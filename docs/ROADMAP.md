@@ -4,9 +4,10 @@ Ogni fase finisce con qualcosa di **giocabile e testato**. A fine fase: revision
 Spuntare `[x]` man mano. Le fasi possono essere ridefinite: è un documento vivo.
 
 ## Fase 0 — Fondamenta e decisioni
-- [ ] Rispondere alle domande aperte in STATO.md
-- [ ] Scaffolding: Vite + TypeScript + Vitest, struttura cartelle
-- [ ] Game loop a tick fisso (separato dal rendering) + salvataggio/caricamento
+- [x] Rispondere alle domande aperte in STATO.md
+- [ ] Scaffolding: Vite + TypeScript + Vitest + PixiJS, struttura cartelle (`src/core` logica pura, `src/render` PixiJS, `src/ui` DOM, `src/data` contenuti)
+- [ ] Game loop: logica a 10 tick/s + render a 60 fps con interpolazione; salvataggio/caricamento versionato
+- [ ] Scena pixel art di prova: risoluzione interna bassa scalata a multipli interi, sprite animato placeholder
 - [ ] Deploy automatico (GitHub Pages) per giocare dal telefono
 - [x] Ampliare il design (GDD) prima di scrivere codice
 

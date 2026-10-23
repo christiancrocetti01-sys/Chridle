@@ -5,23 +5,22 @@
 
 **Ultimo aggiornamento:** 2026-10-23
 **Fase corrente:** 0 — Fondamenta e decisioni
-**Prossimo passo:** l'utente rivede le **[proposta]** in `docs/GDD.md`; poi scaffolding (Vite + TS + Vitest).
+**Prossimo passo:** scaffolding Fase 0 (Vite + TS + Vitest + PixiJS), dopo conferma del piano.
 
 ## Fatto
 - Brainstorm iniziale (`docs/BRAINSTORM.md`).
 - Flusso di lavoro: `CLAUDE.md`, STATO, ROADMAP, GDD, skill `/handoff` e `/riprendi`.
-- GDD ampliato con proposte complete (lore, Vie, statistiche, skill/rune, Costellazioni, equip,
-  modalità, valute, strati di prestige, offline, meta, arte).
+- GDD ampliato e **approvato** dall'utente (ispirazioni: Diablo, PoE, Melvor, NGU, Idle Champions).
 
 ## Decisioni prese
 - Browser game mobile-first, giocatore singolo, nessun server, **solo online** (niente PWA).
-- Interfaccia DOM/CSS + canvas solo per l'area di combattimento.
-- Asset: si parte da risorse gratuite (game-icons.net, pack CC0), crediti in `docs/CREDITS.md`.
+- Grafica **pixel art dettagliata a 60 fps**: combattimento in PixiJS (canvas WebGL), interfaccia in DOM/CSS.
+- Asset: si parte da pack pixel art gratuiti (licenze verificate), crediti in `docs/CREDITS.md`.
 - Progresso offline sì, **senza limite**.
 - **Una sola classe** (Guerriero della Luce); varietà tramite Vie/sottoclassi.
 
 ## Domande aperte
-- Conferma/modifica delle sezioni [proposta] del GDD (in particolare: lore, 5 Vie, Luce/Purezza, modalità).
+- Conferma del piano della Fase 0 (vedi risposta in chat / ROADMAP).
 
 ## Note / problemi noti
 - (nessuno)
