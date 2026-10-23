@@ -28,6 +28,7 @@
 - Progresso offline sì, senza limite (Fase 5). Una sola classe, varietà con le Vie.
 
 ## Domande aperte
+- Gioco online: https://christiancrocetti01-sys.github.io/Chridle/ (ogni push su `main` lo ripubblica).
 - Ritmo: inizio troppo lento/veloce? (prima uccisione ~5 s, primo potenziamento ~20 s)
 
 ## Note / problemi noti
