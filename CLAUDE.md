@@ -23,7 +23,11 @@ Questo file viene caricato automaticamente a ogni sessione: tienilo **breve**.
 - Niente subagent salvo richiesta esplicita.
 
 ## Convenzioni tecniche
-(da confermare nella Fase 0 — vedi ROADMAP)
-- TypeScript + Vite, logica di gioco pura e testabile separata dal rendering.
-- Test con Vitest. Salvataggio su localStorage con versione + migrazioni.
-- Branch di lavoro e commit piccoli e descrittivi.
+- Comandi: `npm run dev` (locale), `npm test` (Vitest), `npm run build` (tsc + vite).
+- `src/core` logica pura e deterministica (niente DOM/Pixi): è l'unica parte con test unitari.
+- `src/render` PixiJS: scena 320×180 scalata a multipli interi; logica a 10 tick/s, render 60 fps con `alpha`.
+- `src/ui` interfaccia DOM/CSS. `src/data` contenuti come dati.
+- Salvataggio in `src/core/save.ts`: cambi allo stato → alza `STATE_VERSION` e aggiungi una migrazione + test.
+- Asset esterni: verifica licenza e registrali in `docs/CREDITS.md`.
+- Verifica visiva: build + `vite preview` + screenshot Playwright (Chromium in /opt/pw-browsers).
+- Commit piccoli e descrittivi.

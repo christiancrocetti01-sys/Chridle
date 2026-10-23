@@ -5,10 +5,10 @@ Spuntare `[x]` man mano. Le fasi possono essere ridefinite: è un documento vivo
 
 ## Fase 0 — Fondamenta e decisioni
 - [x] Rispondere alle domande aperte in STATO.md
-- [ ] Scaffolding: Vite + TypeScript + Vitest + PixiJS, struttura cartelle (`src/core` logica pura, `src/render` PixiJS, `src/ui` DOM, `src/data` contenuti)
-- [ ] Game loop: logica a 10 tick/s + render a 60 fps con interpolazione; salvataggio/caricamento versionato
-- [ ] Scena pixel art di prova: risoluzione interna bassa scalata a multipli interi, sprite animato placeholder
-- [ ] Deploy automatico (GitHub Pages) per giocare dal telefono
+- [x] Scaffolding: Vite + TypeScript + Vitest + PixiJS, struttura cartelle (`src/core` logica pura, `src/render` PixiJS, `src/ui` DOM, `src/data` contenuti)
+- [x] Game loop: logica a 10 tick/s + render a 60 fps con interpolazione; salvataggio/caricamento versionato
+- [x] Scena pixel art di prova: risoluzione interna bassa scalata a multipli interi, sprite animato placeholder
+- [ ] Deploy automatico (GitHub Pages) per giocare dal telefono — workflow pronto, manca attivazione Pages + branch `main`
 - [x] Ampliare il design (GDD) prima di scrivere codice
 
 ## Fase 1 — Core loop minimo
