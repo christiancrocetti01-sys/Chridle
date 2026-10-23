@@ -19,6 +19,12 @@ Spuntare `[x]` man mano. Le fasi possono essere ridefinite: è un documento vivo
 - [x] Potenziamenti acquistabili con oro (Forza, Corazza, Rapidità)
 - [ ] Revisione dell'utente giocando dal telefono
 
+## Fase 1.5 — Identità visiva (scena vetrina)
+- [ ] Scelta asset con l'utente (budget, 3-4 opzioni con anteprime e licenze)
+- [ ] Scena di combattimento con asset veri, parallasse, nebbia, luce, particelle ambientali
+- [ ] UI con cornici ornamentali vere (riferimento manga anni '80)
+- [ ] Approvazione dell'utente: diventa lo standard visivo
+
 ## Fase 2 — Equipaggiamento
 - [ ] Slot (arma, armatura, accessori…) e rarità
 - [ ] Affissi casuali sugli oggetti, inventario, confronto

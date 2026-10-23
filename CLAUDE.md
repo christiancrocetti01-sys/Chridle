@@ -11,6 +11,9 @@ Questo file viene caricato automaticamente a ogni sessione: tienilo **breve**.
 ## Flusso di lavoro (a fasi)
 - Lavoriamo un **task alla volta** della fase corrente in `docs/ROADMAP.md`.
 - Prima di un task non banale: proponi il piano in 3-6 punti e **chiedi conferma**.
+  Mai implementare una fase intera in un colpo: un passo, verifica, conferma.
+- Messaggi brevi e diretti, niente elenchi infiniti.
+- Grafica: non disegnare sprite "a mano" come griglie di caratteri per il gioco vero; servono asset veri.
 - Domande di design (bilanciamento, gusto, scelte grafiche) → chiedi, non inventare.
 - Dopo ogni task: test (`npm test`) + verifica nel browser se tocca la UI, poi commit.
 - A fine task aggiorna `docs/STATO.md` (breve) e spunta la ROADMAP.
