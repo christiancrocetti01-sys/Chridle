@@ -8,6 +8,7 @@ Spuntare `[x]` man mano. Le fasi possono essere ridefinite: è un documento vivo
 - [ ] Scaffolding: Vite + TypeScript + Vitest, struttura cartelle
 - [ ] Game loop a tick fisso (separato dal rendering) + salvataggio/caricamento
 - [ ] Deploy automatico (GitHub Pages) per giocare dal telefono
+- [x] Ampliare il design (GDD) prima di scrivere codice
 
 ## Fase 1 — Core loop minimo
 - [ ] Statistiche base del personaggio (ATK, DEF, HP, velocità, crit…)
@@ -37,7 +38,7 @@ Spuntare `[x]` man mano. Le fasi possono essere ridefinite: è un documento vivo
 ## Fase 6 — Estetica e "juice"
 - [ ] Direzione artistica dark + luce, palette, asset
 - [ ] Animazioni, particellari, suoni, feedback soddisfacenti
-- [ ] PWA installabile
+- [ ] Rifinitura asset e crediti (`docs/CREDITS.md`)
 
 ## Fase 7+ — Espansione contenuti
 - [ ] Centinaia di skill/oggetti/perk generati per lotti dai file dati
