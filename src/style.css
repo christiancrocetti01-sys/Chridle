@@ -76,3 +76,13 @@ html, body {
   transition: opacity 0.3s;
 }
 .toast.show { opacity: 1; }
+
+.btn {
+  margin-top: 12px;
+  padding: 8px 14px;
+  background: transparent;
+  color: var(--gold);
+  border: 1px solid var(--gold-dim);
+  font: inherit;
+  cursor: pointer;
+}

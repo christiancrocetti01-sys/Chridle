@@ -2,6 +2,7 @@ import { AnimatedSprite, Application, Container, Graphics, Sprite, TextureStyle 
 import { GHOUL, HERO, breathFrame } from '../data/sprites';
 import { TICK_RATE } from '../core/loop';
 import type { GameState } from '../core/state';
+import { createInkFilter, type InkStyle } from './dither';
 import { glowTexture, spriteTexture } from './pixels';
 import { pixelPerfectSize } from './scale';
 
@@ -12,6 +13,7 @@ const GROUND_Y = 150;
 export interface Scene {
   /** Aggiorna la scena: `alpha` è la frazione tra due tick di logica. */
   draw(state: GameState, alpha: number): void;
+  setStyle(style: InkStyle): void;
   app: Application;
 }
 
@@ -40,6 +42,10 @@ export async function createScene(host: HTMLElement): Promise<Scene> {
 
   const world = new Container();
   world.sortableChildren = true;
+  const ink = createInkFilter();
+  world.filters = [ink.filter];
+  // il filtro deve coprire tutta la scena, non solo i bordi degli sprite
+  world.filterArea = app.screen;
   app.stage.addChild(world);
   world.addChild(drawBackdrop());
 
@@ -82,6 +88,7 @@ export async function createScene(host: HTMLElement): Promise<Scene> {
 
   return {
     app,
+    setStyle: ink.setStyle,
     draw(state, alpha) {
       const t = (state.tick + alpha) / TICK_RATE; // secondi di gioco, continui
       const a = t * 1.6;

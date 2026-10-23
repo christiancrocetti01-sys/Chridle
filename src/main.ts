@@ -2,6 +2,7 @@ import './style.css';
 import { MAX_TICKS_PER_FRAME, TICK_MS, stepAccumulator } from './core/loop';
 import { loadGame, saveGame, type StorageLike } from './core/save';
 import { newGame, step } from './core/state';
+import type { InkStyle } from './render/dither';
 import { createScene } from './render/scene';
 import { createHud } from './ui/hud';
 
@@ -23,7 +24,10 @@ async function main() {
   const storage = getStorage();
   const state = loadGame(storage) ?? newGame(Date.now());
   const scene = await createScene(document.getElementById('stage')!);
-  const hud = createHud(document.getElementById('hud')!);
+  const param = new URLSearchParams(location.search).get('stile');
+  const style: InkStyle = param === 'mono' || param === 'colore' ? param : 'oro';
+  scene.setStyle(style);
+  const hud = createHud(document.getElementById('hud')!, scene.setStyle, style);
 
   let acc = 0;
   scene.app.ticker.add((ticker) => {

@@ -1,11 +1,14 @@
 import type { GameState } from '../core/state';
+import type { InkStyle } from '../render/dither';
+
+const STYLES: InkStyle[] = ['oro', 'mono', 'colore'];
 
 export interface Hud {
   update(state: GameState, fps: number): void;
   flash(message: string): void;
 }
 
-export function createHud(root: HTMLElement): Hud {
+export function createHud(root: HTMLElement, onStyle: (s: InkStyle) => void, initial: InkStyle): Hud {
   root.innerHTML = `
     <h1 class="title">Chridle</h1>
     <p class="subtitle">Il Guerriero della Luce</p>
@@ -14,6 +17,7 @@ export function createHud(root: HTMLElement): Hud {
       <dt>Tick</dt><dd data-k="tick">0</dd>
       <dt>Tempo di gioco</dt><dd data-k="time">0s</dd>
     </dl>
+    <button class="btn" data-k="style"></button>
     <p class="toast" aria-live="polite"></p>`;
   const el = (k: string) => root.querySelector<HTMLElement>(`[data-k="${k}"]`)!;
   const fpsEl = el('fps');
@@ -21,6 +25,15 @@ export function createHud(root: HTMLElement): Hud {
   const timeEl = el('time');
   const toast = root.querySelector<HTMLElement>('.toast')!;
   let toastTimer = 0;
+  const styleBtn = el('style');
+  let style = initial;
+  const label = () => (styleBtn.textContent = `Stile: ${style}`);
+  label();
+  styleBtn.addEventListener('click', () => {
+    style = STYLES[(STYLES.indexOf(style) + 1) % STYLES.length];
+    label();
+    onStyle(style);
+  });
 
   return {
     update(state, fps) {

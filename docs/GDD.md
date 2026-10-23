@@ -135,8 +135,16 @@ Marchio (il prossimo colpo fa più danni), Vulnerabilità.
 - **Lumi**: piccoli spiriti compagni con bonus passivi, si fanno salire di livello.
 
 ## 15. Direzione artistica
-- **Pixel art dettagliata e fluida a 60 fps** (stile alla Dead Cells/Blasphemous in piccolo, non retrò grezzo).
-- Palette: neri/blu notte profondi + oro/bianco caldo per la luce; ogni rarità ha il suo bagliore.
+- **Pixel art "a inchiostro"**: monocromatica ad alto contrasto, dithering/retino (halftone), grana,
+  neri pieni e bianchi che bruciano. Riferimenti dell'utente: illustrazione manga anni '80 in bianco e nero
+  con cornici ornamentali (stile Saint Seiya) + pixel art monocroma con dithering e particelle che si sgretolano.
+- Fluida a 60 fps. **Proposta in prova**: la Luce dorata è l'unico colore (stile "oro"); alternativa "mono" puro.
+- Interfaccia: **cornici ornamentali** in stile manga/art nouveau (filigrane, stelle, spine) attorno a
+  pannelli, carte di skill e oggetti; titoli con ideogrammi/sigilli decorativi.
+- Rarità: in un mondo monocromo si distinguono con intensità del bagliore, cornici più elaborate e particelle;
+  da decidere se i rari più alti possono avere un tocco di colore.
+- Tecnica chiave: **filtro di post-processing** (`src/render/dither.ts`) che converte tutta la scena in
+  scala di grigi a 4 livelli con dithering Bayer: rende coerenti asset di fonti diverse.
 - Ispirazioni (solo concettuali): Diablo, Path of Exile, Melvor Idle, NGU Idle, Idle Champions.
 
 ### Tecnica
