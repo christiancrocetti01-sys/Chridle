@@ -59,6 +59,49 @@ html, body {
 }
 
 .subtitle { margin: 0 0 12px; color: var(--muted); }
+.muted { color: var(--muted); }
+
+.hud-head { display: flex; justify-content: space-between; align-items: flex-start; }
+.gold { color: var(--gold); font-size: 1.4em; font-variant-numeric: tabular-nums; text-shadow: 0 0 10px rgba(232, 193, 90, 0.4); }
+.gold small { font-size: 0.6em; color: var(--gold-dim); }
+
+.row { display: flex; justify-content: space-between; margin-top: 10px; font-variant-numeric: tabular-nums; }
+.boss { color: var(--gold); font-weight: 700; letter-spacing: 0.1em; }
+.bar { height: 6px; margin-top: 4px; background: #1a1e36; border: 1px solid #2a2f4a; }
+.bar .fill { height: 100%; width: 0; background: linear-gradient(90deg, var(--gold-dim), var(--gold)); transition: width 0.15s linear; }
+.notice { min-height: 1.4em; margin: 8px 0 0; color: var(--gold-dim); font-size: 0.9em; }
+
+.section {
+  margin: 18px 0 8px;
+  font: 600 0.85em 'Cinzel', Georgia, serif;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  border-bottom: 1px solid #2a2f4a;
+  padding-bottom: 4px;
+}
+
+.upgrades { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+.card {
+  display: grid;
+  gap: 2px;
+  text-align: left;
+  padding: 10px 12px;
+  background: #0b0e1f;
+  color: var(--text);
+  border: 1px solid var(--gold-dim);
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.card:not(:disabled):hover { border-color: var(--gold); box-shadow: 0 0 12px rgba(232, 193, 90, 0.25); }
+.card:not(:disabled):active { transform: translateY(1px); }
+.card:disabled { opacity: 0.45; cursor: default; }
+.card-name { font-weight: 600; }
+.card-desc { font-size: 0.85em; color: var(--muted); }
+.card-cost { color: var(--gold); font-variant-numeric: tabular-nums; }
+
+.hud-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; }
 
 .stats {
   display: grid;
@@ -69,16 +112,8 @@ html, body {
 .stats dt { color: var(--muted); }
 .stats dd { margin: 0; font-variant-numeric: tabular-nums; }
 
-.toast {
-  min-height: 1.4em;
-  color: var(--gold);
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-.toast.show { opacity: 1; }
 
 .btn {
-  margin-top: 12px;
   padding: 8px 14px;
   background: transparent;
   color: var(--gold);

@@ -59,6 +59,8 @@ Bruciatura, Sanguinamento, Stordimento, Accecamento (−precisione), Consacrazio
 Marchio (il prossimo colpo fa più danni), Vulnerabilità.
 
 ## 5. Combattimento idle
+**Implementato (Fase 1)** in `src/core/combat.ts`: 10 uccisioni per stage poi boss (×6 HP, ×5 ricompense);
+morte → stage precedente e "allenamento" finché non si sale di livello; danno = d²/(d+difesa).
 - Tick fisso (es. 10/s), deterministico e testabile. Il rendering mostra solo il risultato.
 - Il guerriero avanza da solo nello stage: ondate di nemici → boss dello stage → stage successivo.
 - Se muori, torni indietro di uno stage e "farmi" lì automaticamente (niente frustrazione).
@@ -138,11 +140,11 @@ Marchio (il prossimo colpo fa più danni), Vulnerabilità.
 - **Pixel art "a inchiostro"**: monocromatica ad alto contrasto, dithering/retino (halftone), grana,
   neri pieni e bianchi che bruciano. Riferimenti dell'utente: illustrazione manga anni '80 in bianco e nero
   con cornici ornamentali (stile Saint Seiya) + pixel art monocroma con dithering e particelle che si sgretolano.
-- Fluida a 60 fps. **Proposta in prova**: la Luce dorata è l'unico colore (stile "oro"); alternativa "mono" puro.
+- Fluida a 60 fps. **Deciso: stile "oro"**, mondo in bianco e nero e la Luce dorata come colore principale.
 - Interfaccia: **cornici ornamentali** in stile manga/art nouveau (filigrane, stelle, spine) attorno a
   pannelli, carte di skill e oggetti; titoli con ideogrammi/sigilli decorativi.
-- Rarità: in un mondo monocromo si distinguono con intensità del bagliore, cornici più elaborate e particelle;
-  da decidere se i rari più alti possono avere un tocco di colore.
+- Rarità: si distinguono con bagliore, cornici più elaborate e particelle; **le rarità alte (Mitico, Divino)
+  possono avere più colori** (il filtro dovrà lasciar passare il loro colore, es. maschera o layer fuori filtro).
 - Tecnica chiave: **filtro di post-processing** (`src/render/dither.ts`) che converte tutta la scena in
   scala di grigi a 4 livelli con dithering Bayer: rende coerenti asset di fonti diverse.
 - Ispirazioni (solo concettuali): Diablo, Path of Exile, Melvor Idle, NGU Idle, Idle Champions.

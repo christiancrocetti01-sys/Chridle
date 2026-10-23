@@ -1,4 +1,4 @@
-import { STATE_VERSION, type GameState } from './state';
+import { STATE_VERSION, newGame, type GameState } from './state';
 
 export const SAVE_KEY = 'chridle.save';
 
@@ -10,7 +10,10 @@ export interface StorageLike {
 type Migration = (data: Record<string, unknown>) => Record<string, unknown>;
 
 /** migrations[n] porta un salvataggio dalla versione n alla n+1. */
-export const migrations: Record<number, Migration> = {};
+export const migrations: Record<number, Migration> = {
+  // v1 → v2: arrivano combattimento, livelli e oro; si conserva il tempo di gioco
+  1: (d) => ({ ...newGame(d.createdAt as number), tick: d.tick, lastSeen: d.lastSeen }),
+};
 
 export function serialize(state: GameState): string {
   return JSON.stringify(state);
@@ -34,7 +37,9 @@ export function deserialize(raw: string, migs = migrations, target = STATE_VERSI
 }
 
 function isGameState(d: Record<string, unknown>): d is Record<string, unknown> & GameState {
-  return ['tick', 'createdAt', 'lastSeen'].every((k) => typeof d[k] === 'number');
+  const numbers = ['tick', 'createdAt', 'lastSeen', 'rng', 'gold', 'respawn'].every((k) => typeof d[k] === 'number');
+  const objects = ['hero', 'upgrades', 'stage', 'totals'].every((k) => d[k] && typeof d[k] === 'object');
+  return numbers && objects;
 }
 
 export function saveGame(storage: StorageLike, state: GameState, now: number): void {

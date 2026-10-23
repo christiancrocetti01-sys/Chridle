@@ -1,7 +1,8 @@
 import './style.css';
 import { MAX_TICKS_PER_FRAME, TICK_MS, stepAccumulator } from './core/loop';
 import { loadGame, saveGame, type StorageLike } from './core/save';
-import { newGame, step } from './core/state';
+import { buyUpgrade, step, type CombatEvent } from './core/combat';
+import { newGame } from './core/state';
 import type { InkStyle } from './render/dither';
 import { createScene } from './render/scene';
 import { createHud } from './ui/hud';
@@ -27,14 +28,19 @@ async function main() {
   const param = new URLSearchParams(location.search).get('stile');
   const style: InkStyle = param === 'mono' || param === 'colore' ? param : 'oro';
   scene.setStyle(style);
-  const hud = createHud(document.getElementById('hud')!, scene.setStyle, style);
+  const hud = createHud(
+    document.getElementById('hud')!,
+    { buy: (id) => buyUpgrade(state, id), setStyle: scene.setStyle },
+    style,
+  );
 
   let acc = 0;
   scene.app.ticker.add((ticker) => {
     const r = stepAccumulator(acc, ticker.deltaMS, TICK_MS, MAX_TICKS_PER_FRAME);
     acc = r.acc;
-    for (let i = 0; i < r.ticks; i++) step(state);
-    scene.draw(state, r.alpha);
+    const events: CombatEvent[] = [];
+    for (let i = 0; i < r.ticks; i++) step(state, events);
+    scene.draw(state, r.alpha, events);
     hud.update(state, ticker.FPS);
   });
 

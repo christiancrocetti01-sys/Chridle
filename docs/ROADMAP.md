@@ -8,14 +8,16 @@ Spuntare `[x]` man mano. Le fasi possono essere ridefinite: è un documento vivo
 - [x] Scaffolding: Vite + TypeScript + Vitest + PixiJS, struttura cartelle (`src/core` logica pura, `src/render` PixiJS, `src/ui` DOM, `src/data` contenuti)
 - [x] Game loop: logica a 10 tick/s + render a 60 fps con interpolazione; salvataggio/caricamento versionato
 - [x] Scena pixel art di prova: risoluzione interna bassa scalata a multipli interi, sprite animato placeholder
-- [ ] Deploy automatico (GitHub Pages) per giocare dal telefono — workflow pronto, manca attivazione Pages + branch `main`
+- [x] Deploy automatico (GitHub Pages) per giocare dal telefono
 - [x] Ampliare il design (GDD) prima di scrivere codice
 
 ## Fase 1 — Core loop minimo
-- [ ] Statistiche base del personaggio (ATK, DEF, HP, velocità, crit…)
-- [ ] Combattimento idle automatico contro ondate di nemici
-- [ ] Drop di valuta + esperienza + livelli
-- [ ] UI minima: barra HP, nemico, numeri di danno
+- [x] Statistiche base del personaggio (ATK, DEF, HP, velocità, crit…)
+- [x] Combattimento idle automatico contro ondate di nemici
+- [x] Drop di valuta + esperienza + livelli
+- [x] UI minima: barra HP, nemico, numeri di danno
+- [x] Potenziamenti acquistabili con oro (Forza, Corazza, Rapidità)
+- [ ] Revisione dell'utente giocando dal telefono
 
 ## Fase 2 — Equipaggiamento
 - [ ] Slot (arma, armatura, accessori…) e rarità

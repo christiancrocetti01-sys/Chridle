@@ -1,5 +1,9 @@
 import { AnimatedSprite, Application, Container, Graphics, Sprite, TextureStyle } from 'pixi.js';
-import { GHOUL, HERO, breathFrame } from '../data/sprites';
+import { GHOUL, HERO, breathFrame, type PixelSprite } from '../data/sprites';
+import type { CombatEvent } from '../core/combat';
+import { formatNum } from '../core/format';
+import { heroStats } from '../core/stats';
+import { Effects } from './effects';
 import { TICK_RATE } from '../core/loop';
 import type { GameState } from '../core/state';
 import { createInkFilter, type InkStyle } from './dither';
@@ -12,9 +16,33 @@ const GROUND_Y = 150;
 
 export interface Scene {
   /** Aggiorna la scena: `alpha` è la frazione tra due tick di logica. */
-  draw(state: GameState, alpha: number): void;
+  draw(state: GameState, alpha: number, events: CombatEvent[]): void;
   setStyle(style: InkStyle): void;
   app: Application;
+}
+
+const HERO_X = 96;
+const ENEMY_X = 224;
+const GOLD = 0xffd36b;
+
+function silhouette(sprite: PixelSprite): PixelSprite {
+  const palette = Object.fromEntries(Object.keys(sprite.palette).map((k) => [k, '#ffffff']));
+  return { palette, rows: sprite.rows };
+}
+
+/** Sprite animato + sagoma bianca sovrapposta per il lampo quando viene colpito. */
+function makeActor(sprite: PixelSprite, split: number, speed: number) {
+  const root = new Container();
+  const body = new AnimatedSprite([spriteTexture(sprite), spriteTexture(breathFrame(sprite, split))]);
+  const flash = new AnimatedSprite([spriteTexture(silhouette(sprite)), spriteTexture(silhouette(breathFrame(sprite, split)))]);
+  for (const s of [body, flash]) {
+    s.anchor.set(0.5, 1);
+    s.animationSpeed = speed;
+    s.play();
+  }
+  flash.alpha = 0;
+  root.addChild(body, flash);
+  return { root, flash };
 }
 
 export async function createScene(host: HTMLElement): Promise<Scene> {
@@ -60,46 +88,126 @@ export async function createScene(host: HTMLElement): Promise<Scene> {
   world.addChild(drawEclipse(250, 42));
   world.addChild(drawGround());
 
-  const hero = new AnimatedSprite([spriteTexture(HERO), spriteTexture(breathFrame(HERO, 13))]);
-  hero.anchor.set(0.5, 1);
-  hero.position.set(96, GROUND_Y);
-  hero.scale.set(2); // segnaposto ingranditi: gli asset veri avranno la loro risoluzione
-  hero.animationSpeed = 1 / 30;
-  hero.play();
+  const hero = makeActor(HERO, 13, 1 / 30);
+  hero.root.scale.set(2); // segnaposto ingranditi: gli asset veri avranno la loro risoluzione
+  hero.root.position.set(HERO_X, GROUND_Y);
 
   const heroGlow = new Sprite(glowTexture(40, 'rgba(255,233,168,0.35)'));
   heroGlow.anchor.set(0.5);
-  heroGlow.position.set(96, GROUND_Y - 20);
+  heroGlow.position.set(HERO_X, GROUND_Y - 20);
   heroGlow.blendMode = 'add';
 
-  const ghoul = new AnimatedSprite([spriteTexture(GHOUL), spriteTexture(breathFrame(GHOUL, 9))]);
-  ghoul.anchor.set(0.5, 1);
-  ghoul.scale.set(-2, 2);
-  ghoul.position.set(224, GROUND_Y);
-  ghoul.animationSpeed = 1 / 24;
-  ghoul.play();
+  const enemy = makeActor(GHOUL, 9, 1 / 24);
+  enemy.root.position.set(ENEMY_X, GROUND_Y);
 
   // orbita della luce: guidata dalla logica (tick) e interpolata a 60 fps
   const orb = new Sprite(glowTexture(6, 'rgba(255,246,214,1)'));
   orb.anchor.set(0.5);
   orb.blendMode = 'add';
 
-  world.addChild(heroGlow, hero, ghoul, orb);
+  const bars = new Graphics();
+  const effects = new Effects();
+  effects.layer.zIndex = 5;
+  bars.zIndex = 4;
+  world.addChild(heroGlow, hero.root, enemy.root, orb, bars, effects.layer);
+
+  let last = performance.now();
+  let shake = 0;
+  let heroLunge = 0;
+  let enemyLunge = 0;
+  let enemySpawnT = 1;
+  let hadEnemy = false;
+  let enemyScale = 2;
+
+  const onEvent = (e: CombatEvent, state: GameState) => {
+    const enemyTop = GROUND_Y - GHOUL.rows.length * enemyScale;
+    switch (e.type) {
+      case 'hit':
+        if (e.target === 'enemy') {
+          heroLunge = 1;
+          enemy.flash.alpha = 1;
+          effects.burst(ENEMY_X - 8, GROUND_Y - 14 * (enemyScale / 2), e.crit ? 14 : 5, e.crit ? GOLD : 0xffffff, e.crit ? 90 : 50);
+          effects.text(ENEMY_X + (Math.random() - 0.5) * 16, enemyTop - 12, formatNum(e.amount) + (e.crit ? '!' : ''), e.crit ? GOLD : 0xffffff, e.crit ? 3 : 2);
+          if (e.crit) shake = Math.max(shake, 2);
+        } else {
+          enemyLunge = 1;
+          hero.flash.alpha = 0.8;
+          effects.text(HERO_X, GROUND_Y - 58, formatNum(e.amount), 0x9aa4b8, 1, 0.6);
+          if (state.enemy?.boss) shake = Math.max(shake, 1.5);
+        }
+        break;
+      case 'kill':
+        effects.shatter(GHOUL, ENEMY_X, GROUND_Y, enemyScale, true);
+        effects.text(ENEMY_X, enemyTop - 20, '+' + formatNum(e.gold), GOLD, 2, 1.1);
+        shake = Math.max(shake, e.boss ? 5 : 1);
+        break;
+      case 'levelup':
+        for (let i = 0; i < 3; i++) effects.burst(HERO_X, GROUND_Y - 20, 16, GOLD, 70 + i * 20);
+        effects.text(HERO_X, GROUND_Y - 60, 'LV UP!', GOLD, 2, 1.4);
+        break;
+      case 'death':
+        effects.shatter(HERO, HERO_X, GROUND_Y, 2, false);
+        shake = 4;
+        break;
+      case 'stage':
+        break;
+    }
+  };
 
   return {
     app,
     setStyle: ink.setStyle,
-    draw(state, alpha) {
+    draw(state, alpha, events) {
+      const now = performance.now();
+      const dt = Math.min(0.1, (now - last) / 1000);
+      last = now;
+      for (const e of events) onEvent(e, state);
+
       const t = (state.tick + alpha) / TICK_RATE; // secondi di gioco, continui
       const a = t * 1.6;
-      orb.position.set(96 + Math.cos(a) * 26, GROUND_Y - 24 + Math.sin(a) * 8);
+      orb.position.set(HERO_X + Math.cos(a) * 26, GROUND_Y - 24 + Math.sin(a) * 8);
       orb.zIndex = Math.sin(a) > 0 ? 1 : -1;
       heroGlow.alpha = 0.8 + Math.sin(t * 2) * 0.2;
       eclipseGlow.scale.set(1 + Math.sin(t * 0.7) * 0.05);
-      const now = performance.now() / 1000;
-      for (const s of stars) s.sprite.alpha = 0.35 + 0.65 * Math.abs(Math.sin(now * s.speed + s.phase));
+      for (const s of stars) s.sprite.alpha = 0.35 + 0.65 * Math.abs(Math.sin(now / 1000 * s.speed + s.phase));
+
+      // affondo: scatto rapido in avanti e ritorno morbido
+      heroLunge = Math.max(0, heroLunge - dt * 6);
+      enemyLunge = Math.max(0, enemyLunge - dt * 5);
+      hero.flash.alpha = Math.max(0, hero.flash.alpha - dt * 8);
+      enemy.flash.alpha = Math.max(0, enemy.flash.alpha - dt * 10);
+      hero.root.x = HERO_X + Math.sin(heroLunge * Math.PI) * 8;
+
+      const e = state.enemy;
+      if (e && !hadEnemy) enemySpawnT = 0;
+      hadEnemy = !!e;
+      enemy.root.visible = !!e;
+      if (e) {
+        enemyScale = e.boss ? 3 : 2;
+        enemySpawnT = Math.min(1, enemySpawnT + dt * 4);
+        const enter = (1 - enemySpawnT) ** 2 * 60; // entra da destra
+        enemy.root.scale.set(-enemyScale, enemyScale);
+        enemy.root.x = ENEMY_X + enter - Math.sin(enemyLunge * Math.PI) * 8;
+        enemy.root.alpha = enemySpawnT;
+      }
+
+      const stats = heroStats(state.hero.level, state.upgrades);
+      bars.clear();
+      drawBar(bars, HERO_X - 12, GROUND_Y - 46, 24, state.hero.hp / stats.maxHp);
+      if (e) drawBar(bars, enemy.root.x - 12 * (enemyScale / 2), GROUND_Y - GHOUL.rows.length * enemyScale - 6, 24 * (enemyScale / 2), e.hp / e.maxHp);
+
+      shake = Math.max(0, shake - dt * 20);
+      world.position.set(Math.round((Math.random() - 0.5) * shake), Math.round((Math.random() - 0.5) * shake));
+      effects.update(dt);
     },
   };
+}
+
+function drawBar(g: Graphics, x: number, y: number, w: number, frac: number) {
+  x = Math.round(x);
+  g.rect(x - 1, y - 1, w + 2, 4).fill('#000000');
+  g.rect(x, y, w, 2).fill('#5a5f78');
+  g.rect(x, y, Math.max(0, Math.round(w * Math.min(1, frac))), 2).fill('#f4f1e6');
 }
 
 function drawBackdrop(): Graphics {

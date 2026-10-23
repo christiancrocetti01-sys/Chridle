@@ -45,8 +45,8 @@ export const HERO: PixelSprite = {
 export const GHOUL: PixelSprite = {
   palette: {
     K: OUTLINE,
-    P: '#3b1f4a', p: '#251433',
-    R: '#ff4d6d', B: '#cfc6b0',
+    P: '#7a6a8c', p: '#4e4160',
+    R: '#ff6a3d', B: '#ece4cf',
   },
   rows: [
     '....KKKKKK......',
