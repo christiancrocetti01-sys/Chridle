@@ -6,7 +6,7 @@ import { deserialize, serialize } from '../src/core/save';
 import { newGame, type GameState } from '../src/core/state';
 import { KILLS_PER_STAGE, stateStats } from '../src/core/stats';
 import { ENEMIES, FAMILIES, ZONES, ZONE_STAGES, zoneName, zoneOf } from '../src/data/enemies';
-import { DUNGEON_WAVES, RAID_KEYS, RAID_STAGE, TOWER_MILESTONE } from '../src/data/modes';
+import { DUNGEON_WAVES, RAID_KEYS, RAID_STAGE, TOWER_KEY_EVERY, TOWER_MILESTONE } from '../src/data/modes';
 
 const run = (s: GameState, ticks: number) => {
   const ev: CombatEvent[] = [];
@@ -81,6 +81,16 @@ describe('zone e famiglie', () => {
     expect(ev).toContainEqual({ type: 'key', keys: 1 });
     expect(s.keys).toBe(1);
   });
+
+  it('ribattere il boss di zona sotto il record non dà chiavi', () => {
+    const s = god(newGame(0, 1));
+    s.stage.current = 10;
+    s.stage.best = 11; // si è morti allo stage 11 e si è tornati indietro
+    s.stage.kills = KILLS_PER_STAGE;
+    const ev = run(s, 100);
+    expect(s.stage.current).toBeGreaterThan(10);
+    expect(ev.some((e) => e.type === 'key')).toBe(false);
+  });
 });
 
 describe('Dungeon, Torre e Raid', () => {
@@ -112,6 +122,8 @@ describe('Dungeon, Torre e Raid', () => {
     run(s, 300);
     expect(s.tower.best).toBeGreaterThanOrEqual(TOWER_MILESTONE);
     expect(stateStats(s).atk).toBeCloseTo(before * (1 + towerBonus(s.tower.best)));
+    expect(s.tower.best).toBeGreaterThanOrEqual(TOWER_KEY_EVERY);
+    expect(s.keys).toBe(Math.floor(s.tower.best / TOWER_KEY_EVERY));
     // un eroe debole non regge: torna alla Campagna
     const w = newGame(0, 4);
     enterTower(w);

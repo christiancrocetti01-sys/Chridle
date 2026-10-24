@@ -3,14 +3,11 @@
 > File di passaggio di consegne tra sessioni. Aggiornato con `/handoff`.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
-**Ultimo aggiornamento:** 2026-10-24 (handoff dopo la sessione autonoma: Fasi 3.5 → 7 lotto 3)
-**Fase corrente:** 7 — contenuti a lotti (lotti 1-3 fatti). Grafica: minima fino alla fine (decisione utente). Fasi 3-6 completate, **da rivedere con l'utente**.
-**Prossimo passo:** 1) chiedere all'utente le risposte a `docs/REVISIONE.md` (domande 1-23, numerate; 15-16 risolte);
-2) applicarle (valori in `src/data/*.ts`, poi spostare le decisioni in GDD e togliere le risposte dal file);
-3) se approva (domanda 22), allineare `main` con fast-forward per pubblicare; 4) lotto 4 (domanda 18).
-**Online:** `main` allineato al branch il 2026-10-24 (Fasi 3.5-7 lotto 3). Prossimo: prova da telefono (domanda 21).
-**Risposte REVISIONE:** ok 1-3,5,8,10-12,17,19,20,22; 6 = chiavi più rare (da fare); 9,13,14 a mia scelta (dopo i contenuti);
-da chiarire 4, 7, 18, 23.
+**Ultimo aggiornamento:** 2026-10-24 (revisione con l'utente chiusa, `main` pubblicato, chiavi più rare)
+**Fase corrente:** 7 — contenuti a lotti (lotti 1-3 fatti). Grafica: minima fino alla fine. Fasi 3-6 **approvate**.
+**Prossimo passo:** 1) l'utente prova il gioco dal telefono (Fase 1, mai fatto); 2) lotto 4: rune 24 → ~40
+(costo ×1,6 invariato); poi Purezza/Corruzione come sistema a parte (da progettare con l'utente), Codex/Imprese/Lumi.
+**Online:** `main` allineato al branch il 2026-10-24. Le decisioni della revisione sono nel GDD ("Deciso").
 
 ## Gioco online
 https://christiancrocetti01-sys.github.io/Chridle/ (ogni push su `main` lo ripubblica, ~1 min).
@@ -29,13 +26,13 @@ Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` (fast-forward) quand
 - Salvataggio: **v13** (v11 `vie`, v12 nemico rigenerato + `keys`/`mode`/`tower`/totals, v13 `ascension`).
 
 ## Test
-- `npm test`: **156 verdi** (15 file), `npm run build` ok.
+- `npm test`: **157 verdi** (15 file), `npm run build` ok.
 - Collaudo (non nel repo): 4 h simulate con tutti i sistemi, nessun NaN/crash; 1ª Ascensione in < 1 h.
 - Ritmo (`tests/combat.test.ts`, senza Via/Stelle): 2 h con equip automatico stage 50.
 
 ## Note / problemi noti
-- Muro al boss di zona 50 (scudo + rigenerazione): con Via+Stelle ~4 h fermi (rigenerazione già ridotta a 1%/s).
-- Le chiavi abbondano dopo le Ascensioni (i boss di zona si rifanno): da valutare.
+- Muro al boss di zona 50 (scudo + rigenerazione): con Via+Stelle ~4 h fermi (rigenerazione 1%/s): **voluto**, spinge ad ascendere.
+- Chiavi: boss di zona solo al record, Torre 1 ogni 10 piani (fatto 2026-10-24); collaudo completo da rifare.
 - Il confronto oggetti ora usa tutte le statistiche (`stateStats`), non solo gli oggetti.
 - Pinch a due dita nella scheda Stelle mai verificato su telefono; revisione da telefono (Fase 1) mai spuntata.
 - Verifica visiva: script in scratchpad (salvataggio con `npx vite-node`, iniettato con `addInitScript`;

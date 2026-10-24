@@ -192,8 +192,9 @@ function onKill(state: GameState, events: CombatEvent[]) {
     onModeKill(state, events);
     return;
   }
-  // chiavi: dal boss di zona sempre, dalle élite a volte (si tira solo per le élite)
-  if (zoneBoss || (elite && nextRandom(state) < ELITE_KEY_CHANCE)) {
+  // chiavi: dal boss di zona solo al record (non ribattendolo dopo una morte), dalle élite a volte
+  const newRecord = state.stage.current >= state.stage.best;
+  if ((zoneBoss && newRecord) || (elite && nextRandom(state) < ELITE_KEY_CHANCE)) {
     state.keys++;
     events.push({ type: 'key', keys: state.keys });
   }

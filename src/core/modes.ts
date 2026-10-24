@@ -1,7 +1,7 @@
 import { RARITIES } from '../data/items';
 import {
   DUNGEON_ESSENCE, DUNGEON_FRAGMENTS, DUNGEON_WAVES, DUNGEON_LEVEL_OFFSET, DUNGEON_MODS, DUNGEON_MODS_COUNT, RAID_BOSSES, RAID_DIVINE,
-  RAID_KEYS, RAID_MIN_RARITY, RAID_MYTHIC, RAID_SECONDS, RAID_STAGE, TOWER_BONUS, TOWER_ESSENCE, TOWER_MILESTONE, TOWER_SECONDS,
+  RAID_KEYS, RAID_MIN_RARITY, RAID_MYTHIC, RAID_SECONDS, RAID_STAGE, TOWER_BONUS, TOWER_ESSENCE, TOWER_KEY_EVERY, TOWER_MILESTONE, TOWER_SECONDS,
   type DungeonModId,
 } from '../data/modes';
 import { INVENTORY_SIZE, rollItem, rollRarity, salvageValue, type Item } from './items';
@@ -13,7 +13,8 @@ import { stateStats } from './stats';
 export type ModeEvent =
   /** Fine di una modalità: `ok` = completata (o, per la Torre, nuovo piano raggiunto prima di cadere). */
   | { type: 'mode'; text: string; ok: boolean }
-  | { type: 'drop'; item: Item; salvaged: boolean };
+  | { type: 'drop'; item: Item; salvaged: boolean }
+  | { type: 'key'; keys: number };
 
 type Events = { push(e: ModeEvent): void };
 
@@ -99,6 +100,10 @@ export function onModeKill(state: GameState, events: Events): boolean {
     if (m.floor > state.tower.best) {
       const before = towerMilestones(state.tower.best);
       state.tower.best = m.floor;
+      if (m.floor % TOWER_KEY_EVERY === 0) {
+        state.keys++;
+        events.push({ type: 'key', keys: state.keys });
+      }
       if (towerMilestones(m.floor) > before) events.push({ type: 'mode', text: `Traguardo della Torre: piano ${m.floor}, bonus permanente +${Math.round(towerBonus(m.floor) * 100)}%`, ok: true });
     }
     m.floor++;

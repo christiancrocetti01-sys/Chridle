@@ -35,7 +35,7 @@ Si sceglie una Via a un certo livello; con l'endgame si sblocca una seconda Via 
 | **Custode Stellare** | luce stellare, invocazioni | spiriti/servitori, proiettili, mana |
 | **Eclissiarca** | luce corrotta dall'ombra | sacrifica HP/Purezza per danni enormi, rischio/ricompensa |
 
-- **Fatto (Fase 3.5, da confermare):** Via al livello 10, cambio gratis; ogni Via = statistiche + una regola
+- **Fatto (Fase 3.5, approvato 2026-10-24):** Via al livello 10, cambio gratis; ogni Via = statistiche + una regola
   (Paladino riflette il 30% del danno subito, Lama 25% colpo doppio, Inquisitore colpi che bruciano, Custode
   spirito stellare, Eclissiarca più danni con meno vita) + 2 skill esclusive (livelli 10 e 22). Seconda Via
   (ibrido) con il potenziamento d'Ascensione "Doppia Via": 50% delle statistiche, regola e skill intere.
@@ -44,6 +44,8 @@ Si sceglie una Via a un certo livello; con l'endgame si sblocca una seconda Via 
 - **Luce**: si accumula colpendo, si spende per le skill attive (barra che si riempie = soddisfazione).
 - **Purezza / Corruzione**: alcuni oggetti e la Via Eclissiarca aumentano la Corruzione: più danni, meno difese.
   Crea build "pure" vs "corrotte" senza aggiungere classi.
+- **Deciso (2026-10-24):** Purezza/Corruzione si fa come **sistema a parte** (lotto futuro, da progettare con
+  l'utente); oggi l'Eclissiarca usa solo la vita come rischio. Tag Ombra e affissi Ombra approvati.
 
 ## 4. Statistiche
 Molte statistiche, raggruppate in schede per non sommergere la UI.
@@ -132,10 +134,11 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
 - **Élite** con affissi casuali (Veloce, Corazzato, Vampirico, Esplosivo…) e drop migliori.
 - **Boss** a fine Atto con fasi e meccaniche (scudo da rompere, invocazioni, enrage a tempo).
 
-- **Fatto (Fase 4, da confermare):** 10 zone da 10 stage (2 per famiglia), poi si ricomincia ("… II");
+- **Fatto (Fase 4, approvato 2026-10-24):** 10 zone da 10 stage (2 per famiglia), poi si ricomincia ("… II");
   3 nemici per famiglia, un campione per famiglia come boss di stage, un boss di zona con meccaniche (furia,
   scudo a metà vita, evocazioni, rigenerazione) all'ultimo stage della zona. Resistenze per famiglia (fisico ed
   elementi). Élite dallo stage 5 (8%): 5 affissi, ×3 ricompense, 50% di bottino, 5% di chiave.
+- **Deciso (2026-10-24):** il muro al boss di zona 50 resta (spinge ad ascendere). Nomi approvati.
 
 ## 10. Modalità di gioco
 | Modalità | Descrizione | Ricompensa principale |
@@ -146,10 +149,13 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
 | **Raid / Assedi** | boss enormi multi-fase con timer, si sbloccano a soglie | leggendari e Divini |
 | **Abisso** | endgame infinito con livelli di difficoltà scalabili | Paragon, materiali rari |
 
-- **Fatto (Fase 4, da confermare):** Dungeon (1 chiave, livello = record − 3, 8 nemici + boss di zona,
+- **Fatto (Fase 4, approvato 2026-10-24):** Dungeon (1 chiave, livello = record − 3, 8 nemici + boss di zona,
   2 modificatori su 6, premio: Frammenti, Essenza, pezzo di set garantito); Torre dell'Alba (gratis, 30 s per
   piano, ogni 5 piani di record +3% attacco e vita permanenti); Raid (dallo stage 50, 3 chiavi, 120 s, 3 fasi,
-  Leggendario garantito, 15% Mitico, 2% Divino). La Campagna resta in pausa durante le modalità. Abisso: più avanti.
+  Leggendario garantito, 15% Mitico, 2% Divino). La Campagna resta in pausa durante le modalità.
+- **Deciso (chiavi, 2026-10-24):** il boss di zona dà la chiave solo al **record** dell'Ascensione corrente
+  (ribatterlo dopo una morte non ne dà); la Torre dà 1 chiave ogni 10 piani di record; élite 5% invariato.
+- **Deciso (Abisso):** dopo i contenuti, insieme a Paragon e Rinascita Solare (strati dell'endgame).
 
 ## 11. Valute ed economia
 - **Oro**: base, per potenziamenti e acquisti.
@@ -165,17 +171,18 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
 2. **Paragon / Livelli Stellari** dopo il limite: infiniti, piccoli bonus a scelta.
 3. **Ascensione** (prestige): reset di campagna e livello, ottieni Stelle → albero permanente.
 4. **Rinascita Solare** (meta-prestige): reset delle Ascensioni per moltiplicatori enormi e nuove meccaniche.
-- **Fatto (Fase 5, da confermare):** Ascensione dallo stage 40, valuta **Scintille** (non "Stelle": il nome
+- **Fatto (Fase 5, approvato 2026-10-24):** Ascensione dallo stage 40, valuta **Scintille** (non "Stelle": il nome
   è già delle Costellazioni) = ((record − 30) / 10)²; 9 potenziamenti permanenti in `src/data/ascension.ts`.
   Si azzerano livello, oro, potenziamenti, stage e Costellazioni; restano oggetti, valute, rune, Torre, Vie.
-  Paragon e Rinascita Solare: più avanti.
-- Numeri grandi: supporto oltre 1e308 (libreria tipo `break_infinity.js`), formattazione 1.2K, 3.4M, poi notazione.
+  Paragon e Rinascita Solare: dopo i contenuti, con l'Abisso. Offline 75% approvato.
+- Numeri grandi: supporto oltre 1e308 (libreria tipo `break_infinity.js`) **rimandato** finché non serve
+  (stage ~3800); formattazione 1.2K, 3.4M… fino a Dc, poi notazione.
 
 ## 13. Progresso offline
 - Sì, **senza limite di tempo**.
 - Calcolo analitico (non simulazione tick per tick): stima uccisioni/ora sullo stage migliore "sicuro".
 - Al rientro: schermata riepilogo soddisfacente (oro, XP, oggetti, livelli guadagnati).
-- **Fatto (Fase 5, da confermare):** 5 minuti simulati sullo stage attuale senza avanzare, poi ritmo × tempo ×
+- **Fatto (Fase 5, approvato 2026-10-24):** 5 minuti simulati sullo stage attuale senza avanzare, poi ritmo × tempo ×
   efficienza (75%, +5% per livello di "Veglia Eterna", max 100%); max 30 oggetti veri, il resto in Frammenti.
 
 ## 14. Meta e collezione
