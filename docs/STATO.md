@@ -4,12 +4,12 @@
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
 **Ultimo aggiornamento:** 2026-10-24 (handoff: UI divisa in schede, equip automatico, inventario senza limite; tutto su `main`)
-**Fase corrente:** **grafica finale** (piano approvato dall'utente: bianco e nero, liste semplici).
+**Fase corrente:** **grafica finale**: stile "testo puro" alla Kittens Game/Evolve (scelta utente), B/N, serif.
 Fatto: palette B/N (token in `:root` di `src/style.css`; colore solo a rarità, barre vita, elementi `.el-*`, avvisi);
-inventario a griglia di icone (`.inv-item`); liste a righe apribili `src/ui/list.ts` (`createExpander`, `lockedLine`)
-in Skill, Rune (non comprate in un gruppo), Bestiario, Collezione, Imprese, Lumi bloccati; elementi colorati (`elem` in `src/ui/icons.ts`).
-**Prossimo passo:** sentire l'utente dal telefono (`?v=4` per evitare la cache); poi eventuali altre liste
-(Ascensione/Paragon/Vie/Modalità) con lo stesso schema.
+font EB Garamond (titolo Cinzel); schede in alto come parole, fisse allo scorrimento (`.navs` in `src/ui/hud.ts`),
+sotto-schede in corsivo; niente riquadri; equipaggiamento come righe con i puntini (sagoma tolta, `doll.ts` eliminato);
+statistiche e potenziamenti a puntini; inventario a griglia; liste apribili `src/ui/list.ts`; elementi colorati (`elem` in `icons.ts`).
+**Prossimo passo:** sentire l'utente dal telefono (`?v=5`); poi stesso schema per Vie, Stelle (pannello dettagli), Modalità.
 Valutare con l'utente: smantellamento automatico "fino a Comune" di default (inventario ora illimitato → salvataggio grande).
 **Online:** `main` = branch (d3790c8 + handoff).
 

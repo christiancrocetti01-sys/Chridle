@@ -9,7 +9,6 @@ import { elementalDamage, stateStats, type Stats } from '../core/stats';
 import { RULE_TEXT, SETS, SET_PIECES, UNIQUES } from '../data/uniques';
 import { FUSE_COUNT, FUSE_MAX_RARITY } from '../data/craft';
 import { elem, itemIcon } from './icons';
-import { DOLL_LEFT, DOLL_RIGHT, SILHOUETTE } from './doll';
 import { ITEM_TYPES, TRIGGER_AFFIXES, affixDef, type TriggerDef, type TriggerEffect, RARITIES, SLOTS, STAT_LABELS, TAG_LABELS, POINT_STATS, isPct, type SlotId, type StatKey } from '../data/items';
 
 import { toast } from './fx';
@@ -198,11 +197,7 @@ export function createGearPanel(root: HTMLElement, actions: GearActions) {
   root.innerHTML = `
     <div class="gear-head"><h2 class="section">Equipaggiamento</h2>
       <button class="btn sm" data-g="best" title="Indossa il pezzo migliore per ogni slot">Equipaggia il meglio</button></div>
-    <div class="doll">
-      <div class="doll-col" data-g="left"></div>
-      <div class="doll-figure">${SILHOUETTE}</div>
-      <div class="doll-col" data-g="right"></div>
-    </div>
+    <div class="slots" data-g="slots"></div>
     <h2 class="section">Inventario <span class="muted" data-g="count"></span></h2>
     <div class="inv" data-g="inv"></div>
     <div class="detail" data-g="detail"></div>
@@ -218,7 +213,7 @@ export function createGearPanel(root: HTMLElement, actions: GearActions) {
     </div>`;
 
   const q = (k: string) => root.querySelector<HTMLElement>(`[data-g="${k}"]`)!;
-  const refs = { left: q('left'), right: q('right'), inv: q('inv'), detail: q('detail'), count: q('count'), frag: q('frag') };
+  const refs = { slots: q('slots'), inv: q('inv'), detail: q('detail'), count: q('count'), frag: q('frag') };
   const auto = q('auto') as HTMLSelectElement;
   let selected: Selection = null;
   let lastKey = '';
@@ -316,17 +311,15 @@ export function createGearPanel(root: HTMLElement, actions: GearActions) {
       lastKey = key;
       if (auto.value !== String(gear.autoSalvage)) auto.value = String(gear.autoSalvage);
 
-      const slotHtml = (id: SlotId) => {
+      // slot come righe di testo: "Arma ······ Mazza dei Santi 10"
+      refs.slots.innerHTML = SLOTS.map(({ id, name }) => {
         const it = gear.equipped[id];
-        const name = SLOTS.find((s) => s.id === id)!.name;
         const sel = selected?.kind === 'slot' && selected.slot === id ? ' sel' : '';
-        const border = it ? ` style="border-color:${RARITIES[it.rarity].color};--glow:${RARITIES[it.rarity].color}"` : '';
-        const glow = it && it.rarity >= 4 ? ` glow glow-${it.rarity}` : '';
-        return `<button class="slot${sel}${glow}${it ? '' : ' empty'}" data-act="pick-slot" data-slot="${id}"${border}>
-          <span class="muted">${name}</span>${it ? `<span class="item-line" style="color:${RARITIES[it.rarity].color}">${itemIcon(it.type)}${itemLabel(it)}</span>` : '<span class="muted">—</span>'}</button>`;
-      };
-      refs.left.innerHTML = DOLL_LEFT.map(slotHtml).join('');
-      refs.right.innerHTML = DOLL_RIGHT.map(slotHtml).join('');
+        return `<button class="slot-row${sel}${it ? '' : ' empty'}" data-act="pick-slot" data-slot="${id}">
+          <span class="slot-name">${name}</span><span class="dots"></span>${it
+            ? `<span class="slot-item" style="color:${RARITIES[it.rarity].color}">${itemIcon(it.type)}${itemLabel(it)}</span><span class="slot-lv">${it.ilvl}</span>`
+            : '<span class="muted">—</span>'}</button>`;
+      }).join('');
       refs.count.textContent = `· ${gear.inventory.length} oggetti`;
       refs.inv.innerHTML = gear.inventory.length
         ? gear.inventory.slice().sort((a, b) => b.rarity - a.rarity || b.ilvl - a.ilvl).map((it) => {

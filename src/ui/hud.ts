@@ -90,7 +90,12 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
       <div class="combat" data-k="combat"></div>
       <div class="notice-row"><p class="notice" data-k="notice"></p><button class="btn sm" data-k="leave" hidden>Abbandona</button></div>
     </header>
-    <nav class="subtabs" data-k="subnav"></nav>
+    <div class="navs">
+      <nav class="tabs">
+        ${TABS.map((t) => `<button class="tab" data-tab="${t.id}">${t.name}<span class="badge" data-badge="${t.id}"></span></button>`).join('')}
+      </nav>
+      <nav class="subtabs" data-k="subnav"></nav>
+    </div>
     <div class="pane" data-pane="hero">
       <div data-sub="oggetti"><div data-k="gear"></div></div>
       <div data-sub="potenziamenti">
@@ -118,9 +123,6 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
     <div class="pane" data-pane="world"><div data-k="world"></div></div>
     <div class="pane" data-pane="progress"><div data-k="progress-panel"></div></div>
     <div class="pane" data-pane="ascension"><div data-k="ascension"></div></div>
-    <nav class="tabs">
-      ${TABS.map((t) => `<button class="tab" data-tab="${t.id}">${t.name}<span class="badge" data-badge="${t.id}"></span></button>`).join('')}
-    </nav>
 `;
 
   const el = (k: string) => root.querySelector<HTMLElement>(`[data-k="${k}"]`)!;
