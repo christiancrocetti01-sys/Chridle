@@ -76,6 +76,11 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
   Catene di trigger = combo soddisfacenti.
 - Sinergie trasversali: oggetti e perk che dicono "le skill con tag X ottengono Y".
 - Contenuti: si parte con ~30 skill e ~40 rune, poi espansione per lotti fino a centinaia.
+- **Deciso (Fase 3):** Luce +10 a colpo e +10/s in combattimento (max 100); 4 slot, l'ordine è la priorità;
+  skill sbloccate a livello; soglie automatiche (cura < 50% vita, scudo < 10%, velocità se scaduta); scheda
+  Skill separata. Rune: Essenza di Luce dai nemici, 2 incastonature per skill, stessa runa su più skill,
+  sblocco 50 × 1,6^n, livelli come pozzo infinito. Ordine Fase 3: skill → rune → sinergie per tag →
+  Costellazioni (~30 nodi, 1 punto/livello, respec economico) → Vie.
 
 ## 7. Albero delle abilità: Costellazioni
 - Grande albero a stelle (tema luce): nodi piccoli (+statistiche), notevoli (meccaniche), **chiave di volta**
@@ -100,6 +105,9 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
   Epico in su, max 1 per oggetto, effetti uguali **si sommano**; leggendari unici = effetto/regola fissa +
   affissi casuali (25% dei drop da Leggendario); 4 set da 6 pezzi legati agli stili (Paladino, Piromante,
   Assassino, Pestilenza; 8% dei drop da Epico).
+- **Deciso (varietà 4, crafting):** ritira affisso, migliora tier (max T5), trasferisci affisso (donatore
+  distrutto), fusione 3 uguali → rarità successiva (max Mitico); niente "aggiungi affisso"; unici e set non si
+  modificano; ogni modifica sullo stesso oggetto costa ×1,5.
 - **Visione:** nemici sempre più forti, ma il giocatore arriva a build **assurde** combinando statistiche,
   skill e sinergie (numeri che esplodono).
 
