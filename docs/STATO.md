@@ -5,8 +5,8 @@
 
 **Ultimo aggiornamento:** 2026-10-24 (revisione con l'utente chiusa, `main` pubblicato, chiavi più rare)
 **Fase corrente:** 7 — contenuti a lotti (lotti 1-4 fatti, tutti online). Grafica: minima fino alla fine. Fasi 3-6 **approvate**.
-**Prossimo passo:** 1) l'utente prova il gioco dal telefono (Fase 1, mai fatto); 2) prossimo contenuto:
-poi Purezza/Corruzione come sistema a parte (da progettare con l'utente), Codex/Imprese/Lumi.
+**Prossimo passo:** (prova da telefono rimandata a dopo la grafica finale) prossimo contenuto:
+Purezza/Corruzione come sistema a parte (da progettare con l'utente), Codex/Imprese/Lumi.
 **Online:** `main` allineato al branch il 2026-10-24. Le decisioni della revisione sono nel GDD ("Deciso").
 
 ## Gioco online

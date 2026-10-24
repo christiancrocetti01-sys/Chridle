@@ -17,7 +17,7 @@ Spuntare `[x]` man mano. Le fasi possono essere ridefinite: è un documento vivo
 - [x] Drop di valuta + esperienza + livelli
 - [x] UI minima: barra HP, nemico, numeri di danno
 - [x] Potenziamenti acquistabili con oro (Forza, Corazza, Rapidità)
-- [ ] Revisione dell'utente giocando dal telefono
+- [ ] Revisione dell'utente giocando dal telefono (rimandata a dopo la grafica finale, decisione utente)
 
 ## Fase 1.5 — Grafica minimale (decisione dell'utente, 2026-10-24)
 - [x] Via la scena animata PixiJS: il valore del gioco è in oggetti, statistiche e sinergie
