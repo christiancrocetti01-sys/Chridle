@@ -34,6 +34,20 @@ export function createCombatPanel(root: HTMLElement) {
     while (lines.length > LOG_SIZE) lines.pop()!.remove();
   }
 
+  /** Gli effetti a scatto ripetuti si raggruppano in una riga (×N) per non coprire il resto del registro. */
+  function proc(name: string, id: string) {
+    const top = lines[0];
+    if (top?.dataset.proc === id) {
+      const n = Number(top.dataset.n) + 1;
+      top.dataset.n = String(n);
+      top.textContent = `Effetto ${name} ×${n}`;
+      return;
+    }
+    log(`Effetto ${name}`, 'proc');
+    lines[0].dataset.proc = id;
+    lines[0].dataset.n = '1';
+  }
+
   return {
     onEvents(events: CombatEvent[]) {
       for (const e of events) {
@@ -43,12 +57,14 @@ export function createCombatPanel(root: HTMLElement) {
         else if (e.type === 'stage') log(`Stage ${e.stage}`, 'muted');
         else if (e.type === 'death') log('Il guerriero è caduto…', 'down');
         else if (e.type === 'hit' && e.crit && e.target === 'enemy') log(`Colpo critico: ${formatNum(e.amount)}`, 'crit');
+        else if (e.type === 'proc') proc(e.name, e.id);
       }
     },
     update(state: GameState) {
       const s = stateStats(state);
       const hp = Math.max(0, state.hero.hp);
-      refs.herohp.textContent = `${formatNum(hp)} / ${formatNum(s.maxHp)}`;
+      const shield = state.hero.shield >= 1 ? ` +${formatNum(state.hero.shield)} scudo` : '';
+      refs.herohp.textContent = `${formatNum(hp)} / ${formatNum(s.maxHp)}${shield}`;
       refs.herobar.style.width = `${(hp / s.maxHp) * 100}%`;
       const e = state.enemy;
       refs.enemy.textContent = e ? `${e.boss ? 'BOSS · ' : ''}${NAMES.get(e.templateId) ?? e.templateId}` : '…';

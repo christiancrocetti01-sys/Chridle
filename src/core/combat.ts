@@ -3,18 +3,25 @@ import { UPGRADES, type UpgradeId } from '../data/upgrades';
 import { TICK_RATE } from './loop';
 import { DROP_CHANCE, INVENTORY_SIZE, rollItem, rollRarity, salvageValue, type Item } from './items';
 import { nextRandom } from './rng';
+import { fireTriggers, gearTriggers, tickBuffs, type ProcEvent } from './triggers';
 import type { GameState } from './state';
 import { KILLS_PER_STAGE, elementalDamage, mitigate, stateStats, stageEnemy, upgradeCost, xpToNext } from './stats';
 
 export type CombatEvent =
   | { type: 'hit'; target: 'hero' | 'enemy'; amount: number; crit: boolean }
   | { type: 'dodge' }
+  /** Effetto a scatto: `amount` è il danno, la cura, lo scudo o la velocità in più. */
+  | ProcEvent
   | { type: 'kill'; gold: number; xp: number; boss: boolean }
   | { type: 'levelup'; level: number }
   | { type: 'death' }
   | { type: 'stage'; stage: number }
   /** Oggetto caduto; se `salvaged` è stato smantellato subito (filtro o inventario pieno). */
   | { type: 'drop'; item: Item; salvaged: boolean };
+
+/** Frazione della riserva di sanguinamento (veloce) e di veleno (lento) inflitta a ogni tick. */
+export const BLEED_RATE = 0.1;
+export const POISON_RATE = 0.03;
 
 /** Tick di pausa tra un nemico e il successivo (per l'animazione di morte). */
 export const RESPAWN_TICKS = 6;
@@ -24,6 +31,7 @@ export function step(state: GameState, events: CombatEvent[] = []): CombatEvent[
   state.tick++;
   const hero = stateStats(state);
   state.hero.hp = Math.min(hero.maxHp, state.hero.hp + hero.regen / TICK_RATE);
+  tickBuffs(state);
 
   if (!state.enemy) {
     if (state.respawn > 0) state.respawn--;
@@ -32,30 +40,31 @@ export function step(state: GameState, events: CombatEvent[] = []): CombatEvent[
   }
   const enemy = state.enemy;
   const bossMult = enemy.boss ? hero.bossMult : 1;
+  const triggers = gearTriggers(state.gear);
 
-  // veleno: danno continuo che ignora la difesa
-  if (hero.poison > 0) {
-    enemy.hp -= (hero.poison * bossMult) / TICK_RATE;
-    if (enemy.hp <= 0) {
-      onKill(state, events);
-      return events;
-    }
-  }
+  // danni nel tempo: veleno fisso dagli oggetti + riserve di sanguinamento e veleno sul nemico
+  const bleed = enemy.bleed > 0.5 ? enemy.bleed * BLEED_RATE : enemy.bleed;
+  const poison = enemy.poison > 0.5 ? enemy.poison * POISON_RATE : enemy.poison;
+  enemy.bleed -= bleed;
+  enemy.poison -= poison;
+  enemy.hp -= bleed + poison + (hero.poison * bossMult) / TICK_RATE;
+  if (enemy.hp <= 0) return kill(state, events);
 
   state.hero.swing += hero.attackSpeed / TICK_RATE;
   if (state.hero.swing >= 1) {
     state.hero.swing -= 1;
     const crit = nextRandom(state) < hero.critChance;
     const mult = crit ? hero.critMult : 1;
-    const physical = mitigate(hero.atk * mult, enemy.def);
-    const amount = (physical * (1 + hero.bleed) + elementalDamage(hero) * mult) * bossMult;
+    const physical = mitigate(hero.atk * mult, enemy.def) * bossMult;
+    const amount = physical + elementalDamage(hero) * mult * bossMult;
     enemy.hp -= amount;
+    enemy.bleed += physical * hero.bleed;
     if (hero.lifeSteal > 0) state.hero.hp = Math.min(hero.maxHp, state.hero.hp + amount * hero.lifeSteal);
     events.push({ type: 'hit', target: 'enemy', amount, crit });
-    if (enemy.hp <= 0) {
-      onKill(state, events);
-      return events;
-    }
+    state.hero.hits++;
+    if (crit) fireTriggers(state, hero, triggers, 'crit', events);
+    fireTriggers(state, hero, triggers, 'everyN', events);
+    if (enemy.hp <= 0) return kill(state, events);
   }
 
   enemy.swing += enemy.attackSpeed / TICK_RATE;
@@ -64,20 +73,29 @@ export function step(state: GameState, events: CombatEvent[] = []): CombatEvent[
     // si tira la schivata solo se serve: senza schivata la sequenza dell'RNG non cambia
     if (hero.dodge > 0 && nextRandom(state) < hero.dodge) {
       events.push({ type: 'dodge' });
+      fireTriggers(state, hero, triggers, 'dodge', events);
+      if (enemy.hp <= 0) kill(state, events);
       return events;
     }
-    const amount = mitigate(enemy.atk, hero.def);
+    let amount = mitigate(enemy.atk, hero.def);
+    const absorbed = Math.min(state.hero.shield, amount);
+    state.hero.shield -= absorbed;
+    amount -= absorbed;
     state.hero.hp -= amount;
     events.push({ type: 'hit', target: 'hero', amount, crit: false });
     if (state.hero.hp <= 0) {
       onDeath(state, events);
       return events;
     }
-    if (hero.thorns > 0) {
-      enemy.hp -= hero.thorns * bossMult;
-      if (enemy.hp <= 0) onKill(state, events);
-    }
+    enemy.hp -= hero.thorns * bossMult;
+    fireTriggers(state, hero, triggers, 'struck', events);
+    if (enemy.hp <= 0) kill(state, events);
   }
+  return events;
+}
+
+function kill(state: GameState, events: CombatEvent[]): CombatEvent[] {
+  onKill(state, events);
   return events;
 }
 
@@ -96,6 +114,8 @@ export function spawnEnemy(state: GameState) {
     def: base.def,
     attackSpeed: t.attackSpeed,
     swing: 0,
+    bleed: 0,
+    poison: 0,
   };
 }
 
@@ -112,7 +132,9 @@ function onKill(state: GameState, events: CombatEvent[]) {
   state.enemy = null;
   state.respawn = RESPAWN_TICKS;
   state.hero.swing = 0;
+  state.hero.hits = 0;
   events.push({ type: 'kill', gold, xp, boss });
+  fireTriggers(state, hero, gearTriggers(state.gear), 'kill', events);
   gainXp(state, xp, events);
   dropLoot(state, boss, events);
 
@@ -161,6 +183,9 @@ function onDeath(state: GameState, events: CombatEvent[]) {
   const wasBoss = state.enemy?.boss;
   state.enemy = null;
   state.respawn = RESPAWN_TICKS * 2;
+  state.hero.shield = 0;
+  state.hero.hits = 0;
+  state.hero.buffs = [];
   state.hero.hp = stateStats(state).maxHp;
   state.hero.swing = 0;
   state.stage.auto = false;

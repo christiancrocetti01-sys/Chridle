@@ -82,17 +82,19 @@ export interface RarityDef {
   weight: number;
   /** Frammenti ottenuti smantellando, per livello oggetto. */
   fragments: number;
+  /** Probabilità che uno degli affissi sia un effetto a scatto (trigger). */
+  triggerChance: number;
 }
 
 /** In ordine crescente: l'indice è il "grado" della rarità. */
 export const RARITIES: RarityDef[] = [
-  { id: 'comune', name: 'Comune', color: '#c9c9c9', affixes: 0, power: 1, weight: 600, fragments: 1 },
-  { id: 'magico', name: 'Magico', color: '#5b8cff', affixes: 1, power: 1.1, weight: 250, fragments: 2 },
-  { id: 'raro', name: 'Raro', color: '#f2d24b', affixes: 2, power: 1.25, weight: 100, fragments: 5 },
-  { id: 'epico', name: 'Epico', color: '#b45cff', affixes: 3, power: 1.45, weight: 40, fragments: 12 },
-  { id: 'leggendario', name: 'Leggendario', color: '#ff8a1f', affixes: 4, power: 1.7, weight: 9, fragments: 30 },
-  { id: 'mitico', name: 'Mitico', color: '#ff3b4e', affixes: 5, power: 2, weight: 0.9, fragments: 80 },
-  { id: 'divino', name: 'Divino', color: '#fff6c8', affixes: 6, power: 2.5, weight: 0.1, fragments: 250 },
+  { id: 'comune', name: 'Comune', color: '#c9c9c9', affixes: 0, power: 1, weight: 600, fragments: 1, triggerChance: 0 },
+  { id: 'magico', name: 'Magico', color: '#5b8cff', affixes: 1, power: 1.1, weight: 250, fragments: 2, triggerChance: 0 },
+  { id: 'raro', name: 'Raro', color: '#f2d24b', affixes: 2, power: 1.25, weight: 100, fragments: 5, triggerChance: 0 },
+  { id: 'epico', name: 'Epico', color: '#b45cff', affixes: 3, power: 1.45, weight: 40, fragments: 12, triggerChance: 0.3 },
+  { id: 'leggendario', name: 'Leggendario', color: '#ff8a1f', affixes: 4, power: 1.7, weight: 9, fragments: 30, triggerChance: 0.5 },
+  { id: 'mitico', name: 'Mitico', color: '#ff3b4e', affixes: 5, power: 2, weight: 0.9, fragments: 80, triggerChance: 0.75 },
+  { id: 'divino', name: 'Divino', color: '#fff6c8', affixes: 6, power: 2.5, weight: 0.1, fragments: 250, triggerChance: 1 },
 ];
 
 /** Tag delle sinergie: oggi descrittivi, poi useranno trigger, set e leggendari. */
@@ -189,6 +191,66 @@ export const AFFIXES: AffixDef[] = [
   affix('giant', 'del Gigante', ['vita'], ['armatura', 'cintura'], ['hp', 7], ['hpPct', 0.02]),
   affix('merchant', 'del Mercante', ['fortuna'], ['cintura', 'anello'], ['goldPct', 0.04], ['magicFind', 0.04]),
 ];
+
+/** Quando scatta un effetto. */
+export type TriggerOn = 'crit' | 'everyN' | 'kill' | 'struck' | 'dodge';
+
+/**
+ * Effetto a scatto. `value` è al tier 1 ed è moltiplicato dal tier:
+ * burst/bleed/poison = frazione dell'attacco, heal/shield = frazione della vita massima, haste = velocità in più.
+ */
+export type TriggerEffect =
+  | { kind: 'burst'; element: Element; value: number }
+  | { kind: 'bleed' | 'poison' | 'heal' | 'shield'; value: number }
+  | { kind: 'haste'; value: number; seconds: number };
+
+export interface TriggerDef {
+  id: string;
+  name: string;
+  tags: Tag[];
+  types: ItemType[];
+  on: TriggerOn;
+  /** Per `everyN`: ogni quanti colpi. */
+  n?: number;
+  effect: TriggerEffect;
+}
+
+const trig = (id: string, name: string, tags: Tag[], types: T[], on: TriggerOn, effect: TriggerEffect, n?: number): TriggerDef =>
+  ({ id, name, tags, types, on, effect, ...(n ? { n } : {}) });
+
+/** Effetti a scatto: solo da Epico in su, al massimo uno per oggetto. Effetti uguali su più oggetti si sommano. */
+export const TRIGGER_AFFIXES: TriggerDef[] = [
+  // al critico
+  trig('critFire', "dell'Incendio", ['fuoco', 'critico'], ['arma', 'guanti', 'anello', 'amuleto'], 'crit', { kind: 'burst', element: 'fire', value: 0.5 }),
+  trig('critHoly', 'del Giudizio', ['sacro', 'critico'], ['arma', 'amuleto', 'reliquia'], 'crit', { kind: 'burst', element: 'holy', value: 0.5 }),
+  trig('critBleed', 'dello Squartatore', ['sanguinamento', 'critico'], ['arma', 'guanti'], 'crit', { kind: 'bleed', value: 0.6 }),
+  trig('critHaste', 'del Fervore', ['velocita', 'critico'], ['guanti', 'stivali', 'anello'], 'crit', { kind: 'haste', value: 0.15, seconds: 3 }),
+  // ogni N colpi
+  trig('nLightning', 'della Folgore', ['fulmine'], ['arma', 'guanti', 'anello'], 'everyN', { kind: 'burst', element: 'lightning', value: 0.9 }, 4),
+  trig('nShadow', "dell'Abisso", ['ombra'], ['arma', 'mantello', 'amuleto'], 'everyN', { kind: 'burst', element: 'shadow', value: 1.1 }, 5),
+  trig('nCold', 'della Valanga', ['gelo'], ['secondaria', 'anello', 'amuleto'], 'everyN', { kind: 'burst', element: 'cold', value: 0.9 }, 4),
+  trig('nPoison', 'della Pestilenza', ['veleno'], ['arma', 'guanti', 'secondaria'], 'everyN', { kind: 'poison', value: 0.8 }, 3),
+  // all'uccisione
+  trig('killHeal', 'del Martire', ['vita'], ['elmo', 'armatura', 'amuleto', 'reliquia'], 'kill', { kind: 'heal', value: 0.04 }),
+  trig('killHaste', 'della Carneficina', ['velocita'], ['arma', 'stivali', 'cintura'], 'kill', { kind: 'haste', value: 0.2, seconds: 5 }),
+  trig('killShield', 'del Custode', ['difesa'], ['secondaria', 'armatura', 'mantello'], 'kill', { kind: 'shield', value: 0.06 }),
+  // quando si viene colpiti
+  trig('struckShield', 'della Fede', ['sacro', 'difesa'], ['secondaria', 'elmo', 'armatura', 'cintura'], 'struck', { kind: 'shield', value: 0.03 }),
+  trig('struckFire', 'della Vendetta', ['fuoco', 'difesa'], ['armatura', 'cintura', 'mantello'], 'struck', { kind: 'burst', element: 'fire', value: 0.4 }),
+  trig('struckHeal', 'della Grazia', ['sacro', 'vita'], ['elmo', 'cintura', 'reliquia'], 'struck', { kind: 'heal', value: 0.015 }),
+  // alla schivata
+  trig('dodgeShadow', "dell'Ombra Vendicativa", ['ombra', 'difesa'], ['guanti', 'stivali', 'mantello'], 'dodge', { kind: 'burst', element: 'shadow', value: 0.8 }),
+  trig('dodgeHaste', 'del Vento', ['velocita', 'difesa'], ['stivali', 'mantello'], 'dodge', { kind: 'haste', value: 0.15, seconds: 3 }),
+];
+
+export function triggersFor(type: ItemType): TriggerDef[] {
+  return TRIGGER_AFFIXES.filter((a) => a.types.includes(type));
+}
+
+/** Definizione di un affisso (normale o a scatto) dal suo id. */
+export function affixDef(id: string): AffixDef | TriggerDef | undefined {
+  return AFFIXES.find((a) => a.id === id) ?? TRIGGER_AFFIXES.find((a) => a.id === id);
+}
 
 /** Affissi che possono comparire su un tipo di oggetto. */
 export function affixesFor(type: ItemType): AffixDef[] {

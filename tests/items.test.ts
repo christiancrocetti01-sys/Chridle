@@ -5,9 +5,9 @@ import {
   type Item,
 } from '../src/core/items';
 import { deserialize, serialize } from '../src/core/save';
-import { newGame } from '../src/core/state';
+import { STATE_VERSION, newGame } from '../src/core/state';
 import { KILLS_PER_STAGE, heroStats, stageEnemy, stateStats } from '../src/core/stats';
-import { AFFIXES, FLAT_STATS, ITEM_TYPES, RARITIES, affixesFor } from '../src/data/items';
+import { AFFIXES, FLAT_STATS, ITEM_TYPES, RARITIES, affixesFor, triggersFor } from '../src/data/items';
 import { emptyMods } from '../src/core/items';
 
 const rng = (seed: number) => ({ rng: seed });
@@ -175,7 +175,7 @@ describe('affissi v4', () => {
 
   it('gli oggetti ricevono solo affissi ammessi per il loro tipo', () => {
     for (const t of ITEM_TYPES) {
-      const allowed = new Set(affixesFor(t.id).map((a) => a.id));
+      const allowed = new Set([...affixesFor(t.id), ...triggersFor(t.id)].map((a) => a.id));
       for (let seed = 0; seed < 40; seed++) {
         for (const a of rollItem(rng(seed), 1, 10, 6, t.id).affixes) expect(allowed.has(a.id)).toBe(true);
       }
@@ -289,7 +289,7 @@ describe('salvataggio v4', () => {
     const old = (uid: number) => ({ ...rollItem(rng(uid), uid, 3, 0, 'anello'), affixes: [{ id: 'crit', stat: 'crit', tier: 2, value: 0.02 }] });
     const v3 = { ...s, version: 3, gear: { ...s.gear, equipped: { anello1: old(1) }, inventory: [old(2)] } };
     const m = deserialize(JSON.stringify(v3))!;
-    expect(m.version).toBe(4);
+    expect(m.version).toBe(STATE_VERSION);
     expect(m.gear.equipped.anello1!.affixes).toEqual([{ id: 'crit', tier: 2, mods: [{ stat: 'crit', value: 0.02 }] }]);
     expect(m.gear.inventory[0].affixes[0].mods[0].stat).toBe('crit');
     expect(gearMods(m.gear).crit).toBeCloseTo(0.02);

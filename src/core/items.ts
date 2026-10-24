@@ -1,5 +1,5 @@
 import {
-  AFFIXES, AFFIX_TIERS, FLAT_STATS, ITEM_TYPES, RARITIES, SLOTS, STAT_LABELS, affixesFor,
+  AFFIX_TIERS, FLAT_STATS, ITEM_TYPES, RARITIES, SLOTS, STAT_LABELS, affixDef, affixesFor, triggersFor,
   type ItemType, type SlotId, type StatKey,
 } from '../data/items';
 import { nextRandom } from './rng';
@@ -8,6 +8,8 @@ export interface Affix {
   id: string;
   tier: number;
   mods: { stat: StatKey; value: number }[];
+  /** Solo per gli effetti a scatto: moltiplicatore del valore base (tier × variazione). */
+  power?: number;
 }
 
 export interface Item {
@@ -70,7 +72,14 @@ export function rollItem(rng: Rng, uid: number, ilvl: number, rarity: number, ty
 
   const pool = affixesFor(def.id);
   const affixes: Affix[] = [];
-  for (let i = 0; i < r.affixes && pool.length; i++) {
+  // da Epico in su, uno degli affissi può essere un effetto a scatto
+  const triggers = triggersFor(def.id);
+  if (r.triggerChance > 0 && triggers.length && nextRandom(rng) < r.triggerChance) {
+    const a = pick(rng, triggers);
+    const t = pickWeighted(rng, AFFIX_TIERS);
+    affixes.push({ id: a.id, tier: t.tier, mods: [], power: t.mult * (0.85 + 0.3 * nextRandom(rng)) });
+  }
+  while (affixes.length < r.affixes && pool.length) {
     const a = pool.splice(Math.floor(nextRandom(rng) * pool.length), 1)[0];
     const t = pickWeighted(rng, AFFIX_TIERS);
     const roll = 0.85 + 0.3 * nextRandom(rng);
@@ -79,7 +88,7 @@ export function rollItem(rng: Rng, uid: number, ilvl: number, rarity: number, ty
   }
 
   const best = affixes.reduce<Affix | null>((b, a) => (!b || a.tier > b.tier ? a : b), null);
-  const suffix = best ? ` ${AFFIXES.find((a) => a.id === best.id)!.name}` : '';
+  const suffix = best ? ` ${affixDef(best.id)!.name}` : '';
   return { uid, type: def.id, rarity, ilvl, name: pick(rng, def.names) + suffix, base, affixes };
 }
 

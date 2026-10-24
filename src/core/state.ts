@@ -12,6 +12,22 @@ export interface EnemyState {
   attackSpeed: number;
   /** Avanzamento verso il prossimo attacco, 0..1. */
   swing: number;
+  /** Danno ancora da infliggere con sanguinamento e veleno (si consuma nel tempo). */
+  bleed: number;
+  poison: number;
+}
+
+export interface HeroState {
+  level: number;
+  xp: number;
+  hp: number;
+  swing: number;
+  /** Assorbe il danno prima della vita. */
+  shield: number;
+  /** Colpi messi a segno sul nemico corrente (per gli effetti "ogni N colpi"). */
+  hits: number;
+  /** Effetti temporanei: uno per affisso a scatto, si rinnova quando riscatta. */
+  buffs: { key: string; speedPct: number; ticks: number }[];
 }
 
 export interface GameState {
@@ -24,7 +40,7 @@ export interface GameState {
   lastSeen: number;
   /** Stato dell'RNG deterministico. */
   rng: number;
-  hero: { level: number; xp: number; hp: number; swing: number };
+  hero: HeroState;
   gold: number;
   /** Valuta del crafting, dallo smantellamento. */
   fragments: number;
@@ -43,7 +59,7 @@ export interface GameState {
   totals: { kills: number; deaths: number; gold: number };
 }
 
-export const STATE_VERSION = 4;
+export const STATE_VERSION = 5;
 
 export function newGame(now: number, seed = now >>> 0): GameState {
   const upgrades = { forza: 0, corazza: 0, rapidita: 0 };
@@ -53,7 +69,7 @@ export function newGame(now: number, seed = now >>> 0): GameState {
     createdAt: now,
     lastSeen: now,
     rng: seed,
-    hero: { level: 1, xp: 0, hp: heroStats(1, upgrades).maxHp, swing: 0 },
+    hero: { level: 1, xp: 0, hp: heroStats(1, upgrades).maxHp, swing: 0, shield: 0, hits: 0, buffs: [] },
     gold: 0,
     fragments: 0,
     gear: newGear(),

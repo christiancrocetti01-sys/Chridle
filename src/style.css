@@ -152,6 +152,8 @@ html, body {
 .log li { opacity: 0.9; }
 .log li:nth-child(n + 4) { opacity: 0.5; }
 .log .crit { color: #f4e3a0; }
+.log .proc { color: #c9a6ff; }
+.affixes .trigger { color: #e7c873; }
 .log .gold { color: var(--gold); }
 .log .down { color: #ff6b6b; }
 

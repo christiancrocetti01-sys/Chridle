@@ -3,7 +3,7 @@ import { INVENTORY_SIZE, itemMods, salvageValue, slotsFor, type GearState, type 
 import type { GameState } from '../core/state';
 import { elementalDamage, heroStats, type Stats } from '../core/stats';
 import { DOLL_LEFT, DOLL_RIGHT, SILHOUETTE } from './doll';
-import { AFFIXES, ITEM_TYPES, RARITIES, SLOTS, STAT_LABELS, TAG_LABELS, isPct, type SlotId, type StatKey } from '../data/items';
+import { ITEM_TYPES, TRIGGER_AFFIXES, affixDef, type TriggerDef, RARITIES, SLOTS, STAT_LABELS, TAG_LABELS, isPct, type SlotId, type StatKey } from '../data/items';
 
 export interface GearActions {
   equip(uid: number, slot: SlotId): void;
@@ -26,13 +26,36 @@ function itemLabel(it: Item): string {
   return `<span class="rar-${it.rarity}" style="color:${RARITIES[it.rarity].color}">${esc(it.name)}</span>`;
 }
 
+const ON_TEXT: Record<TriggerDef['on'], string> = {
+  crit: 'Al critico', everyN: 'Ogni {n} colpi', kill: "All'uccisione", struck: 'Quando vieni colpito', dodge: 'Quando schivi',
+};
+const ELEMENT_TEXT = { fire: 'fuoco', cold: 'gelo', lightning: 'fulmine', holy: 'luce sacra', shadow: 'ombra' };
+const pct = (v: number) => `${Math.round(v * 100)}%`;
+
+/** "Al critico: esplosione di fuoco (120% dell'attacco)". */
+export function describeTrigger(t: TriggerDef, value: number): string {
+  const e = t.effect;
+  const what =
+    e.kind === 'burst' ? `esplosione di ${ELEMENT_TEXT[e.element]} (${pct(value)} dell'attacco)`
+    : e.kind === 'bleed' ? `sanguinamento (${pct(value)} dell'attacco)`
+    : e.kind === 'poison' ? `veleno (${pct(value)} dell'attacco)`
+    : e.kind === 'heal' ? `cura ${pct(value)} della vita`
+    : e.kind === 'shield' ? `scudo pari al ${pct(value)} della vita`
+    : e.kind === 'haste' ? `+${pct(value)} velocità d'attacco per ${e.seconds} s`
+    : '';
+  return `${ON_TEXT[t.on].replace('{n}', String(t.n))}: ${what}`;
+}
+
 function itemDetail(it: Item): string {
   const r = RARITIES[it.rarity];
   const type = ITEM_TYPES.find((t) => t.id === it.type)!;
   const lines = it.affixes.map((a) => {
-    const mods = a.mods.map((m) => `+${formatStat(m.stat, m.value)} ${STAT_LABELS[m.stat]}`).join(' · ');
-    const tags = AFFIXES.find((d) => d.id === a.id)?.tags.map((t) => TAG_LABELS[t]).join(', ') ?? '';
-    return `<li>${mods} <span class="muted">T${a.tier}${tags ? ` · ${tags}` : ''}</span></li>`;
+    const trig = a.power ? TRIGGER_AFFIXES.find((d) => d.id === a.id) : undefined;
+    const text = trig
+      ? `<span class="trigger">${describeTrigger(trig, trig.effect.value * a.power!)}</span>`
+      : a.mods.map((m) => `+${formatStat(m.stat, m.value)} ${STAT_LABELS[m.stat]}`).join(' · ');
+    const tags = affixDef(a.id)?.tags.map((t) => TAG_LABELS[t]).join(', ') ?? '';
+    return `<li>${text} <span class="muted">T${a.tier}${tags ? ` · ${tags}` : ''}</span></li>`;
   });
   return `
     <div class="item-name">${itemLabel(it)}</div>

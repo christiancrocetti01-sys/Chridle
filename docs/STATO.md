@@ -3,10 +3,9 @@
 > File di passaggio di consegne tra sessioni. Aggiornato con `/handoff`.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
-**Ultimo aggiornamento:** 2026-10-24 (varietà 1)
-**Fase corrente:** 2 — Equipaggiamento, varietà (punto 1 fatto).
-**Prossimo passo:** Varietà 2 — trigger (al critico/uccisione/ogni N colpi), da proporre e confermare.
-Poi: leggendari unici, set 2/4/6, crafting con i Frammenti.
+**Ultimo aggiornamento:** 2026-10-24 (varietà 2)
+**Fase corrente:** 2 — Equipaggiamento, varietà (punti 1-2 fatti).
+**Prossimo passo:** Varietà 3 — leggendari unici e set 2/4/6, da proporre e confermare. Poi crafting con i Frammenti.
 **Grafica:** decisa **minimale** (niente scena, niente asset da scaricare): UI DOM + sagoma SVG.
 
 ## Gioco online
@@ -30,11 +29,19 @@ Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` quando un passo è a
   Nuove stat: elementi piatti/% (ignorano la difesa), veleno/s, sanguinamento (% del fisico, istantaneo per ora),
   rubavita, schivata (max 50%), spine, oro/XP/ritrovamento magico, danno ai boss. Affisso salvato come `mods[]`.
   Salvataggio v4 (migrazione affissi v3). Confronto e HUD mostrano le nuove stat.
-- Test: **50 verdi** (5 file), build ok. Simulazione 2 h con equip: stage 45.
+- Varietà 2: 16 effetti a scatto (`TRIGGER_AFFIXES` in `src/data/items.ts`, logica in `src/core/triggers.ts`):
+  al critico / ogni N colpi / all'uccisione / quando colpito / alla schivata → esplosione elementale, sanguinamento,
+  veleno, cura, scudo, velocità a tempo. Solo da Epico in su (`triggerChance` per rarità: 30/50/75/100%), max 1
+  per oggetto, effetti uguali **si sommano** (scelta utente). Sanguinamento e veleno ora sono riserve sul nemico
+  che si consumano nel tempo. Salvataggio v5 (scudo, buff, colpi; riserve sul nemico).
+- Test: **61 verdi** (6 file), build ok. Simulazione 2 h con equip: stage 45 (la simulazione non valuta i trigger).
 
 ## Feedback dell'utente (importante)
 - La vecchia grafica era "AI slop". Ora la direzione è: **grafica minimale**, non serve vedere il
   combattimento; ciò che conta è **una varietà infinita di armi, statistiche e sinergie**.
+
+- Visione dell'utente: nemici sempre più forti, ma il giocatore deve arrivare a build **assurde** combinando
+  statistiche, skill e sinergie (numeri che esplodono: Fase 5).
 
 ## Domande aperte
 - I Frammenti non si spendono ancora (arriva il crafting).

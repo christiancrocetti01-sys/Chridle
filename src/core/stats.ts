@@ -1,6 +1,7 @@
 import { ELEMENTS, type Element } from '../data/items';
 import type { UpgradeId } from '../data/upgrades';
 import { emptyMods, gearMods, type GearState, type StatMods } from './items';
+import type { HeroState } from './state';
 
 export interface Stats {
   maxHp: number;
@@ -14,6 +15,8 @@ export interface Stats {
   regen: number;
   /** Danno elementale aggiunto a ogni colpo (non ridotto dalla difesa). */
   elements: Record<Element, number>;
+  /** Moltiplicatore dei danni di ogni elemento (anche per le esplosioni a scatto). */
+  elemMult: Record<Element, number>;
   /** Danno da veleno al secondo, continuo, ignora la difesa. */
   poison: number;
   /** Frazione del danno fisico inflitta in più come sanguinamento (ignora la difesa). */
@@ -48,6 +51,7 @@ export function heroStats(level: number, upgrades: Record<UpgradeId, number>, mo
     critMult: 2 + mods.critDmg,
     regen: maxHp * (0.01 + mods.regenPct),
     elements: Object.fromEntries(ELEMENTS.map((e) => [e, mods[e] * (1 + mods[`${e}Pct`] + mods.elemPct)])) as Record<Element, number>,
+    elemMult: Object.fromEntries(ELEMENTS.map((e) => [e, 1 + mods[`${e}Pct`] + mods.elemPct])) as Record<Element, number>,
     poison: mods.poison,
     bleed: mods.bleed,
     lifeSteal: mods.lifeSteal,
@@ -66,8 +70,10 @@ export function elementalDamage(s: Stats): number {
 }
 
 /** Statistiche dell'eroe con l'equipaggiamento indossato. */
-export function stateStats(state: { hero: { level: number }; upgrades: Record<UpgradeId, number>; gear: GearState }): Stats {
-  return heroStats(state.hero.level, state.upgrades, gearMods(state.gear));
+export function stateStats(state: { hero: HeroState; upgrades: Record<UpgradeId, number>; gear: GearState }): Stats {
+  const mods = gearMods(state.gear);
+  for (const b of state.hero.buffs) mods.speedPct += b.speedPct;
+  return heroStats(state.hero.level, state.upgrades, mods);
 }
 
 /** Riduzione con rendimenti decrescenti: la difesa non annulla mai del tutto il danno. */

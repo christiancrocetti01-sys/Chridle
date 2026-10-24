@@ -34,6 +34,12 @@ export const migrations: Record<number, Migration> = {
       },
     };
   },
+  // v4 → v5: effetti a scatto (scudo, buff, contatore colpi; sanguinamento e veleno sul nemico)
+  4: (d) => ({
+    ...d,
+    hero: { ...(d.hero as object), shield: 0, hits: 0, buffs: [] },
+    enemy: d.enemy ? { ...(d.enemy as object), bleed: 0, poison: 0 } : null,
+  }),
 };
 
 export function serialize(state: GameState): string {
