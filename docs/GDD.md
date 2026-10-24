@@ -81,6 +81,8 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
   Skill separata. Rune: Essenza di Luce dai nemici, 2 incastonature per skill, stessa runa su più skill,
   sblocco 50 × 1,6^n, livelli come pozzo infinito. Ordine Fase 3: skill → rune → sinergie per tag →
   Costellazioni (~30 nodi, 1 punto/livello, respec economico) → Vie.
+- **Deciso (sinergie per tag):** per ora solo affissi, 2 per tag di skill: effetto (+10% al T1) e riduzione
+  ricarica (−5% al T1); i bonus dei tag di una skill si sommano. Unici/set con sinergie: più avanti.
 
 ## 7. Albero delle abilità: Costellazioni
 - Grande albero a stelle (tema luce): nodi piccoli (+statistiche), notevoli (meccaniche), **chiave di volta**
