@@ -1,7 +1,7 @@
 /**
  * Collaudo massivo: un "giocatore automatico" gioca ore simulate con tutti i sistemi
- * (equip, crafting e fusione, potenziamenti, Vie, Stelle, skill, rune, Dungeon/Torre/Raid,
- * Ascensioni, Purezza/Corruzione, offline, salvataggio) e controlla che lo stato resti sano.
+ * (equip, crafting e fusione, potenziamenti, Vie, Stelle, skill, rune, Dungeon/Torre/Raid/Abisso,
+ * Ascensioni, Rinascite, Paragon, Purezza/Corruzione, offline, salvataggio) e controlla che lo stato resti sano.
  *
  *   npm run collaudo                       tutti i profili in parallelo, 8 ore
  *   npm run collaudo -- --ore 24 --seed 7
@@ -18,7 +18,9 @@ import { chooseSecondVia, chooseVia } from '../src/core/vie';
 import { canSocket, levelCost, levelRune, socketRune, unlockCost, unlockRune, isDamageSkill } from '../src/core/runes';
 import { setSlot, unlockedSkills } from '../src/core/skills';
 import { activeVie } from '../src/core/vie';
-import { canRaid, enterDungeon, enterRaid, enterTower } from '../src/core/modes';
+import { canRaid, enterAbyss, enterDungeon, enterRaid, enterTower } from '../src/core/modes';
+import { abyssUnlocked, canRebirth, paragonFree, rebirth, spendParagon } from '../src/core/endgame';
+import type { ParagonId } from '../src/data/endgame';
 import { ascend, buyPerk, canAscend, perkCost, perkLevel, PERKS } from '../src/core/ascension';
 import { applyOffline } from '../src/core/offline';
 import { deserialize, serialize } from '../src/core/save';
@@ -201,6 +203,12 @@ function autoRunes(state: GameState, order: RuneId[], stats: Counters) {
   }
 }
 
+/** Paragon: attacco e vita a turno, ogni quarto punto in danno critico. */
+const PARAGON_ORDER: ParagonId[] = ['forza', 'vigore', 'forza', 'precisione', 'vigore', 'tempra'];
+function autoParagon(state: GameState) {
+  while (paragonFree(state.paragon) > 0) spendParagon(state, PARAGON_ORDER[state.paragon.level % PARAGON_ORDER.length]);
+}
+
 function autoPerks(state: GameState, p: Profile) {
   for (let bought = true; bought;) {
     bought = false;
@@ -222,8 +230,8 @@ interface Counters {
   keySrc: Record<string, number>;
   /** Esiti dei Raid persi (morte o tempo) e Corruzione massima raggiunta. */
   raidLoss: Record<string, number>; maxCorr: number; minCorr: number;
-  dungeons: [number, number]; towers: [number, number]; raids: [number, number];
-  ascensions: number; fusions: number; crafts: number; runesUnlocked: number; runeLevels: number; lumiLevels: number;
+  dungeons: [number, number]; towers: [number, number]; raids: [number, number]; abyss: number;
+  ascensions: number; rebirths: number; rebirthAt: number[]; fusions: number; crafts: number; runesUnlocked: number; runeLevels: number; lumiLevels: number;
   essenceGained: number; offlineHours: number; saveChecks: number;
 }
 
@@ -252,14 +260,15 @@ function checkSave(state: GameState, where: string) {
 interface Checkpoint {
   h: number; level: number; stage: number; best: number; asc: number; scint: number; tower: number;
   keys: number; runes: number; essence: number; nextRune: number; corruption: number; power: number; deaths: number;
+  abyss: number; paragon: number; soli: number; collection: number; achievements: number;
 }
 
 function simulate(p: Profile) {
   const state = newGame(0, SEED * 1000 + PROFILES.indexOf(p) + 1);
   const order = [...RUNES.map((r) => r.id)].sort((a, b) => ((a.charCodeAt(0) * 31 + SEED) % 7) - ((b.charCodeAt(0) * 31 + SEED) % 7));
   const c: Counters = {
-    kills: 0, deaths: 0, keysGained: 0, keysOffline: 0, keySrc: {}, raidLoss: {}, maxCorr: 0, minCorr: 0, dungeons: [0, 0], towers: [0, 0], raids: [0, 0],
-    ascensions: 0, fusions: 0, crafts: 0, runesUnlocked: 0, runeLevels: 0, lumiLevels: 0, essenceGained: 0, offlineHours: 0, saveChecks: 0,
+    kills: 0, deaths: 0, keysGained: 0, keysOffline: 0, keySrc: {}, raidLoss: {}, maxCorr: 0, minCorr: 0, dungeons: [0, 0], towers: [0, 0], raids: [0, 0], abyss: 0,
+    ascensions: 0, rebirths: 0, rebirthAt: [], fusions: 0, crafts: 0, runesUnlocked: 0, runeLevels: 0, lumiLevels: 0, essenceGained: 0, offlineHours: 0, saveChecks: 0,
   };
   const checkpoints: Checkpoint[] = [];
   const ascendAt: number[] = [];
@@ -268,6 +277,7 @@ function simulate(p: Profile) {
   let lastBest = 0;
   let lastBestTick = 0;
   let lastTower = -Infinity;
+  let lastAbyss = -Infinity;
   const ev: CombatEvent[] = [];
   const t0 = Date.now();
 
@@ -289,6 +299,9 @@ function simulate(p: Profile) {
         const src = kind !== 'campaign' ? kind : zoneBoss ? 'boss' : 'elite';
         c.keySrc[src] = (c.keySrc[src] ?? 0) + 1;
       }
+      else if (e.type === 'mode' && kind === 'abyss') {
+        if (state.mode.kind !== 'abyss') c.abyss++;
+      }
       else if (e.type === 'mode') {
         const slot = kind === 'dungeon' ? c.dungeons : kind === 'tower' ? c.towers : c.raids;
         slot[e.ok ? 0 : 1]++;
@@ -307,12 +320,22 @@ function simulate(p: Profile) {
       autoSkills(state);
       autoRunes(state, order, c);
       autoLumi(state, p.via, order, c);
+      autoParagon(state);
       if (state.mode.kind === 'campaign') {
         // Ascensione quando si è fermi da 15 minuti; prima si spendono le chiavi
         const stuck = t - lastBestTick > 15 * 60 * TICK_RATE;
         if (state.stage.best >= RAID_STAGE && canRaid(state)) enterRaid(state);
         else if (state.keys >= 1 && (state.stage.best < RAID_STAGE || state.keys > RAID_KEYS)) enterDungeon(state);
         else if (t - lastTower > 20 * 60 * TICK_RATE) { enterTower(state); lastTower = t; }
+        else if (abyssUnlocked(state) && t - lastAbyss > 30 * 60 * TICK_RATE) { enterAbyss(state); lastAbyss = t; }
+        else if (stuck && canRebirth(state)) {
+          rebirth(state);
+          c.rebirths++;
+          c.rebirthAt.push(+(t / ticksPerHour).toFixed(1));
+          autoPerks(state, p);
+          lastBest = state.stage.best;
+          lastBestTick = t;
+        }
         else if (stuck && canAscend(state)) {
           ascend(state);
           c.ascensions++;
@@ -341,6 +364,8 @@ function simulate(p: Profile) {
         asc: state.ascension.count, scint: state.ascension.total, tower: state.tower.best, keys: state.keys,
         runes: Object.keys(state.runes.levels).length, essence: Math.round(state.essence), nextRune: unlockCost(state),
         corruption: s.corruption, power: power(state, p), deaths: c.deaths,
+        abyss: state.abyss.best, paragon: state.paragon.level, soli: state.rebirth.soli,
+        collection: state.collection.length, achievements: state.achievements.length,
       });
       if (ONLY) console.log(JSON.stringify(checkpoints.at(-1)));
       // sessioni: dopo ogni 2 h di gioco, 2 h offline
@@ -374,14 +399,17 @@ function report(results: Result[]) {
     const c = r.counters;
     console.log(`\n=== ${r.profile} (${r.hours} h simulate in ${r.seconds} s) ${r.issues.length ? '❌' : '✅'}`);
     for (const i of r.issues) console.log('  !', i);
-    console.log('  h  liv stage best asc scint torre chiavi rune essenza/prossima corr morti');
-    for (const k of r.checkpoints) {
-      console.log(`  ${String(k.h).padStart(2)} ${String(k.level).padStart(4)} ${String(k.stage).padStart(5)} ${String(k.best).padStart(4)} ${String(k.asc).padStart(3)} ${String(k.scint).padStart(5)} ${String(k.tower).padStart(5)} ${String(k.keys).padStart(6)} ${String(k.runes).padStart(4)}  ${fmt(k.essence)}/${fmt(k.nextRune)} ${String(k.corruption).padStart(4)} ${String(k.deaths).padStart(5)}`);
+    console.log('    h  liv stage best asc scint torre abisso parag soli coll impr chiavi rune essenza/prossima corr morti');
+    // nei collaudi lunghi una riga ogni 12 h
+    const every = r.hours > 48 ? 12 : 1;
+    for (const k of r.checkpoints.filter((x) => x.h % every === 0)) {
+      console.log(`  ${String(k.h).padStart(3)} ${String(k.level).padStart(4)} ${String(k.stage).padStart(5)} ${String(k.best).padStart(4)} ${String(k.asc).padStart(3)} ${String(k.scint).padStart(5)} ${String(k.tower).padStart(5)} ${String(k.abyss).padStart(6)} ${String(k.paragon).padStart(5)} ${String(k.soli).padStart(4)} ${String(k.collection).padStart(4)} ${String(k.achievements).padStart(4)} ${String(k.keys).padStart(6)} ${String(k.runes).padStart(4)}  ${fmt(k.essence)}/${fmt(k.nextRune)} ${String(k.corruption).padStart(4)} ${String(k.deaths).padStart(5)}`);
     }
     const online = r.hours;
     console.log(`  chiavi: ${c.keysGained} in gioco (${fmt(c.keysGained / online)}/h) + ${c.keysOffline} offline (${c.offlineHours} h)  ·  fonti ${JSON.stringify(c.keySrc)}`);
     console.log(`  dungeon ${c.dungeons[0]}✓/${c.dungeons[1]}✗  torre ${c.towers[0]}✓/${c.towers[1]}✗  raid ${c.raids[0]}✓/${c.raids[1]}✗ ${JSON.stringify(c.raidLoss)}  ·  corruzione ${c.minCorr}…${c.maxCorr}`);
-    console.log(`  ascensioni ${c.ascensions} a ${r.ascendAt.join(', ') || '—'} h  ·  fusioni ${c.fusions}  affissi alzati ${c.crafts}  rune ${c.runesUnlocked} sbloccate / ${c.runeLevels} livelli`);
+    console.log(`  rinascite ${c.rebirths} a ${c.rebirthAt.join(', ') || '—'} h  ·  discese nell'Abisso ${c.abyss}`);
+    console.log(`  ascensioni ${c.ascensions} a ${r.ascendAt.length > 20 ? `${r.ascendAt.slice(0, 10).join(', ')} … ${r.ascendAt.slice(-3).join(', ')}` : r.ascendAt.join(', ') || '—'} h  ·  fusioni ${c.fusions}  affissi alzati ${c.crafts}  rune ${c.runesUnlocked} sbloccate / ${c.runeLevels} livelli`);
     console.log(`  fine: Vie ${r.end.vie.join('+')}, stelle ${r.end.stars}, corruzione ${r.end.corruption}, regole ${r.end.rules.join(' ') || '—'}`);
     console.log(`  skill ${r.end.skills.join(', ')}  ·  perk ${JSON.stringify(r.end.perks)}`);
     console.log(`  codex ${JSON.stringify(r.end.codex)}  ·  collezione ${r.end.collection}/${UNIQUES.length}  ·  imprese ${r.end.achievements}`);

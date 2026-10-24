@@ -12,6 +12,7 @@ import { createLumiPanel, type LumiActions } from './lumi';
 import { createAscensionPanel, type AscensionActions } from './ascension';
 import { createWorldPanel, modeTimer, type WorldActions } from './world';
 import { DUNGEON_WAVES } from '../data/modes';
+import { ABYSS_WAVES } from '../data/endgame';
 import { soundOn, toggleSound } from './sound';
 import { zoneName } from '../data/enemies';
 import { UPGRADES, type UpgradeId } from '../data/upgrades';
@@ -136,6 +137,7 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
       refs.notice.textContent = m.kind === 'dungeon' ? `Dungeon livello ${m.level}: nemico ${Math.min(m.wave + 1, DUNGEON_WAVES + 1)} di ${DUNGEON_WAVES + 1} (la Campagna è in pausa)`
         : m.kind === 'tower' ? `Torre dell'Alba: piano ${m.floor} · ${modeTimer(state)} (record ${state.tower.best})`
         : m.kind === 'raid' ? `Raid: ${m.name} · ${modeTimer(state)}`
+        : m.kind === 'abyss' ? `Abisso: profondità ${m.depth} · ${m.wave >= ABYSS_WAVES ? 'Guardiano' : `nemico ${m.wave + 1} di ${ABYSS_WAVES}`} (record ${state.abyss.best})`
         : state.stage.auto ? '' : "Troppo forte: allenamento finché non sali di livello.";
 
       for (const u of UPGRADES) {

@@ -4,6 +4,7 @@ import { unlockSkills } from './skills';
 import type { GameState } from './state';
 import { stateStats } from './stats';
 import { activeVie } from './vie';
+import { sparkMult } from './endgame';
 
 export interface AscensionState {
   count: number;
@@ -58,12 +59,21 @@ export function buyPerk(state: GameState, id: PerkId): boolean {
  */
 export function ascend(state: GameState): number {
   if (!canAscend(state)) return 0;
-  const gain = scintilleFor(state.stage.best);
+  const gain = scintilleGain(state);
   const a = state.ascension;
   a.count++;
   a.scintille += gain;
   a.total += gain;
-  const start = startStage(a);
+  restartRun(state);
+  return gain;
+}
+
+/** Scintille ottenute ascendendo ora (i Soli della Rinascita le moltiplicano). */
+export const scintilleGain = (state: GameState) => Math.floor(scintilleFor(state.stage.best) * sparkMult(state.rebirth));
+
+/** Riparte da livello 1 e dallo stage iniziale (Ascensione e Rinascita). */
+export function restartRun(state: GameState) {
+  const start = startStage(state.ascension);
   state.hero = { level: 1, xp: 0, hp: 0, swing: 0, shield: 0, hits: 0, buffs: [], nextCrit: false, light: 0, sanctity: 0 };
   state.gold = 0;
   state.upgrades = { forza: 0, corazza: 0, rapidita: 0 };
@@ -75,7 +85,6 @@ export function ascend(state: GameState): number {
   state.skills.cooldowns = {};
   unlockSkills(state.skills, 1, activeVie(state.vie));
   state.hero.hp = stateStats(state).maxHp;
-  return gain;
 }
 
 export { PERKS };

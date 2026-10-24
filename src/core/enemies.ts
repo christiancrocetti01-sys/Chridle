@@ -6,6 +6,7 @@ import {
 import {
   DUNGEON_WAVES, RAID_ATK, RAID_HP, RAID_PHASES, TOWER_ATK, TOWER_BASE, TOWER_HP, TOWER_STEP,
 } from '../data/modes';
+import { ABYSS_ATK, ABYSS_BASE, ABYSS_ELITE, ABYSS_HP, ABYSS_STEP, ABYSS_WAVES } from '../data/endgame';
 import { TICK_RATE } from './loop';
 import { nextRandom } from './rng';
 import type { EnemyState, GameState } from './state';
@@ -95,6 +96,16 @@ export function spawnEnemy(state: GameState): EnemyState {
     const e = build(CHAMPIONS[zone.family], stage, { boss: true, name: `Piano ${m.floor} · ${CHAMPIONS[zone.family].name}` });
     e.maxHp = e.hp = e.maxHp * TOWER_HP / CHAMPIONS[zone.family].hp;
     e.atk *= TOWER_ATK;
+    return e;
+  }
+  if (m.kind === 'abyss') {
+    const stage = ABYSS_BASE + m.depth * ABYSS_STEP;
+    const guardian = m.wave >= ABYSS_WAVES;
+    const e = guardian ? stageBoss(stage, true) : zoneEnemy(state, stage, false);
+    if (guardian) e.name = `Guardiano dell'Abisso · ${e.name}`;
+    else if (nextRandom(state) < ABYSS_ELITE) makeElite(e, pickOf(state, ELITES).id);
+    e.hp = e.maxHp *= ABYSS_HP;
+    e.atk *= ABYSS_ATK;
     return e;
   }
   if (m.kind === 'raid') {

@@ -20,7 +20,8 @@ import { RARITIES } from '../data/items';
 import { activeVie } from './vie';
 import { perkValue } from './ascension';
 import { elementalVs, enemyAtk, resMult, spawnEnemy, tickEnemy, type MechanicEvent } from './enemies';
-import { onModeDeath, onModeKill, tickMode, type ModeEvent } from './modes';
+import { abyssStage, onModeDeath, onModeKill, tickMode, type ModeEvent } from './modes';
+import { lootMult } from './endgame';
 import { TOWER_BASE, TOWER_STEP } from '../data/modes';
 import { DOT_DOUBLE, KILLS_PER_STAGE, mitigate, stateStats, stageEnemy, upgradeCost, xpToNext, type Stats } from './stats';
 
@@ -188,7 +189,8 @@ function hitHero(state: GameState, hero: Stats, raw: number, events: CombatEvent
 /** Stage che determina ricompense e livello oggetto: quello della modalità in corso. */
 export function rewardStage(state: GameState): number {
   const m = state.mode;
-  return m.kind === 'campaign' ? state.stage.current : m.kind === 'tower' ? TOWER_BASE + m.floor * TOWER_STEP : m.level;
+  return m.kind === 'campaign' ? state.stage.current : m.kind === 'tower' ? TOWER_BASE + m.floor * TOWER_STEP
+    : m.kind === 'abyss' ? abyssStage(m.depth) : m.level;
 }
 
 function onKill(state: GameState, events: CombatEvent[]) {
@@ -202,7 +204,7 @@ function onKill(state: GameState, events: CombatEvent[]) {
   const gold = base.gold * mult * hero.goldMult;
   const xp = base.xp * mult * hero.xpMult;
   const essence = essenceFor(stage, boss) * (elite ? ELITE_REWARD : 1) * (1 + perkValue(state.ascension, 'essenza'))
-    * (1 + (enemy.harvest ?? 0));
+    * (1 + (enemy.harvest ?? 0)) * lootMult(state.rebirth);
   state.gold += gold;
   state.essence += essence;
   state.totals.gold += gold;

@@ -3,7 +3,8 @@ import type { StatKey } from './items';
 
 export type TrackId =
   | 'uccisioni' | 'stage' | 'livello' | 'ascensioni' | 'dungeon' | 'raid'
-  | 'torre' | 'codex' | 'collezione' | 'rune' | 'oro';
+  | 'torre' | 'codex' | 'collezione' | 'rune' | 'oro'
+  | 'abisso' | 'paragon' | 'rinascite';
 
 export interface TrackDef {
   id: TrackId;
@@ -28,6 +29,9 @@ export const TRACKS: TrackDef[] = [
   { id: 'collezione', name: 'Collezionista', text: '{n} unici in collezione', steps: [1, 5, 10, 20, 30], bonus: [['critDmg', 0.04]] },
   { id: 'rune', name: 'Runologo', text: '{n} rune sbloccate', steps: [1, 5, 10, 20, 40], bonus: [['goldPct', 0.03]] },
   { id: 'oro', name: 'Tesoriere', text: '{n} oro guadagnato', steps: [1e4, 1e6, 1e9, 1e12, 1e15], bonus: [['goldPct', 0.03]] },
+  { id: 'abisso', name: 'Abissale', text: "profondità {n} dell'Abisso", steps: [5, 10, 25, 50, 100], bonus: [['hpPct', 0.02], ['defPct', 0.02]] },
+  { id: 'paragon', name: 'Paragone', text: 'Paragon {n}', steps: [10, 50, 100, 250, 500], bonus: [['atkPct', 0.02]] },
+  { id: 'rinascite', name: 'Rinato', text: '{n} Rinascite Solari', steps: [1, 3, 10, 25], bonus: [['atkPct', 0.03], ['hpPct', 0.03]] },
 ];
 
 export const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];

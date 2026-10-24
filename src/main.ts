@@ -7,7 +7,8 @@ import { refundStar, resetStars, takeStar } from './core/constellations';
 import { moveSlot, setSlot } from './core/skills';
 import { chooseSecondVia, chooseVia } from './core/vie';
 import { levelLumo, setActiveLumo } from './core/lumi';
-import { enterDungeon, enterRaid, enterTower, leaveMode } from './core/modes';
+import { enterAbyss, enterDungeon, enterRaid, enterTower, leaveMode } from './core/modes';
+import { rebirth, resetParagon, spendParagon } from './core/endgame';
 import { ascend, buyPerk } from './core/ascension';
 import { applyOffline } from './core/offline';
 import { showOfflineReport } from './ui/ascension';
@@ -55,6 +56,10 @@ function main() {
     enterDungeon: () => enterDungeon(state),
     enterTower: () => enterTower(state),
     enterRaid: () => enterRaid(state),
+    enterAbyss: () => enterAbyss(state),
+    rebirth: () => rebirth(state),
+    spendParagon: (id) => changeGear(state, () => spendParagon(state, id)),
+    resetParagon: () => changeGear(state, () => (resetParagon(state), true)),
     leaveMode: () => leaveMode(state, []),
     ascend: () => ascend(state),
     buyPerk: (id) => changeGear(state, () => buyPerk(state, id)),

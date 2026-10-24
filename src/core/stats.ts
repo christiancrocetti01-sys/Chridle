@@ -8,6 +8,7 @@ import { familyMult, type CodexState } from './codex';
 import { addCollectionMods, type CollectionState } from './collection';
 import { addAchievementMods, type AchievementState } from './achievements';
 import { addLumiMods, type LumiState } from './lumi';
+import { addParagonMods, lootMult, powerMult, type ParagonState, type RebirthState } from './endgame';
 import type { Family } from '../data/enemies';
 import { BLOOD_PACT_MAX } from '../data/vie';
 import {
@@ -109,12 +110,13 @@ export function elementalDamage(s: Stats): number {
 }
 
 /** Statistiche dell'eroe con l'equipaggiamento indossato. */
-export function stateStats(state: { hero: HeroState; upgrades: Record<UpgradeId, number>; gear: GearState; stars?: string[]; vie?: ViaState; tower?: { best: number }; ascension?: AscensionState; codex?: CodexState; collection?: CollectionState; achievements?: AchievementState; lumi?: LumiState }): Stats {
+export function stateStats(state: { hero: HeroState; upgrades: Record<UpgradeId, number>; gear: GearState; stars?: string[]; vie?: ViaState; tower?: { best: number }; ascension?: AscensionState; codex?: CodexState; collection?: CollectionState; achievements?: AchievementState; lumi?: LumiState; paragon?: ParagonState; rebirth?: RebirthState }): Stats {
   const mods = gearMods(state.gear);
   addPerkMods(state.ascension, mods);
   addCollectionMods(state.collection, mods);
   addAchievementMods(state.achievements, mods);
   addLumiMods(state.lumi, mods);
+  addParagonMods(state.paragon, mods);
   // traguardi della Torre dell'Alba: attacco e vita permanenti
   const tower = Math.floor((state.tower?.best ?? 0) / TOWER_MILESTONE) * TOWER_BONUS;
   mods.atkPct += tower;
@@ -127,6 +129,20 @@ export function stateStats(state: { hero: HeroState; upgrades: Record<UpgradeId,
     mods.defPct += b.defPct ?? 0;
   }
   const s = heroStats(state.hero.level, state.upgrades, mods);
+  // Soli della Rinascita: moltiplicatori su tutto
+  const sun = powerMult(state.rebirth);
+  if (sun > 1) {
+    s.atk *= sun;
+    s.maxHp *= sun;
+    s.regen *= sun;
+    s.def *= sun;
+    s.poison *= sun;
+    s.thorns *= sun;
+    for (const e of ELEMENTS) s.elements[e] *= sun;
+    const loot = lootMult(state.rebirth);
+    s.goldMult *= loot;
+    s.xpMult *= loot;
+  }
   s.familyMult = familyMult(state.codex);
   s.rules = gearRules(Object.values(state.gear.equipped));
   for (const r of starRules) s.rules.add(r);

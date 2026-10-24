@@ -11,6 +11,7 @@ import { newCodex, type CodexState } from './codex';
 import type { CollectionState } from './collection';
 import type { AchievementState } from './achievements';
 import { newLumi, type LumiState } from './lumi';
+import { newParagon, newRebirth, type ParagonState, type RebirthState } from './endgame';
 
 export interface EnemyState {
   templateId: string;
@@ -67,7 +68,9 @@ export type Mode =
   | { kind: 'campaign' }
   | { kind: 'dungeon'; level: number; wave: number; mods: DungeonModId[] }
   | { kind: 'tower'; floor: number; ticksLeft: number }
-  | { kind: 'raid'; level: number; ticksLeft: number; name: string };
+  | { kind: 'raid'; level: number; ticksLeft: number; name: string }
+  /** Abisso: `wave` = nemici uccisi nella profondità (all'ultimo arriva il Guardiano). */
+  | { kind: 'abyss'; depth: number; wave: number };
 
 export interface GameState {
   /** Versione dello schema del salvataggio. */
@@ -118,9 +121,15 @@ export interface GameState {
   achievements: AchievementState;
   /** Lumi: spiriti compagni (permanenti). */
   lumi: LumiState;
+  /** Abisso: profondità record (completata). */
+  abyss: { best: number };
+  /** Paragon: livelli infiniti dall'Abisso (permanenti). */
+  paragon: ParagonState;
+  /** Rinascita Solare (permanente). */
+  rebirth: RebirthState;
 }
 
-export const STATE_VERSION = 19;
+export const STATE_VERSION = 20;
 
 export function newGame(now: number, seed = now >>> 0): GameState {
   const upgrades = { forza: 0, corazza: 0, rapidita: 0 };
@@ -152,5 +161,8 @@ export function newGame(now: number, seed = now >>> 0): GameState {
     collection: [],
     achievements: [],
     lumi: newLumi(),
+    abyss: { best: 0 },
+    paragon: newParagon(),
+    rebirth: newRebirth(),
   };
 }

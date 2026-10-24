@@ -1,4 +1,6 @@
-import { dungeonLevel, dungeonReward, towerBonus, towerMilestones } from '../core/modes';
+import { abyssStage, abyssStart, dungeonLevel, dungeonReward, towerBonus, towerMilestones } from '../core/modes';
+import { abyssUnlocked } from '../core/endgame';
+import { ABYSS_ASCENSIONS, ABYSS_ATK, ABYSS_GUARDIAN_XP, ABYSS_HP, ABYSS_WAVES } from '../data/endgame';
 import type { GameState } from '../core/state';
 import { FAMILIES, MECHANIC_TEXT, ZONE_KEY_EVERY, ZONE_STAGES, zoneName, zoneOf, type DamageType, type Family } from '../data/enemies';
 import { DUNGEON_MODS, DUNGEON_WAVES, RAID_KEYS, RAID_SECONDS, RAID_LEVEL_OFFSET, RAID_STAGE, TOWER_MILESTONE, TOWER_SECONDS } from '../data/modes';
@@ -18,6 +20,7 @@ export interface WorldActions {
   enterDungeon(): void;
   enterTower(): void;
   enterRaid(): void;
+  enterAbyss(): void;
   leaveMode(): void;
 }
 
@@ -46,7 +49,7 @@ export function createWorldPanel(root: HTMLElement, actions: WorldActions) {
   return {
     update(state: GameState) {
       const m = state.mode;
-      const k = JSON.stringify([state.stage.current, state.stage.best, state.keys, m.kind, m.kind === 'dungeon' ? m.mods : 0, state.tower.best, codexKey(state), state.collection.length, state.achievements.length]);
+      const k = JSON.stringify([state.stage.current, state.stage.best, state.keys, m.kind, m.kind === 'dungeon' ? m.mods : 0, state.tower.best, state.abyss.best, state.ascension.count, state.rebirth.count, codexKey(state), state.collection.length, state.achievements.length]);
       if (k === key) return;
       key = k;
       const z = zoneOf(state.stage.current);
@@ -55,7 +58,7 @@ export function createWorldPanel(root: HTMLElement, actions: WorldActions) {
       const lvl = dungeonLevel(state);
       const dz = zoneOf(lvl);
       root.innerHTML = `
-        ${inMode ? `<div class="mode-banner"><span>${m.kind === 'dungeon' ? 'Dungeon in corso' : m.kind === 'tower' ? 'Torre in corso' : 'Raid in corso'}</span>
+        ${inMode ? `<div class="mode-banner"><span>${m.kind === 'dungeon' ? 'Dungeon in corso' : m.kind === 'tower' ? 'Torre in corso' : m.kind === 'abyss' ? 'Abisso in corso' : 'Raid in corso'}</span>
           <button class="btn sm" data-w="leaveMode">Abbandona</button></div>` : ''}
         <h2 class="section">Zona <span class="muted">· stage ${zStart}-${zStart + ZONE_STAGES - 1}</span></h2>
         <div class="skill-row">
@@ -89,6 +92,14 @@ export function createWorldPanel(root: HTMLElement, actions: WorldActions) {
             <button class="btn sm" data-w="enterRaid"${state.stage.best >= RAID_STAGE && state.keys >= RAID_KEYS && !inMode ? '' : ' disabled'}>Entra · ${RAID_KEYS} chiavi</button></div>
           <div class="skill-info">${RAID_SECONDS} s per abbatterlo. Fase 2: evoca servitori e si scuda; fase 3: furia e rigenerazione.
             In premio un oggetto <b>Leggendario</b> garantito (a volte Mitico o Divino).</div>
+        </div>
+        <h2 class="section">Abisso <span class="muted">· record profondità ${state.abyss.best}</span></h2>
+        <div class="skill-row${abyssUnlocked(state) ? '' : ' locked'}">
+          <div class="skill-head"><span>${abyssUnlocked(state) ? `Si scende dalla profondità <b>${abyssStart(state.abyss.best)}</b> (nemici da stage ${abyssStage(abyssStart(state.abyss.best))})` : `Si sblocca dopo ${ABYSS_ASCENSIONS} Ascensioni`}</span>
+            <button class="btn sm" data-w="enterAbyss"${abyssUnlocked(state) && !inMode ? '' : ' disabled'}>Scendi</button></div>
+          <div class="skill-info">Profondità infinite: ${ABYSS_WAVES} nemici (molte élite) e un Guardiano, poi si scende ancora finché non cadi.
+            Nemici con vita ×${ABYSS_HP} e attacco ×${ABYSS_ATK}. Ogni uccisione dà esperienza <b>Paragon</b> pari alla profondità
+            (il Guardiano ×${ABYSS_GUARDIAN_XP}), oltre al bottino normale. Gratis.</div>
         </div>
         <h2 class="section">Bestiario <span class="muted">· +${Math.round(CODEX_DMG * 100)}% danni per grado, per sempre</span></h2>
         ${bestiary(state)}

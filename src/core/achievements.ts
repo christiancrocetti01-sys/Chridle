@@ -28,6 +28,9 @@ export function trackValue(state: GameState, id: TrackId): number {
     case 'collezione': return state.collection.length;
     case 'rune': return Object.keys(state.runes.levels).length;
     case 'oro': return state.totals.gold;
+    case 'abisso': return state.abyss?.best ?? 0;
+    case 'paragon': return state.paragon?.level ?? 0;
+    case 'rinascite': return state.rebirth?.count ?? 0;
   }
 }
 

@@ -1,12 +1,19 @@
-import { canAscend, perkCost, perkLevel, perkValue } from '../core/ascension';
+import { canAscend, perkCost, perkLevel, perkValue, scintilleGain } from '../core/ascension';
+import { canRebirth, lootMult, paragonFree, powerMult, rebirthGain, sparkMult } from '../core/endgame';
+import { PARAGON, REBIRTH_SCINTILLE, paragonCost, type ParagonId } from '../data/endgame';
+import { STAT_LABELS } from '../data/items';
+import { formatStat } from './gear';
 import { formatNum } from '../core/format';
 import type { OfflineReport } from '../core/offline';
 import type { GameState } from '../core/state';
-import { ASCEND_STAGE, PERKS, scintilleFor, type PerkDef, type PerkId } from '../data/ascension';
+import { ASCEND_STAGE, PERKS, type PerkDef, type PerkId } from '../data/ascension';
 
 export interface AscensionActions {
   ascend(): void;
   buyPerk(id: PerkId): void;
+  rebirth(): void;
+  spendParagon(id: ParagonId): void;
+  resetParagon(): void;
 }
 
 const perkText = (d: PerkDef, total: number) =>
@@ -16,6 +23,7 @@ const perkText = (d: PerkDef, total: number) =>
 export function createAscensionPanel(root: HTMLElement, actions: AscensionActions) {
   let key = '';
   let confirm = false;
+  let confirmSun = false;
   root.addEventListener('click', (ev) => {
     const t = (ev.target as HTMLElement).closest<HTMLElement>('[data-a]');
     if (!t) return;
@@ -23,14 +31,20 @@ export function createAscensionPanel(root: HTMLElement, actions: AscensionAction
       // doppio tocco: la prima volta chiede conferma
       if (confirm) actions.ascend();
       confirm = !confirm;
+    } else if (t.dataset.a === 'rebirth') {
+      if (confirmSun) actions.rebirth();
+      confirmSun = !confirmSun;
     } else if (t.dataset.a === 'perk') actions.buyPerk(t.dataset.id as PerkId);
+    else if (t.dataset.a === 'paragon') actions.spendParagon(t.dataset.id as ParagonId);
+    else if (t.dataset.a === 'paragonReset') actions.resetParagon();
     key = '';
   });
   return {
     update(state: GameState) {
       const a = state.ascension;
-      const gain = scintilleFor(state.stage.best);
-      const k = JSON.stringify([a, gain, confirm, canAscend(state)]);
+      const gain = scintilleGain(state);
+      const p = state.paragon;
+      const k = JSON.stringify([a, gain, confirm, confirmSun, canAscend(state), p.level, p.points, Math.floor((p.xp / paragonCost(p.level)) * 100), state.rebirth]);
       if (k === key) return;
       key = k;
       const ok = canAscend(state);
@@ -41,8 +55,10 @@ export function createAscensionPanel(root: HTMLElement, actions: AscensionAction
             <button class="btn sm${confirm ? ' danger' : ''}" data-a="ascend"${ok && gain > 0 ? '' : ' disabled'}>${confirm ? 'Conferma: riparti da capo' : `Ascendi · +${gain}`}</button></div>
           <div class="skill-info">Il Sole si riaccende un poco, ma l’Eclissi ritorna. Si riparte da livello 1 e dallo stage iniziale
             perdendo oro, potenziamenti e Costellazioni (i punti tornano salendo). Restano oggetti, Frammenti, Essenza, rune, chiavi, Torre e Vie.</div>
-          <div class="skill-info muted">${state.stage.best >= ASCEND_STAGE ? `Scintille = ((record − 30) / 10)². Record attuale: stage ${state.stage.best}.` : `Si sblocca allo stage ${ASCEND_STAGE} (record attuale ${state.stage.best}).`}</div>
+          <div class="skill-info muted">${state.stage.best >= ASCEND_STAGE ? `Scintille = ((record − 30) / 10)²${sparkMult(state.rebirth) > 1 ? ` × ${sparkMult(state.rebirth).toFixed(2)} (Soli)` : ''}. Record attuale: stage ${state.stage.best}.` : `Si sblocca allo stage ${ASCEND_STAGE} (record attuale ${state.stage.best}).`}</div>
         </div>
+        ${rebirthBlock(state, confirmSun)}
+        ${paragonBlock(state)}
         <h2 class="section">Potenziamenti permanenti</h2>
         <div class="skill-list">${PERKS.map((d) => {
           const lv = perkLevel(a, d.id);
@@ -56,6 +72,41 @@ export function createAscensionPanel(root: HTMLElement, actions: AscensionAction
         }).join('')}</div>`;
     },
   };
+}
+
+/** Rinascita Solare: Soli, moltiplicatori e pulsante. */
+function rebirthBlock(state: GameState, confirm: boolean): string {
+  const r = state.rebirth;
+  const gain = rebirthGain(state);
+  return `<h2 class="section">Rinascita Solare <span class="muted">· ${r.count} volte</span></h2>
+    <div class="skill-row">
+      <div class="skill-head"><span><b class="scint">${r.soli}</b> Soli</span>
+        <button class="btn sm${confirm ? ' danger' : ''}" data-a="rebirth"${canRebirth(state) ? '' : ' disabled'}>${confirm ? 'Conferma: azzera le Ascensioni' : `Rinasci · +${gain} Soli`}</button></div>
+      <div class="skill-info">Il Sole muore e rinasce. Si azzerano Ascensioni, Scintille e potenziamenti (restano gli slot delle skill e la Doppia Via)
+        e si riparte da capo. Restano oggetti, rune, Torre, Abisso, Paragon, collezione e Lumi.</div>
+      <div class="skill-info">${r.soli ? `Ora: attacco, vita e difesa <b>×${powerMult(r).toFixed(1)}</b> · oro, XP, Essenza e Paragon ×${lootMult(r).toFixed(1)} · Scintille ×${sparkMult(r).toFixed(2)}`
+        : '<span class="muted">Ogni Sole: attacco, vita e difesa +100%, oro, XP ed Essenza +50%, Scintille +25%. Per sempre.</span>'}</div>
+      <div class="skill-info muted">Soli = √(Scintille del ciclo / 100), da ${REBIRTH_SCINTILLE} Scintille guadagnate (ora ${formatNum(state.ascension.total)}).</div>
+    </div>`;
+}
+
+/** Paragon: livello, barra dell'esperienza e punti da spendere. */
+function paragonBlock(state: GameState): string {
+  const p = state.paragon;
+  const free = paragonFree(p);
+  const pct = Math.min(100, (p.xp / paragonCost(p.level)) * 100);
+  return `<h2 class="section">Paragon <span class="muted">· livello ${p.level}${free ? ` · <b>${free}</b> punti` : ''}</span></h2>
+    <div class="skill-row">
+      <div class="bar"><div class="fill" style="width:${pct.toFixed(1)}%"></div></div>
+      <div class="skill-info muted">${formatNum(p.xp)} / ${formatNum(paragonCost(p.level))} esperienza Paragon: si guadagna solo nell'Abisso.
+        I punti si possono riprendere quando vuoi. <button class="btn sm" data-a="paragonReset"${p.level - free ? '' : ' disabled'}>Riprendi i punti</button></div>
+    </div>
+    <div class="skill-list">${PARAGON.map((d) => {
+      const n = p.points[d.id] ?? 0;
+      return `<div class="skill-row"><div class="skill-head"><span><b>${d.name}</b> <span class="muted">${n}</span> ·
+        ${d.mods.map(([k, v]) => `+${formatStat(k, v * Math.max(1, n))} ${STAT_LABELS[k]}`).join(', ')}${n ? '' : ' <span class="muted">per punto</span>'}</span>
+        <button class="btn sm" data-a="paragon" data-id="${d.id}"${free ? '' : ' disabled'}>+1</button></div></div>`;
+    }).join('')}</div>`;
 }
 
 const duration = (s: number) => {

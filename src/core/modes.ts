@@ -10,6 +10,8 @@ import { TICK_RATE } from './loop';
 import { nextRandom } from './rng';
 import type { GameState } from './state';
 import { stateStats } from './stats';
+import { ABYSS_BACK, ABYSS_BASE, ABYSS_GUARDIAN_XP, ABYSS_STEP, ABYSS_WAVES } from '../data/endgame';
+import { abyssUnlocked, gainParagon } from './endgame';
 
 export type ModeEvent =
   /** Fine di una modalità: `ok` = completata (o, per la Torre, nuovo piano raggiunto prima di cadere). */
@@ -58,6 +60,17 @@ export function enterRaid(state: GameState): boolean {
   state.keys -= RAID_KEYS;
   const name = RAID_BOSSES[Math.floor(nextRandom(state) * RAID_BOSSES.length)];
   switchTo(state, { kind: 'raid', level: state.stage.best - RAID_LEVEL_OFFSET, ticksLeft: RAID_SECONDS * TICK_RATE, name });
+  return true;
+}
+
+/** Stage equivalente (nemici e ricompense) di una profondità dell'Abisso. */
+export const abyssStage = (depth: number) => ABYSS_BASE + depth * ABYSS_STEP;
+/** Profondità da cui si riparte entrando nell'Abisso. */
+export const abyssStart = (best: number) => Math.max(1, best + 1 - ABYSS_BACK);
+
+export function enterAbyss(state: GameState): boolean {
+  if (!abyssUnlocked(state) || state.mode.kind !== 'campaign') return false;
+  switchTo(state, { kind: 'abyss', depth: abyssStart(state.abyss.best), wave: 0 });
   return true;
 }
 
@@ -111,6 +124,22 @@ export function onModeKill(state: GameState, events: Events): boolean {
     m.ticksLeft = TOWER_SECONDS * TICK_RATE;
     return true;
   }
+  if (m.kind === 'abyss') {
+    const guardian = m.wave >= ABYSS_WAVES;
+    const levels = gainParagon(state, m.depth * (guardian ? ABYSS_GUARDIAN_XP : 1));
+    if (levels) events.push({ type: 'mode', text: `Paragon ${state.paragon.level}: +${levels} punt${levels > 1 ? 'i' : 'o'} da spendere`, ok: true });
+    if (!guardian) {
+      m.wave++;
+      return true;
+    }
+    if (m.depth > state.abyss.best) {
+      state.abyss.best = m.depth;
+      events.push({ type: 'mode', text: `Abisso: profondità ${m.depth} conquistata (nuovo record)`, ok: true });
+    }
+    m.depth++;
+    m.wave = 0;
+    return true;
+  }
   if (m.kind === 'raid') {
     const r = nextRandom(state);
     const rarity = r < RAID_DIVINE ? 6 : r < RAID_DIVINE + RAID_MYTHIC ? 5 : RAID_MIN_RARITY;
@@ -136,6 +165,7 @@ export function onModeDeath(state: GameState, events: Events) {
   const m = state.mode;
   const text = m.kind === 'dungeon' ? 'Caduto nel Dungeon: la chiave è persa'
     : m.kind === 'tower' ? `Caduto al piano ${m.floor} della Torre (record ${state.tower.best})`
+    : m.kind === 'abyss' ? `Caduto alla profondità ${m.depth} dell'Abisso (record ${state.abyss.best})`
     : 'Caduto nel Raid';
   leaveMode(state, events, text);
 }
