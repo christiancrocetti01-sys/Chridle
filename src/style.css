@@ -242,3 +242,27 @@ html, body {
 .modal-box { width: min(420px, 100%); padding: 18px; border: 1px solid var(--gold-dim); background: #0b0e1f; box-shadow: 0 0 40px rgba(232, 193, 90, 0.15); }
 .title.sm { font-size: 1.5em; margin: 0 0 6px; }
 .modal-ok { width: 100%; margin-top: 12px; text-align: center; }
+
+/* Fase 6: icone, bagliori, avvisi */
+.icon { width: 1.15em; height: 1.15em; vertical-align: -0.2em; margin-right: 4px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.item-line { display: inline; }
+.glow-4 { box-shadow: 0 0 6px -1px var(--glow); }
+.glow-5 { box-shadow: 0 0 10px -1px var(--glow); }
+.glow-6 { animation: divine 2.4s ease-in-out infinite; }
+@keyframes divine { 0%, 100% { box-shadow: 0 0 8px -1px var(--glow); } 50% { box-shadow: 0 0 18px 1px var(--glow); } }
+.bar.flash { animation: flash 0.25s ease-out; }
+@keyframes flash { from { box-shadow: 0 0 10px 2px rgba(244, 227, 160, 0.8); } to { box-shadow: none; } }
+.bar.hurt { animation: hurt 0.3s ease-out; }
+@keyframes hurt { 0% { transform: translateX(-2px); } 40% { transform: translateX(2px); } 100% { transform: none; } }
+.toasts { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 30; display: grid; gap: 6px; width: min(340px, calc(100% - 32px)); pointer-events: none; }
+.toast { padding: 8px 12px; text-align: center; background: rgba(11, 14, 31, 0.95); border: 1px solid #2a2f4a; animation: toast-in 0.25s ease-out; transition: opacity 0.5s, transform 0.5s; }
+.toast.out { opacity: 0; transform: translateY(-8px); }
+.toast.gold { color: var(--gold); border-color: var(--gold-dim); }
+.toast.loot.r4 { border-color: #ff8a1f; box-shadow: 0 0 12px rgba(255, 138, 31, 0.35); }
+.toast.loot.r5 { border-color: #ff3b4e; box-shadow: 0 0 16px rgba(255, 59, 78, 0.45); }
+.toast.loot.r6 { border-color: #fff6c8; box-shadow: 0 0 24px rgba(255, 246, 200, 0.6); }
+@keyframes toast-in { from { opacity: 0; transform: translateY(-8px) scale(0.96); } to { opacity: 1; transform: none; } }
+.sound { margin-left: 6px; padding: 0 6px; font: 0.5em system-ui, sans-serif; vertical-align: middle; color: var(--muted); background: transparent; border: 1px solid #2a2f4a; cursor: pointer; text-decoration: line-through; }
+.sound.on { color: var(--gold); border-color: var(--gold-dim); text-decoration: none; }
+.wallet, .stats dd, .card-cost { font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: reduce) { .glow-6, .bar.flash, .bar.hurt, .toast { animation: none; } }

@@ -11,6 +11,7 @@ import { createViaPanel, type ViaActions } from './vie';
 import { createAscensionPanel, type AscensionActions } from './ascension';
 import { createWorldPanel, modeTimer, type WorldActions } from './world';
 import { DUNGEON_WAVES } from '../data/modes';
+import { soundOn, toggleSound } from './sound';
 import { zoneName } from '../data/enemies';
 import { UPGRADES, type UpgradeId } from '../data/upgrades';
 
@@ -27,7 +28,7 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
   root.innerHTML = `
     <header class="hud-head">
       <div>
-        <h1 class="title">Chridle</h1>
+        <h1 class="title">Chridle <button class="sound" data-k="sound" title="Suoni">♪</button></h1>
         <p class="subtitle">Il Guerriero della Luce</p>
       </div>
       <div class="wallet">
@@ -76,8 +77,18 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
     gold: el('gold'), level: el('level'), xptext: el('xptext'), xpbar: el('xpbar'),
     stage: el('stage'), best: el('best'), progress: el('progress'), stagebar: el('stagebar'),
     notice: el('notice'), stats: el('stats'), essence: el('essence'), starpts: el('starpts'),
-    keys: el('keys'), zone: el('zone'), asc: el('asc'),
+    keys: el('keys'), zone: el('zone'), asc: el('asc'), sound: el('sound'),
   };
+
+  const soundLabel = () => {
+    refs.sound.classList.toggle('on', soundOn());
+    refs.sound.setAttribute('aria-pressed', String(soundOn()));
+  };
+  soundLabel();
+  refs.sound.addEventListener('click', () => {
+    toggleSound();
+    soundLabel();
+  });
 
   root.querySelectorAll<HTMLButtonElement>('[data-up]').forEach((b) =>
     b.addEventListener('click', () => actions.buy(b.dataset.up as UpgradeId)),

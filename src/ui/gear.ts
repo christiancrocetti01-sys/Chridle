@@ -3,11 +3,12 @@ import {
   transferCost, upgradeCost,
 } from '../core/craft';
 import { formatNum } from '../core/format';
-import { INVENTORY_SIZE, itemMods, setCounts, salvageValue, slotsFor, type Affix, type GearState, type Item } from '../core/items';
+import { INVENTORY_SIZE, setCounts, salvageValue, slotsFor, type Affix, type GearState, type Item } from '../core/items';
 import type { GameState } from '../core/state';
-import { elementalDamage, heroStats, type Stats } from '../core/stats';
+import { elementalDamage, stateStats, type Stats } from '../core/stats';
 import { RULE_TEXT, SETS, SET_PIECES, UNIQUES } from '../data/uniques';
 import { FUSE_COUNT, FUSE_MAX_RARITY } from '../data/craft';
+import { itemIcon } from './icons';
 import { DOLL_LEFT, DOLL_RIGHT, SILHOUETTE } from './doll';
 import { ITEM_TYPES, TRIGGER_AFFIXES, affixDef, type TriggerDef, type TriggerEffect, RARITIES, SLOTS, STAT_LABELS, TAG_LABELS, isPct, type SlotId, type StatKey } from '../data/items';
 
@@ -130,9 +131,10 @@ const COMPARE: { get: (s: Stats) => number; label: string; pct?: boolean }[] = [
 
 /** Differenze di statistiche se si indossasse `item` nello `slot`. */
 function compare(state: GameState, item: Item | null, slot: SlotId): string {
-  const now = heroStats(state.hero.level, state.upgrades, itemMods(Object.values(state.gear.equipped)));
+  // con tutto il resto (Costellazioni, Vie, Torre, Ascensione): le percentuali si sommano a quelle
+  const now = stateStats(state);
   const after = { ...state.gear.equipped, [slot]: item ?? undefined };
-  const then = heroStats(state.hero.level, state.upgrades, itemMods(Object.values(after)));
+  const then = stateStats({ ...state, gear: { ...state.gear, equipped: after } });
   const rows = COMPARE.map(({ get, label, pct }) => {
     const d = get(then) - get(now);
     if (Math.abs(d) < 1e-9) return '';
@@ -307,9 +309,10 @@ export function createGearPanel(root: HTMLElement, actions: GearActions) {
         const it = gear.equipped[id];
         const name = SLOTS.find((s) => s.id === id)!.name;
         const sel = selected?.kind === 'slot' && selected.slot === id ? ' sel' : '';
-        const border = it ? ` style="border-color:${RARITIES[it.rarity].color}"` : '';
-        return `<button class="slot${sel}${it ? '' : ' empty'}" data-act="pick-slot" data-slot="${id}"${border}>
-          <span class="muted">${name}</span>${it ? itemLabel(it) : '<span class="muted">—</span>'}</button>`;
+        const border = it ? ` style="border-color:${RARITIES[it.rarity].color};--glow:${RARITIES[it.rarity].color}"` : '';
+        const glow = it && it.rarity >= 4 ? ` glow glow-${it.rarity}` : '';
+        return `<button class="slot${sel}${glow}${it ? '' : ' empty'}" data-act="pick-slot" data-slot="${id}"${border}>
+          <span class="muted">${name}</span>${it ? `<span class="item-line" style="color:${RARITIES[it.rarity].color}">${itemIcon(it.type)}${itemLabel(it)}</span>` : '<span class="muted">—</span>'}</button>`;
       };
       refs.left.innerHTML = DOLL_LEFT.map(slotHtml).join('');
       refs.right.innerHTML = DOLL_RIGHT.map(slotHtml).join('');
@@ -318,7 +321,7 @@ export function createGearPanel(root: HTMLElement, actions: GearActions) {
         ? gear.inventory.slice().sort((a, b) => b.rarity - a.rarity || b.ilvl - a.ilvl).map((it) => {
             const sel = selected?.kind === 'inv' && selected.uid === it.uid ? ' sel' : '';
             const type = ITEM_TYPES.find((t) => t.id === it.type)!.name;
-            return `<button class="inv-item${sel}" data-act="pick-inv" data-uid="${it.uid}">${itemLabel(it)} <span class="muted">${type} · ${it.ilvl}</span></button>`;
+            return `<button class="inv-item${sel}" data-act="pick-inv" data-uid="${it.uid}"><span style="color:${RARITIES[it.rarity].color}">${itemIcon(it.type)}</span>${itemLabel(it)} <span class="muted">${type} · ${it.ilvl}</span></button>`;
           }).join('')
         : '<p class="muted">Vuoto: i nemici lasciano oggetti, i boss sempre.</p>';
       refs.detail.innerHTML = renderDetail(state, gear);

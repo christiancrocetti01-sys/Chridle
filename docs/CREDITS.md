@@ -6,4 +6,5 @@ Ogni asset esterno va registrato qui **prima** di essere usato: nome, autore, li
 |---|---|---|---|---|
 | Font Cinzel | Natanael Gama | Google Fonts | OFL 1.1 | caricato da fonts.googleapis.com |
 
-Gli sprite attuali (`src/data/sprites.ts`) sono segnaposto originali del progetto.
+Icone degli oggetti (`src/ui/icons.ts`), sagoma del guerriero (`src/ui/doll.ts`) e suoni (`src/ui/sound.ts`, sintetizzati
+con WebAudio, nessun file audio) sono originali del progetto.

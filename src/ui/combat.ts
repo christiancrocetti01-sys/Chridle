@@ -5,6 +5,8 @@ import { stateStats } from '../core/stats';
 import { RARITIES } from '../data/items';
 import { FAMILIES, type Mechanic } from '../data/enemies';
 import { modeTimer, resText } from './world';
+import { flash, toast } from './fx';
+import { SFX } from './sound';
 
 const MECHANIC_SHORT: Record<Mechanic, string> = { enrage: 'furia', shield: 'scudo', summon: 'evocazioni', regen: 'rigenerazione' };
 import { MAX_LIGHT, skillDef } from '../data/skills';
@@ -53,8 +55,23 @@ export function createCombatPanel(root: HTMLElement) {
     lines[0].dataset.n = '1';
   }
 
+  /** Suoni, lampi e avvisi: solo per gli eventi che contano. */
+  function juice(e: CombatEvent) {
+    if (e.type === 'hit' && e.crit && e.target === 'enemy') { SFX.crit(); flash(refs.enemybar.parentElement!, 'flash'); }
+    else if (e.type === 'hit' && e.target === 'hero' && e.amount > 0) flash(refs.herobar.parentElement!, 'hurt');
+    else if (e.type === 'kill') (e.boss ? SFX.boss : SFX.kill)();
+    else if (e.type === 'levelup') { SFX.level(); toast(`Livello <b>${e.level}</b>`, 'gold'); }
+    else if (e.type === 'death') SFX.death();
+    else if (e.type === 'key') SFX.key();
+    else if (e.type === 'drop' && !e.salvaged && e.item.rarity >= 4) {
+      SFX.loot(e.item.rarity);
+      toast(`<span class="rar-${e.item.rarity}" style="color:${RARITIES[e.item.rarity].color}">${e.item.name}</span><br><small>${RARITIES[e.item.rarity].name}</small>`, `loot r${e.item.rarity}`);
+    } else if (e.type === 'mode' && e.ok) toast(e.text, 'gold');
+  }
+
   return {
     onEvents(events: CombatEvent[]) {
+      for (const e of events) juice(e);
       for (const e of events) {
         if (e.type === 'kill') log(`${e.boss ? 'Boss sconfitto' : 'Nemico sconfitto'}: +${formatNum(e.gold)} oro, +${formatNum(e.xp)} XP, +${formatNum(e.essence)} Essenza`, e.boss ? 'boss' : '');
         else if (e.type === 'drop') log(`Bottino: ${e.item.name} (${RARITIES[e.item.rarity].name})${e.salvaged ? ' → smantellato' : ''}`, '', RARITIES[e.item.rarity].color);
