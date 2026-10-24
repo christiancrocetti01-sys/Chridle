@@ -9,7 +9,6 @@
 ritirare un affisso (costo crescente), migliorare il tier, aggiungere un affisso se c'è spazio (o altro, es.
 fondere oggetti). Logica in `src/core/items.ts` (o nuovo `src/core/craft.ts`), costi in `src/data/`, UI nel
 dettaglio oggetto di `src/ui/gear.ts`. Poi Fase 3 (skill e build).
-**Da chiedere subito:** allineare `main` con la varietà 3 (non ancora fatto; varietà 1-2 già online).
 **Grafica:** decisa **minimale** (niente scena, niente asset da scaricare): UI DOM + sagoma SVG.
 
 ## Gioco online
