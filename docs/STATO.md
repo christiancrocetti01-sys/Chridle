@@ -4,9 +4,9 @@
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
 **Ultimo aggiornamento:** 2026-10-24 (varietà 4 fatta)
-**Fase corrente:** 3 — Skill e build. Piano approvato in 5 passi: 1 Luce + skill attive (fatto), 2 Rune
-(Essenza di Luce dai nemici, ~12 rune), 3 sinergie per tag, 4 Costellazioni (~30 nodi, 1 punto/livello,
-respec economico), 5 Vie. **Prossimo passo:** passo 2 — Rune.
+**Fase corrente:** 3 — Skill e build. Piano approvato in 5 passi: 1 Luce + skill attive (fatto), 2 Rune (fatto),
+3 sinergie per tag, 4 Costellazioni (~30 nodi, 1 punto/livello,
+respec economico), 5 Vie. **Prossimo passo:** passo 3 — sinergie per tag (da pianificare).
 **Online:** `main` allineato con la varietà 4.
 **Grafica:** decisa **minimale** (niente scena, niente asset da scaricare): UI DOM + sagoma SVG.
 
@@ -34,7 +34,10 @@ Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` (fast-forward) quand
   scudo sotto 10%, velocità solo se scaduta; 4 slot in ordine di priorità, una skill per tick, 8 skill sbloccate a
   livello (1-25) che vanno nel primo slot libero. Effetti condivisi con i trigger (`applyEffect` in triggers.ts).
   UI a schede: Eroe / Skill.
-- Salvataggio: **v8** (v4 affissi `mods[]`, v5 scudo/buff/colpi/riserve, v6 `hero.nextCrit`, v7 `item.crafts`, v8 Luce e skill).
+- Fase 3 passo 2 (`src/data/runes.ts`, `src/core/runes.ts`, effetti in `perform` di skills.ts): Essenza di Luce
+  (1 a nemico, boss ×10, × (1 + stage/10)); 12 rune, sblocco 50 × 1,6^n, livelli +10% (costo 50 × 1,5^lv);
+  2 incastonature per skill, la stessa runa su più skill; alcune solo su skill di danno.
+- Salvataggio: **v9** (v4 affissi `mods[]`, v5 scudo/buff/colpi/riserve, v6 `hero.nextCrit`, v7 `item.crafts`, v8 Luce e skill, v9 Essenza e rune).
 
 ## Scelte fatte da Claude (da confermare se l'utente obietta)
 - `triggerChance` per rarità 30/50/75/100% (Epico→Divino).
@@ -45,7 +48,7 @@ Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` (fast-forward) quand
 - Statistiche piatte degli unici = valore × 2 (come un T3) × crescita del livello oggetto.
 
 ## Test
-- `npm test`: **99 verdi** (9 file), `npm run build` ok (handoff 2026-10-24).
+- `npm test`: **111 verdi** (10 file), `npm run build` ok (handoff 2026-10-24).
 - Simulazione (`tests/combat.test.ts`): 2 h senza equip stage 32, con equip automatico 54 (prima delle skill: 27 / 43). L'equip automatico
   **non valuta** trigger, unici e set: la potenza reale di quelle build non è misurata.
 

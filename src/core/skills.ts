@@ -2,7 +2,10 @@ import { HEAL_BELOW, LIGHT_PER_HIT, LIGHT_PER_SECOND, MAX_LIGHT, SHIELD_BELOW, S
 import { TICK_RATE } from './loop';
 import type { GameState } from './state';
 import type { Stats } from './stats';
-import { applyEffect } from './triggers';
+import { RUNE_EXECUTE_HP, RUNE_HASTE_SECONDS, RUNE_SHADOW_HP_COST, reduction, type RuneId } from '../data/runes';
+import { nextRandom } from './rng';
+import { isDamageSkill, skillRune } from './runes';
+import { applyEffect, heal } from './triggers';
 
 export interface SkillState {
   /** Skill negli slot (null = vuoto); l'ordine è la priorità di lancio. */
@@ -47,9 +50,14 @@ export function tickSkills(state: GameState) {
   for (const id in cd) if (cd[id] > 0) cd[id]--;
 }
 
+/** Costo in Luce e ricarica (in tick) con le rune Parsimonia e Rapidità. */
+export const lightCost = (state: GameState, def: SkillDef) => def.light * (1 - reduction(skillRune(state, def.id, 'parsimonia')));
+export const cooldownTicks = (state: GameState, def: SkillDef) =>
+  Math.round(def.cooldown * TICK_RATE * (1 - reduction(skillRune(state, def.id, 'rapidita'))));
+
 export const canCast = (state: GameState, id: string) => {
   const def = skillDef(id);
-  return !!def && state.skills.cooldowns[id] <= 0 && state.hero.light >= def.light && state.hero.level >= def.level;
+  return !!def && state.skills.cooldowns[id] <= 0 && state.hero.light >= lightCost(state, def) && state.hero.level >= def.level;
 };
 
 /** Soglie automatiche: niente cura a vita alta, niente scudo se c'è già, niente velocità se è ancora attiva. */
@@ -61,19 +69,66 @@ export function worthCasting(state: GameState, hero: Stats, def: SkillDef): bool
   return true;
 }
 
+/** Effetto della skill con le sue rune. Restituisce il valore principale, o null se non ha bersaglio. */
+function perform(state: GameState, hero: Stats, def: SkillDef): number | null {
+  const r = (id: RuneId) => skillRune(state, def.id, id);
+  const enemy = state.enemy;
+  const damage = isDamageSkill(def);
+  let effect = def.effect;
+  let value = effect.value * (1 + r('potenza'));
+  if (damage && r('ombra')) {
+    if (effect.kind === 'burst') effect = { ...effect, element: 'shadow' };
+    value *= 1 + r('ombra');
+    state.hero.hp = Math.max(1, state.hero.hp - hero.maxHp * RUNE_SHADOW_HP_COST);
+  }
+  if (damage && enemy && enemy.hp < enemy.maxHp * RUNE_EXECUTE_HP) value *= 1 + r('esecuzione');
+  const amount = applyEffect(state, hero, effect, value, `skill:${def.id}`);
+  if (amount === null) return null;
+  if (damage && enemy) {
+    enemy.poison += amount * r('brace');
+    enemy.bleed += amount * r('lacerazione');
+    if (r('sete')) heal(state, hero, amount * r('sete'));
+  }
+  if (r('bastione')) state.hero.shield = Math.min(hero.maxHp, state.hero.shield + hero.maxHp * r('bastione'));
+  if (r('fervore')) {
+    const haste = { kind: 'haste' as const, value: r('fervore'), seconds: RUNE_HASTE_SECONDS };
+    applyEffect(state, hero, haste, haste.value, `rune:fervore:${def.id}`);
+  }
+  return amount;
+}
+
+/** Lancia una skill (senza controllare ricarica e Luce: lo fa chi chiama). `free` = non consuma Luce. */
+function castSkill(state: GameState, hero: Stats, def: SkillDef, events: { push(e: SkillEvent): void }, free = false): boolean {
+  if (!worthCasting(state, hero, def)) return false;
+  const amount = perform(state, hero, def);
+  if (amount === null) return false;
+  if (!free) state.hero.light -= lightCost(state, def);
+  state.skills.cooldowns[def.id] = cooldownTicks(state, def);
+  events.push({ type: 'skill', id: def.id, name: def.name, amount });
+  // si tira l'Eco solo se la runa c'è: senza, la sequenza dell'RNG non cambia
+  const eco = skillRune(state, def.id, 'eco');
+  if (eco && nextRandom(state) < Math.min(1, eco)) {
+    const again = perform(state, hero, def);
+    if (again !== null) events.push({ type: 'skill', id: def.id, name: def.name, amount: again });
+  }
+  return true;
+}
+
 /** Lancia la prima skill pronta in ordine di slot (al massimo una per tick). */
 export function castSkills(state: GameState, hero: Stats, events: { push(e: SkillEvent): void }) {
   if (!state.enemy) return;
   for (const id of state.skills.slots) {
-    if (!id || !canCast(state, id)) continue;
-    const def = skillDef(id)!;
-    if (!worthCasting(state, hero, def)) continue;
-    const amount = applyEffect(state, hero, def.effect, def.effect.value, `skill:${id}`);
-    if (amount === null) continue;
-    state.hero.light -= def.light;
-    state.skills.cooldowns[id] = Math.round(def.cooldown * TICK_RATE);
-    events.push({ type: 'skill', id, name: def.name, amount });
-    return;
+    if (id && canCast(state, id) && castSkill(state, hero, skillDef(id)!, events)) return;
+  }
+}
+
+/** Runa Scintilla: al critico le skill negli slot con la ricarica finita possono lanciarsi gratis. */
+export function castOnCrit(state: GameState, hero: Stats, events: { push(e: SkillEvent): void }) {
+  if (!state.enemy) return;
+  for (const id of state.skills.slots) {
+    const chance = id ? skillRune(state, id, 'scintilla') : 0;
+    if (!chance || state.skills.cooldowns[id!] > 0) continue;
+    if (nextRandom(state) < Math.min(1, chance)) castSkill(state, hero, skillDef(id!)!, events, true);
   }
 }
 

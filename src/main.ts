@@ -2,6 +2,7 @@ import './style.css';
 import { MAX_TICKS_PER_FRAME, TICK_MS, stepAccumulator } from './core/loop';
 import { loadGame, saveGame, type StorageLike } from './core/save';
 import { buyUpgrade, changeGear, step, type CombatEvent } from './core/combat';
+import { levelRune, socketRune, unlockRune } from './core/runes';
 import { moveSlot, setSlot } from './core/skills';
 import { fuseItems, rerollAffix, transferAffix, upgradeAffix } from './core/craft';
 import { equip, salvage, salvageUpTo, unequip } from './core/items';
@@ -38,6 +39,9 @@ function main() {
     fuse: (uids) => fuseItems(state, uids),
     setSkillSlot: (slot, id) => setSlot(state, slot, id),
     moveSkillSlot: (slot, dir) => moveSlot(state, slot, dir),
+    unlockRune: (id) => unlockRune(state, id),
+    levelRune: (id) => levelRune(state, id),
+    socketRune: (skill, i, id) => socketRune(state, skill, i, id),
   });
 
   let acc = 0;

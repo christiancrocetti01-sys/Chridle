@@ -1,5 +1,6 @@
 import type { UpgradeId } from '../data/upgrades';
 import { newGear, type GearState } from './items';
+import { newRunes, type RuneState } from './runes';
 import { newSkills, type SkillState } from './skills';
 import { heroStats } from './stats';
 
@@ -51,6 +52,9 @@ export interface GameState {
   fragments: number;
   gear: GearState;
   skills: SkillState;
+  /** Valuta delle rune, dai nemici. */
+  essence: number;
+  runes: RuneState;
   upgrades: Record<UpgradeId, number>;
   stage: {
     current: number;
@@ -65,7 +69,7 @@ export interface GameState {
   totals: { kills: number; deaths: number; gold: number };
 }
 
-export const STATE_VERSION = 8;
+export const STATE_VERSION = 9;
 
 export function newGame(now: number, seed = now >>> 0): GameState {
   const upgrades = { forza: 0, corazza: 0, rapidita: 0 };
@@ -80,6 +84,8 @@ export function newGame(now: number, seed = now >>> 0): GameState {
     fragments: 0,
     gear: newGear(),
     skills: newSkills(),
+    essence: 0,
+    runes: newRunes(),
     upgrades,
     stage: { current: 1, best: 1, kills: 0, auto: true },
     enemy: null,

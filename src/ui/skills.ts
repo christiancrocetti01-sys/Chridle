@@ -1,4 +1,8 @@
 import { TICK_RATE } from '../core/loop';
+import { formatNum } from '../core/format';
+import { canSocket, levelCost, runeValue, socketsOf, unlockCost } from '../core/runes';
+import { cooldownTicks, lightCost } from '../core/skills';
+import { RUNES, runeDef, type RuneId } from '../data/runes';
 import type { GameState } from '../core/state';
 import { MAX_LIGHT, SKILLS, SKILL_TAG_LABELS, skillDef, type SkillDef } from '../data/skills';
 import { describeEffect } from './gear';
@@ -6,10 +10,26 @@ import { describeEffect } from './gear';
 export interface SkillActions {
   setSkillSlot(slot: number, id: string | null): void;
   moveSkillSlot(slot: number, dir: -1 | 1): void;
+  unlockRune(id: RuneId): void;
+  levelRune(id: RuneId): void;
+  socketRune(skill: string, i: number, id: RuneId | null): void;
 }
 
-const info = (d: SkillDef) =>
-  `${describeEffect(d.effect, d.effect.value)} <span class="muted">· ${d.light} Luce · ricarica ${d.cooldown} s · ${d.tags.map((t) => SKILL_TAG_LABELS[t]).join(', ')}</span>`;
+/** Effetto, costo e ricarica (già ridotti dalle rune incastonate). */
+const info = (state: GameState, d: SkillDef) => {
+  const sec = cooldownTicks(state, d) / TICK_RATE;
+  return `${describeEffect(d.effect, d.effect.value)} <span class="muted">· ${Math.round(lightCost(state, d))} Luce · ricarica ${+sec.toFixed(1)} s · ${d.tags.map((t) => SKILL_TAG_LABELS[t]).join(', ')}</span>`;
+};
+
+/** Le 2 incastonature di una skill: una tendina con le rune sbloccate compatibili. */
+function socketsHtml(state: GameState, skill: string): string {
+  return `<div class="sockets">${socketsOf(state, skill).map((cur, i) => {
+    const opts = RUNES.filter((r) => state.runes.levels[r.id] && (r.id === cur || canSocket(state, skill, i, r.id)))
+      .map((r) => `<option value="${r.id}"${r.id === cur ? ' selected' : ''}>${r.name}</option>`).join('');
+    const tip = cur ? runeDef(cur)!.text(runeValue(state, cur)) : '';
+    return `<label class="socket" title="${tip}">◇ <select data-sock="${skill}" data-i="${i}"><option value="">— runa —</option>${opts}</select></label>`;
+  }).join('')}</div>`;
+}
 
 /** Scheda Skill: slot in ordine di priorità con la ricarica, poi tutte le skill (sbloccate e no). */
 export function createSkillPanel(root: HTMLElement, actions: SkillActions) {
@@ -18,11 +38,21 @@ export function createSkillPanel(root: HTMLElement, actions: SkillActions) {
     <div class="bar light"><div class="fill" data-s="lightbar"></div></div>
     <h2 class="section">Skill attive <span class="muted">· in ordine di priorità</span></h2>
     <div class="skill-slots" data-s="slots"></div>
+    <h2 class="section">Rune <span class="muted">· <span data-s="ess"></span> Essenza</span></h2>
+    <div class="skill-list" data-s="runes"></div>
     <h2 class="section">Tutte le skill</h2>
     <div class="skill-list" data-s="list"></div>`;
   const q = (k: string) => root.querySelector<HTMLElement>(`[data-s="${k}"]`)!;
-  const refs = { light: q('light'), lightbar: q('lightbar'), slots: q('slots'), list: q('list') };
+  const refs = { light: q('light'), lightbar: q('lightbar'), slots: q('slots'), list: q('list'), runes: q('runes'), ess: q('ess') };
   let lastKey = '';
+  let runeKey = '';
+
+  root.addEventListener('change', (ev) => {
+    const t = ev.target as HTMLSelectElement;
+    if (!t.dataset.sock) return;
+    actions.socketRune(t.dataset.sock, Number(t.dataset.i), (t.value || null) as RuneId | null);
+    lastKey = '';
+  });
 
   root.addEventListener('click', (ev) => {
     const t = (ev.target as HTMLElement).closest<HTMLElement>('[data-act]');
@@ -32,7 +62,9 @@ export function createSkillPanel(root: HTMLElement, actions: SkillActions) {
     else if (t.dataset.act === 'down') actions.moveSkillSlot(slot, 1);
     else if (t.dataset.act === 'clear') actions.setSkillSlot(slot, null);
     else if (t.dataset.act === 'put') actions.setSkillSlot(slot, t.dataset.id!);
-    lastKey = '';
+    else if (t.dataset.act === 'unlock') actions.unlockRune(t.dataset.id as RuneId);
+    else if (t.dataset.act === 'level') actions.levelRune(t.dataset.id as RuneId);
+    lastKey = runeKey = '';
   });
 
   return {
@@ -41,7 +73,8 @@ export function createSkillPanel(root: HTMLElement, actions: SkillActions) {
       refs.light.textContent = `${Math.floor(state.hero.light)} / ${MAX_LIGHT}`;
       refs.lightbar.style.width = `${(state.hero.light / MAX_LIGHT) * 100}%`;
 
-      const key = JSON.stringify([slots, state.hero.level]);
+      refs.ess.textContent = formatNum(state.essence);
+      const key = JSON.stringify([slots, state.hero.level, state.runes]);
       if (key !== lastKey) {
         lastKey = key;
         const n = slots.length;
@@ -55,7 +88,7 @@ export function createSkillPanel(root: HTMLElement, actions: SkillActions) {
                 <button class="btn sm" data-act="down" data-slot="${i}"${i < n - 1 ? '' : ' disabled'}>↓</button>
                 <button class="btn sm" data-act="clear" data-slot="${i}">✕</button></span>` : ''}
             </div>
-            ${d ? `<div class="skill-info">${info(d)}</div><div class="bar cd"><div class="fill" data-cd="${i}"></div></div>` : ''}
+            ${d ? `<div class="skill-info">${info(state, d)}</div>${socketsHtml(state, d.id)}<div class="bar cd"><div class="fill" data-cd="${i}"></div></div>` : ''}
           </div>`;
         }).join('');
         refs.list.innerHTML = SKILLS.map((d) => {
@@ -67,7 +100,25 @@ export function createSkillPanel(root: HTMLElement, actions: SkillActions) {
                 .join('')}</span>`;
           return `<div class="skill-row${locked ? ' locked' : ''}">
             <div class="skill-head"><b>${d.name}</b>${put}</div>
-            <div class="skill-info">${info(d)}</div>
+            <div class="skill-info">${info(state, d)}</div>
+          </div>`;
+        }).join('');
+      }
+      // rune: si ridisegnano quando cambia cosa si può comprare, non a ogni Essenza raccolta
+      const unlock = unlockCost(state);
+      const rk = JSON.stringify([state.runes.levels, RUNES.map((r) => {
+        const lv = state.runes.levels[r.id];
+        return state.essence >= (lv ? levelCost(lv) : unlock);
+      })]);
+      if (rk !== runeKey) {
+        runeKey = rk;
+        refs.runes.innerHTML = RUNES.map((r) => {
+          const lv = state.runes.levels[r.id];
+          const cost = lv ? levelCost(lv) : unlock;
+          const btn = `<button class="btn sm" data-act="${lv ? 'level' : 'unlock'}" data-id="${r.id}"${state.essence >= cost ? '' : ' disabled'}>${lv ? 'Potenzia' : 'Sblocca'} · ${formatNum(cost)}</button>`;
+          return `<div class="skill-row${lv ? '' : ' locked-rune'}">
+            <div class="skill-head"><span><b>${r.name}</b> <span class="muted">${lv ? `Lv ${lv}` : 'bloccata'}${r.damageOnly ? ' · solo skill di danno' : ''}</span></span>${btn}</div>
+            <div class="skill-info">${r.text(runeValue(state, r.id))}</div>
           </div>`;
         }).join('');
       }
@@ -77,8 +128,8 @@ export function createSkillPanel(root: HTMLElement, actions: SkillActions) {
         const d = id ? skillDef(id) : undefined;
         if (!bar || !d) return;
         const left = cooldowns[d.id] ?? 0;
-        bar.style.width = `${(1 - left / (d.cooldown * TICK_RATE)) * 100}%`;
-        bar.classList.toggle('ready', left <= 0 && state.hero.light >= d.light);
+        bar.style.width = `${Math.max(0, 1 - left / cooldownTicks(state, d)) * 100}%`;
+        bar.classList.toggle('ready', left <= 0 && state.hero.light >= lightCost(state, d));
       });
     },
   };

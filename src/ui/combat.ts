@@ -53,7 +53,7 @@ export function createCombatPanel(root: HTMLElement) {
   return {
     onEvents(events: CombatEvent[]) {
       for (const e of events) {
-        if (e.type === 'kill') log(`${e.boss ? 'Boss sconfitto' : 'Nemico sconfitto'}: +${formatNum(e.gold)} oro, +${formatNum(e.xp)} XP`, e.boss ? 'boss' : '');
+        if (e.type === 'kill') log(`${e.boss ? 'Boss sconfitto' : 'Nemico sconfitto'}: +${formatNum(e.gold)} oro, +${formatNum(e.xp)} XP, +${formatNum(e.essence)} Essenza`, e.boss ? 'boss' : '');
         else if (e.type === 'drop') log(`Bottino: ${e.item.name} (${RARITIES[e.item.rarity].name})${e.salvaged ? ' → smantellato' : ''}`, '', RARITIES[e.item.rarity].color);
         else if (e.type === 'levelup') log(`Livello ${e.level}!`, 'gold');
         else if (e.type === 'stage') log(`Stage ${e.stage}`, 'muted');

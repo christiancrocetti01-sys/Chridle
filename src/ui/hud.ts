@@ -23,7 +23,10 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
         <h1 class="title">Chridle</h1>
         <p class="subtitle">Il Guerriero della Luce</p>
       </div>
-      <div class="gold"><span data-k="gold">0</span> <small>oro</small></div>
+      <div class="wallet">
+        <div class="gold"><span data-k="gold">0</span> <small>oro</small></div>
+        <div class="essence"><span data-k="essence">0</span> <small>Essenza</small></div>
+      </div>
     </header>
     <div class="row"><span>Livello <b data-k="level">1</b></span><span class="muted" data-k="xptext"></span></div>
     <div class="bar"><div class="fill" data-k="xpbar"></div></div>
@@ -56,7 +59,7 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
   const refs = {
     gold: el('gold'), level: el('level'), xptext: el('xptext'), xpbar: el('xpbar'),
     stage: el('stage'), best: el('best'), progress: el('progress'), stagebar: el('stagebar'),
-    notice: el('notice'), stats: el('stats'),
+    notice: el('notice'), stats: el('stats'), essence: el('essence'),
   };
 
   root.querySelectorAll<HTMLButtonElement>('[data-up]').forEach((b) =>
@@ -84,6 +87,7 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
       if (frame++ % 6) return;
       const need = xpToNext(state.hero.level);
       refs.gold.textContent = formatNum(state.gold);
+      refs.essence.textContent = formatNum(state.essence);
       refs.level.textContent = String(state.hero.level);
       refs.xptext.textContent = `${formatNum(state.hero.xp)} / ${formatNum(need)} XP`;
       refs.xpbar.style.width = `${(state.hero.xp / need) * 100}%`;

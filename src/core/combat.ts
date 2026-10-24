@@ -3,7 +3,8 @@ import { UPGRADES, type UpgradeId } from '../data/upgrades';
 import { TICK_RATE } from './loop';
 import { DROP_CHANCE, INVENTORY_SIZE, rollItem, rollRarity, salvageValue, type Item } from './items';
 import { nextRandom } from './rng';
-import { castSkills, gainLight, tickSkills, unlockSkills, type SkillEvent } from './skills';
+import { essenceFor } from './runes';
+import { castOnCrit, castSkills, gainLight, tickSkills, unlockSkills, type SkillEvent } from './skills';
 import { damageMult, fireTriggers, gearTriggers, heal, tickBuffs, type ProcEvent } from './triggers';
 import type { GameState } from './state';
 import { KILLS_PER_STAGE, elementalDamage, mitigate, stateStats, stageEnemy, upgradeCost, xpToNext } from './stats';
@@ -16,7 +17,7 @@ export type CombatEvent =
   | SkillEvent
   /** Skill sbloccata salendo di livello (e messa in uno slot libero, se c'era). */
   | { type: 'unlock'; id: string }
-  | { type: 'kill'; gold: number; xp: number; boss: boolean }
+  | { type: 'kill'; gold: number; xp: number; essence: number; boss: boolean }
   | { type: 'levelup'; level: number }
   | { type: 'death' }
   | { type: 'stage'; stage: number }
@@ -69,7 +70,10 @@ export function step(state: GameState, events: CombatEvent[] = []): CombatEvent[
     events.push({ type: 'hit', target: 'enemy', amount, crit });
     state.hero.hits++;
     gainLight(state);
-    if (crit) fireTriggers(state, hero, triggers, 'crit', events);
+    if (crit) {
+      fireTriggers(state, hero, triggers, 'crit', events);
+      castOnCrit(state, hero, events);
+    }
     fireTriggers(state, hero, triggers, 'everyN', events);
     if (enemy.hp <= 0) return kill(state, events);
   }
@@ -137,14 +141,16 @@ function onKill(state: GameState, events: CombatEvent[]) {
   const mult = boss ? 5 : 1;
   const gold = base.gold * mult * hero.goldMult;
   const xp = base.xp * mult * hero.xpMult;
+  const essence = essenceFor(state.stage.current, boss);
   state.gold += gold;
+  state.essence += essence;
   state.totals.gold += gold;
   state.totals.kills++;
   state.enemy = null;
   state.respawn = RESPAWN_TICKS;
   state.hero.swing = 0;
   state.hero.hits = 0;
-  events.push({ type: 'kill', gold, xp, boss });
+  events.push({ type: 'kill', gold, xp, essence, boss });
   fireTriggers(state, hero, gearTriggers(state.gear), 'kill', events);
   gainXp(state, xp, events);
   dropLoot(state, boss, events);

@@ -1,4 +1,5 @@
 import { newGear } from './items';
+import { newRunes } from './runes';
 import { newSkills } from './skills';
 import { STATE_VERSION, newGame, type GameState } from './state';
 
@@ -50,6 +51,8 @@ export const migrations: Record<number, Migration> = {
     const hero = d.hero as { level: number };
     return { ...d, hero: { ...hero, light: 0 }, skills: newSkills(hero.level) };
   },
+  // v8 → v9: Essenza di Luce e rune
+  8: (d) => ({ ...d, essence: 0, runes: newRunes() }),
 };
 
 export function serialize(state: GameState): string {
@@ -74,8 +77,8 @@ export function deserialize(raw: string, migs = migrations, target = STATE_VERSI
 }
 
 function isGameState(d: Record<string, unknown>): d is Record<string, unknown> & GameState {
-  const numbers = ['tick', 'createdAt', 'lastSeen', 'rng', 'gold', 'fragments', 'respawn'].every((k) => typeof d[k] === 'number');
-  const objects = ['hero', 'upgrades', 'stage', 'totals', 'gear', 'skills'].every((k) => d[k] && typeof d[k] === 'object');
+  const numbers = ['tick', 'createdAt', 'lastSeen', 'rng', 'gold', 'fragments', 'essence', 'respawn'].every((k) => typeof d[k] === 'number');
+  const objects = ['hero', 'upgrades', 'stage', 'totals', 'gear', 'skills', 'runes'].every((k) => d[k] && typeof d[k] === 'object');
   return numbers && objects;
 }
 
