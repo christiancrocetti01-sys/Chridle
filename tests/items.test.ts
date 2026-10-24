@@ -6,8 +6,9 @@ import {
 } from '../src/core/items';
 import { deserialize, serialize } from '../src/core/save';
 import { newGame } from '../src/core/state';
-import { KILLS_PER_STAGE, heroStats, stateStats } from '../src/core/stats';
-import { RARITIES } from '../src/data/items';
+import { KILLS_PER_STAGE, heroStats, stageEnemy, stateStats } from '../src/core/stats';
+import { AFFIXES, FLAT_STATS, ITEM_TYPES, RARITIES, affixesFor } from '../src/data/items';
+import { emptyMods } from '../src/core/items';
 
 const rng = (seed: number) => ({ rng: seed });
 
@@ -162,5 +163,135 @@ describe('salvataggio v3', () => {
     s.gear.inventory.push(rollItem(rng(1), 1, 3, 2), rollItem(rng(2), 2, 3, 6, 'arma'));
     equip(s.gear, 2);
     expect(deserialize(serialize(s))).toEqual(s);
+  });
+});
+
+describe('affissi v4', () => {
+  it('ogni tipo di oggetto ha abbastanza affissi per un Divino; id unici', () => {
+    expect(AFFIXES.length).toBeGreaterThanOrEqual(40);
+    expect(new Set(AFFIXES.map((a) => a.id)).size).toBe(AFFIXES.length);
+    for (const t of ITEM_TYPES) expect(affixesFor(t.id).length).toBeGreaterThanOrEqual(RARITIES[RARITIES.length - 1].affixes);
+  });
+
+  it('gli oggetti ricevono solo affissi ammessi per il loro tipo', () => {
+    for (const t of ITEM_TYPES) {
+      const allowed = new Set(affixesFor(t.id).map((a) => a.id));
+      for (let seed = 0; seed < 40; seed++) {
+        for (const a of rollItem(rng(seed), 1, 10, 6, t.id).affixes) expect(allowed.has(a.id)).toBe(true);
+      }
+    }
+  });
+
+  it('le statistiche piatte crescono con il livello oggetto, le percentuali no', () => {
+    const lo = rollItem(rng(5), 1, 1, 6, 'arma');
+    const hi = rollItem(rng(5), 1, 40, 6, 'arma');
+    lo.affixes.forEach((a, i) => a.mods.forEach((m, j) => {
+      const v = hi.affixes[i].mods[j].value;
+      if (FLAT_STATS.has(m.stat)) expect(v).toBeGreaterThan(m.value * 10);
+      else expect(v).toBeCloseTo(m.value);
+    }));
+  });
+
+  it('gli affissi ibridi danno due statistiche', () => {
+    const g = newGear();
+    const it = rollItem(rng(1), 1, 1, 0, 'arma');
+    it.affixes = [{ id: 'crusader', tier: 1, mods: [{ stat: 'holy', value: 3 }, { stat: 'def', value: 2 }] }];
+    g.equipped.arma = it;
+    const m = gearMods(g);
+    expect(m.holy).toBe(3);
+    expect(m.def).toBe(2);
+  });
+
+  it('il ritrovamento magico alza le rarità', () => {
+    const better = (mf: number) => {
+      const r = rng(77);
+      let n = 0;
+      for (let i = 0; i < 10000; i++) if (rollRarity(r, false, mf) > 0) n++;
+      return n;
+    };
+    expect(better(1)).toBeGreaterThan(better(0) * 1.3);
+  });
+});
+
+describe('statistiche speciali in combattimento', () => {
+  const up = { forza: 0, corazza: 0, rapidita: 0 };
+  const fight = (mods: Partial<ReturnType<typeof emptyMods>>, seed = 1) => {
+    const s = newGame(0, seed);
+    const it = rollItem(rng(1), 1, 1, 0, 'reliquia');
+    it.base.value = 0;
+    it.affixes = [{ id: 'test', tier: 1, mods: Object.entries(mods).map(([stat, value]) => ({ stat: stat as 'atk', value: value! })) }];
+    s.gear.equipped.reliquia = it;
+    while (!s.enemy) step(s);
+    return s;
+  };
+
+  it('il danno elementale ignora la difesa e si somma al colpo', () => {
+    expect(heroStats(1, up, { ...emptyMods(), fire: 10, firePct: 0.5, elemPct: 0.5 }).elements.fire).toBeCloseTo(20);
+    const plain = fight({});
+    const fire = fight({ fire: 50 });
+    plain.enemy!.def = fire.enemy!.def = 1e9;
+    const hit = (s: typeof plain) => {
+      const ev: CombatEvent[] = [];
+      while (!ev.some((e) => e.type === 'hit' && e.target === 'enemy')) step(s, ev);
+      return ev.find((e) => e.type === 'hit' && e.target === 'enemy')!;
+    };
+    const a = hit(plain), b = hit(fire);
+    if (a.type !== 'hit' || b.type !== 'hit') throw new Error();
+    expect(b.amount - a.amount).toBeGreaterThanOrEqual(50);
+  });
+
+  it('il veleno uccide anche senza attaccare', () => {
+    const s = fight({ poison: 1e6, atkPct: -1 });
+    const ev = step(s);
+    expect(ev.some((e) => e.type === 'kill')).toBe(true);
+  });
+
+  it('schivata, spine e rubavita', () => {
+    const s = fight({ dodge: 1 });
+    expect(stateStats(s).dodge).toBe(0.5);
+    s.enemy!.hp = 1e12;
+    const ev: CombatEvent[] = [];
+    for (let i = 0; i < 300; i++) step(s, ev);
+    expect(ev.some((e) => e.type === 'dodge')).toBe(true);
+    expect(ev.some((e) => e.type === 'hit' && e.target === 'hero')).toBe(true);
+
+    const t = fight({ thorns: 1e9 });
+    t.enemy!.hp = 1e8;
+    const ev1: CombatEvent[] = [];
+    while (t.enemy) step(t, ev1);
+    const k = ev1.findIndex((e) => e.type === 'kill');
+    expect(ev1[k - 1]).toMatchObject({ type: 'hit', target: 'hero' });
+
+    const v = fight({ lifeSteal: 1 });
+    v.hero.hp = 1;
+    v.enemy!.hp = 1e9;
+    const ev2: CombatEvent[] = [];
+    while (!ev2.some((e) => e.type === 'hit' && e.target === 'enemy')) step(v, ev2);
+    expect(v.hero.hp).toBeGreaterThan(5);
+  });
+
+  it('bonus oro ed esperienza', () => {
+    const s = fight({ goldPct: 1, xpPct: 1 });
+    s.enemy!.hp = 0.001;
+    const ev: CombatEvent[] = [];
+    while (s.enemy) step(s, ev);
+    const kill = ev.find((e) => e.type === 'kill');
+    if (kill?.type !== 'kill') throw new Error();
+    const base = stageEnemy(1);
+    expect(kill.gold).toBeCloseTo(base.gold * 2);
+    expect(kill.xp).toBeCloseTo(base.xp * 2);
+  });
+});
+
+describe('salvataggio v4', () => {
+  it('migra gli affissi v3 ({ stat, value }) in mods', () => {
+    const s = newGame(0, 1);
+    const old = (uid: number) => ({ ...rollItem(rng(uid), uid, 3, 0, 'anello'), affixes: [{ id: 'crit', stat: 'crit', tier: 2, value: 0.02 }] });
+    const v3 = { ...s, version: 3, gear: { ...s.gear, equipped: { anello1: old(1) }, inventory: [old(2)] } };
+    const m = deserialize(JSON.stringify(v3))!;
+    expect(m.version).toBe(4);
+    expect(m.gear.equipped.anello1!.affixes).toEqual([{ id: 'crit', tier: 2, mods: [{ stat: 'crit', value: 0.02 }] }]);
+    expect(m.gear.inventory[0].affixes[0].mods[0].stat).toBe('crit');
+    expect(gearMods(m.gear).crit).toBeCloseTo(0.02);
   });
 });

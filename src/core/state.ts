@@ -43,7 +43,7 @@ export interface GameState {
   totals: { kills: number; deaths: number; gold: number };
 }
 
-export const STATE_VERSION = 3;
+export const STATE_VERSION = 4;
 
 export function newGame(now: number, seed = now >>> 0): GameState {
   const upgrades = { forza: 0, corazza: 0, rapidita: 0 };

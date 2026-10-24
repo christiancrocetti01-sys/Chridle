@@ -4,10 +4,11 @@ import { TICK_RATE } from './loop';
 import { DROP_CHANCE, INVENTORY_SIZE, rollItem, rollRarity, salvageValue, type Item } from './items';
 import { nextRandom } from './rng';
 import type { GameState } from './state';
-import { KILLS_PER_STAGE, mitigate, stateStats, stageEnemy, upgradeCost, xpToNext } from './stats';
+import { KILLS_PER_STAGE, elementalDamage, mitigate, stateStats, stageEnemy, upgradeCost, xpToNext } from './stats';
 
 export type CombatEvent =
   | { type: 'hit'; target: 'hero' | 'enemy'; amount: number; crit: boolean }
+  | { type: 'dodge' }
   | { type: 'kill'; gold: number; xp: number; boss: boolean }
   | { type: 'levelup'; level: number }
   | { type: 'death' }
@@ -30,13 +31,26 @@ export function step(state: GameState, events: CombatEvent[] = []): CombatEvent[
     return events;
   }
   const enemy = state.enemy;
+  const bossMult = enemy.boss ? hero.bossMult : 1;
+
+  // veleno: danno continuo che ignora la difesa
+  if (hero.poison > 0) {
+    enemy.hp -= (hero.poison * bossMult) / TICK_RATE;
+    if (enemy.hp <= 0) {
+      onKill(state, events);
+      return events;
+    }
+  }
 
   state.hero.swing += hero.attackSpeed / TICK_RATE;
   if (state.hero.swing >= 1) {
     state.hero.swing -= 1;
     const crit = nextRandom(state) < hero.critChance;
-    const amount = mitigate(hero.atk * (crit ? hero.critMult : 1), enemy.def);
+    const mult = crit ? hero.critMult : 1;
+    const physical = mitigate(hero.atk * mult, enemy.def);
+    const amount = (physical * (1 + hero.bleed) + elementalDamage(hero) * mult) * bossMult;
     enemy.hp -= amount;
+    if (hero.lifeSteal > 0) state.hero.hp = Math.min(hero.maxHp, state.hero.hp + amount * hero.lifeSteal);
     events.push({ type: 'hit', target: 'enemy', amount, crit });
     if (enemy.hp <= 0) {
       onKill(state, events);
@@ -47,10 +61,22 @@ export function step(state: GameState, events: CombatEvent[] = []): CombatEvent[
   enemy.swing += enemy.attackSpeed / TICK_RATE;
   if (enemy.swing >= 1) {
     enemy.swing -= 1;
+    // si tira la schivata solo se serve: senza schivata la sequenza dell'RNG non cambia
+    if (hero.dodge > 0 && nextRandom(state) < hero.dodge) {
+      events.push({ type: 'dodge' });
+      return events;
+    }
     const amount = mitigate(enemy.atk, hero.def);
     state.hero.hp -= amount;
     events.push({ type: 'hit', target: 'hero', amount, crit: false });
-    if (state.hero.hp <= 0) onDeath(state, events);
+    if (state.hero.hp <= 0) {
+      onDeath(state, events);
+      return events;
+    }
+    if (hero.thorns > 0) {
+      enemy.hp -= hero.thorns * bossMult;
+      if (enemy.hp <= 0) onKill(state, events);
+    }
   }
   return events;
 }
@@ -76,9 +102,10 @@ export function spawnEnemy(state: GameState) {
 function onKill(state: GameState, events: CombatEvent[]) {
   const boss = state.enemy!.boss;
   const base = stageEnemy(state.stage.current);
+  const hero = stateStats(state);
   const mult = boss ? 5 : 1;
-  const gold = base.gold * mult;
-  const xp = base.xp * mult;
+  const gold = base.gold * mult * hero.goldMult;
+  const xp = base.xp * mult * hero.xpMult;
   state.gold += gold;
   state.totals.gold += gold;
   state.totals.kills++;
@@ -102,7 +129,7 @@ function onKill(state: GameState, events: CombatEvent[]) {
 function dropLoot(state: GameState, boss: boolean, events: CombatEvent[]) {
   if (!boss && nextRandom(state) >= DROP_CHANCE) return;
   const gear = state.gear;
-  const item = rollItem(state, gear.nextId++, state.stage.current, rollRarity(state, boss));
+  const item = rollItem(state, gear.nextId++, state.stage.current, rollRarity(state, boss, stateStats(state).magicFind));
   const salvaged = item.rarity <= gear.autoSalvage || gear.inventory.length >= INVENTORY_SIZE;
   if (salvaged) state.fragments += salvageValue(item);
   else gear.inventory.push(item);

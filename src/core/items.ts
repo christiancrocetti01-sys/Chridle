@@ -1,14 +1,13 @@
 import {
-  AFFIXES, AFFIX_TIERS, ITEM_TYPES, RARITIES, SLOTS,
+  AFFIXES, AFFIX_TIERS, FLAT_STATS, ITEM_TYPES, RARITIES, SLOTS, STAT_LABELS, affixesFor,
   type ItemType, type SlotId, type StatKey,
 } from '../data/items';
 import { nextRandom } from './rng';
 
 export interface Affix {
   id: string;
-  stat: StatKey;
   tier: number;
-  value: number;
+  mods: { stat: StatKey; value: number }[];
 }
 
 export interface Item {
@@ -53,8 +52,10 @@ function pickWeighted<T extends { weight: number }>(rng: Rng, list: T[]): T {
 
 const pick = <T>(rng: Rng, list: T[]): T => list[Math.floor(nextRandom(rng) * list.length)];
 
-export function rollRarity(rng: Rng, boss = false): number {
-  const once = () => RARITIES.indexOf(pickWeighted(rng, RARITIES));
+/** `magicFind` moltiplica il peso di tutte le rarità sopra Comune. */
+export function rollRarity(rng: Rng, boss = false, magicFind = 0): number {
+  const table = RARITIES.map((r, i) => ({ i, weight: i ? r.weight * (1 + magicFind) : r.weight }));
+  const once = () => pickWeighted(rng, table).i;
   // boss: il migliore di due tiri e almeno Magico
   return boss ? Math.max(1, once(), once()) : once();
 }
@@ -67,13 +68,14 @@ export function rollItem(rng: Rng, uid: number, ilvl: number, rarity: number, ty
   // piccola variazione (±10%) anche sulla statistica di base
   const base = { stat: def.base, value: def.baseValue * growth * r.power * (0.9 + 0.2 * nextRandom(rng)) };
 
-  const pool = AFFIXES.slice();
+  const pool = affixesFor(def.id);
   const affixes: Affix[] = [];
   for (let i = 0; i < r.affixes && pool.length; i++) {
     const a = pool.splice(Math.floor(nextRandom(rng) * pool.length), 1)[0];
     const t = pickWeighted(rng, AFFIX_TIERS);
     const roll = 0.85 + 0.3 * nextRandom(rng);
-    affixes.push({ id: a.id, stat: a.stat, tier: t.tier, value: a.value * t.mult * roll * (a.scales ? growth : 1) });
+    const mods = a.mods.map((m) => ({ stat: m.stat, value: m.value * t.mult * roll * (FLAT_STATS.has(m.stat) ? growth : 1) }));
+    affixes.push({ id: a.id, tier: t.tier, mods });
   }
 
   const best = affixes.reduce<Affix | null>((b, a) => (!b || a.tier > b.tier ? a : b), null);
@@ -82,7 +84,7 @@ export function rollItem(rng: Rng, uid: number, ilvl: number, rarity: number, ty
 }
 
 export function emptyMods(): StatMods {
-  return { atk: 0, def: 0, hp: 0, atkPct: 0, defPct: 0, hpPct: 0, speedPct: 0, crit: 0, critDmg: 0, regenPct: 0 };
+  return Object.fromEntries(Object.keys(STAT_LABELS).map((k) => [k, 0])) as StatMods;
 }
 
 export function itemMods(items: Iterable<Item | undefined>): StatMods {
@@ -90,7 +92,7 @@ export function itemMods(items: Iterable<Item | undefined>): StatMods {
   for (const it of items) {
     if (!it) continue;
     m[it.base.stat] += it.base.value;
-    for (const a of it.affixes) m[a.stat] += a.value;
+    for (const a of it.affixes) for (const x of a.mods) m[x.stat] += x.value;
   }
   return m;
 }

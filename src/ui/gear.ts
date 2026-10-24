@@ -1,9 +1,9 @@
 import { formatNum } from '../core/format';
 import { INVENTORY_SIZE, itemMods, salvageValue, slotsFor, type GearState, type Item } from '../core/items';
 import type { GameState } from '../core/state';
-import { heroStats, type Stats } from '../core/stats';
+import { elementalDamage, heroStats, type Stats } from '../core/stats';
 import { DOLL_LEFT, DOLL_RIGHT, SILHOUETTE } from './doll';
-import { ITEM_TYPES, PCT_STATS, RARITIES, SLOTS, STAT_LABELS, type SlotId, type StatKey } from '../data/items';
+import { AFFIXES, ITEM_TYPES, RARITIES, SLOTS, STAT_LABELS, TAG_LABELS, isPct, type SlotId, type StatKey } from '../data/items';
 
 export interface GearActions {
   equip(uid: number, slot: SlotId): void;
@@ -18,7 +18,7 @@ type Selection = { kind: 'inv'; uid: number } | { kind: 'slot'; slot: SlotId } |
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => `&${({ '&': 'amp', '<': 'lt', '>': 'gt', '"': 'quot' })[c]};`);
 
 export function formatStat(stat: StatKey, v: number): string {
-  if (PCT_STATS.has(stat)) return `${(v * 100).toFixed(v < 0.1 ? 1 : 0)}%`;
+  if (isPct(stat)) return `${(v * 100).toFixed(v < 0.1 ? 1 : 0)}%`;
   return v < 10 ? v.toFixed(1) : formatNum(v);
 }
 
@@ -29,7 +29,11 @@ function itemLabel(it: Item): string {
 function itemDetail(it: Item): string {
   const r = RARITIES[it.rarity];
   const type = ITEM_TYPES.find((t) => t.id === it.type)!;
-  const lines = it.affixes.map((a) => `<li>+${formatStat(a.stat, a.value)} ${STAT_LABELS[a.stat]} <span class="muted">T${a.tier}</span></li>`);
+  const lines = it.affixes.map((a) => {
+    const mods = a.mods.map((m) => `+${formatStat(m.stat, m.value)} ${STAT_LABELS[m.stat]}`).join(' · ');
+    const tags = AFFIXES.find((d) => d.id === a.id)?.tags.map((t) => TAG_LABELS[t]).join(', ') ?? '';
+    return `<li>${mods} <span class="muted">T${a.tier}${tags ? ` · ${tags}` : ''}</span></li>`;
+  });
   return `
     <div class="item-name">${itemLabel(it)}</div>
     <div class="muted">${r.name} · ${type.name} · Lv oggetto ${it.ilvl}</div>
@@ -37,14 +41,24 @@ function itemDetail(it: Item): string {
     <ul class="affixes">${lines.join('')}</ul>`;
 }
 
-const COMPARE: { key: keyof Stats; label: string; pct?: boolean }[] = [
-  { key: 'atk', label: 'Attacco' },
-  { key: 'def', label: 'Difesa' },
-  { key: 'maxHp', label: 'Vita' },
-  { key: 'attackSpeed', label: 'Velocità' },
-  { key: 'critChance', label: 'Critico', pct: true },
-  { key: 'critMult', label: 'Danno critico', pct: true },
-  { key: 'regen', label: 'Rigenerazione' },
+const COMPARE: { get: (s: Stats) => number; label: string; pct?: boolean }[] = [
+  { get: (s) => s.atk, label: 'Attacco' },
+  { get: elementalDamage, label: 'Danno elementale' },
+  { get: (s) => s.def, label: 'Difesa' },
+  { get: (s) => s.maxHp, label: 'Vita' },
+  { get: (s) => s.attackSpeed, label: 'Velocità' },
+  { get: (s) => s.critChance, label: 'Critico', pct: true },
+  { get: (s) => s.critMult, label: 'Danno critico', pct: true },
+  { get: (s) => s.regen, label: 'Rigenerazione' },
+  { get: (s) => s.poison, label: 'Veleno/s' },
+  { get: (s) => s.bleed, label: 'Sanguinamento', pct: true },
+  { get: (s) => s.lifeSteal, label: 'Rubavita', pct: true },
+  { get: (s) => s.dodge, label: 'Schivata', pct: true },
+  { get: (s) => s.thorns, label: 'Spine' },
+  { get: (s) => s.bossMult, label: 'Danno ai boss', pct: true },
+  { get: (s) => s.goldMult, label: 'Oro', pct: true },
+  { get: (s) => s.xpMult, label: 'Esperienza', pct: true },
+  { get: (s) => s.magicFind, label: 'Ritrovamento magico', pct: true },
 ];
 
 /** Differenze di statistiche se si indossasse `item` nello `slot`. */
@@ -52,8 +66,8 @@ function compare(state: GameState, item: Item | null, slot: SlotId): string {
   const now = heroStats(state.hero.level, state.upgrades, itemMods(Object.values(state.gear.equipped)));
   const after = { ...state.gear.equipped, [slot]: item ?? undefined };
   const then = heroStats(state.hero.level, state.upgrades, itemMods(Object.values(after)));
-  const rows = COMPARE.map(({ key, label, pct }) => {
-    const d = then[key] - now[key];
+  const rows = COMPARE.map(({ get, label, pct }) => {
+    const d = get(then) - get(now);
     if (Math.abs(d) < 1e-9) return '';
     const text = pct ? `${(d * 100).toFixed(1)}%` : Math.abs(d) < 10 ? d.toFixed(2) : formatNum(Math.abs(d));
     const sign = d > 0 ? '+' : pct || Math.abs(d) < 10 ? '' : '-';

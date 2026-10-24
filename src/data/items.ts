@@ -1,17 +1,30 @@
-/** Statistiche che gli oggetti possono modificare. I "Pct" sono frazioni (0.1 = +10%). */
+/** Statistiche che gli oggetti possono modificare. I "Pct" e le probabilità sono frazioni (0.1 = +10%). */
 export type StatKey =
   | 'atk' | 'def' | 'hp'
   | 'atkPct' | 'defPct' | 'hpPct'
-  | 'speedPct' | 'crit' | 'critDmg' | 'regenPct';
+  | 'speedPct' | 'crit' | 'critDmg' | 'regenPct'
+  | Element | `${Element}Pct` | 'elemPct'
+  | 'poison' | 'bleed' | 'lifeSteal' | 'dodge' | 'thorns'
+  | 'goldPct' | 'xpPct' | 'magicFind' | 'bossDmg';
+
+/** Elementi: danno aggiunto a ogni colpo, non ridotto dalla difesa. */
+export const ELEMENTS = ['fire', 'cold', 'lightning', 'holy', 'shadow'] as const;
+export type Element = (typeof ELEMENTS)[number];
 
 export const STAT_LABELS: Record<StatKey, string> = {
   atk: 'Attacco', def: 'Difesa', hp: 'Vita',
   atkPct: 'Attacco', defPct: 'Difesa', hpPct: 'Vita',
   speedPct: "Velocità d'attacco", crit: 'Probabilità di critico', critDmg: 'Danno critico', regenPct: 'Rigenerazione',
+  fire: 'Danno da fuoco', cold: 'Danno da gelo', lightning: 'Danno da fulmine', holy: 'Danno sacro', shadow: "Danno d'ombra",
+  firePct: 'Danno da fuoco', coldPct: 'Danno da gelo', lightningPct: 'Danno da fulmine', holyPct: 'Danno sacro', shadowPct: "Danno d'ombra",
+  elemPct: 'Danno elementale',
+  poison: 'Veleno al secondo', bleed: 'Sanguinamento (del danno fisico)', lifeSteal: 'Rubavita', dodge: 'Schivata', thorns: 'Danno da spine',
+  goldPct: 'Oro', xpPct: 'Esperienza', magicFind: 'Ritrovamento magico', bossDmg: 'Danno ai boss',
 };
 
-/** Statistiche espresse in percentuale (per la formattazione). */
-export const PCT_STATS: ReadonlySet<StatKey> = new Set(['atkPct', 'defPct', 'hpPct', 'speedPct', 'crit', 'critDmg', 'regenPct']);
+/** Statistiche piatte: crescono con il livello oggetto. Tutte le altre sono percentuali. */
+export const FLAT_STATS: ReadonlySet<StatKey> = new Set<StatKey>(['atk', 'def', 'hp', ...ELEMENTS, 'poison', 'thorns']);
+export const isPct = (stat: StatKey) => !FLAT_STATS.has(stat);
 
 export type ItemType =
   | 'arma' | 'secondaria' | 'elmo' | 'armatura' | 'guanti' | 'stivali'
@@ -82,29 +95,105 @@ export const RARITIES: RarityDef[] = [
   { id: 'divino', name: 'Divino', color: '#fff6c8', affixes: 6, power: 2.5, weight: 0.1, fragments: 250 },
 ];
 
+/** Tag delle sinergie: oggi descrittivi, poi useranno trigger, set e leggendari. */
+export type Tag =
+  | 'fisico' | 'sacro' | 'fuoco' | 'gelo' | 'fulmine' | 'ombra'
+  | 'critico' | 'sanguinamento' | 'veleno' | 'difesa' | 'rubavita'
+  | 'vita' | 'velocita' | 'fortuna';
+
+export const TAG_LABELS: Record<Tag, string> = {
+  fisico: 'Fisico', sacro: 'Sacro', fuoco: 'Fuoco', gelo: 'Gelo', fulmine: 'Fulmine', ombra: 'Ombra',
+  critico: 'Critico', sanguinamento: 'Sanguinamento', veleno: 'Veleno', difesa: 'Difesa', rubavita: 'Rubavita',
+  vita: 'Vita', velocita: 'Velocità', fortuna: 'Fortuna',
+};
+
 export interface AffixDef {
   id: string;
-  stat: StatKey;
   /** Suffisso usato nel nome dell'oggetto. */
   name: string;
-  /** Valore al tier 1 (per le statistiche piatte: a livello oggetto 1). */
-  value: number;
-  /** Le statistiche piatte crescono con il livello oggetto, le percentuali no. */
-  scales: boolean;
+  tags: Tag[];
+  /** Tipi di oggetto su cui può comparire. */
+  types: ItemType[];
+  /** Valori al tier 1 (le statistiche piatte: a livello oggetto 1). Gli ibridi hanno due statistiche più deboli. */
+  mods: { stat: StatKey; value: number }[];
 }
 
+type T = ItemType;
+const OFFENSE: T[] = ['arma', 'guanti', 'anello', 'amuleto'];
+const ARMOR: T[] = ['secondaria', 'elmo', 'armatura', 'guanti', 'stivali', 'cintura', 'mantello'];
+const BODY: T[] = ['elmo', 'armatura', 'cintura', 'mantello'];
+const FOCUS: T[] = ['arma', 'secondaria', 'anello', 'amuleto', 'reliquia'];
+
+const affix = (id: string, name: string, tags: Tag[], types: T[], ...mods: [StatKey, number][]): AffixDef =>
+  ({ id, name, tags, types, mods: mods.map(([stat, value]) => ({ stat, value })) });
+
 export const AFFIXES: AffixDef[] = [
-  { id: 'atk', stat: 'atk', name: 'del Falco', value: 2, scales: true },
-  { id: 'def', stat: 'def', name: 'della Torre', value: 1.2, scales: true },
-  { id: 'hp', stat: 'hp', name: "dell'Orso", value: 10, scales: true },
-  { id: 'atkPct', stat: 'atkPct', name: 'della Furia', value: 0.03, scales: false },
-  { id: 'defPct', stat: 'defPct', name: 'del Bastione', value: 0.03, scales: false },
-  { id: 'hpPct', stat: 'hpPct', name: 'della Vita', value: 0.03, scales: false },
-  { id: 'speedPct', stat: 'speedPct', name: "dell'Alba", value: 0.02, scales: false },
-  { id: 'crit', stat: 'crit', name: 'del Lampo', value: 0.01, scales: false },
-  { id: 'critDmg', stat: 'critDmg', name: 'della Lama Nera', value: 0.06, scales: false },
-  { id: 'regenPct', stat: 'regenPct', name: 'del Sole', value: 0.002, scales: false },
+  // fisico
+  affix('atk', 'del Falco', ['fisico'], OFFENSE, ['atk', 2]),
+  affix('atkHeavy', 'del Massacro', ['fisico'], ['arma'], ['atk', 3.5]),
+  affix('atkPct', 'della Furia', ['fisico'], [...OFFENSE, 'reliquia'], ['atkPct', 0.03]),
+  affix('atkPctHeavy', 'del Carnefice', ['fisico'], ['arma'], ['atkPct', 0.06]),
+  affix('speedPct', "dell'Alba", ['velocita'], [...OFFENSE, 'stivali'], ['speedPct', 0.02]),
+  // critico
+  affix('crit', 'del Lampo', ['critico'], [...OFFENSE, 'elmo'], ['crit', 0.01]),
+  affix('critHeavy', 'del Colpo Preciso', ['critico'], ['arma'], ['crit', 0.02]),
+  affix('critDmg', 'della Lama Nera', ['critico'], OFFENSE, ['critDmg', 0.06]),
+  // difesa e vita
+  affix('def', 'della Torre', ['difesa'], ARMOR, ['def', 1.2]),
+  affix('defPct', 'del Bastione', ['difesa'], [...ARMOR, 'reliquia'], ['defPct', 0.03]),
+  affix('defPctHeavy', 'della Muraglia', ['difesa'], ['secondaria'], ['defPct', 0.06]),
+  affix('hp', "dell'Orso", ['vita'], [...ARMOR, 'amuleto'], ['hp', 10]),
+  affix('hpPct', 'della Vita', ['vita'], [...BODY, 'amuleto'], ['hpPct', 0.03]),
+  affix('regenPct', 'del Sole', ['vita'], ['elmo', 'armatura', 'cintura', 'amuleto', 'reliquia'], ['regenPct', 0.002]),
+  affix('dodge', "dell'Ombra Danzante", ['difesa'], ['guanti', 'stivali', 'mantello', 'anello'], ['dodge', 0.01]),
+  affix('thorns', 'del Rovo', ['difesa'], ['secondaria', 'elmo', 'armatura', 'cintura'], ['thorns', 2]),
+  // elementi: danno piatto
+  affix('fire', 'della Brace', ['fuoco'], OFFENSE, ['fire', 1.5]),
+  affix('cold', 'della Brina', ['gelo'], OFFENSE, ['cold', 1.5]),
+  affix('lightning', 'della Tempesta', ['fulmine'], OFFENSE, ['lightning', 1.5]),
+  affix('holy', 'della Luce', ['sacro'], OFFENSE, ['holy', 1.5]),
+  affix('shadow', "dell'Eclissi", ['ombra'], OFFENSE, ['shadow', 1.5]),
+  // elementi: percentuali
+  affix('firePct', "dell'Inferno", ['fuoco'], FOCUS, ['firePct', 0.05]),
+  affix('coldPct', "dell'Inverno", ['gelo'], FOCUS, ['coldPct', 0.05]),
+  affix('lightningPct', 'del Tuono', ['fulmine'], FOCUS, ['lightningPct', 0.05]),
+  affix('holyPct', 'dei Santi', ['sacro'], FOCUS, ['holyPct', 0.05]),
+  affix('shadowPct', 'del Vuoto', ['ombra'], FOCUS, ['shadowPct', 0.05]),
+  affix('elemPct', "dell'Arcano", ['fuoco', 'gelo', 'fulmine', 'sacro', 'ombra'], ['anello', 'amuleto', 'reliquia'], ['elemPct', 0.03]),
+  // sanguinamento, veleno, rubavita
+  affix('bleed', 'del Macellaio', ['sanguinamento'], ['arma', 'guanti'], ['bleed', 0.04]),
+  affix('bleedJewel', 'della Ferita Aperta', ['sanguinamento'], ['anello', 'amuleto', 'reliquia'], ['bleed', 0.02]),
+  affix('poison', 'della Vipera', ['veleno'], ['arma', 'guanti', 'anello'], ['poison', 1]),
+  affix('poisonFocus', 'della Palude', ['veleno'], ['secondaria', 'amuleto', 'reliquia'], ['poison', 0.7]),
+  affix('lifeSteal', 'del Vampiro', ['rubavita'], ['arma', 'anello', 'amuleto'], ['lifeSteal', 0.005]),
+  // fortuna e boss
+  affix('goldPct', "dell'Avaro", ['fortuna'], ['guanti', 'cintura', 'elmo', 'anello', 'amuleto'], ['goldPct', 0.05]),
+  affix('xpPct', 'del Saggio', ['fortuna'], ['elmo', 'anello', 'amuleto', 'reliquia'], ['xpPct', 0.04]),
+  affix('magicFind', 'del Cercatore', ['fortuna'], ['elmo', 'stivali', 'mantello', 'anello', 'amuleto'], ['magicFind', 0.05]),
+  affix('bossDmg', 'dello Sterminatore', ['fisico'], ['arma', 'amuleto', 'reliquia'], ['bossDmg', 0.05]),
+  // ibridi: due statistiche, ognuna più debole
+  affix('crusader', 'del Crociato', ['sacro', 'difesa'], ['arma', 'secondaria', 'armatura'], ['holy', 1.1], ['def', 0.8]),
+  affix('paladin', 'del Paladino', ['sacro', 'vita'], ['elmo', 'armatura', 'reliquia'], ['holyPct', 0.04], ['hp', 7]),
+  affix('temple', 'del Tempio', ['sacro', 'vita'], ['amuleto', 'reliquia'], ['holy', 1], ['regenPct', 0.0015]),
+  affix('phoenix', 'della Fenice', ['fuoco', 'vita'], ['mantello', 'amuleto', 'reliquia'], ['fire', 1.1], ['regenPct', 0.0015]),
+  affix('glacier', 'del Ghiacciaio', ['gelo', 'difesa'], ['secondaria', 'armatura', 'anello'], ['cold', 1.1], ['defPct', 0.02]),
+  affix('stormRunner', 'del Fulmine Rapido', ['fulmine', 'velocita'], ['arma', 'guanti', 'stivali'], ['lightning', 1.1], ['speedPct', 0.015]),
+  affix('assassin', 'del Sicario', ['ombra', 'critico'], ['arma', 'guanti', 'mantello'], ['shadow', 1.1], ['crit', 0.008]),
+  affix('warlock', 'dello Stregone', ['ombra'], ['secondaria', 'amuleto'], ['shadowPct', 0.03], ['elemPct', 0.02]),
+  affix('venomBlade', 'della Lama Avvelenata', ['veleno', 'fisico'], ['arma'], ['poison', 0.7], ['atk', 1.4]),
+  affix('venomThorn', 'della Spina Velenosa', ['veleno', 'difesa'], ['secondaria', 'armatura', 'mantello'], ['thorns', 1.4], ['poison', 0.5]),
+  affix('berserker', 'del Berserker', ['fisico', 'rubavita'], ['arma', 'cintura'], ['atkPct', 0.04], ['lifeSteal', 0.003]),
+  affix('leech', 'della Sanguisuga', ['sanguinamento', 'rubavita'], ['guanti', 'anello'], ['bleed', 0.03], ['lifeSteal', 0.003]),
+  affix('duelist', 'del Duellante', ['critico', 'difesa'], ['guanti', 'stivali', 'anello'], ['crit', 0.008], ['dodge', 0.008]),
+  affix('kingslayer', 'del Cacciatore di Re', ['critico'], ['arma', 'guanti'], ['bossDmg', 0.04], ['critDmg', 0.04]),
+  affix('giant', 'del Gigante', ['vita'], ['armatura', 'cintura'], ['hp', 7], ['hpPct', 0.02]),
+  affix('merchant', 'del Mercante', ['fortuna'], ['cintura', 'anello'], ['goldPct', 0.04], ['magicFind', 0.04]),
 ];
+
+/** Affissi che possono comparire su un tipo di oggetto. */
+export function affixesFor(type: ItemType): AffixDef[] {
+  return AFFIXES.filter((a) => a.types.includes(type));
+}
 
 /** Tier degli affissi: T1 comune … T5 raro. Il valore è moltiplicato per `mult`. */
 export const AFFIX_TIERS = [

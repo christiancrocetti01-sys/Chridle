@@ -1,3 +1,4 @@
+import { ELEMENTS, type Element } from '../data/items';
 import type { UpgradeId } from '../data/upgrades';
 import { emptyMods, gearMods, type GearState, type StatMods } from './items';
 
@@ -11,9 +12,26 @@ export interface Stats {
   critMult: number;
   /** HP rigenerati al secondo. */
   regen: number;
+  /** Danno elementale aggiunto a ogni colpo (non ridotto dalla difesa). */
+  elements: Record<Element, number>;
+  /** Danno da veleno al secondo, continuo, ignora la difesa. */
+  poison: number;
+  /** Frazione del danno fisico inflitta in più come sanguinamento (ignora la difesa). */
+  bleed: number;
+  /** Frazione del danno inflitto recuperata come vita. */
+  lifeSteal: number;
+  dodge: number;
+  /** Danno restituito a chi colpisce l'eroe. */
+  thorns: number;
+  goldMult: number;
+  xpMult: number;
+  magicFind: number;
+  /** Moltiplicatore di tutto il danno contro i boss. */
+  bossMult: number;
 }
 
 export const MAX_CRIT_CHANCE = 0.75;
+export const MAX_DODGE = 0.5;
 
 /** Statistiche dell'eroe: base da livello, poi oggetti (piatti e %), poi potenziamenti. */
 export function heroStats(level: number, upgrades: Record<UpgradeId, number>, mods: StatMods = emptyMods()): Stats {
@@ -29,7 +47,22 @@ export function heroStats(level: number, upgrades: Record<UpgradeId, number>, mo
     critChance: Math.min(MAX_CRIT_CHANCE, 0.1 + mods.crit),
     critMult: 2 + mods.critDmg,
     regen: maxHp * (0.01 + mods.regenPct),
+    elements: Object.fromEntries(ELEMENTS.map((e) => [e, mods[e] * (1 + mods[`${e}Pct`] + mods.elemPct)])) as Record<Element, number>,
+    poison: mods.poison,
+    bleed: mods.bleed,
+    lifeSteal: mods.lifeSteal,
+    dodge: Math.min(MAX_DODGE, mods.dodge),
+    thorns: mods.thorns,
+    goldMult: 1 + mods.goldPct,
+    xpMult: 1 + mods.xpPct,
+    magicFind: mods.magicFind,
+    bossMult: 1 + mods.bossDmg,
   };
+}
+
+/** Danno elementale totale per colpo. */
+export function elementalDamage(s: Stats): number {
+  return ELEMENTS.reduce((sum, e) => sum + s.elements[e], 0);
 }
 
 /** Statistiche dell'eroe con l'equipaggiamento indossato. */

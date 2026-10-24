@@ -28,6 +28,10 @@ Spuntare `[x]` man mano. Le fasi possono essere ridefinite: è un documento vivo
 - [x] Slot (arma, armatura, accessori…) e rarità
 - [x] Affissi casuali sugli oggetti, inventario, confronto
 - [x] Generatore di oggetti data-driven
+- [x] Varietà 1: 52 affissi con tag e restrizioni per tipo, ibridi, elementi/veleno/sanguinamento/rubavita/schivata/spine/fortuna
+- [ ] Varietà 2: trigger (al critico, all'uccisione, ogni N colpi)
+- [ ] Varietà 3: leggendari unici e set 2/4/6
+- [ ] Varietà 4: crafting con i Frammenti
 
 ## Fase 3 — Skill e build
 - [ ] Sistema di skill attive/passive con trigger e sinergie (tag)

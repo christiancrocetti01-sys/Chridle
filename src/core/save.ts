@@ -16,6 +16,24 @@ export const migrations: Record<number, Migration> = {
   1: (d) => ({ ...newGame(d.createdAt as number), tick: d.tick, lastSeen: d.lastSeen }),
   // v2 → v3: arriva l'equipaggiamento
   2: (d) => ({ ...d, fragments: 0, gear: newGear() }),
+  // v3 → v4: gli affissi possono avere più statistiche ({ stat, value } → mods)
+  3: (d) => {
+    type OldAffix = { id: string; tier: number; stat: string; value: number };
+    type OldItem = { affixes: OldAffix[] };
+    const item = (it: OldItem) => ({
+      ...it,
+      affixes: it.affixes.map(({ id, tier, stat, value }) => ({ id, tier, mods: [{ stat, value }] })),
+    });
+    const gear = d.gear as { equipped: Record<string, OldItem>; inventory: OldItem[] };
+    return {
+      ...d,
+      gear: {
+        ...gear,
+        equipped: Object.fromEntries(Object.entries(gear.equipped).map(([slot, it]) => [slot, item(it)])),
+        inventory: gear.inventory.map(item),
+      },
+    };
+  },
 };
 
 export function serialize(state: GameState): string {

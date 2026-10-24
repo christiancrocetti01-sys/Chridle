@@ -1,7 +1,7 @@
 import { upgradePrice, type CombatEvent } from '../core/combat';
 import { formatNum } from '../core/format';
 import type { GameState } from '../core/state';
-import { KILLS_PER_STAGE, stateStats, xpToNext } from '../core/stats';
+import { KILLS_PER_STAGE, elementalDamage, stateStats, xpToNext, type Stats } from '../core/stats';
 import { createCombatPanel } from './combat';
 import { createGearPanel, type GearActions } from './gear';
 import { UPGRADES, type UpgradeId } from '../data/upgrades';
@@ -96,9 +96,30 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
         ['Velocità', `${s.attackSpeed.toFixed(2)}/s`],
         ['Critico', `${(s.critChance * 100).toFixed(0)}% ×${s.critMult.toFixed(2)}`],
         ['Rigenerazione', `${formatNum(s.regen)}/s`],
+        ...extraStats(s),
         ['Uccisioni', formatNum(state.totals.kills)],
         ['Morti', String(state.totals.deaths)],
       ].map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
     },
   };
+}
+
+const num = (v: number) => (v < 10 ? v.toFixed(1) : formatNum(v));
+const pct = (v: number) => `${(v * 100).toFixed(v < 0.1 ? 1 : 0)}%`;
+
+/** Statistiche speciali, mostrate solo se l'equipaggiamento le dà. */
+function extraStats(s: Stats): string[][] {
+  const rows: [number, string, string][] = [
+    [elementalDamage(s), 'Elementale', `+${num(elementalDamage(s))}/colpo`],
+    [s.poison, 'Veleno', `${num(s.poison)}/s`],
+    [s.bleed, 'Sanguinamento', pct(s.bleed)],
+    [s.lifeSteal, 'Rubavita', pct(s.lifeSteal)],
+    [s.dodge, 'Schivata', pct(s.dodge)],
+    [s.thorns, 'Spine', num(s.thorns)],
+    [s.bossMult - 1, 'Danno ai boss', `+${pct(s.bossMult - 1)}`],
+    [s.goldMult - 1, 'Oro', `+${pct(s.goldMult - 1)}`],
+    [s.xpMult - 1, 'Esperienza', `+${pct(s.xpMult - 1)}`],
+    [s.magicFind, 'Ritrov. magico', `+${pct(s.magicFind)}`],
+  ];
+  return rows.filter(([v]) => v > 0).map(([, k, v]) => [k, v]);
 }

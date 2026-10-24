@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { buyUpgrade, step, upgradePrice, type CombatEvent } from '../src/core/combat';
 import { newGame, type GameState } from '../src/core/state';
 import { equip, salvageUpTo } from '../src/core/items';
-import { KILLS_PER_STAGE, stateStats } from '../src/core/stats';
+import { KILLS_PER_STAGE, elementalDamage, stateStats } from '../src/core/stats';
 import { SLOTS } from '../src/data/items';
 import { UPGRADES } from '../src/data/upgrades';
 
@@ -23,7 +23,9 @@ function autoBuy(state: GameState) {
 /** Misura grezza di potenza: danno al secondo × resistenza. */
 function power(state: GameState): number {
   const s = stateStats(state);
-  return s.atk * s.attackSpeed * (1 + s.critChance * (s.critMult - 1)) * s.maxHp * (1 + s.def / 50);
+  const hit = (s.atk * (1 + s.bleed) + elementalDamage(s)) * (1 + s.critChance * (s.critMult - 1));
+  const dps = hit * s.attackSpeed + s.poison;
+  return dps * s.maxHp * (1 + s.def / 50) * (1 + s.lifeSteal * 10) / (1 - s.dodge);
 }
 
 /** Indossa ogni oggetto che aumenta la potenza, poi smantella il resto. */
