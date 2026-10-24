@@ -6,7 +6,7 @@ import { checkLumi } from './lumi';
 import type { LumoId } from '../data/lumi';
 import { TICK_RATE } from './loop';
 import { SANCTITY_SECONDS } from '../data/corruption';
-import { DROP_CHANCE, rollItem, rollRarity, salvageValue, type Item } from './items';
+import { DROP_CHANCE, rollItem, rollRarity, type Item } from './items';
 import { nextRandom } from './rng';
 import { essenceFor } from './runes';
 import { castOnCrit, castSkills, gainLight, tickSkills, unlockSkills, type SkillEvent } from './skills';
@@ -16,7 +16,8 @@ import type { GameState } from './state';
 import {
   CHAIN_LIGHTNING_ATK, FIRST_STRIKE_MULT, FROSTBITE_SPEED, LUCKY_DROP_CHANCE, SOUL_HARVEST_HEAL,
 } from '../data/uniques';
-import { RARITIES } from '../data/items';
+import { RARITIES, type SlotId } from '../data/items';
+import { takeItem } from './autoequip';
 import { activeVie } from './vie';
 import { perkValue } from './ascension';
 import { elementalVs, enemyAtk, resMult, spawnEnemy, tickEnemy, type MechanicEvent } from './enemies';
@@ -37,8 +38,8 @@ export type CombatEvent =
   | { type: 'levelup'; level: number }
   | { type: 'death' }
   | { type: 'stage'; stage: number }
-  /** Oggetto caduto; se `salvaged` è stato smantellato subito (filtro o inventario pieno). */
-  | { type: 'drop'; item: Item; salvaged: boolean; discovered?: boolean }
+  /** Oggetto caduto: indossato in `slot` se migliora la potenza, altrimenti smantellato (`salvaged`). */
+  | { type: 'drop'; item: Item; salvaged: boolean; slot?: SlotId; discovered?: boolean }
   | { type: 'key'; keys: number }
   /** Impresa completata (id "traccia:gradino"). */
   | { type: 'achievement'; id: string }
@@ -248,10 +249,9 @@ function dropLoot(state: GameState, stage: number, boss: boolean, elite: boolean
   // Viandante: si tira solo con la regola (la sequenza dell'RNG non cambia)
   if (hero.rules.has('luckyDrops') && rarity < RARITIES.length - 1 && nextRandom(state) < LUCKY_DROP_CHANCE) rarity++;
   const item = rollItem(state, gear.nextId++, stage, rarity);
-  const salvaged = item.rarity <= gear.autoSalvage;
-  if (salvaged) state.fragments += salvageValue(item);
-  else gear.inventory.push(item);
-  events.push({ type: 'drop', item, salvaged, discovered: discover(state, item) });
+  const discovered = discover(state, item);
+  const slot = takeItem(state, item);
+  events.push({ type: 'drop', item, salvaged: !slot, slot, discovered });
 }
 
 /** Cambia l'equipaggiamento mantenendo la vita persa (non si cura né si muore cambiando oggetti). */

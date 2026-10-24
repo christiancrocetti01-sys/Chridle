@@ -75,3 +75,11 @@ Spuntare `[x]` man mano. Le fasi possono essere ridefinite: è un documento vivo
   - [x] Altri unici e set (lotto 5: 30 unici, 8 set, 7 regole nuove)
   - [x] Endgame: Abisso, Paragon, Rinascita Solare (salvataggio v20)
   - [x] Collaudo di 10 giorni simulati
+
+## Fase 8 — Tutto automatico (decisione utente, 2026-10-24)
+Manuali restano solo: scelta della Via, quando ascendere/rinascere, modalità (Dungeon/Torre/Raid/Abisso).
+- [x] Equipaggiamento automatico: ogni drop si indossa se alza la potenza, il resto (e il pezzo tolto) → Frammenti; niente inventario
+- [ ] 6 skill fisse (attacco forte, area, colpo nel tempo, cura, scudo, velocità) sbloccate a livello, livelli automatici con la Luce; rune passive automatiche
+- [ ] Crafting automatico (tier e fusione sull'equipaggiamento indossato) e spese permanenti automatiche (oro, Paragon, Ascensione)
+- [ ] Albero (Stelle) automatico per priorità finché non è completo
+- [ ] UI in sola lettura, guida, salvataggio v21 con migrazione, collaudo 8 h / 240 h e ribilanciamento

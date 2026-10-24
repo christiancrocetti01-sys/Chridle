@@ -13,9 +13,8 @@ import { ascend, buyPerk } from './core/ascension';
 import { applyOffline } from './core/offline';
 import { showOfflineReport } from './ui/ascension';
 import { fuseItems, rerollAffix, transferAffix, upgradeAffix } from './core/craft';
-import { equip, salvage, salvageUpTo, unequip } from './core/items';
 import { newGame } from './core/state';
-import { equipBest } from './core/autoequip';
+import { absorbInventory } from './core/autoequip';
 import { createHud } from './ui/hud';
 
 const AUTOSAVE_MS = 10_000;
@@ -35,22 +34,13 @@ function getStorage(): StorageLike {
 function main() {
   const storage = getStorage();
   const state = loadGame(storage) ?? newGame(Date.now());
+  absorbInventory(state);
   const hud = createHud(document.getElementById('hud')!, {
     buy: (id) => buyUpgrade(state, id),
-    equip: (uid, slot) => changeGear(state, () => equip(state.gear, uid, slot)),
-    unequip: (slot) => changeGear(state, () => unequip(state.gear, slot)),
-    salvage: (uid) => (state.fragments += salvage(state.gear, uid)),
-    salvageUpTo: (r) => (state.fragments += salvageUpTo(state.gear, r)),
-    setAutoSalvage: (r) => (state.gear.autoSalvage = r),
     reroll: (uid, i) => changeGear(state, () => rerollAffix(state, uid, i)),
     upgrade: (uid, i) => changeGear(state, () => upgradeAffix(state, uid, i)),
     transfer: (uid, i, d, j) => changeGear(state, () => transferAffix(state, uid, i, d, j)),
     fuse: (uids) => fuseItems(state, uids),
-    equipBest: () => {
-      let n = 0;
-      changeGear(state, () => (n = equipBest(state)) > 0);
-      return n;
-    },
     setSkillSlot: (slot, id) => setSlot(state, slot, id),
     moveSkillSlot: (slot, dir) => moveSlot(state, slot, dir),
     unlockRune: (id) => unlockRune(state, id),

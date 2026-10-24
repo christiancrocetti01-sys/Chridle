@@ -3,31 +3,21 @@ import {
   transferCost, upgradeCost,
 } from '../core/craft';
 import { formatNum } from '../core/format';
-import { setCounts, salvageValue, slotsFor, type Affix, type GearState, type Item } from '../core/items';
+import { setCounts, type Affix, type GearState, type Item } from '../core/items';
 import type { GameState } from '../core/state';
-import { elementalDamage, stateStats, type Stats } from '../core/stats';
 import { RULE_TEXT, SETS, SET_PIECES, UNIQUES } from '../data/uniques';
 import { FUSE_COUNT, FUSE_MAX_RARITY } from '../data/craft';
 import { elem, itemIcon } from './icons';
 import { ITEM_TYPES, TRIGGER_AFFIXES, affixDef, type TriggerDef, type TriggerEffect, RARITIES, SLOTS, STAT_LABELS, TAG_LABELS, POINT_STATS, isPct, type SlotId, type StatKey } from '../data/items';
 
-import { toast } from './fx';
-
 export interface GearActions {
-  equip(uid: number, slot: SlotId): void;
-  unequip(slot: SlotId): void;
-  salvage(uid: number): void;
-  salvageUpTo(rarity: number): void;
-  setAutoSalvage(rarity: number): void;
   reroll(uid: number, i: number): void;
   upgrade(uid: number, i: number): void;
   transfer(uid: number, i: number, donorUid: number, j: number): void;
   fuse(uids: number[]): void;
-  /** Equip automatico: restituisce quanti oggetti ha cambiato. */
-  equipBest(): number;
 }
 
-type Selection = { kind: 'inv'; uid: number } | { kind: 'slot'; slot: SlotId } | null;
+type Selection = { kind: 'slot'; slot: SlotId } | null;
 
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => `&${({ '&': 'amp', '<': 'lt', '>': 'gt', '"': 'quot' })[c]};`);
 
@@ -113,42 +103,6 @@ function itemDetail(it: Item, equipped: Item[]): string {
     <ul class="affixes">${lines.join('')}</ul>`;
 }
 
-const COMPARE: { get: (s: Stats) => number; label: string; pct?: boolean }[] = [
-  { get: (s) => s.atk, label: 'Attacco' },
-  { get: elementalDamage, label: 'Danno elementale' },
-  { get: (s) => s.def, label: 'Difesa' },
-  { get: (s) => s.maxHp, label: 'Vita' },
-  { get: (s) => s.attackSpeed, label: 'Velocità' },
-  { get: (s) => s.critChance, label: 'Critico', pct: true },
-  { get: (s) => s.critMult, label: 'Danno critico', pct: true },
-  { get: (s) => s.regen, label: 'Rigenerazione' },
-  { get: (s) => s.poison, label: 'Veleno/s' },
-  { get: (s) => s.bleed, label: 'Sanguinamento', pct: true },
-  { get: (s) => s.lifeSteal, label: 'Rubavita', pct: true },
-  { get: (s) => s.dodge, label: 'Schivata', pct: true },
-  { get: (s) => s.thorns, label: 'Spine' },
-  { get: (s) => s.bossMult, label: 'Danno ai boss', pct: true },
-  { get: (s) => s.goldMult, label: 'Oro', pct: true },
-  { get: (s) => s.xpMult, label: 'Esperienza', pct: true },
-  { get: (s) => s.magicFind, label: 'Ritrovamento magico', pct: true },
-];
-
-/** Differenze di statistiche se si indossasse `item` nello `slot`. */
-function compare(state: GameState, item: Item | null, slot: SlotId): string {
-  // con tutto il resto (Costellazioni, Vie, Torre, Ascensione): le percentuali si sommano a quelle
-  const now = stateStats(state);
-  const after = { ...state.gear.equipped, [slot]: item ?? undefined };
-  const then = stateStats({ ...state, gear: { ...state.gear, equipped: after } });
-  const rows = COMPARE.map(({ get, label, pct }) => {
-    const d = get(then) - get(now);
-    if (Math.abs(d) < 1e-9) return '';
-    const text = pct ? `${(d * 100).toFixed(1)}%` : Math.abs(d) < 10 ? d.toFixed(2) : formatNum(Math.abs(d));
-    const sign = d > 0 ? '+' : pct || Math.abs(d) < 10 ? '' : '-';
-    return `<span class="${d > 0 ? 'up' : 'down'}">${sign}${text} ${label}</span>`;
-  }).filter(Boolean);
-  return rows.length ? `<div class="compare">${rows.join('')}</div>` : '<div class="compare muted">Nessuna differenza</div>';
-}
-
 /** Affisso scelto da un donatore per il trasferimento, come "uidDonatore:indice". */
 type Pick = string;
 
@@ -195,43 +149,18 @@ function craftPanel(state: GameState, it: Item, pick: Pick): string {
 
 export function createGearPanel(root: HTMLElement, actions: GearActions) {
   root.innerHTML = `
-    <div class="gear-head"><h2 class="section">Equipaggiamento</h2>
-      <button class="btn sm" data-g="best" title="Indossa il pezzo migliore per ogni slot">Equipaggia il meglio</button></div>
+    <h2 class="section">Equipaggiamento</h2>
+    <p class="muted">Ogni oggetto che cade si indossa da solo se aumenta la potenza; gli altri diventano Frammenti.</p>
     <div class="slots" data-g="slots"></div>
-    <h2 class="section">Inventario <span class="muted" data-g="count"></span></h2>
-    <div class="inv" data-g="inv"></div>
     <div class="detail" data-g="detail"></div>
-    <div class="salvage-row">
-      <label>Smantella in automatico
-        <select data-g="auto">
-          <option value="-1">nessuno</option>
-          ${RARITIES.slice(0, -1).map((r, i) => `<option value="${i}">fino a ${r.name}</option>`).join('')}
-        </select>
-      </label>
-      <button class="btn" data-g="bulk">Smantella ora</button>
-      <span><b data-g="frag">0</b> <span class="muted">Frammenti</span></span>
-    </div>`;
+    <div class="salvage-row"><span><b data-g="frag">0</b> <span class="muted">Frammenti</span></span></div>`;
 
   const q = (k: string) => root.querySelector<HTMLElement>(`[data-g="${k}"]`)!;
-  const refs = { slots: q('slots'), inv: q('inv'), detail: q('detail'), count: q('count'), frag: q('frag') };
-  const auto = q('auto') as HTMLSelectElement;
+  const refs = { slots: q('slots'), detail: q('detail'), frag: q('frag') };
   let selected: Selection = null;
   let lastKey = '';
   let current: GameState | null = null;
   let pick: Pick = '';
-
-  auto.addEventListener('change', () => actions.setAutoSalvage(Number(auto.value)));
-  q('best').addEventListener('click', () => {
-    const n = actions.equipBest();
-    toast(n ? `Equipaggiati <b>${n}</b> ${n === 1 ? 'oggetto' : 'oggetti'} migliori` : 'Hai già addosso il meglio', 'gold');
-    selected = null;
-    lastKey = '';
-  });
-  q('bulk').addEventListener('click', () => {
-    const r = Number(auto.value);
-    if (r >= 0) actions.salvageUpTo(r);
-    lastKey = '';
-  });
 
   root.addEventListener('change', (ev) => {
     const t = ev.target as HTMLSelectElement;
@@ -245,8 +174,7 @@ export function createGearPanel(root: HTMLElement, actions: GearActions) {
     if (!t) return;
     const { act, uid, slot, i } = t.dataset;
     const prev = JSON.stringify(selected);
-    if (act === 'pick-inv') selected = { kind: 'inv', uid: Number(uid) };
-    else if (act === 'reroll') actions.reroll(Number(uid), Number(i));
+    if (act === 'reroll') actions.reroll(Number(uid), Number(i));
     else if (act === 'upgrade') actions.upgrade(Number(uid), Number(i));
     else if (act === 'transfer') {
       const [d, j] = pick.split(':').map(Number);
@@ -256,9 +184,6 @@ export function createGearPanel(root: HTMLElement, actions: GearActions) {
       actions.fuse(t.dataset.uids!.split(',').map(Number));
       selected = null;
     } else if (act === 'pick-slot') selected = current?.gear.equipped[slot as SlotId] ? { kind: 'slot', slot: slot as SlotId } : null;
-    else if (act === 'equip') { actions.equip(Number(uid), slot as SlotId); selected = null; }
-    else if (act === 'unequip') { actions.unequip(slot as SlotId); selected = null; }
-    else if (act === 'salvage') { actions.salvage(Number(uid)); selected = null; }
     if (JSON.stringify(selected) !== prev) pick = '';
     lastKey = '';
   });
@@ -268,25 +193,6 @@ export function createGearPanel(root: HTMLElement, actions: GearActions) {
       const it = gear.equipped[selected.slot];
       if (!it) return '';
       return `${itemDetail(it, Object.values(gear.equipped) as Item[])}
-        <div class="actions"><button class="btn" data-act="unequip" data-slot="${selected.slot}">Togli</button></div>
-        ${craftPanel(state, it, pick)}`;
-    }
-    if (selected?.kind === 'inv') {
-      const uid = selected.uid;
-      const it = gear.inventory.find((x) => x.uid === uid);
-      if (!it) return '';
-      const slots = slotsFor(it.type);
-      const cmp = slots.map((s) => {
-        const name = slots.length > 1 ? `${SLOTS.find((x) => x.id === s)!.name} ${s.endsWith('1') ? 'sinistro' : 'destro'}` : 'Equipaggia';
-        const worn = gear.equipped[s];
-        return `<div class="cmp-block">
-          <div class="muted">${worn ? `al posto di ${itemLabel(worn)}` : 'slot vuoto'}</div>
-          ${compare(state, it, s)}
-          <button class="btn" data-act="equip" data-uid="${uid}" data-slot="${s}">${name}</button>
-        </div>`;
-      }).join('');
-      return `${itemDetail(it, Object.values(gear.equipped) as Item[])}${cmp}
-        <div class="actions"><button class="btn" data-act="salvage" data-uid="${uid}">Smantella (+${salvageValue(it)} Frammenti)</button></div>
         ${craftPanel(state, it, pick)}`;
     }
     return '<p class="muted">Tocca un oggetto per vederne i dettagli.</p>';
@@ -300,7 +206,6 @@ export function createGearPanel(root: HTMLElement, actions: GearActions) {
       // il resto del pannello si ridisegna solo quando cambia qualcosa
       const key = JSON.stringify([
         SLOTS.map((s) => gear.equipped[s.id]?.uid ?? 0),
-        gear.inventory.map((i) => i.uid),
         selected,
         pick,
         state.fragments,
@@ -309,7 +214,6 @@ export function createGearPanel(root: HTMLElement, actions: GearActions) {
       ]);
       if (key === lastKey) return;
       lastKey = key;
-      if (auto.value !== String(gear.autoSalvage)) auto.value = String(gear.autoSalvage);
 
       // slot come righe di testo: "Arma ······ Mazza dei Santi 10"
       refs.slots.innerHTML = SLOTS.map(({ id, name }) => {
@@ -320,16 +224,6 @@ export function createGearPanel(root: HTMLElement, actions: GearActions) {
             ? `<span class="slot-item" style="color:${RARITIES[it.rarity].color}">${itemIcon(it.type)}${itemLabel(it)}</span><span class="slot-lv">${it.ilvl}</span>`
             : '<span class="muted">—</span>'}</button>`;
       }).join('');
-      refs.count.textContent = `· ${gear.inventory.length} oggetti`;
-      refs.inv.innerHTML = gear.inventory.length
-        ? gear.inventory.slice().sort((a, b) => b.rarity - a.rarity || b.ilvl - a.ilvl).map((it) => {
-            const sel = selected?.kind === 'inv' && selected.uid === it.uid ? ' sel' : '';
-            const type = ITEM_TYPES.find((t) => t.id === it.type)!.name;
-            const c = RARITIES[it.rarity].color;
-            const glow = it.rarity >= 4 ? ` glow glow-${it.rarity}` : '';
-            return `<button class="inv-item${sel}${glow}" data-act="pick-inv" data-uid="${it.uid}" title="${esc(it.name)} · ${type} · ${it.ilvl}" style="color:${c};border-color:${c};--glow:${c}">${itemIcon(it.type)}<span class="inv-lv">${it.ilvl}</span></button>`;
-          }).join('')
-        : '<p class="muted">Vuoto: i nemici lasciano oggetti, i boss sempre.</p>';
       refs.detail.innerHTML = renderDetail(state, gear);
     },
   };

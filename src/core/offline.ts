@@ -1,5 +1,6 @@
 import { ELITE_CHANCE, ELITE_FROM_STAGE, ELITE_KEY_CHANCE, type Family } from '../data/enemies';
 import { discover } from './collection';
+import { takeItem } from './autoequip';
 import { checkAchievements } from './achievements';
 import { checkLumi } from './lumi';
 import { offlineEfficiency } from './ascension';
@@ -82,19 +83,16 @@ export function applyOffline(state: GameState, seconds: number): OfflineReport |
   const totalDrops = Math.round(drops * factor);
   const real = Math.min(totalDrops, OFFLINE_MAX_ITEMS);
   const frag0 = state.fragments;
-  const inv0 = state.gear.inventory.length;
   const mf = stateStats(state).magicFind;
   let value = 0;
   for (let i = 0; i < real; i++) {
     const item = rollItem(state, state.gear.nextId++, state.stage.current, rollRarity(state, false, mf));
     value += salvageValue(item);
     discover(state, item);
-    if (item.rarity <= state.gear.autoSalvage) state.fragments += salvageValue(item);
-    else state.gear.inventory.push(item);
+    if (takeItem(state, item)) report.items++;
   }
   if (real) state.fragments += (value / real) * (totalDrops - real);
   report.fragments = state.fragments - frag0;
-  report.items = state.gear.inventory.length - inv0;
 
   const lv = state.hero.level;
   gainXp(state, report.xp, []);

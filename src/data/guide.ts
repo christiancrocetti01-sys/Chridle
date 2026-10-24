@@ -27,10 +27,10 @@ export const GUIDE: GuideSection[] = [
   {
     id: 'oggetti', title: 'Oggetti', text: [
       '12 slot e 7 rarità: {rarita}. Più è rara, più affissi ha.',
-      'Tocca un oggetto per vederlo e confrontarlo con quello che indossi (verde = meglio, rosso = peggio).',
-      '<b>Equipaggia il meglio</b> sceglie da solo il pezzo più forte per ogni slot. Gli unici con regole speciali conviene sceglierli a mano.',
+      "Tutto automatico: ogni oggetto che cade si indossa da solo nello slot dove aumenta di più la potenza (danni × resistenza), il pezzo tolto diventa Frammenti.",
+      'Tocca uno slot per vedere l\'oggetto che indossi.',
       "Da Epico in su un oggetto può avere un effetto a scatto (al critico, ogni N colpi…). I <b>leggendari unici</b> hanno una regola fissa, i <b>set</b> danno bonus a 2, 4 e 6 pezzi.",
-      '<b>Smantella</b> ciò che non serve (anche in automatico fino a una rarità) per avere Frammenti.',
+      'Gli oggetti che non migliorano nulla si smantellano subito in Frammenti. Gli unici nuovi entrano comunque nella Collezione.',
       '<b>Crafting</b>: ritira un affisso, migliorane il tier (fino a T5), trasferiscilo da un altro oggetto o fondi 3 oggetti uguali in uno di rarità superiore. Ogni modifica sullo stesso oggetto costa di più.',
     ],
   },
@@ -89,7 +89,7 @@ export const GUIDE: GuideSection[] = [
       'A gioco chiuso il guerriero continua (al 75%, di più con «Veglia Eterna»): al rientro trovi il riepilogo.',
       'Il gioco salva da solo nel browser. Il ♪ in alto accende i suoni.',
       'I pallini rossi sulle schede indicano qualcosa da fare (punti liberi, Ascensione pronta…).',
-      'Bloccato? Prova, in ordine: Equipaggia il meglio → punti nelle Stelle → rune → Potenziamenti → Torre → Ascensione.',
+      'Bloccato? Prova, in ordine: punti nelle Stelle → rune → Potenziamenti → Torre → Ascensione.',
     ],
   },
 ];

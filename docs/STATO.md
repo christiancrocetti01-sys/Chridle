@@ -4,9 +4,11 @@
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
 **Ultimo aggiornamento:** 2026-10-24 (handoff: stile "testo puro" B/N e guida; tutto su `main`)
-**Fase corrente:** **grafica finale** in stile "testo puro" (decisioni in GDD §15).
-**Prossimo passo:** chiedere all'utente il parere dal telefono (`?v=6` contro la cache) su interfaccia e testi della guida;
-poi stesso schema per Vie (`src/ui/vie.ts`), pannello dettagli Stelle (`src/ui/stars.ts`), Modalità (`src/ui/world.ts`).
+**Fase corrente:** **Fase 8 — Tutto automatico** (ROADMAP). Grafica finale in pausa.
+**Prossimo passo:** passo 2, le 6 skill fisse con livelli automatici (proporre piano e chiedere conferma).
+- Passo 1 fatto: `takeItem` in `src/core/autoequip.ts` (drop, premi delle modalità, offline); `absorbInventory` al caricamento
+  svuota gli inventari vecchi. `gear.inventory` resta nello stato ma è sempre vuoto; `autoSalvage` non si usa più.
+  Pannello Oggetti senza inventario (`src/ui/gear.ts`), il crafting manuale resta sugli oggetti indossati fino al passo 3.
 **Online:** `main` = branch (466dbd3 + handoff).
 
 ## Questa sessione (2026-10-24)

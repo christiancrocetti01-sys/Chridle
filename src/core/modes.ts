@@ -1,4 +1,5 @@
-import { RARITIES } from '../data/items';
+import { RARITIES, type SlotId } from '../data/items';
+import { takeItem } from './autoequip';
 import {
   DUNGEON_ESSENCE, DUNGEON_FRAGMENTS, DUNGEON_WAVES, DUNGEON_LEVEL_OFFSET, DUNGEON_MODS, DUNGEON_MODS_COUNT, RAID_BOSSES, RAID_DIVINE,
   RAID_KEYS, RAID_LEVEL_OFFSET, RAID_MIN_RARITY, RAID_MYTHIC, RAID_SECONDS, RAID_STAGE, TOWER_BONUS, TOWER_ESSENCE, TOWER_KEY_EVERY, TOWER_MILESTONE, TOWER_SECONDS,
@@ -16,7 +17,7 @@ import { abyssUnlocked, gainParagon } from './endgame';
 export type ModeEvent =
   /** Fine di una modalità: `ok` = completata (o, per la Torre, nuovo piano raggiunto prima di cadere). */
   | { type: 'mode'; text: string; ok: boolean }
-  | { type: 'drop'; item: Item; salvaged: boolean; discovered?: boolean }
+  | { type: 'drop'; item: Item; salvaged: boolean; slot?: SlotId; discovered?: boolean }
   | { type: 'key'; keys: number };
 
 type Events = { push(e: ModeEvent): void };
@@ -85,8 +86,9 @@ export function leaveMode(state: GameState, events: Events, text?: string, ok = 
 export const dungeonReward = (mods: DungeonModId[]) => 1 + mods.reduce((s, id) => s + DUNGEON_MODS.find((m) => m.id === id)!.reward, 0);
 
 function giveItem(state: GameState, item: Item, events: Events) {
-  state.gear.inventory.push(item);
-  events.push({ type: 'drop', item, salvaged: false, discovered: discover(state, item) });
+  const discovered = discover(state, item);
+  const slot = takeItem(state, item);
+  events.push({ type: 'drop', item, salvaged: !slot, slot, discovered });
 }
 
 /**

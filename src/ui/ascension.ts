@@ -127,7 +127,7 @@ export function showOfflineReport(r: OfflineReport) {
     ['Esperienza', `+${formatNum(r.xp)}${r.levels ? ` · <b>+${r.levels} livelli</b>` : ''}`],
     ['Essenza', `+${formatNum(r.essence)}`],
     ['Frammenti', `+${formatNum(r.fragments)}`],
-    ['Oggetti tenuti', String(r.items)],
+    ['Oggetti indossati', String(r.items)],
     ...(r.keys ? [['Chiavi', `+${r.keys}`] as [string, string]] : []),
   ];
   box.innerHTML = `<div class="modal-box">

@@ -118,31 +118,22 @@ describe('drop', () => {
     while (s.enemy) step(s, ev);
     const drop = ev.find((e) => e.type === 'drop');
     expect(drop && drop.type === 'drop' && drop.item.rarity).toBeGreaterThanOrEqual(1);
-    expect(s.gear.inventory).toHaveLength(1);
+    // all'inizio non si indossa niente: il primo oggetto va sempre addosso
+    expect(drop && drop.type === 'drop' && drop.slot).toBeTruthy();
+    expect(s.gear.inventory).toHaveLength(0);
   });
 
-  it('i nemici normali lasciano oggetti ogni tanto; il filtro smantella in automatico', () => {
+  it('i nemici normali lasciano oggetti ogni tanto; ciò che non serve si smantella', () => {
     const s = newGame(0, 11);
-    s.gear.autoSalvage = 0;
     const ev: CombatEvent[] = [];
     for (let i = 0; i < 6000; i++) step(s, ev);
     const drops = ev.filter((e) => e.type === 'drop');
     const kills = ev.filter((e) => e.type === 'kill').length;
     expect(drops.length).toBeGreaterThan(kills / 16);
     expect(drops.length).toBeLessThan(kills / 3);
-    expect(s.gear.inventory.every((i) => i.rarity > 0)).toBe(true);
+    expect(s.gear.inventory).toHaveLength(0);
+    expect(drops.some((e) => e.type === 'drop' && e.salvaged)).toBe(true);
     expect(s.fragments).toBeGreaterThan(0);
-  });
-
-  it('l\'inventario non ha limite: i drop si tengono anche con 200 oggetti', () => {
-    const s = newGame(0, 3);
-    s.gear.autoSalvage = -1;
-    for (let i = 0; i < 200; i++) s.gear.inventory.push(rollItem(rng(i), 1000 + i, 1, 0));
-    s.stage.kills = KILLS_PER_STAGE;
-    while (!s.enemy) step(s);
-    s.enemy.hp = 1;
-    while (s.enemy) step(s);
-    expect(s.gear.inventory).toHaveLength(201);
   });
 });
 

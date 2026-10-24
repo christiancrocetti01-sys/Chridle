@@ -1,3 +1,4 @@
+import { newGear } from '../src/core/items';
 import { describe, expect, it } from 'vitest';
 import { rewardStage, step, type CombatEvent } from '../src/core/combat';
 import { enemyAtk, makeElite, resMult, spawnEnemy, tickEnemy } from '../src/core/enemies';
@@ -114,17 +115,19 @@ describe('Dungeon, Torre e Raid', () => {
     expect(ev.some((e) => e.type === 'mode' && e.ok)).toBe(true);
     expect(s.mode.kind).toBe('campaign');
     expect(s.fragments).toBeGreaterThan(frag);
-    expect(s.gear.inventory.some((it) => it.special?.kind === 'set')).toBe(true);
+    expect(ev.some((e) => e.type === 'drop' && e.item.special?.kind === 'set')).toBe(true);
     expect(s.stage.current).toBe(30); // la Campagna riprende da dove era
   });
 
   it('Torre: piani a tempo, record e bonus permanente ai traguardi', () => {
     const s = god(newGame(0, 4));
-    const before = stateStats(s).atk;
     expect(enterTower(s)).toBe(true);
     run(s, 300);
     expect(s.tower.best).toBeGreaterThanOrEqual(TOWER_MILESTONE);
-    expect(stateStats(s).atk).toBeCloseTo(before * (1 + towerBonus(s.tower.best)));
+    // senza equipaggiamento (i premi si indossano da soli e le percentuali si sommano)
+    const bare = { ...s, gear: newGear() };
+    const before = stateStats({ ...bare, tower: { ...s.tower, best: 0 } }).atk;
+    expect(stateStats(bare).atk).toBeCloseTo(before * (1 + towerBonus(s.tower.best)));
     expect(s.tower.best).toBeGreaterThanOrEqual(TOWER_KEY_EVERY);
     expect(s.keys).toBe(Math.floor(s.tower.best / TOWER_KEY_EVERY));
     // un eroe debole non regge: torna alla Campagna
@@ -145,10 +148,10 @@ describe('Dungeon, Torre e Raid', () => {
     expect(s.keys).toBe(0);
     while (!s.enemy) step(s);
     Object.assign(s.enemy, { hp: 1, phase: 3, mechanics: [] }); // il boss è enorme: qui interessa solo la ricompensa
-    run(s, 300);
+    const ev = run(s, 300);
     expect(s.mode.kind).toBe('campaign');
     expect(s.totals.raids).toBe(1);
-    expect(s.gear.inventory.some((it) => it.rarity >= 4)).toBe(true);
+    expect(ev.some((e) => e.type === 'drop' && e.item.rarity >= 4)).toBe(true);
   });
 
   it('si può abbandonare; il salvataggio conserva modalità e chiavi', () => {
