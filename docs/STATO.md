@@ -8,7 +8,9 @@
 **Prossimo passo:** 1) chiedere all'utente le risposte a `docs/REVISIONE.md` (domande 1-23, numerate; 15-16 risolte);
 2) applicarle (valori in `src/data/*.ts`, poi spostare le decisioni in GDD e togliere le risposte dal file);
 3) se approva (domanda 22), allineare `main` con fast-forward per pubblicare; 4) lotto 4 (domanda 18).
-**Online:** `main` = sinergie per tag (Fase 3 passo 3). Tutto il resto solo sul branch `claude/epic-allen-10jgj5`.
+**Online:** `main` allineato al branch il 2026-10-24 (Fasi 3.5-7 lotto 3). Prossimo: prova da telefono (domanda 21).
+**Risposte REVISIONE:** ok 1-3,5,8,10-12,17,19,20,22; 6 = chiavi più rare (da fare); 9,13,14 a mia scelta (dopo i contenuti);
+da chiarire 4, 7, 18, 23.
 
 ## Gioco online
 https://christiancrocetti01-sys.github.io/Chridle/ (ogni push su `main` lo ripubblica, ~1 min).
