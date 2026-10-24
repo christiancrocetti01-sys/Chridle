@@ -73,6 +73,12 @@ export const UNIQUES: UniqueDef[] = [
   { id: 'berserker', name: 'Cinghia del Berserker', type: 'cintura', tags: ['fisico', 'rubavita'], mods: [['atkPct', 0.08], ['lifeSteal', 0.01]], rule: 'frenzy' },
   { id: 'eco', name: "Anello dell'Eco", type: 'anello', tags: ['fuoco', 'gelo', 'fulmine', 'sacro', 'ombra'], mods: [['elemPct', 0.08]], rule: 'quickTriggers' },
   { id: 'tormenta', name: 'Stivali della Tormenta', type: 'stivali', tags: ['velocita'], mods: [['speedPct', 0.08], ['dodge', 0.02]], rule: 'hasteStacks' },
+  // lotto 2: la meccanica di una Via su un oggetto (per gli ibridi e per chi segue un'altra Via)
+  { id: 'soleNascente', name: 'Martello del Sole Nascente', type: 'arma', tags: ['sacro', 'difesa'], mods: [['holyPct', 0.2], ['defPct', 0.1]], rule: 'reflect' },
+  { id: 'albaGemella', name: "Lama dell'Alba Gemella", type: 'secondaria', tags: ['velocita', 'critico'], mods: [['speedPct', 0.1], ['crit', 0.03]], rule: 'doubleStrike' },
+  { id: 'torcia', name: "Torcia dell'Inquisitore", type: 'reliquia', tags: ['fuoco'], mods: [['fire', 3], ['firePct', 0.15]], rule: 'burningHits' },
+  { id: 'astrolabio', name: 'Astrolabio del Custode', type: 'amuleto', tags: ['sacro', 'fulmine'], mods: [['holyPct', 0.15], ['lightningPct', 0.15]], rule: 'starSpirit' },
+  { id: 'coronaNera', name: "Corona dell'Eclissi Nera", type: 'elmo', tags: ['ombra'], mods: [['shadow', 3], ['shadowPct', 0.2]], rule: 'bloodPact' },
 ];
 
 export interface SetDef {

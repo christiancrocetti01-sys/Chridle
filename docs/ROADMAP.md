@@ -56,3 +56,6 @@ Spuntare `[x]` man mano. Le fasi possono essere ridefinite: è un documento vivo
 
 ## Fase 7+ — Espansione contenuti
 - [ ] Centinaia di skill/oggetti/perk generati per lotti dai file dati
+  - [x] Lotto 1 (con le Vie): 10 skill delle Vie, affissi Ombra
+  - [x] Lotto 2: regioni delle Vie nelle Costellazioni (~250 nodi, 8 chiavi di volta), 5 unici con le meccaniche delle Vie
+  - [ ] Lotto 3+: rune (12 → ~40), skill (18 → ~30), altri unici e set, Abisso, Codex, Imprese, Lumi
