@@ -3,11 +3,11 @@
 > File di passaggio di consegne tra sessioni. Aggiornato con `/handoff`.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
-**Ultimo aggiornamento:** 2026-10-24 (contenuti finiti: lotto 5 unici/set + endgame; collaudo 10 giorni ok)
-**Fase corrente:** contenuti **completati** (Fase 7). Prossima: **grafica finale** (decisione utente).
-**Prossimo passo:** proporre il piano della grafica finale.
-Domanda aperta: Rinascite ~30-45 in 10 giorni (prima ogni ~10 h, poi ogni ~4-5 h): va bene il ritmo?
-**Online:** `main` = branch: lotto 5 ed endgame pubblicati.
+**Ultimo aggiornamento:** 2026-10-24 (handoff: contenuti e endgame finiti, collaudo 10 giorni ok, tutto su `main`)
+**Fase corrente:** lato tecnico/contenuti **completato**. Prossima: **grafica finale** (decisione utente).
+**Prossimo passo:** proporre all'utente il piano della grafica (3-6 punti, chiedere gusti: palette, font, layout
+mobile, schede lunghe Collezione/Imprese/Paragon da rifare). File UI: `src/ui/*.ts`, `src/style.css`. Niente codice prima del sì.
+**Online:** `main` = branch (6c655bd): lotto 5 ed endgame pubblicati.
 
 ## Gioco online
 https://christiancrocetti01-sys.github.io/Chridle/ (ogni push su `main` lo ripubblica, ~1 min).
@@ -40,12 +40,11 @@ Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` (fast-forward) quand
 - Salvataggio: **v20** (v20 `abyss`/`paragon`/`rebirth`), prima **v19** (v11 `vie`, v12 nemico + `keys`/`mode`/`tower`, v13 `ascension`, v14 campi opzionali rune, v15 `hero.sanctity`, v16 `codex`, v17 `collection`, v18 `achievements`, v19 `lumi`).
 
 ## Test
-- `npm test`: **218 verdi** (21 file), `npm run build` ok.
+- `npm test`: **218 verdi** (21 file), `npm run build` ok (verificato all'handoff).
 - Collaudo: `npm run collaudo -- --ore 8 [--seed N] [--profilo id]` (`scripts/collaudo.ts`, un processo per profilo:
   5 Vie + uno con sessioni offline). 8 h: nessun NaN/crash/salvataggio rotto, ~30 s. Rilanciarlo dopo ogni sistema nuovo.
   Attenzione: nelle catene di comandi non fidarsi di `npm test | grep` (esce 0 anche se fallisce).
 - Ritmo (`tests/combat.test.ts`, senza Via/Stelle): 2 h con equip automatico stage 50.
-
 - Collaudo 10 giorni (`--ore 240`, ~20 min): nessun problema. A 240 h: livello ~125, record 160-175, Abisso 37-47,
   Paragon ~170-190, Soli 58-92, collezione 30/30 (dalle ~70 h), imprese 56-57/69, rune 27-30/40.
 
@@ -53,8 +52,9 @@ Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` (fast-forward) quand
 - Muro al boss di zona 50 (scudo + rigenerazione): con Via+Stelle ~4 h fermi (rigenerazione 1%/s): **voluto**, spinge ad ascendere.
 - Collaudo 8 h dopo il bilanciamento: chiavi 5-6,5/h, Raid ~60% vinti, 5-8 Ascensioni, record 62-99
   (Eclissiarca il più veloce, Paladino/Custode i più lenti), 13-14 rune (la prossima 22-36k Essenza).
-- Meta (sessione 2026-10-24): Collezione 5-14/18 unici, ~25 Imprese su 54, Lumo preferito ~Lv 17 in 8 h di collaudo.
-- Domanda aperta: Neutro (Corruzione vicina a 0) senza bonus va bene?
+- Domande aperte (bilanciamento, non bloccano la grafica): Neutro (Corruzione ~0) senza bonus va bene?
+  Rinascite ~30-45 in 10 giorni (prima ogni ~10 h, poi ogni ~4-5 h): ritmo ok?
+- Numeri oltre 1e308 rimandati (servono verso stage ~3800; a 10 giorni il record è ~175).
 - Il confronto oggetti ora usa tutte le statistiche (`stateStats`), non solo gli oggetti.
 - Revisione da telefono rimandata a dopo la grafica finale (decisione utente).
 - Verifica visiva: script in scratchpad (salvataggio con `npx vite-node`, iniettato con `addInitScript`;
