@@ -210,6 +210,10 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
   bonus permanenti a tema per gradino. Controllo ogni secondo in `step` e dopo l'offline; restano all'Ascensione.
   Collaudo: ~25 imprese in 8 h.
 - **Lumi**: piccoli spiriti compagni con bonus passivi, si fanno salire di livello.
+  **Fatto (2026-10-24):** 6 Lumi (`src/data/lumi.ts`) sbloccati da traguardi (stage 15, primo Dungeon, Torre 10,
+  prima Ascensione, primo Raid, 9 unici). Livelli con l'Essenza (100 × 1,35^lv), restano all'Ascensione.
+  **Uno attivo** (decisione utente): bonus per livello pieno + effetto fisso; gli altri danno il 25% del bonus.
+  Sezione nella scheda Eroe. Collaudo: Lumo preferito ~Lv 17 in 8 h, rune invariate (13-14), Ascensioni 6-9.
 
 ## 15. Direzione artistica
 - **Deciso (2026-10-24): grafica minimale.** Non si vede il personaggio combattere: il gioco è

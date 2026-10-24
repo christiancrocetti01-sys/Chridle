@@ -6,6 +6,7 @@ import { levelRune, socketRune, unlockRune } from './core/runes';
 import { refundStar, resetStars, takeStar } from './core/constellations';
 import { moveSlot, setSlot } from './core/skills';
 import { chooseSecondVia, chooseVia } from './core/vie';
+import { levelLumo, setActiveLumo } from './core/lumi';
 import { enterDungeon, enterRaid, enterTower, leaveMode } from './core/modes';
 import { ascend, buyPerk } from './core/ascension';
 import { applyOffline } from './core/offline';
@@ -59,6 +60,8 @@ function main() {
     buyPerk: (id) => changeGear(state, () => buyPerk(state, id)),
     chooseVia: (id) => changeGear(state, () => chooseVia(state, id)),
     chooseSecondVia: (id) => changeGear(state, () => chooseSecondVia(state, id)),
+    activateLumo: (id) => changeGear(state, () => setActiveLumo(state, id)),
+    levelLumo: (id) => changeGear(state, () => levelLumo(state, id)),
   });
 
   // progresso offline: all'apertura e al ritorno sulla scheda del browser

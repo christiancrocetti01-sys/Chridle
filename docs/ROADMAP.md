@@ -66,5 +66,6 @@ Spuntare `[x]` man mano. Le fasi possono essere ridefinite: è un documento vivo
   - [x] Codex/Bestiario (salvataggio v16) + Furia contro gli stalli
   - [x] Collezione leggendari (salvataggio v17)
   - [x] Imprese (salvataggio v18, solo bonus permanenti)
-  - [ ] Lumi; altri unici e set
+  - [x] Lumi (salvataggio v19)
+  - [ ] Altri unici e set
   - [ ] Endgame: Abisso, Paragon, Rinascita Solare

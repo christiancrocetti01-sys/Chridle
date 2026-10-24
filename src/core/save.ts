@@ -7,6 +7,7 @@ import { newAscension } from './ascension';
 import { newCodex } from './codex';
 import { collectFrom } from './collection';
 import { checkAchievements } from './achievements';
+import { checkLumi, newLumi } from './lumi';
 import type { GearState } from './items';
 import { STATE_VERSION, newGame, type GameState } from './state';
 
@@ -92,6 +93,12 @@ export const migrations: Record<number, Migration> = {
     checkAchievements(s);
     return s as unknown as Record<string, unknown>;
   },
+  // v18 → v19: Lumi (quelli già raggiunti si sbloccano subito)
+  18: (d) => {
+    const s = { ...d, lumi: newLumi() } as unknown as GameState;
+    checkLumi(s);
+    return s as unknown as Record<string, unknown>;
+  },
 };
 
 export function serialize(state: GameState): string {
@@ -119,7 +126,7 @@ export function deserialize(raw: string, migs = migrations, target = STATE_VERSI
 
 function isGameState(d: Record<string, unknown>): d is Record<string, unknown> & GameState {
   const numbers = ['tick', 'createdAt', 'lastSeen', 'rng', 'gold', 'fragments', 'essence', 'respawn', 'keys'].every((k) => typeof d[k] === 'number');
-  const objects = ['hero', 'upgrades', 'stage', 'totals', 'gear', 'skills', 'runes', 'stars', 'vie', 'mode', 'tower', 'ascension', 'collection', 'achievements'].every((k) => d[k] && typeof d[k] === 'object');
+  const objects = ['hero', 'upgrades', 'stage', 'totals', 'gear', 'skills', 'runes', 'stars', 'vie', 'mode', 'tower', 'ascension', 'collection', 'achievements', 'lumi'].every((k) => d[k] && typeof d[k] === 'object');
   return numbers && objects;
 }
 

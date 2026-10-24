@@ -31,6 +31,8 @@ import { VIA_LEVEL, type ViaId } from '../src/data/vie';
 import { RAID_KEYS, RAID_STAGE } from '../src/data/modes';
 import type { PerkId } from '../src/data/ascension';
 import { UNIQUES } from '../src/data/uniques';
+import { levelLumo, lumoCost, setActiveLumo } from '../src/core/lumi';
+import type { LumoId } from '../src/data/lumi';
 
 interface Profile {
   id: string;
@@ -157,6 +159,24 @@ function autoSkills(state: GameState) {
   pool.forEach((d, i) => { if (state.skills.slots[i] !== d.id) setSlot(state, i, d.id); });
 }
 
+/** Lumo preferito per Via (se non è sbloccato, quello di livello più alto). */
+const VIA_LUMO: Record<ViaId, LumoId> = { paladino: 'aureola', lama: 'ombretta', inquisitore: 'fiammella', custode: 'scintilla', eclissiarca: 'ombretta' };
+
+/** Lumi: attiva il preferito e lo alza con l'Essenza avanzata dalle rune (meno di metà del prossimo sblocco). */
+function autoLumi(state: GameState, via: ViaId, order: RuneId[], stats: Counters) {
+  const lv = state.lumi.levels;
+  const owned = (Object.keys(lv) as LumoId[]).sort((a, b) => lv[b]! - lv[a]!);
+  if (!owned.length) return;
+  const want = lv[VIA_LUMO[via]] ? VIA_LUMO[via] : owned[0];
+  if (state.lumi.active !== want) setActiveLumo(state, want);
+  const runesLeft = order.some((id) => !state.runes.levels[id]);
+  for (let n = 0; n < 50; n++) {
+    if (runesLeft && lumoCost(lv[want]!) >= unlockCost(state) / 2) break;
+    if (!levelLumo(state, want)) break;
+    stats.lumiLevels++;
+  }
+}
+
 /** Rune: sblocca la prossima (ordine del profilo), altrimenti alza quelle incastonate; poi incastona. */
 function autoRunes(state: GameState, order: RuneId[], stats: Counters) {
   for (let n = 0; n < 100; n++) {
@@ -203,7 +223,7 @@ interface Counters {
   /** Esiti dei Raid persi (morte o tempo) e Corruzione massima raggiunta. */
   raidLoss: Record<string, number>; maxCorr: number; minCorr: number;
   dungeons: [number, number]; towers: [number, number]; raids: [number, number];
-  ascensions: number; fusions: number; crafts: number; runesUnlocked: number; runeLevels: number;
+  ascensions: number; fusions: number; crafts: number; runesUnlocked: number; runeLevels: number; lumiLevels: number;
   essenceGained: number; offlineHours: number; saveChecks: number;
 }
 
@@ -239,7 +259,7 @@ function simulate(p: Profile) {
   const order = [...RUNES.map((r) => r.id)].sort((a, b) => ((a.charCodeAt(0) * 31 + SEED) % 7) - ((b.charCodeAt(0) * 31 + SEED) % 7));
   const c: Counters = {
     kills: 0, deaths: 0, keysGained: 0, keysOffline: 0, keySrc: {}, raidLoss: {}, maxCorr: 0, minCorr: 0, dungeons: [0, 0], towers: [0, 0], raids: [0, 0],
-    ascensions: 0, fusions: 0, crafts: 0, runesUnlocked: 0, runeLevels: 0, essenceGained: 0, offlineHours: 0, saveChecks: 0,
+    ascensions: 0, fusions: 0, crafts: 0, runesUnlocked: 0, runeLevels: 0, lumiLevels: 0, essenceGained: 0, offlineHours: 0, saveChecks: 0,
   };
   const checkpoints: Checkpoint[] = [];
   const ascendAt: number[] = [];
@@ -286,6 +306,7 @@ function simulate(p: Profile) {
       autoStars(state, p);
       autoSkills(state);
       autoRunes(state, order, c);
+      autoLumi(state, p.via, order, c);
       if (state.mode.kind === 'campaign') {
         // Ascensione quando si è fermi da 15 minuti; prima si spendono le chiavi
         const stuck = t - lastBestTick > 15 * 60 * TICK_RATE;
@@ -336,7 +357,7 @@ function simulate(p: Profile) {
     counters: c, ascendAt, checkpoints,
     end: {
       vie: activeVie(state.vie), stars: state.stars.length, corruption: s.corruption, rules: [...s.rules],
-      skills: state.skills.slots, perks: state.ascension.perks, codex: state.codex, collection: state.collection.length, achievements: state.achievements.length,
+      skills: state.skills.slots, perks: state.ascension.perks, codex: state.codex, collection: state.collection.length, achievements: state.achievements.length, lumi: state.lumi,
       gear: Object.values(state.gear.equipped).map((it) => `${it!.rarity}:${it!.special?.id ?? it!.type}`),
     },
   };
@@ -364,6 +385,7 @@ function report(results: Result[]) {
     console.log(`  fine: Vie ${r.end.vie.join('+')}, stelle ${r.end.stars}, corruzione ${r.end.corruption}, regole ${r.end.rules.join(' ') || '—'}`);
     console.log(`  skill ${r.end.skills.join(', ')}  ·  perk ${JSON.stringify(r.end.perks)}`);
     console.log(`  codex ${JSON.stringify(r.end.codex)}  ·  collezione ${r.end.collection}/${UNIQUES.length}  ·  imprese ${r.end.achievements}`);
+    console.log(`  lumi ${JSON.stringify(r.end.lumi.levels)} attivo ${r.end.lumi.active ?? '—'} (${c.lumiLevels} livelli comprati)`);
   }
   const bad = results.filter((r) => r.issues.length);
   console.log(bad.length ? `\n❌ ${bad.length} profili con problemi` : `\n✅ nessun NaN, crash o salvataggio rotto in ${results.length} profili`);

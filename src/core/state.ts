@@ -10,6 +10,7 @@ import { newAscension, type AscensionState } from './ascension';
 import { newCodex, type CodexState } from './codex';
 import type { CollectionState } from './collection';
 import type { AchievementState } from './achievements';
+import { newLumi, type LumiState } from './lumi';
 
 export interface EnemyState {
   templateId: string;
@@ -115,9 +116,11 @@ export interface GameState {
   collection: CollectionState;
   /** Imprese completate (permanenti). */
   achievements: AchievementState;
+  /** Lumi: spiriti compagni (permanenti). */
+  lumi: LumiState;
 }
 
-export const STATE_VERSION = 18;
+export const STATE_VERSION = 19;
 
 export function newGame(now: number, seed = now >>> 0): GameState {
   const upgrades = { forza: 0, corazza: 0, rapidita: 0 };
@@ -148,5 +151,6 @@ export function newGame(now: number, seed = now >>> 0): GameState {
     codex: newCodex(),
     collection: [],
     achievements: [],
+    lumi: newLumi(),
   };
 }

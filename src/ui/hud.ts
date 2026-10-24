@@ -8,6 +8,7 @@ import { createGearPanel, type GearActions } from './gear';
 import { createSkillPanel, type SkillActions } from './skills';
 import { createStarPanel, type StarActions } from './stars';
 import { createViaPanel, type ViaActions } from './vie';
+import { createLumiPanel, type LumiActions } from './lumi';
 import { createAscensionPanel, type AscensionActions } from './ascension';
 import { createWorldPanel, modeTimer, type WorldActions } from './world';
 import { DUNGEON_WAVES } from '../data/modes';
@@ -15,7 +16,7 @@ import { soundOn, toggleSound } from './sound';
 import { zoneName } from '../data/enemies';
 import { UPGRADES, type UpgradeId } from '../data/upgrades';
 
-export interface HudActions extends GearActions, SkillActions, StarActions, ViaActions, WorldActions, AscensionActions {
+export interface HudActions extends GearActions, SkillActions, StarActions, ViaActions, WorldActions, AscensionActions, LumiActions {
   buy(id: UpgradeId): void;
 }
 
@@ -53,6 +54,7 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
     </nav>
     <div data-pane="hero">
     <div data-k="vie"></div>
+    <div data-k="lumi"></div>
     <h2 class="section">Potenziamenti</h2>
     <div class="upgrades">
       ${UPGRADES.map((u) => `
@@ -106,6 +108,7 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
   const stars = createStarPanel(el('stars'), actions);
   const combat = createCombatPanel(el('combat'));
   const vie = createViaPanel(el('vie'), actions);
+  const lumi = createLumiPanel(el('lumi'), actions);
   const world = createWorldPanel(el('world'), actions);
   const ascension = createAscensionPanel(el('ascension'), actions);
 
@@ -143,6 +146,7 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
       }
 
       vie.update(state);
+      lumi.update(state);
       world.update(state);
       ascension.update(state);
       refs.asc.textContent = state.ascension.scintille >= 1 ? `(${Math.floor(state.ascension.scintille)})` : '';

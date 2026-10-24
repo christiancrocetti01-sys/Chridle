@@ -3,10 +3,10 @@
 > File di passaggio di consegne tra sessioni. Aggiornato con `/handoff`.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
-**Ultimo aggiornamento:** 2026-10-24 (Collezione e Imprese su `main`)
+**Ultimo aggiornamento:** 2026-10-24 (Collezione e Imprese su `main`; Lumi sul branch, `main` da allineare dopo l'ok)
 **Fase corrente:** 7 — contenuti a lotti. Grafica e UI minime fino alla fine (prova da telefono rimandata a dopo).
-**Prossimo passo:** **Lumi** (spiriti compagni con bonus passivi,
-GDD §14); altri unici e set; endgame (Abisso, Paragon, Rinascita) alla fine. Proporre il piano prima.
+**Prossimo passo:** far provare i Lumi e allineare `main`. Poi **altri unici e set** (lotto di dati), poi
+endgame (Abisso, Paragon, Rinascita Solare), poi grafica finale. Proporre il piano prima.
 **Online:** `main` = ef3dad6 (Collezione leggendari, Imprese).
 
 ## Gioco online
@@ -33,10 +33,11 @@ Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` (fast-forward) quand
 - Collezione leggendari: `src/core/collection.ts` (`discover` a ogni drop/fusione/offline), `src/data/collection.ts`,
   bonus in `stateStats`; evento `drop.discovered`; elenco in `src/ui/world.ts`. UI da rifare alla fine.
 - Imprese: `src/core/achievements.ts` (`checkAchievements` in `step` ogni secondo), `src/data/achievements.ts`.
-- Salvataggio: **v18** (v11 `vie`, v12 nemico + `keys`/`mode`/`tower`, v13 `ascension`, v14 campi opzionali rune, v15 `hero.sanctity`, v16 `codex`, v17 `collection`, v18 `achievements`).
+- Lumi: `src/core/lumi.ts` (`checkLumi` accanto alle Imprese), `src/data/lumi.ts`, sezione `src/ui/lumi.ts` (scheda Eroe).
+- Salvataggio: **v19** (v11 `vie`, v12 nemico + `keys`/`mode`/`tower`, v13 `ascension`, v14 campi opzionali rune, v15 `hero.sanctity`, v16 `codex`, v17 `collection`, v18 `achievements`, v19 `lumi`).
 
 ## Test
-- `npm test`: **194 verdi** (19 file), `npm run build` ok.
+- `npm test`: **200 verdi** (20 file), `npm run build` ok.
 - Collaudo: `npm run collaudo -- --ore 8 [--seed N] [--profilo id]` (`scripts/collaudo.ts`, un processo per profilo:
   5 Vie + uno con sessioni offline). 8 h: nessun NaN/crash/salvataggio rotto, ~30 s. Rilanciarlo dopo ogni sistema nuovo.
   Attenzione: nelle catene di comandi non fidarsi di `npm test | grep` (esce 0 anche se fallisce).
