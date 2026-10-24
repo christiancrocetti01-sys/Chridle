@@ -22,6 +22,7 @@ function withTriggers(ids: string[], power = 1, seed = 1): GameState {
   });
   while (!s.enemy) step(s);
   s.enemy.hp = s.enemy.maxHp = 1e12;
+  Object.assign(s.enemy, { atk: 6, attackSpeed: 0.8, family: 'nonmorti' }); // come un Ghoul dello stage 1: l'eroe non muore
   return s;
 }
 
@@ -126,7 +127,7 @@ describe('salvataggio v5', () => {
     const m = deserialize(JSON.stringify(v4))!;
     expect(m.version).toBe(STATE_VERSION);
     expect(m.hero).toMatchObject({ shield: 0, hits: 0, buffs: [] });
-    expect(m.enemy).toMatchObject({ bleed: 0, poison: 0 });
+    expect(m.enemy).toBeNull(); // dalla v12 il nemico in corso si rigenera (zone e famiglie)
     expect([shield, hits, buffs, bleed, poison]).toBeDefined();
   });
 

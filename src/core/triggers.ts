@@ -1,6 +1,7 @@
 import { TRIGGER_AFFIXES, type TriggerDef, type TriggerEffect, type TriggerOn } from '../data/items';
 import { ECHO_RULES, SETS } from '../data/uniques';
 import { TICK_RATE } from './loop';
+import { resMult } from './enemies';
 import { setCounts, type GearState } from './items';
 import type { EnemyState, GameState } from './state';
 import type { Stats } from './stats';
@@ -54,7 +55,7 @@ export function heal(state: GameState, hero: Stats, amount: number) {
   state.hero.hp = Math.min(hero.maxHp, state.hero.hp + amount);
   if (amount <= missing) return;
   const excess = amount - Math.max(0, missing);
-  if (hero.rules.has('overhealHoly') && state.enemy) state.enemy.hp -= excess * hero.elemMult.holy * damageMult(hero, state.enemy);
+  if (hero.rules.has('overhealHoly') && state.enemy) state.enemy.hp -= excess * hero.elemMult.holy * resMult(state.enemy, 'holy') * damageMult(hero, state.enemy);
   else if (hero.rules.has('overhealShield')) state.hero.shield = Math.min(hero.maxHp, state.hero.shield + excess);
 }
 
@@ -85,7 +86,7 @@ export function applyEffect(state: GameState, hero: Stats, e: TriggerEffect, val
   const mult = enemy ? damageMult(hero, enemy) : 1;
   if (e.kind === 'burst') {
     if (!enemy) return null;
-    const amount = value * hero.atk * hero.elemMult[e.element] * mult * (hero.rules.has(ECHO_RULES[e.element]) ? 2 : 1);
+    const amount = value * hero.atk * hero.elemMult[e.element] * resMult(enemy, e.element) * mult * (hero.rules.has(ECHO_RULES[e.element]) ? 2 : 1);
     enemy.hp -= amount;
     return amount;
   }

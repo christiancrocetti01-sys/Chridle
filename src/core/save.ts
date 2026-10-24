@@ -59,6 +59,15 @@ export const migrations: Record<number, Migration> = {
   9: (d) => ({ ...d, stars: [] }),
   // v10 → v11: Vie (sottoclassi)
   10: (d) => ({ ...d, vie: newVie() }),
+  // v11 → v12: zone e famiglie (il nemico in corso si rigenera), chiavi, Dungeon/Torre/Raid
+  11: (d) => ({
+    ...d,
+    enemy: null,
+    keys: 0,
+    mode: { kind: 'campaign' },
+    tower: { best: 0 },
+    totals: { ...(d.totals as object), dungeons: 0, raids: 0 },
+  }),
 };
 
 export function serialize(state: GameState): string {
@@ -85,8 +94,8 @@ export function deserialize(raw: string, migs = migrations, target = STATE_VERSI
 }
 
 function isGameState(d: Record<string, unknown>): d is Record<string, unknown> & GameState {
-  const numbers = ['tick', 'createdAt', 'lastSeen', 'rng', 'gold', 'fragments', 'essence', 'respawn'].every((k) => typeof d[k] === 'number');
-  const objects = ['hero', 'upgrades', 'stage', 'totals', 'gear', 'skills', 'runes', 'stars', 'vie'].every((k) => d[k] && typeof d[k] === 'object');
+  const numbers = ['tick', 'createdAt', 'lastSeen', 'rng', 'gold', 'fragments', 'essence', 'respawn', 'keys'].every((k) => typeof d[k] === 'number');
+  const objects = ['hero', 'upgrades', 'stage', 'totals', 'gear', 'skills', 'runes', 'stars', 'vie', 'mode', 'tower'].every((k) => d[k] && typeof d[k] === 'object');
   return numbers && objects;
 }
 

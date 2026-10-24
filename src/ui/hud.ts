@@ -8,9 +8,12 @@ import { createGearPanel, type GearActions } from './gear';
 import { createSkillPanel, type SkillActions } from './skills';
 import { createStarPanel, type StarActions } from './stars';
 import { createViaPanel, type ViaActions } from './vie';
+import { createWorldPanel, modeTimer, type WorldActions } from './world';
+import { DUNGEON_WAVES } from '../data/modes';
+import { zoneName } from '../data/enemies';
 import { UPGRADES, type UpgradeId } from '../data/upgrades';
 
-export interface HudActions extends GearActions, SkillActions, StarActions, ViaActions {
+export interface HudActions extends GearActions, SkillActions, StarActions, ViaActions, WorldActions {
   buy(id: UpgradeId): void;
 }
 
@@ -29,11 +32,13 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
       <div class="wallet">
         <div class="gold"><span data-k="gold">0</span> <small>oro</small></div>
         <div class="essence"><span data-k="essence">0</span> <small>Essenza</small></div>
+        <div class="essence"><span data-k="keys">0</span> <small>chiavi</small></div>
       </div>
     </header>
     <div class="row"><span>Livello <b data-k="level">1</b></span><span class="muted" data-k="xptext"></span></div>
     <div class="bar"><div class="fill" data-k="xpbar"></div></div>
     <div class="row"><span>Stage <b data-k="stage">1</b> <span class="muted" data-k="best"></span></span><span data-k="progress"></span></div>
+    <div class="row zone-row"><span class="muted" data-k="zone"></span></div>
     <div class="bar"><div class="fill" data-k="stagebar"></div></div>
     <p class="notice" data-k="notice"></p>
     <div class="combat" data-k="combat"></div>
@@ -41,6 +46,7 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
       <button class="tab on" data-tab="hero">Eroe</button>
       <button class="tab" data-tab="skills">Skill</button>
       <button class="tab" data-tab="stars">Stelle <span class="muted" data-k="starpts"></span></button>
+      <button class="tab" data-tab="world">Mondo</button>
     </nav>
     <div data-pane="hero">
     <div data-k="vie"></div>
@@ -59,6 +65,7 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
     </div>
     <div data-pane="skills" hidden><div data-k="skills"></div></div>
     <div data-pane="stars" hidden><div data-k="stars"></div></div>
+    <div data-pane="world" hidden><div data-k="world"></div></div>
 `;
 
   const el = (k: string) => root.querySelector<HTMLElement>(`[data-k="${k}"]`)!;
@@ -66,6 +73,7 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
     gold: el('gold'), level: el('level'), xptext: el('xptext'), xpbar: el('xpbar'),
     stage: el('stage'), best: el('best'), progress: el('progress'), stagebar: el('stagebar'),
     notice: el('notice'), stats: el('stats'), essence: el('essence'), starpts: el('starpts'),
+    keys: el('keys'), zone: el('zone'),
   };
 
   root.querySelectorAll<HTMLButtonElement>('[data-up]').forEach((b) =>
@@ -84,6 +92,7 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
   const stars = createStarPanel(el('stars'), actions);
   const combat = createCombatPanel(el('combat'));
   const vie = createViaPanel(el('vie'), actions);
+  const world = createWorldPanel(el('world'), actions);
 
   let frame = 0;
   return {
@@ -105,7 +114,11 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
       refs.progress.textContent = bossNow ? 'BOSS' : `${state.stage.kills} / ${KILLS_PER_STAGE}`;
       refs.progress.classList.toggle('boss', !!bossNow);
       refs.stagebar.style.width = `${Math.min(1, state.stage.kills / KILLS_PER_STAGE) * 100}%`;
-      refs.notice.textContent = state.stage.auto ? '' : "Troppo forte: allenamento finché non sali di livello.";
+      const m = state.mode;
+      refs.notice.textContent = m.kind === 'dungeon' ? `Dungeon livello ${m.level}: nemico ${Math.min(m.wave + 1, DUNGEON_WAVES + 1)} di ${DUNGEON_WAVES + 1} (la Campagna è in pausa)`
+        : m.kind === 'tower' ? `Torre dell'Alba: piano ${m.floor} · ${modeTimer(state)} (record ${state.tower.best})`
+        : m.kind === 'raid' ? `Raid: ${m.name} · ${modeTimer(state)}`
+        : state.stage.auto ? '' : "Troppo forte: allenamento finché non sali di livello.";
 
       for (const u of UPGRADES) {
         const price = upgradePrice(state, u.id);
@@ -115,6 +128,9 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
       }
 
       vie.update(state);
+      world.update(state);
+      refs.keys.textContent = String(state.keys);
+      refs.zone.textContent = zoneName(state.stage.current);
       gear.update(state);
       skills.update(state);
       stars.update(state);

@@ -18,6 +18,7 @@ function fighting(level = 30) {
   while (!s.enemy) step(s);
   s.enemy!.hp = s.enemy!.maxHp = 1e12;
   s.enemy!.atk = 0;
+  s.enemy!.family = 'bestie'; // niente resistenze a sacro e ombra
   return s;
 }
 

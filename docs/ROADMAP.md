@@ -41,8 +41,8 @@ Spuntare `[x]` man mano. Le fasi possono essere ridefinite: è un documento vivo
 - [x] Classi e sottoclassi (5 Vie, 2 skill ciascuna, seconda Via con l’Ascensione)
 
 ## Fase 4 — Contenuti
-- [ ] Zone/stage con progressione
-- [ ] Dungeon, Torre infinita, Raid/boss
+- [x] Zone/stage con progressione (10 zone, 5 famiglie con resistenze, 15 nemici, élite, boss di zona con meccaniche)
+- [x] Dungeon (chiavi, modificatori, set garantito), Torre dell’Alba (bonus permanenti), Raid in 3 fasi
 
 ## Fase 5 — Progressione infinita
 - [ ] Prestige / rinascita con valuta meta

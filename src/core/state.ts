@@ -1,4 +1,6 @@
 import type { UpgradeId } from '../data/upgrades';
+import type { EliteId, Family, Mechanic } from '../data/enemies';
+import type { DungeonModId } from '../data/modes';
 import { newGear, type GearState } from './items';
 import { newRunes, type RuneState } from './runes';
 import { newSkills, type SkillState } from './skills';
@@ -7,7 +9,19 @@ import { newVie, type ViaState } from './vie';
 
 export interface EnemyState {
   templateId: string;
+  name: string;
+  family: Family;
   boss: boolean;
+  /** Boss di fine zona, di dungeon o di raid: ha meccaniche. */
+  zoneBoss: boolean;
+  elite: EliteId | null;
+  mechanics: Mechanic[];
+  /** Tick passati in combattimento (per furia ed evocazioni). */
+  age: number;
+  /** Lo scudo a metà vita è già stato usato. */
+  shielded: boolean;
+  /** Fase del raid (1-3). */
+  phase: number;
   hp: number;
   maxHp: number;
   atk: number;
@@ -36,6 +50,13 @@ export interface HeroState {
   /** Risorsa delle skill attive: si accumula colpendo. */
   light: number;
 }
+
+/** Modalità in corso: la Campagna resta in pausa mentre si gioca un Dungeon, la Torre o un Raid. */
+export type Mode =
+  | { kind: 'campaign' }
+  | { kind: 'dungeon'; level: number; wave: number; mods: DungeonModId[] }
+  | { kind: 'tower'; floor: number; ticksLeft: number }
+  | { kind: 'raid'; level: number; ticksLeft: number; name: string };
 
 export interface GameState {
   /** Versione dello schema del salvataggio. */
@@ -71,10 +92,15 @@ export interface GameState {
   enemy: EnemyState | null;
   /** Tick mancanti prima che compaia il prossimo nemico. */
   respawn: number;
-  totals: { kills: number; deaths: number; gold: number };
+  totals: { kills: number; deaths: number; gold: number; dungeons: number; raids: number };
+  /** Chiavi dei Dungeon (anche per i Raid). */
+  keys: number;
+  mode: Mode;
+  /** Torre dell'Alba: piano record. */
+  tower: { best: number };
 }
 
-export const STATE_VERSION = 11;
+export const STATE_VERSION = 12;
 
 export function newGame(now: number, seed = now >>> 0): GameState {
   const upgrades = { forza: 0, corazza: 0, rapidita: 0 };
@@ -97,6 +123,9 @@ export function newGame(now: number, seed = now >>> 0): GameState {
     stage: { current: 1, best: 1, kills: 0, auto: true },
     enemy: null,
     respawn: 0,
-    totals: { kills: 0, deaths: 0, gold: 0 },
+    totals: { kills: 0, deaths: 0, gold: 0, dungeons: 0, raids: 0 },
+    keys: 0,
+    mode: { kind: 'campaign' },
+    tower: { best: 0 },
   };
 }

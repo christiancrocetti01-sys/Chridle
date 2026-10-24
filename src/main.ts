@@ -6,6 +6,7 @@ import { levelRune, socketRune, unlockRune } from './core/runes';
 import { refundStar, resetStars, takeStar } from './core/constellations';
 import { moveSlot, setSlot } from './core/skills';
 import { chooseSecondVia, chooseVia } from './core/vie';
+import { enterDungeon, enterRaid, enterTower, leaveMode } from './core/modes';
 import { fuseItems, rerollAffix, transferAffix, upgradeAffix } from './core/craft';
 import { equip, salvage, salvageUpTo, unequip } from './core/items';
 import { newGame } from './core/state';
@@ -47,6 +48,10 @@ function main() {
     takeStar: (id) => takeStar(state, id),
     refundStar: (id) => refundStar(state, id),
     resetStars: () => resetStars(state),
+    enterDungeon: () => enterDungeon(state),
+    enterTower: () => enterTower(state),
+    enterRaid: () => enterRaid(state),
+    leaveMode: () => leaveMode(state, []),
     chooseVia: (id) => changeGear(state, () => chooseVia(state, id)),
     chooseSecondVia: (id) => changeGear(state, () => chooseSecondVia(state, id)),
   });

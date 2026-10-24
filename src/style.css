@@ -227,3 +227,10 @@ html, body {
 .via.second { border-color: #6d7bd8; }
 .via-tag { color: var(--gold); font-size: 0.85em; }
 .via-more summary { cursor: pointer; margin-bottom: 6px; }
+
+/* Mondo */
+.zone-row { margin-top: 2px; font-size: 0.85em; }
+.enemy-info { font-size: 0.75em; margin-top: 3px; min-height: 1.2em; }
+.mode-banner { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding: 8px 10px; border: 1px solid var(--gold-dim); color: var(--gold); background: rgba(232, 193, 90, 0.06); }
+.tabs { overflow-x: auto; scrollbar-width: none; }
+.tab { flex: 0 0 auto; }

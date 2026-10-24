@@ -2,12 +2,14 @@ import type { CombatEvent } from '../core/combat';
 import { formatNum } from '../core/format';
 import type { GameState } from '../core/state';
 import { stateStats } from '../core/stats';
-import { BOSSES, ENEMIES } from '../data/enemies';
 import { RARITIES } from '../data/items';
+import { FAMILIES, type Mechanic } from '../data/enemies';
+import { modeTimer, resText } from './world';
+
+const MECHANIC_SHORT: Record<Mechanic, string> = { enrage: 'furia', shield: 'scudo', summon: 'evocazioni', regen: 'rigenerazione' };
 import { MAX_LIGHT, skillDef } from '../data/skills';
 
 const LOG_SIZE = 6;
-const NAMES = new Map([...ENEMIES, ...BOSSES].map((e) => [e.id, e.name]));
 
 /** Pannello di combattimento minimale: barre vita e registro degli eventi importanti. */
 export function createCombatPanel(root: HTMLElement) {
@@ -20,10 +22,11 @@ export function createCombatPanel(root: HTMLElement) {
     <div class="fighter">
       <div class="row"><span data-c="enemy"></span><span class="muted" data-c="enemyhp"></span></div>
       <div class="bar hp enemy"><div class="fill" data-c="enemybar"></div></div>
+      <div class="enemy-info muted" data-c="einfo"></div>
     </div>
     <ul class="log" data-c="log"></ul>`;
   const q = (k: string) => root.querySelector<HTMLElement>(`[data-c="${k}"]`)!;
-  const refs = { herohp: q('herohp'), herobar: q('herobar'), enemy: q('enemy'), enemyhp: q('enemyhp'), enemybar: q('enemybar'), lightbar: q('lightbar'), log: q('log') };
+  const refs = { herohp: q('herohp'), herobar: q('herobar'), enemy: q('enemy'), enemyhp: q('enemyhp'), enemybar: q('enemybar'), einfo: q('einfo'), lightbar: q('lightbar'), log: q('log') };
   const lines: HTMLLIElement[] = [];
 
   function log(text: string, cls = '', color?: string) {
@@ -61,6 +64,9 @@ export function createCombatPanel(root: HTMLElement) {
         else if (e.type === 'hit' && e.crit && e.target === 'enemy') log(`Colpo critico: ${formatNum(e.amount)}`, 'crit');
         else if (e.type === 'proc') proc(e.name, e.id);
         else if (e.type === 'skill') proc(e.name, `skill:${e.id}`, 'Skill');
+        else if (e.type === 'mechanic') log(e.text, 'down');
+        else if (e.type === 'mode') log(e.text, e.ok ? 'gold' : 'down');
+        else if (e.type === 'key') log(`Chiave trovata! (${e.keys})`, 'gold');
         else if (e.type === 'unlock') log(`Nuova skill: ${skillDef(e.id)?.name}`, 'gold');
       }
     },
@@ -72,8 +78,11 @@ export function createCombatPanel(root: HTMLElement) {
       refs.lightbar.style.width = `${(state.hero.light / MAX_LIGHT) * 100}%`;
       refs.herobar.style.width = `${(hp / s.maxHp) * 100}%`;
       const e = state.enemy;
-      refs.enemy.textContent = e ? `${e.boss ? 'BOSS · ' : ''}${NAMES.get(e.templateId) ?? e.templateId}` : '…';
-      refs.enemy.classList.toggle('boss', !!e?.boss);
+      refs.enemy.textContent = e ? `${e.boss ? 'BOSS · ' : e.elite ? 'ÉLITE · ' : ''}${e.name}` : '…';
+      refs.enemy.classList.toggle('boss', !!e?.boss || !!e?.elite);
+      const timer = modeTimer(state);
+      const mech = e?.mechanics.length ? ` · ${e.mechanics.map((x) => MECHANIC_SHORT[x]).join(', ')}` : '';
+      refs.einfo.textContent = e ? `${FAMILIES[e.family].name} · ${resText(e.family)}${mech}${timer ? ` · ⏳ ${timer}` : ''}` : '';
       refs.enemyhp.textContent = e ? `${formatNum(Math.max(0, e.hp))} / ${formatNum(e.maxHp)}` : '';
       refs.enemybar.style.width = e ? `${(Math.max(0, e.hp) / e.maxHp) * 100}%` : '0%';
     },

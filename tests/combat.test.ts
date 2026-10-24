@@ -66,7 +66,8 @@ describe('combattimento', () => {
     run(s, 10);
     expect(s.enemy?.boss).toBe(true);
     s.enemy!.hp = 1;
-    const ev = run(s, 30);
+    const ev: CombatEvent[] = [];
+    while (!ev.some((e) => e.type === 'stage')) step(s, ev);
     expect(ev).toContainEqual({ type: 'stage', stage: 2 });
     expect(s.stage.kills).toBe(0);
   });

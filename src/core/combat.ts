@@ -1,4 +1,4 @@
-import { BOSSES, ENEMIES } from '../data/enemies';
+import { ELITE_DROP, ELITE_KEY_CHANCE, ELITE_REWARD, VAMPIRIC_SHARE } from '../data/enemies';
 import { UPGRADES, type UpgradeId } from '../data/upgrades';
 import { TICK_RATE } from './loop';
 import { DROP_CHANCE, INVENTORY_SIZE, rollItem, rollRarity, salvageValue, type Item } from './items';
@@ -9,7 +9,10 @@ import { damageMult, fireTriggers, gearTriggers, heal, tickBuffs, type ActiveTri
 import { BURNING_SHARE, DOUBLE_STRIKE_CHANCE, REFLECT_SHARE, SPIRIT_ATK } from '../data/vie';
 import type { GameState } from './state';
 import { activeVie } from './vie';
-import { KILLS_PER_STAGE, elementalDamage, mitigate, stateStats, stageEnemy, upgradeCost, xpToNext, type Stats } from './stats';
+import { elementalVs, enemyAtk, resMult, spawnEnemy, tickEnemy, type MechanicEvent } from './enemies';
+import { onModeDeath, onModeKill, tickMode, type ModeEvent } from './modes';
+import { TOWER_BASE, TOWER_STEP } from '../data/modes';
+import { KILLS_PER_STAGE, mitigate, stateStats, stageEnemy, upgradeCost, xpToNext, type Stats } from './stats';
 
 export type CombatEvent =
   | { type: 'hit'; target: 'hero' | 'enemy'; amount: number; crit: boolean }
@@ -24,7 +27,10 @@ export type CombatEvent =
   | { type: 'death' }
   | { type: 'stage'; stage: number }
   /** Oggetto caduto; se `salvaged` è stato smantellato subito (filtro o inventario pieno). */
-  | { type: 'drop'; item: Item; salvaged: boolean };
+  | { type: 'drop'; item: Item; salvaged: boolean }
+  | { type: 'key'; keys: number }
+  | MechanicEvent
+  | ModeEvent;
 
 /** Frazione della riserva di sanguinamento (veloce) e di veleno (lento) inflitta a ogni tick. */
 export const BLEED_RATE = 0.1;
@@ -37,9 +43,11 @@ export const RESPAWN_TICKS = 6;
 export function step(state: GameState, events: CombatEvent[] = []): CombatEvent[] {
   state.tick++;
   const hero = stateStats(state);
-  heal(state, hero, hero.regen / TICK_RATE);
+  const m = state.mode;
+  if (!(m.kind === 'dungeon' && m.mods.includes('tenebra'))) heal(state, hero, hero.regen / TICK_RATE);
   tickBuffs(state);
   tickSkills(state);
+  tickMode(state, events);
 
   if (!state.enemy) {
     if (state.respawn > 0) state.respawn--;
@@ -49,6 +57,8 @@ export function step(state: GameState, events: CombatEvent[] = []): CombatEvent[
   const enemy = state.enemy;
   const dmgMult = damageMult(hero, enemy);
   const triggers = gearTriggers(state.gear);
+  const summon = tickEnemy(enemy, state.mode.kind === 'raid', events);
+  if (summon > 0 && hitHero(state, hero, summon, events)) return events;
 
   // danni nel tempo: veleno fisso dagli oggetti + riserve di sanguinamento e veleno sul nemico
   const bleed = enemy.bleed > 0.5 ? enemy.bleed * BLEED_RATE : enemy.bleed;
@@ -60,7 +70,7 @@ export function step(state: GameState, events: CombatEvent[] = []): CombatEvent[
 
   // Custode Stellare: lo spirito colpisce una volta al secondo
   if (hero.rules.has('starSpirit') && state.tick % TICK_RATE === 0) {
-    enemy.hp -= hero.atk * SPIRIT_ATK * hero.elemMult.holy * dmgMult;
+    enemy.hp -= hero.atk * SPIRIT_ATK * hero.elemMult.holy * resMult(enemy, 'holy') * dmgMult;
     if (enemy.hp <= 0) return kill(state, events);
   }
 
@@ -90,17 +100,7 @@ export function step(state: GameState, events: CombatEvent[] = []): CombatEvent[
       if (enemy.hp <= 0) kill(state, events);
       return events;
     }
-    let amount = mitigate(enemy.atk, hero.def);
-    if (hero.rules.has('reflect')) enemy.hp -= amount * REFLECT_SHARE * dmgMult;
-    const absorbed = Math.min(state.hero.shield, amount);
-    state.hero.shield -= absorbed;
-    amount -= absorbed;
-    state.hero.hp -= amount;
-    events.push({ type: 'hit', target: 'hero', amount, crit: false });
-    if (state.hero.hp <= 0) {
-      onDeath(state, events);
-      return events;
-    }
+    if (hitHero(state, hero, enemyAtk(enemy), events)) return events;
     enemy.hp -= hero.thorns * dmgMult;
     fireTriggers(state, hero, triggers, 'struck', events);
     if (enemy.hp <= 0) kill(state, events);
@@ -114,8 +114,8 @@ function strike(state: GameState, hero: Stats, dmgMult: number, triggers: Active
   const crit = (nextRandom(state) < hero.critChance || state.hero.nextCrit) && !hero.rules.has('noCrit');
   state.hero.nextCrit = false;
   const mult = crit ? hero.critMult : 1;
-  const physical = mitigate(hero.atk * mult, enemy.def) * dmgMult;
-  const amount = physical + elementalDamage(hero) * mult * dmgMult;
+  const physical = mitigate(hero.atk * mult, enemy.def) * resMult(enemy, 'physical') * dmgMult;
+  const amount = physical + elementalVs(hero, enemy) * mult * dmgMult;
   enemy.hp -= amount;
   enemy.bleed += physical * hero.bleed + (crit && hero.rules.has('critBleed') ? amount : 0);
   if (hero.rules.has('burningHits')) enemy.poison += amount * BURNING_SHARE;
@@ -135,34 +135,39 @@ function kill(state: GameState, events: CombatEvent[]): CombatEvent[] {
   return events;
 }
 
-export function spawnEnemy(state: GameState) {
-  const boss = state.stage.kills >= KILLS_PER_STAGE;
-  const pool = boss ? BOSSES : ENEMIES;
-  const t = pool[Math.floor(nextRandom(state) * pool.length)];
-  const base = stageEnemy(state.stage.current);
-  const maxHp = base.hp * t.hp;
-  return {
-    templateId: t.id,
-    boss,
-    hp: maxHp,
-    maxHp,
-    atk: base.atk * t.atk,
-    def: base.def,
-    attackSpeed: t.attackSpeed,
-    swing: 0,
-    bleed: 0,
-    poison: 0,
-  };
+/** L'eroe subisce un colpo (difesa, riflesso, scudo, vampirismo). Restituisce true se muore. */
+function hitHero(state: GameState, hero: Stats, raw: number, events: CombatEvent[]): boolean {
+  const enemy = state.enemy!;
+  let amount = mitigate(raw, hero.def);
+  if (hero.rules.has('reflect')) enemy.hp -= amount * REFLECT_SHARE * damageMult(hero, enemy);
+  const absorbed = Math.min(state.hero.shield, amount);
+  state.hero.shield -= absorbed;
+  amount -= absorbed;
+  state.hero.hp -= amount;
+  if (enemy.elite === 'vampirico') enemy.hp = Math.min(enemy.maxHp, enemy.hp + amount * VAMPIRIC_SHARE);
+  events.push({ type: 'hit', target: 'hero', amount, crit: false });
+  if (state.hero.hp > 0) return false;
+  onDeath(state, events);
+  return true;
+}
+
+/** Stage che determina ricompense e livello oggetto: quello della modalità in corso. */
+export function rewardStage(state: GameState): number {
+  const m = state.mode;
+  return m.kind === 'campaign' ? state.stage.current : m.kind === 'tower' ? TOWER_BASE + m.floor * TOWER_STEP : m.level;
 }
 
 function onKill(state: GameState, events: CombatEvent[]) {
-  const boss = state.enemy!.boss;
-  const base = stageEnemy(state.stage.current);
+  const enemy = state.enemy!;
+  const { boss, elite, zoneBoss } = enemy;
+  const stage = rewardStage(state);
+  const base = stageEnemy(stage);
   const hero = stateStats(state);
-  const mult = boss ? 5 : 1;
+  const raid = state.mode.kind === 'raid';
+  const mult = raid ? 20 : zoneBoss ? 10 : boss ? 5 : elite ? ELITE_REWARD : 1;
   const gold = base.gold * mult * hero.goldMult;
   const xp = base.xp * mult * hero.xpMult;
-  const essence = essenceFor(state.stage.current, boss);
+  const essence = essenceFor(stage, boss) * (elite ? ELITE_REWARD : 1);
   state.gold += gold;
   state.essence += essence;
   state.totals.gold += gold;
@@ -174,8 +179,17 @@ function onKill(state: GameState, events: CombatEvent[]) {
   events.push({ type: 'kill', gold, xp, essence, boss });
   fireTriggers(state, hero, gearTriggers(state.gear), 'kill', events);
   gainXp(state, xp, events);
-  dropLoot(state, boss, events);
+  if (!raid) dropLoot(state, stage, boss, !!elite, events);
 
+  if (state.mode.kind !== 'campaign') {
+    onModeKill(state, events);
+    return;
+  }
+  // chiavi: dal boss di zona sempre, dalle élite a volte (si tira solo per le élite)
+  if (zoneBoss || (elite && nextRandom(state) < ELITE_KEY_CHANCE)) {
+    state.keys++;
+    events.push({ type: 'key', keys: state.keys });
+  }
   if (boss) {
     state.stage.kills = 0;
     state.stage.current++;
@@ -186,10 +200,10 @@ function onKill(state: GameState, events: CombatEvent[]) {
   }
 }
 
-function dropLoot(state: GameState, boss: boolean, events: CombatEvent[]) {
-  if (!boss && nextRandom(state) >= DROP_CHANCE) return;
+function dropLoot(state: GameState, stage: number, boss: boolean, elite: boolean, events: CombatEvent[]) {
+  if (!boss && nextRandom(state) >= (elite ? ELITE_DROP : DROP_CHANCE)) return;
   const gear = state.gear;
-  const item = rollItem(state, gear.nextId++, state.stage.current, rollRarity(state, boss, stateStats(state).magicFind));
+  const item = rollItem(state, gear.nextId++, stage, rollRarity(state, boss, stateStats(state).magicFind));
   const salvaged = item.rarity <= gear.autoSalvage || gear.inventory.length >= INVENTORY_SIZE;
   if (salvaged) state.fragments += salvageValue(item);
   else gear.inventory.push(item);
@@ -220,6 +234,7 @@ function gainXp(state: GameState, xp: number, events: CombatEvent[]) {
 function onDeath(state: GameState, events: CombatEvent[]) {
   state.totals.deaths++;
   const wasBoss = state.enemy?.boss;
+  const inMode = state.mode.kind !== 'campaign';
   state.enemy = null;
   state.respawn = RESPAWN_TICKS * 2;
   state.hero.shield = 0;
@@ -229,6 +244,11 @@ function onDeath(state: GameState, events: CombatEvent[]) {
   state.hero.light = 0;
   state.hero.hp = stateStats(state).maxHp;
   state.hero.swing = 0;
+  if (inMode) {
+    onModeDeath(state, events);
+    events.push({ type: 'death' });
+    return;
+  }
   state.stage.auto = false;
   if (!wasBoss && state.stage.current > 1) {
     // lo stage precedente era già completato: al prossimo livello si riaffronta subito il suo boss
