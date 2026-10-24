@@ -181,3 +181,20 @@ html, body {
 .set-title { margin-top: 6px; color: #3ecf8e; }
 .affixes.set .set-on { color: #3ecf8e; }
 .affixes.unique { color: #e6b85c; }
+
+/* Schede e skill */
+.tabs { display: flex; gap: 4px; margin-top: 14px; border-bottom: 1px solid #2a2f4a; }
+.tab { padding: 8px 16px; background: transparent; color: var(--muted); border: 1px solid transparent; border-bottom: none; font: inherit; cursor: pointer; }
+.tab.on { color: var(--gold); border-color: #2a2f4a; background: #080a17; margin-bottom: -1px; }
+.bar.light { height: 4px; }
+.bar.light .fill { background: linear-gradient(90deg, #6d7bd8, #cfe0ff); transition: none; }
+.bar.cd { height: 3px; margin-top: 6px; }
+.bar.cd .fill { background: #3a3f5c; transition: none; }
+.bar.cd .fill.ready { background: var(--gold); }
+.skill-slots, .skill-list { display: grid; gap: 6px; }
+.skill-slot, .skill-row { padding: 8px 10px; border: 1px solid #2a2f4a; background: #0b0e1f; min-width: 0; }
+.skill-slot.empty { opacity: 0.6; }
+.skill-row.locked { opacity: 0.5; }
+.skill-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 4px 8px; }
+.skill-btns { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.skill-info { margin-top: 4px; font-size: 0.85em; }

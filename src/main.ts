@@ -2,6 +2,7 @@ import './style.css';
 import { MAX_TICKS_PER_FRAME, TICK_MS, stepAccumulator } from './core/loop';
 import { loadGame, saveGame, type StorageLike } from './core/save';
 import { buyUpgrade, changeGear, step, type CombatEvent } from './core/combat';
+import { moveSlot, setSlot } from './core/skills';
 import { fuseItems, rerollAffix, transferAffix, upgradeAffix } from './core/craft';
 import { equip, salvage, salvageUpTo, unequip } from './core/items';
 import { newGame } from './core/state';
@@ -35,6 +36,8 @@ function main() {
     upgrade: (uid, i) => changeGear(state, () => upgradeAffix(state, uid, i)),
     transfer: (uid, i, d, j) => changeGear(state, () => transferAffix(state, uid, i, d, j)),
     fuse: (uids) => fuseItems(state, uids),
+    setSkillSlot: (slot, id) => setSlot(state, slot, id),
+    moveSkillSlot: (slot, dir) => moveSlot(state, slot, dir),
   });
 
   let acc = 0;

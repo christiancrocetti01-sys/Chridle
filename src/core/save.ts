@@ -1,4 +1,5 @@
 import { newGear } from './items';
+import { newSkills } from './skills';
 import { STATE_VERSION, newGame, type GameState } from './state';
 
 export const SAVE_KEY = 'chridle.save';
@@ -44,6 +45,11 @@ export const migrations: Record<number, Migration> = {
   5: (d) => ({ ...d, hero: { ...(d.hero as object), nextCrit: false } }),
   // v6 → v7: crafting (contatore `crafts` opzionale sugli oggetti, assente = 0): niente da convertire
   6: (d) => d,
+  // v7 → v8: Luce e skill attive (le skill già sbloccate dal livello vanno negli slot)
+  7: (d) => {
+    const hero = d.hero as { level: number };
+    return { ...d, hero: { ...hero, light: 0 }, skills: newSkills(hero.level) };
+  },
 };
 
 export function serialize(state: GameState): string {
@@ -69,7 +75,7 @@ export function deserialize(raw: string, migs = migrations, target = STATE_VERSI
 
 function isGameState(d: Record<string, unknown>): d is Record<string, unknown> & GameState {
   const numbers = ['tick', 'createdAt', 'lastSeen', 'rng', 'gold', 'fragments', 'respawn'].every((k) => typeof d[k] === 'number');
-  const objects = ['hero', 'upgrades', 'stage', 'totals', 'gear'].every((k) => d[k] && typeof d[k] === 'object');
+  const objects = ['hero', 'upgrades', 'stage', 'totals', 'gear', 'skills'].every((k) => d[k] && typeof d[k] === 'object');
   return numbers && objects;
 }
 

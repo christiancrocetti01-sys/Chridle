@@ -1,5 +1,6 @@
 import type { UpgradeId } from '../data/upgrades';
 import { newGear, type GearState } from './items';
+import { newSkills, type SkillState } from './skills';
 import { heroStats } from './stats';
 
 export interface EnemyState {
@@ -30,6 +31,8 @@ export interface HeroState {
   buffs: { key: string; speedPct: number; ticks: number }[];
   /** Il prossimo colpo è un critico garantito (regola "dodgeCrit"). */
   nextCrit: boolean;
+  /** Risorsa delle skill attive: si accumula colpendo. */
+  light: number;
 }
 
 export interface GameState {
@@ -47,6 +50,7 @@ export interface GameState {
   /** Valuta del crafting, dallo smantellamento. */
   fragments: number;
   gear: GearState;
+  skills: SkillState;
   upgrades: Record<UpgradeId, number>;
   stage: {
     current: number;
@@ -61,7 +65,7 @@ export interface GameState {
   totals: { kills: number; deaths: number; gold: number };
 }
 
-export const STATE_VERSION = 7;
+export const STATE_VERSION = 8;
 
 export function newGame(now: number, seed = now >>> 0): GameState {
   const upgrades = { forza: 0, corazza: 0, rapidita: 0 };
@@ -71,10 +75,11 @@ export function newGame(now: number, seed = now >>> 0): GameState {
     createdAt: now,
     lastSeen: now,
     rng: seed,
-    hero: { level: 1, xp: 0, hp: heroStats(1, upgrades).maxHp, swing: 0, shield: 0, hits: 0, buffs: [], nextCrit: false },
+    hero: { level: 1, xp: 0, hp: heroStats(1, upgrades).maxHp, swing: 0, shield: 0, hits: 0, buffs: [], nextCrit: false, light: 0 },
     gold: 0,
     fragments: 0,
     gear: newGear(),
+    skills: newSkills(),
     upgrades,
     stage: { current: 1, best: 1, kills: 0, auto: true },
     enemy: null,

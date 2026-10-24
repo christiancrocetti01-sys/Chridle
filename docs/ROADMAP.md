@@ -34,7 +34,9 @@ Spuntare `[x]` man mano. Le fasi possono essere ridefinite: è un documento vivo
 - [x] Varietà 4: crafting con i Frammenti (ritira, migliora tier, trasferisci affisso, fusione 3→1)
 
 ## Fase 3 — Skill e build
-- [ ] Sistema di skill attive/passive con trigger e sinergie (tag)
+- [x] Luce e skill attive (4 slot con priorità, 8 skill sbloccate a livello)
+- [ ] Rune (Essenza di Luce) che modificano le skill
+- [ ] Sinergie per tag (oggetti/regole "le skill con tag X ottengono Y")
 - [ ] Albero delle abilità / perk
 - [ ] Classi e sottoclassi
 

@@ -1,4 +1,4 @@
-import { TRIGGER_AFFIXES, type TriggerDef, type TriggerOn } from '../data/items';
+import { TRIGGER_AFFIXES, type TriggerDef, type TriggerEffect, type TriggerOn } from '../data/items';
 import { ECHO_RULES, SETS } from '../data/uniques';
 import { TICK_RATE } from './loop';
 import { setCounts, type GearState } from './items';
@@ -64,34 +64,47 @@ export function everyN(hero: Stats, n: number): number {
  * Il danno va al nemico corrente (se c'è): chi chiama controlla se è morto.
  */
 export function fireTriggers(state: GameState, hero: Stats, triggers: ActiveTrigger[], on: TriggerOn, events: { push(e: ProcEvent): void }) {
-  const enemy = state.enemy;
-  const mult = enemy ? damageMult(hero, enemy) : 1;
   for (const t of triggers) {
     if (t.def.on !== on) continue;
     if (on === 'everyN' && state.hero.hits % everyN(hero, t.def.n!) !== 0) continue;
-    const e = t.def.effect;
-    let amount = 0;
-    if (e.kind === 'burst' && enemy) {
-      amount = t.value * hero.atk * hero.elemMult[e.element] * mult * (hero.rules.has(ECHO_RULES[e.element]) ? 2 : 1);
-      enemy.hp -= amount;
-    } else if ((e.kind === 'bleed' || e.kind === 'poison') && enemy) {
-      amount = t.value * hero.atk * mult;
-      enemy[e.kind] += amount;
-    } else if (e.kind === 'heal') {
-      amount = t.value * hero.maxHp;
-      heal(state, hero, amount);
-    } else if (e.kind === 'shield') {
-      amount = t.value * hero.maxHp;
-      state.hero.shield = Math.min(hero.maxHp, state.hero.shield + amount);
-    } else if (e.kind === 'haste') {
-      const ticks = e.seconds * TICK_RATE;
-      const b = hero.rules.has('hasteStacks') ? undefined : state.hero.buffs.find((x) => x.key === t.key);
-      if (b) b.ticks = ticks;
-      else if (state.hero.buffs.length < MAX_BUFFS) state.hero.buffs.push({ key: t.key, speedPct: t.value, ticks });
-      amount = t.value;
-    } else continue;
-    events.push({ type: 'proc', id: t.def.id, name: t.def.name, amount });
+    const amount = applyEffect(state, hero, t.def.effect, t.value, t.key);
+    if (amount !== null) events.push({ type: 'proc', id: t.def.id, name: t.def.name, amount });
   }
+}
+
+/**
+ * Applica un effetto (di un trigger o di una skill) con il suo valore. `key` identifica il buff di velocità
+ * da rinnovare. Restituisce il danno/cura/scudo/velocità, o null se non c'è un nemico da colpire.
+ */
+export function applyEffect(state: GameState, hero: Stats, e: TriggerEffect, value: number, key: string): number | null {
+  const enemy = state.enemy;
+  const mult = enemy ? damageMult(hero, enemy) : 1;
+  if (e.kind === 'burst') {
+    if (!enemy) return null;
+    const amount = value * hero.atk * hero.elemMult[e.element] * mult * (hero.rules.has(ECHO_RULES[e.element]) ? 2 : 1);
+    enemy.hp -= amount;
+    return amount;
+  }
+  if (e.kind === 'bleed' || e.kind === 'poison') {
+    if (!enemy) return null;
+    const amount = value * hero.atk * mult;
+    enemy[e.kind] += amount;
+    return amount;
+  }
+  if (e.kind === 'heal') {
+    heal(state, hero, value * hero.maxHp);
+    return value * hero.maxHp;
+  }
+  if (e.kind === 'shield') {
+    state.hero.shield = Math.min(hero.maxHp, state.hero.shield + value * hero.maxHp);
+    return value * hero.maxHp;
+  }
+  if (e.kind !== 'haste') return null;
+  const ticks = e.seconds * TICK_RATE;
+  const b = hero.rules.has('hasteStacks') ? undefined : state.hero.buffs.find((x) => x.key === key);
+  if (b) b.ticks = ticks;
+  else if (state.hero.buffs.length < MAX_BUFFS) state.hero.buffs.push({ key, speedPct: value, ticks });
+  return value;
 }
 
 /** Ogni tick: scadono i buff. */

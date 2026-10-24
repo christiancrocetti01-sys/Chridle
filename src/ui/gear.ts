@@ -9,7 +9,7 @@ import { elementalDamage, heroStats, type Stats } from '../core/stats';
 import { RULE_TEXT, SETS, SET_PIECES, UNIQUES } from '../data/uniques';
 import { FUSE_COUNT, FUSE_MAX_RARITY } from '../data/craft';
 import { DOLL_LEFT, DOLL_RIGHT, SILHOUETTE } from './doll';
-import { ITEM_TYPES, TRIGGER_AFFIXES, affixDef, type TriggerDef, RARITIES, SLOTS, STAT_LABELS, TAG_LABELS, isPct, type SlotId, type StatKey } from '../data/items';
+import { ITEM_TYPES, TRIGGER_AFFIXES, affixDef, type TriggerDef, type TriggerEffect, RARITIES, SLOTS, STAT_LABELS, TAG_LABELS, isPct, type SlotId, type StatKey } from '../data/items';
 
 export interface GearActions {
   equip(uid: number, slot: SlotId): void;
@@ -71,16 +71,18 @@ const pct = (v: number) => `${Math.round(v * 100)}%`;
 
 /** "Al critico: esplosione di fuoco (120% dell'attacco)". */
 export function describeTrigger(t: TriggerDef, value: number): string {
-  const e = t.effect;
-  const what =
-    e.kind === 'burst' ? `esplosione di ${ELEMENT_TEXT[e.element]} (${pct(value)} dell'attacco)`
+  return `${ON_TEXT[t.on].replace('{n}', String(t.n))}: ${describeEffect(t.effect, value)}`;
+}
+
+/** "esplosione di fuoco (120% dell'attacco)". */
+export function describeEffect(e: TriggerEffect, value: number): string {
+  return e.kind === 'burst' ? `esplosione di ${ELEMENT_TEXT[e.element]} (${pct(value)} dell'attacco)`
     : e.kind === 'bleed' ? `sanguinamento (${pct(value)} dell'attacco)`
     : e.kind === 'poison' ? `veleno (${pct(value)} dell'attacco)`
     : e.kind === 'heal' ? `cura ${pct(value)} della vita`
     : e.kind === 'shield' ? `scudo pari al ${pct(value)} della vita`
     : e.kind === 'haste' ? `+${pct(value)} velocità d'attacco per ${e.seconds} s`
     : '';
-  return `${ON_TEXT[t.on].replace('{n}', String(t.n))}: ${what}`;
 }
 
 function affixText(a: Affix): string {

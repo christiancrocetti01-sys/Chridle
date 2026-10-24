@@ -3,6 +3,7 @@ import { UPGRADES, type UpgradeId } from '../data/upgrades';
 import { TICK_RATE } from './loop';
 import { DROP_CHANCE, INVENTORY_SIZE, rollItem, rollRarity, salvageValue, type Item } from './items';
 import { nextRandom } from './rng';
+import { castSkills, gainLight, tickCooldowns, unlockSkills, type SkillEvent } from './skills';
 import { damageMult, fireTriggers, gearTriggers, heal, tickBuffs, type ProcEvent } from './triggers';
 import type { GameState } from './state';
 import { KILLS_PER_STAGE, elementalDamage, mitigate, stateStats, stageEnemy, upgradeCost, xpToNext } from './stats';
@@ -12,6 +13,9 @@ export type CombatEvent =
   | { type: 'dodge' }
   /** Effetto a scatto: `amount` è il danno, la cura, lo scudo o la velocità in più. */
   | ProcEvent
+  | SkillEvent
+  /** Skill sbloccata salendo di livello (e messa in uno slot libero, se c'era). */
+  | { type: 'unlock'; id: string }
   | { type: 'kill'; gold: number; xp: number; boss: boolean }
   | { type: 'levelup'; level: number }
   | { type: 'death' }
@@ -32,6 +36,7 @@ export function step(state: GameState, events: CombatEvent[] = []): CombatEvent[
   const hero = stateStats(state);
   heal(state, hero, hero.regen / TICK_RATE);
   tickBuffs(state);
+  tickCooldowns(state);
 
   if (!state.enemy) {
     if (state.respawn > 0) state.respawn--;
@@ -63,10 +68,14 @@ export function step(state: GameState, events: CombatEvent[] = []): CombatEvent[
     if (hero.lifeSteal > 0) heal(state, hero, amount * hero.lifeSteal);
     events.push({ type: 'hit', target: 'enemy', amount, crit });
     state.hero.hits++;
+    gainLight(state);
     if (crit) fireTriggers(state, hero, triggers, 'crit', events);
     fireTriggers(state, hero, triggers, 'everyN', events);
     if (enemy.hp <= 0) return kill(state, events);
   }
+
+  castSkills(state, hero, events);
+  if (enemy.hp <= 0) return kill(state, events);
 
   enemy.swing += enemy.attackSpeed / TICK_RATE;
   if (enemy.swing >= 1) {
@@ -176,6 +185,7 @@ function gainXp(state: GameState, xp: number, events: CombatEvent[]) {
     state.hero.level++;
     state.hero.hp = stateStats(state).maxHp;
     state.stage.auto = true; // più forte: si riprova ad avanzare
+    for (const id of unlockSkills(state.skills, state.hero.level)) events.push({ type: 'unlock', id });
     events.push({ type: 'levelup', level: state.hero.level });
   }
 }
@@ -189,6 +199,7 @@ function onDeath(state: GameState, events: CombatEvent[]) {
   state.hero.hits = 0;
   state.hero.buffs = [];
   state.hero.nextCrit = false;
+  state.hero.light = 0;
   state.hero.hp = stateStats(state).maxHp;
   state.hero.swing = 0;
   state.stage.auto = false;

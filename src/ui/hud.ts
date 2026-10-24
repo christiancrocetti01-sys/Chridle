@@ -4,9 +4,10 @@ import type { GameState } from '../core/state';
 import { KILLS_PER_STAGE, elementalDamage, stateStats, xpToNext, type Stats } from '../core/stats';
 import { createCombatPanel } from './combat';
 import { createGearPanel, type GearActions } from './gear';
+import { createSkillPanel, type SkillActions } from './skills';
 import { UPGRADES, type UpgradeId } from '../data/upgrades';
 
-export interface HudActions extends GearActions {
+export interface HudActions extends GearActions, SkillActions {
   buy(id: UpgradeId): void;
 }
 
@@ -30,6 +31,11 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
     <div class="bar"><div class="fill" data-k="stagebar"></div></div>
     <p class="notice" data-k="notice"></p>
     <div class="combat" data-k="combat"></div>
+    <nav class="tabs">
+      <button class="tab on" data-tab="hero">Eroe</button>
+      <button class="tab" data-tab="skills">Skill</button>
+    </nav>
+    <div data-pane="hero">
     <h2 class="section">Potenziamenti</h2>
     <div class="upgrades">
       ${UPGRADES.map((u) => `
@@ -42,6 +48,8 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
     <div data-k="gear"></div>
     <h2 class="section">Statistiche</h2>
     <dl class="stats" data-k="stats"></dl>
+    </div>
+    <div data-pane="skills" hidden><div data-k="skills"></div></div>
 `;
 
   const el = (k: string) => root.querySelector<HTMLElement>(`[data-k="${k}"]`)!;
@@ -55,7 +63,15 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
     b.addEventListener('click', () => actions.buy(b.dataset.up as UpgradeId)),
   );
 
+  root.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach((b) =>
+    b.addEventListener('click', () => {
+      root.querySelectorAll<HTMLElement>('[data-tab]').forEach((t) => t.classList.toggle('on', t === b));
+      root.querySelectorAll<HTMLElement>('[data-pane]').forEach((p) => (p.hidden = p.dataset.pane !== b.dataset.tab));
+    }),
+  );
+
   const gear = createGearPanel(el('gear'), actions);
+  const skills = createSkillPanel(el('skills'), actions);
   const combat = createCombatPanel(el('combat'));
 
   let frame = 0;
@@ -87,6 +103,7 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
       }
 
       gear.update(state);
+      skills.update(state);
       combat.update(state);
       const s = stateStats(state);
       refs.stats.innerHTML = [
