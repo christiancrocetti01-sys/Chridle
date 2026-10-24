@@ -187,7 +187,7 @@ function craftPanel(state: GameState, it: Item, pick: Pick): string {
       : `<span class="muted">Fusione: servono ${FUSE_COUNT} oggetti ${RARITIES[it.rarity].name} di questo tipo (hai ${set.length}).</span>`;
   }
   return `<div class="craft">
-    <div class="set-title">Crafting <span class="muted">· modifiche fatte: ${it.crafts ?? 0} · costi in Frammenti</span></div>
+    <div class="craft-title">Crafting <span class="muted">· modifiche fatte: ${it.crafts ?? 0} · costi in Frammenti</span></div>
     ${rows.length ? `<ul class="craft-list">${rows.join('')}</ul>` : ''}
     ${transfer}
     ${fuse ? `<div class="craft-fuse">${fuse}</div>` : ''}
@@ -332,7 +332,9 @@ export function createGearPanel(root: HTMLElement, actions: GearActions) {
         ? gear.inventory.slice().sort((a, b) => b.rarity - a.rarity || b.ilvl - a.ilvl).map((it) => {
             const sel = selected?.kind === 'inv' && selected.uid === it.uid ? ' sel' : '';
             const type = ITEM_TYPES.find((t) => t.id === it.type)!.name;
-            return `<button class="inv-item${sel}" data-act="pick-inv" data-uid="${it.uid}"><span style="color:${RARITIES[it.rarity].color}">${itemIcon(it.type)}</span>${itemLabel(it)} <span class="muted">${type} · ${it.ilvl}</span></button>`;
+            const c = RARITIES[it.rarity].color;
+            const glow = it.rarity >= 4 ? ` glow glow-${it.rarity}` : '';
+            return `<button class="inv-item${sel}${glow}" data-act="pick-inv" data-uid="${it.uid}" title="${esc(it.name)} · ${type} · ${it.ilvl}" style="color:${c};border-color:${c};--glow:${c}">${itemIcon(it.type)}<span class="inv-lv">${it.ilvl}</span></button>`;
           }).join('')
         : '<p class="muted">Vuoto: i nemici lasciano oggetti, i boss sempre.</p>';
       refs.detail.innerHTML = renderDetail(state, gear);
