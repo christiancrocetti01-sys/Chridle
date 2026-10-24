@@ -205,3 +205,19 @@ html, body {
 .socket { font-size: 0.85em; color: #cfe0ff; }
 .socket select { background: #0b0e1f; color: var(--text); border: 1px solid #2a2f4a; font: inherit; padding: 3px; }
 .locked-rune { opacity: 0.75; }
+
+/* Costellazioni */
+.star-map { position: relative; margin: 8px 0; border: 1px solid #2a2f4a; background: radial-gradient(circle at 50% 50%, #10142b, #05060d); }
+.star-map svg { display: block; width: 100%; height: min(70vh, 560px); touch-action: none; user-select: none; cursor: grab; }
+.star-zoom { position: absolute; right: 6px; top: 6px; display: flex; flex-direction: column; gap: 4px; }
+.star-links line { stroke: #2a2f4a; stroke-width: 3; }
+.star-links line.on { stroke: var(--gold-dim); }
+.star { fill: #141833; stroke: #3a3f5c; stroke-width: 2; cursor: pointer; }
+.star.notable { stroke-width: 3; }
+.star.keystone { stroke-width: 4; stroke: #6d5a8f; }
+.star.reachable { stroke: #6d7bd8; }
+.star.open { stroke: #cfe0ff; fill: #1c2347; }
+.star.on, .star.start { fill: var(--gold); stroke: #fff3c4; }
+.star.sel { stroke: #fff; stroke-width: 5; }
+.star-detail { margin-bottom: 4px; }
+.rule { color: #e6b85c; }

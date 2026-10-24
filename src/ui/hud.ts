@@ -1,13 +1,15 @@
 import { upgradePrice, type CombatEvent } from '../core/combat';
+import { pointsLeft } from '../core/constellations';
 import { formatNum } from '../core/format';
 import type { GameState } from '../core/state';
 import { KILLS_PER_STAGE, elementalDamage, stateStats, xpToNext, type Stats } from '../core/stats';
 import { createCombatPanel } from './combat';
 import { createGearPanel, type GearActions } from './gear';
 import { createSkillPanel, type SkillActions } from './skills';
+import { createStarPanel, type StarActions } from './stars';
 import { UPGRADES, type UpgradeId } from '../data/upgrades';
 
-export interface HudActions extends GearActions, SkillActions {
+export interface HudActions extends GearActions, SkillActions, StarActions {
   buy(id: UpgradeId): void;
 }
 
@@ -37,6 +39,7 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
     <nav class="tabs">
       <button class="tab on" data-tab="hero">Eroe</button>
       <button class="tab" data-tab="skills">Skill</button>
+      <button class="tab" data-tab="stars">Stelle <span class="muted" data-k="starpts"></span></button>
     </nav>
     <div data-pane="hero">
     <h2 class="section">Potenziamenti</h2>
@@ -53,13 +56,14 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
     <dl class="stats" data-k="stats"></dl>
     </div>
     <div data-pane="skills" hidden><div data-k="skills"></div></div>
+    <div data-pane="stars" hidden><div data-k="stars"></div></div>
 `;
 
   const el = (k: string) => root.querySelector<HTMLElement>(`[data-k="${k}"]`)!;
   const refs = {
     gold: el('gold'), level: el('level'), xptext: el('xptext'), xpbar: el('xpbar'),
     stage: el('stage'), best: el('best'), progress: el('progress'), stagebar: el('stagebar'),
-    notice: el('notice'), stats: el('stats'), essence: el('essence'),
+    notice: el('notice'), stats: el('stats'), essence: el('essence'), starpts: el('starpts'),
   };
 
   root.querySelectorAll<HTMLButtonElement>('[data-up]').forEach((b) =>
@@ -75,6 +79,7 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
 
   const gear = createGearPanel(el('gear'), actions);
   const skills = createSkillPanel(el('skills'), actions);
+  const stars = createStarPanel(el('stars'), actions);
   const combat = createCombatPanel(el('combat'));
 
   let frame = 0;
@@ -108,6 +113,9 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
 
       gear.update(state);
       skills.update(state);
+      stars.update(state);
+      const pts = pointsLeft(state);
+      refs.starpts.textContent = pts > 0 ? `(${pts})` : '';
       combat.update(state);
       const s = stateStats(state);
       refs.stats.innerHTML = [

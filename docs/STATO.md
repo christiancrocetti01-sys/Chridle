@@ -4,10 +4,10 @@
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
 **Ultimo aggiornamento:** 2026-10-24 (handoff dopo Fase 3 passo 2)
-**Fase corrente:** 3 — Skill e build, passi 1-3 su 5 fatti (skill attive, rune, sinergie per tag). Decisioni in `docs/GDD.md` §6.
-**Prossimo passo:** passo 4 — **Costellazioni**
-(~30 nodi, 1 punto/livello, respec economico: proporre il piano). Poi Vie.
-**Online:** `main` allineato con il passo 3 (sinergie per tag). **Grafica:** minimale (UI DOM + sagoma SVG).
+**Fase corrente:** 3 — Skill e build, passi 1-4 su 5 fatti (skill attive, rune, sinergie per tag, Costellazioni). Decisioni in `docs/GDD.md` §6.
+**Prossimo passo:** far approvare le Costellazioni e allineare `main`; poi passo 5 — **Vie** (classi e
+sottoclassi, GDD: proporre il piano, legarle alle regioni dell'albero).
+**Online:** `main` allineato con il passo 3 (sinergie per tag); Costellazioni solo sul branch. **Grafica:** minimale (UI DOM + sagoma SVG).
 
 ## Gioco online
 https://christiancrocetti01-sys.github.io/Chridle/ (ogni push su `main` lo ripubblica, ~1 min).
@@ -25,7 +25,11 @@ Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` (fast-forward) quand
 - Fase 3 passo 3: sinergie per tag, solo affissi (16: `${tag}Skill` effetto +10% T1, `${tag}Cdr` ricarica −5% T1)
   in `src/data/items.ts`; `skillPower`/`skillCdr` in Stats; `skillValue`/`cooldownTicks` in skills.ts; bonus
   dei tag di una skill sommati, × runa Potenza. Il testo delle skill ora mostra l'effetto reale.
-- Salvataggio: **v9** (v7 `item.crafts`, v8 `hero.light` + `skills`, v9 `essence` + `runes`).
+- Fase 3 passo 4: Costellazioni (GDD §7). Generatore in `src/data/constellations.ts`, logica in
+  `src/core/constellations.ts` (stats sommate in `stateStats`, regole nelle `rules`; nuove RuleId noCrit,
+  freeSkills, overhealHoly), scheda Stelle `src/ui/stars.ts` (SVG, trascina/pinch/rotella, dettaglio e riepilogo).
+- Salvataggio: **v10** (v7 `item.crafts`, v8 `hero.light` + `skills`, v9 `essence` + `runes`, v10 `stars`).
+  Al caricamento le stelle sconosciute o staccate vengono scartate (`cleanStars`).
 
 ## Sessione 2026-10-24 (questa)
 - Varietà 4 (crafting) completata e pubblicata; Fase 2 chiusa.
@@ -40,11 +44,15 @@ Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` (fast-forward) quand
 - Sinergie: riduzione ricarica per tag lineare con tetto 60% (`MAX_SKILL_CDR`), moltiplicata con Rapidità;
   tier usano i moltiplicatori esistenti (effetto 10/15/20/27/35%, ricarica 5/7,5/10/13,5/17,5%).
   Effetto su FOCUS (arma, secondaria, anello, amuleto, reliquia), ricarica su elmo, guanti, mantello, reliquia.
+- Costellazioni: tutti i valori dei nodi (piccoli ~ affisso T1, notevoli ~3×, alcune notevoli danno regole
+  degli unici: critBleed, execute, dodgeCrit, frenzy, overhealShield, endlessPoison, hasteStacks); Colpo
+  Assoluto moltiplica attacco ed elementi (quindi anche skill/trigger); Martirio ha la precedenza su
+  overhealShield; 1 punto per livello a partire dal 2.
 - Valori delle 8 skill e delle 12 rune (vedi file dati); Rapidità/Parsimonia con rendimenti decrescenti
   (`reduction`), Eco e Scintilla con probabilità max 100%; Essenza 1 a nemico, boss ×10, × (1 + stage/10).
 
 ## Test
-- `npm test`: **115 verdi** (11 file), `npm run build` ok (handoff 2026-10-24).
+- `npm test`: **125 verdi** (12 file), `npm run build` ok (handoff 2026-10-24).
 - Simulazione (`tests/combat.test.ts`): 2 h senza equip stage 32, con equip automatico 51 (era 54: pool di affissi più ampio). Non usa rune né
   crafting e l'equip automatico non valuta trigger/unici/set: la potenza reale delle build non è misurata.
 

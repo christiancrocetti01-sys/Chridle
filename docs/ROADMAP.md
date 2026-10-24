@@ -37,7 +37,7 @@ Spuntare `[x]` man mano. Le fasi possono essere ridefinite: è un documento vivo
 - [x] Luce e skill attive (4 slot con priorità, 8 skill sbloccate a livello)
 - [x] Rune (Essenza di Luce): 12 rune con livelli, 2 incastonature per skill
 - [x] Sinergie per tag (oggetti/regole "le skill con tag X ottengono Y")
-- [ ] Albero delle abilità / perk
+- [x] Albero delle abilità / perk (Costellazioni, primo lotto 148 nodi)
 - [ ] Classi e sottoclassi
 
 ## Fase 4 — Contenuti

@@ -87,6 +87,12 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
   (cambiano le regole, es. "i critici non esistono più, ogni colpo fa +80%").
 - Punti da livello. Respec economico (non punire la sperimentazione).
 - Ogni Via ha la sua regione dell'albero; le regioni si toccano per gli ibridi.
+- **Deciso (Fase 3):** dimensioni stile PoE (migliaia di nodi a regime), nodi **generati** da dati
+  (`src/data/constellations.ts`: rami → spina + ammassi ad anello con notevole al centro, ponti tra le punte).
+  Primo lotto 148 nodi: rami Offesa / Difesa / Luce, 12 notevoli, 3 chiavi di volta (Colpo Assoluto: niente
+  critici, +80% ai colpi; Martirio: cura in eccesso → danno sacro; Luce Perpetua: skill gratis, ricarica ×2).
+  1 punto per livello, respec gratuito, si restituisce una stella solo se non stacca le altre.
+  Espansione a lotti in Fase 7 (regioni delle Vie).
 
 ## 8. Equipaggiamento
 - **Slot**: arma principale, mano secondaria (scudo/tomo/seconda arma), elmo, armatura, guanti, stivali,

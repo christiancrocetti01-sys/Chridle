@@ -3,6 +3,7 @@ import { MAX_TICKS_PER_FRAME, TICK_MS, stepAccumulator } from './core/loop';
 import { loadGame, saveGame, type StorageLike } from './core/save';
 import { buyUpgrade, changeGear, step, type CombatEvent } from './core/combat';
 import { levelRune, socketRune, unlockRune } from './core/runes';
+import { refundStar, resetStars, takeStar } from './core/constellations';
 import { moveSlot, setSlot } from './core/skills';
 import { fuseItems, rerollAffix, transferAffix, upgradeAffix } from './core/craft';
 import { equip, salvage, salvageUpTo, unequip } from './core/items';
@@ -42,6 +43,9 @@ function main() {
     unlockRune: (id) => unlockRune(state, id),
     levelRune: (id) => levelRune(state, id),
     socketRune: (skill, i, id) => socketRune(state, skill, i, id),
+    takeStar: (id) => takeStar(state, id),
+    refundStar: (id) => refundStar(state, id),
+    resetStars: () => resetStars(state),
   });
 
   let acc = 0;
