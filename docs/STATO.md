@@ -9,6 +9,7 @@ Fatto: palette B/N (token in `:root` di `src/style.css`; colore solo a rarità, 
 font EB Garamond (titolo Cinzel); schede in alto come parole, fisse allo scorrimento (`.navs` in `src/ui/hud.ts`),
 sotto-schede in corsivo; niente riquadri; equipaggiamento come righe con i puntini (sagoma tolta, `doll.ts` eliminato);
 statistiche e potenziamenti a puntini; inventario a griglia; liste apribili `src/ui/list.ts`; elementi colorati (`elem` in `icons.ts`).
+Guida: pulsante «?» in alto (`src/ui/guide.ts`, testi in `src/data/guide.ts`: aggiornarli quando cambiano le regole); `README.md` per GitHub.
 **Prossimo passo:** sentire l'utente dal telefono (`?v=5`); poi stesso schema per Vie, Stelle (pannello dettagli), Modalità.
 Valutare con l'utente: smantellamento automatico "fino a Comune" di default (inventario ora illimitato → salvataggio grande).
 **Online:** `main` = branch (d3790c8 + handoff).

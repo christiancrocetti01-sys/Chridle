@@ -19,6 +19,7 @@ import { ABYSS_WAVES } from '../data/endgame';
 import { soundOn, toggleSound } from './sound';
 import { zoneName } from '../data/enemies';
 import { UPGRADES, type UpgradeId } from '../data/upgrades';
+import { openGuide } from './guide';
 
 export interface HudActions extends GearActions, SkillActions, StarActions, ViaActions, WorldActions, AscensionActions, LumiActions {
   buy(id: UpgradeId): void;
@@ -69,7 +70,7 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
     <style>${SUB_CSS}</style>
     <header class="top">
       <div class="top-row">
-        <h1 class="title">Chridle <button class="sound" data-k="sound" title="Suoni">♪</button></h1>
+        <h1 class="title">Chridle <button class="sound" data-k="sound" title="Suoni">♪</button><button class="help" data-k="help" title="Guida">?</button></h1>
         <div class="wallet">
           <span class="gold"><span data-k="gold">0</span> <small>oro</small></span>
           <span class="essence"><span data-k="essence">0</span> <small>Essenza</small></span>
@@ -143,6 +144,7 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
     soundLabel();
   });
   refs.leave.addEventListener('click', () => actions.leaveMode());
+  el('help').addEventListener('click', openGuide);
 
   root.querySelectorAll<HTMLButtonElement>('[data-up]').forEach((b) =>
     b.addEventListener('click', () => actions.buy(b.dataset.up as UpgradeId)),

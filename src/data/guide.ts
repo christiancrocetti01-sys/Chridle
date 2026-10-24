@@ -1,0 +1,95 @@
+/** Guida del giocatore (pulsante «?» in alto): sezioni brevi, testo con poco HTML; {rarita} = elenco colorato. */
+export interface GuideSection { id: string; title: string; text: string[] }
+
+export const GUIDE_INTRO =
+  "Il Sole è stato divorato dall'Eclissi. Tu sei il guerriero della luce: combatti da solo, anche a gioco chiuso. " +
+  'Il tuo compito è scegliere oggetti, skill e build sempre più forti.';
+
+export const GUIDE: GuideSection[] = [
+  {
+    id: 'combattimento', title: 'Combattimento e stage', text: [
+      'Il guerriero attacca da solo. Ogni stage ha <b>10 nemici</b> e poi un <b>boss</b>: battuto il boss si passa allo stage successivo.',
+      "Se muori torni indietro di uno stage e ti alleni lì finché non sali di livello, poi riparti da solo.",
+      "Ogni 10 stage cambia zona e famiglia di nemici; l'ultimo stage della zona ha un boss con meccaniche (scudo, furia, evocazioni, rigenerazione).",
+      'Ogni famiglia è debole o resistente ad alcuni elementi: lo leggi sotto la barra del nemico.',
+      'Dopo 2 minuti contro lo stesso nemico scatta la <b>Furia</b>: il suo attacco raddoppia ogni 10 s, così nessuno scontro dura per sempre.',
+    ],
+  },
+  {
+    id: 'valute', title: 'Valute', text: [
+      '<b>Oro</b>: dai nemici, per i Potenziamenti (Eroe).',
+      '<b>Essenza</b>: dai nemici, per rune e Lumi.',
+      '<b>Frammenti</b>: smantellando oggetti, per il crafting.',
+      '<b>Chiavi</b>: dai boss di zona (al record, ogni 20 stage), dalla Torre e a volte dalle élite. Aprono Dungeon e Raid.',
+      "<b>Scintille</b> e <b>Soli</b>: dall'Ascensione e dalla Rinascita, per i bonus permanenti.",
+    ],
+  },
+  {
+    id: 'oggetti', title: 'Oggetti', text: [
+      '12 slot e 7 rarità: {rarita}. Più è rara, più affissi ha.',
+      'Tocca un oggetto per vederlo e confrontarlo con quello che indossi (verde = meglio, rosso = peggio).',
+      '<b>Equipaggia il meglio</b> sceglie da solo il pezzo più forte per ogni slot. Gli unici con regole speciali conviene sceglierli a mano.',
+      "Da Epico in su un oggetto può avere un effetto a scatto (al critico, ogni N colpi…). I <b>leggendari unici</b> hanno una regola fissa, i <b>set</b> danno bonus a 2, 4 e 6 pezzi.",
+      '<b>Smantella</b> ciò che non serve (anche in automatico fino a una rarità) per avere Frammenti.',
+      '<b>Crafting</b>: ritira un affisso, migliorane il tier (fino a T5), trasferiscilo da un altro oggetto o fondi 3 oggetti uguali in uno di rarità superiore. Ogni modifica sullo stesso oggetto costa di più.',
+    ],
+  },
+  {
+    id: 'skill', title: 'Skill e rune', text: [
+      'Colpendo accumuli <b>Luce</b> (max 100); le skill la spendono e partono da sole.',
+      "Hai 4 slot: l'ordine è la priorità. Cure e scudi aspettano il momento giusto (vita bassa).",
+      'Nuove skill si sbloccano salendo di livello (Build › Skill).',
+      'Le <b>rune</b> si comprano con l\'Essenza e si incastonano nelle skill (2 per skill): le modificano. Si possono potenziare all\'infinito.',
+      'I tag (Sacro, Fuoco, Nel tempo…) contano: alcuni affissi potenziano tutte le skill con un certo tag.',
+    ],
+  },
+  {
+    id: 'stelle', title: 'Stelle (Costellazioni)', text: [
+      'Ogni livello dà <b>1 punto</b> da spendere nella mappa delle Stelle, partendo dal centro e prendendo stelle collegate.',
+      'Le stelle piccole danno statistiche, le <b>notevoli</b> (al centro degli anelli) bonus forti, le <b>chiavi di volta</b> cambiano le regole.',
+      'Il respec è gratis: sperimenta.',
+    ],
+  },
+  {
+    id: 'vie', title: 'Vie', text: [
+      'Al <b>livello 10</b> scegli una Via (Build › Via): Paladino, Lama dell\'Alba, Inquisitore, Custode Stellare o Eclissiarca.',
+      'Ogni Via dà statistiche, una regola speciale, 2 skill esclusive e una regione delle Stelle. Cambiarla è gratis.',
+      "Con il potenziamento d'Ascensione «Doppia Via» ne aggiungi una seconda.",
+      '<b>Purezza e Corruzione</b>: alcuni oggetti e Vie spostano l\'ago. Corruzione = più danni, meno difesa e cure; Purezza = il contrario. Agli estremi si sbloccano effetti speciali.',
+    ],
+  },
+  {
+    id: 'mondo', title: 'Modalità', text: [
+      'Durante una modalità la Campagna è in pausa; puoi abbandonare quando vuoi.',
+      '<b>Dungeon</b> (1 chiave): 8 nemici e un boss con modificatori casuali. Premio: Frammenti, Essenza e un pezzo di set.',
+      '<b>Torre dell\'Alba</b> (gratis): un nemico per piano, 30 s ciascuno. Ogni 5 piani di record +3% attacco e vita per sempre.',
+      '<b>Raid</b> (dallo stage 50, 3 chiavi): boss in 3 fasi in 120 s. Premio: un Leggendario garantito, a volte Mitico o Divino.',
+      "<b>Abisso</b> (dopo 3 Ascensioni): profondità infinite. Dà esperienza <b>Paragon</b>.",
+    ],
+  },
+  {
+    id: 'progressi', title: 'Progressi e Lumi', text: [
+      '<b>Bestiario</b>: uccidendo una famiglia sali di grado e fai +5% danni contro di lei, per sempre.',
+      '<b>Collezione</b>: ogni leggendario unico trovato almeno una volta dà un bonus permanente, più premi al 25/50/100%.',
+      '<b>Imprese</b>: traguardi a gradini (uccisioni, stage, livello…), ognuno con un piccolo bonus permanente.',
+      '<b>Lumi</b> (Build › Lumi): spiriti sbloccati dai traguardi. Uno è attivo (bonus pieno + effetto), gli altri danno il 25%. Salgono di livello con l\'Essenza.',
+    ],
+  },
+  {
+    id: 'ascensione', title: 'Ascensione, Rinascita, Paragon', text: [
+      "<b>Ascensione</b> (dallo stage 40): ricominci da livello 1 e stage 1 in cambio di <b>Scintille</b>, che comprano potenziamenti permanenti. " +
+        'Tieni oggetti, Frammenti, Essenza, rune, chiavi, Torre e Vie; perdi oro, Potenziamenti e Stelle (i punti tornano salendo).',
+      'Più alto è il record, più Scintille: conviene ascendere quando ti blocchi.',
+      '<b>Rinascita Solare</b>: azzera anche le Ascensioni in cambio di <b>Soli</b>, moltiplicatori enormi e permanenti.',
+      '<b>Paragon</b>: livelli infiniti dall\'Abisso, 1 punto per livello su bonus a scelta (si riprendono gratis).',
+    ],
+  },
+  {
+    id: 'offline', title: 'Offline e consigli', text: [
+      'A gioco chiuso il guerriero continua (al 75%, di più con «Veglia Eterna»): al rientro trovi il riepilogo.',
+      'Il gioco salva da solo nel browser. Il ♪ in alto accende i suoni.',
+      'I pallini rossi sulle schede indicano qualcosa da fare (punti liberi, Ascensione pronta…).',
+      'Bloccato? Prova, in ordine: Equipaggia il meglio → punti nelle Stelle → rune → Potenziamenti → Torre → Ascensione.',
+    ],
+  },
+];

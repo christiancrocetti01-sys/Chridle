@@ -365,3 +365,9 @@ select { font: inherit; }
 .card-cost { color: var(--accent); }
 .card:disabled { opacity: 1; cursor: default; }
 .card:disabled .card-cost { color: var(--muted); }
+
+/* Guida */
+.help { margin-left: 6px; padding: 0 7px; font: 600 0.5em system-ui, sans-serif; vertical-align: middle; color: var(--accent); background: transparent; border: 1px solid var(--line-2); border-radius: 50%; cursor: pointer; }
+.modal-box.guide { width: min(560px, 100%); max-height: calc(100dvh - 32px); overflow-y: auto; }
+.guide .li-body p { margin: 0; }
+.guide .li-body { gap: 8px; font-size: 0.95em; }
