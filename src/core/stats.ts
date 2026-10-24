@@ -1,6 +1,7 @@
 import { ELEMENTS, type Element } from '../data/items';
 import type { UpgradeId } from '../data/upgrades';
-import { emptyMods, gearMods, type GearState, type StatMods } from './items';
+import type { RuleId } from '../data/uniques';
+import { emptyMods, gearMods, gearRules, type GearState, type StatMods } from './items';
 import type { HeroState } from './state';
 
 export interface Stats {
@@ -31,6 +32,8 @@ export interface Stats {
   magicFind: number;
   /** Moltiplicatore di tutto il danno contro i boss. */
   bossMult: number;
+  /** Regole speciali attive (unici e set completi). */
+  rules: Set<RuleId>;
 }
 
 export const MAX_CRIT_CHANCE = 0.75;
@@ -61,8 +64,12 @@ export function heroStats(level: number, upgrades: Record<UpgradeId, number>, mo
     xpMult: 1 + mods.xpPct,
     magicFind: mods.magicFind,
     bossMult: 1 + mods.bossDmg,
+    rules: new Set(),
   };
 }
+
+export const FRENZY_HP = 0.5;
+export const FRENZY_SPEED = 1.5;
 
 /** Danno elementale totale per colpo. */
 export function elementalDamage(s: Stats): number {
@@ -73,7 +80,10 @@ export function elementalDamage(s: Stats): number {
 export function stateStats(state: { hero: HeroState; upgrades: Record<UpgradeId, number>; gear: GearState }): Stats {
   const mods = gearMods(state.gear);
   for (const b of state.hero.buffs) mods.speedPct += b.speedPct;
-  return heroStats(state.hero.level, state.upgrades, mods);
+  const s = heroStats(state.hero.level, state.upgrades, mods);
+  s.rules = gearRules(Object.values(state.gear.equipped));
+  if (s.rules.has('frenzy') && state.hero.hp < s.maxHp * FRENZY_HP) s.attackSpeed *= FRENZY_SPEED;
+  return s;
 }
 
 /** Riduzione con rendimenti decrescenti: la difesa non annulla mai del tutto il danno. */

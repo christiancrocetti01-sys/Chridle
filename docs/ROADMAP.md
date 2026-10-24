@@ -30,7 +30,7 @@ Spuntare `[x]` man mano. Le fasi possono essere ridefinite: è un documento vivo
 - [x] Generatore di oggetti data-driven
 - [x] Varietà 1: 52 affissi con tag e restrizioni per tipo, ibridi, elementi/veleno/sanguinamento/rubavita/schivata/spine/fortuna
 - [x] Varietà 2: 16 effetti a scatto (critico, ogni N colpi, uccisione, colpito, schivata), sanguinamento/veleno nel tempo, scudo, velocità a tempo
-- [ ] Varietà 3: leggendari unici e set 2/4/6
+- [x] Varietà 3: 13 leggendari unici con regole speciali, 4 set da 6 pezzi (bonus 2/4/6)
 - [ ] Varietà 4: crafting con i Frammenti
 
 ## Fase 3 — Skill e build

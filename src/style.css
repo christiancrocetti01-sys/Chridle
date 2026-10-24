@@ -171,3 +171,6 @@ html, body {
 .slot > span:last-child { overflow-wrap: anywhere; line-height: 1.25; }
 .slot.empty { opacity: 0.6; }
 .slot.sel { box-shadow: 0 0 0 1px var(--gold); }
+.set-title { margin-top: 6px; color: #3ecf8e; }
+.affixes.set .set-on { color: #3ecf8e; }
+.affixes.unique { color: #e6b85c; }

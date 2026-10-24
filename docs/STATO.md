@@ -3,9 +3,9 @@
 > File di passaggio di consegne tra sessioni. Aggiornato con `/handoff`.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
-**Ultimo aggiornamento:** 2026-10-24 (varietà 2)
-**Fase corrente:** 2 — Equipaggiamento, varietà (punti 1-2 fatti).
-**Prossimo passo:** Varietà 3 — leggendari unici e set 2/4/6, da proporre e confermare. Poi crafting con i Frammenti.
+**Ultimo aggiornamento:** 2026-10-24 (varietà 3)
+**Fase corrente:** 2 — Equipaggiamento, varietà (punti 1-3 fatti).
+**Prossimo passo:** Varietà 4 — crafting con i Frammenti (da proporre e confermare). Poi Fase 3 (skill e build).
 **Grafica:** decisa **minimale** (niente scena, niente asset da scaricare): UI DOM + sagoma SVG.
 
 ## Gioco online
@@ -34,7 +34,12 @@ Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` quando un passo è a
   veleno, cura, scudo, velocità a tempo. Solo da Epico in su (`triggerChance` per rarità: 30/50/75/100%), max 1
   per oggetto, effetti uguali **si sommano** (scelta utente). Sanguinamento e veleno ora sono riserve sul nemico
   che si consumano nel tempo. Salvataggio v5 (scudo, buff, colpi; riserve sul nemico).
-- Test: **61 verdi** (6 file), build ok. Simulazione 2 h con equip: stage 45 (la simulazione non valuta i trigger).
+- Varietà 3 (`src/data/uniques.ts`): 13 **regole speciali** (eco per elemento, veleno infinito, critico dopo
+  schivata, cure in eccesso → scudo, esecuzione, critico che sanguina, frenesia, trigger più rapidi, velocità che
+  si accumula, max 20 buff). 13 **unici** (nome + statistiche fisse + regola + affissi casuali; 25% dei drop da
+  Leggendario in su). 4 **set** da 6 pezzi (Paladino, Piromante, Assassino, Pestilenza; 8% dei drop da Epico):
+  2 pezzi statistiche, 4 effetto a scatto, 6 regola + statistiche. `item.special` sull'oggetto. Salvataggio v6.
+- Test: **76 verdi** (7 file), build ok. Simulazione 2 h con equip: stage 43 (non valuta trigger/regole).
 
 ## Feedback dell'utente (importante)
 - La vecchia grafica era "AI slop". Ora la direzione è: **grafica minimale**, non serve vedere il

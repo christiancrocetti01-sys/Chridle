@@ -40,6 +40,8 @@ export const migrations: Record<number, Migration> = {
     hero: { ...(d.hero as object), shield: 0, hits: 0, buffs: [] },
     enemy: d.enemy ? { ...(d.enemy as object), bleed: 0, poison: 0 } : null,
   }),
+  // v5 → v6: unici e set (campo opzionale sugli oggetti) e il critico garantito dopo una schivata
+  5: (d) => ({ ...d, hero: { ...(d.hero as object), nextCrit: false } }),
 };
 
 export function serialize(state: GameState): string {

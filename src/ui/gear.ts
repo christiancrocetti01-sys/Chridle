@@ -1,7 +1,8 @@
 import { formatNum } from '../core/format';
-import { INVENTORY_SIZE, itemMods, salvageValue, slotsFor, type GearState, type Item } from '../core/items';
+import { INVENTORY_SIZE, itemMods, setCounts, salvageValue, slotsFor, type GearState, type Item } from '../core/items';
 import type { GameState } from '../core/state';
 import { elementalDamage, heroStats, type Stats } from '../core/stats';
+import { RULE_TEXT, SETS, SET_PIECES, UNIQUES } from '../data/uniques';
 import { DOLL_LEFT, DOLL_RIGHT, SILHOUETTE } from './doll';
 import { ITEM_TYPES, TRIGGER_AFFIXES, affixDef, type TriggerDef, RARITIES, SLOTS, STAT_LABELS, TAG_LABELS, isPct, type SlotId, type StatKey } from '../data/items';
 
@@ -22,8 +23,35 @@ export function formatStat(stat: StatKey, v: number): string {
   return v < 10 ? v.toFixed(1) : formatNum(v);
 }
 
+const UNIQUE_COLOR = '#e6b85c';
+const SET_COLOR = '#3ecf8e';
+
 function itemLabel(it: Item): string {
-  return `<span class="rar-${it.rarity}" style="color:${RARITIES[it.rarity].color}">${esc(it.name)}</span>`;
+  const color = it.special?.kind === 'unique' ? UNIQUE_COLOR : it.special?.kind === 'set' ? SET_COLOR : RARITIES[it.rarity].color;
+  return `<span class="rar-${it.rarity}" style="color:${color}">${esc(it.name)}</span>`;
+}
+
+/** Effetto fisso di un unico, oppure bonus del set con i pezzi indossati (attivi evidenziati). */
+function specialDetail(it: Item, equipped: Item[]): string {
+  const sp = it.special;
+  if (!sp) return '';
+  const mods = sp.mods.map((m) => `<li>+${formatStat(m.stat, m.value)} ${STAT_LABELS[m.stat]}</li>`).join('');
+  if (sp.kind === 'unique') {
+    const u = UNIQUES.find((x) => x.id === sp.id)!;
+    return `<ul class="affixes unique">${mods}<li class="trigger">${RULE_TEXT[u.rule]}</li></ul>`;
+  }
+  const set = SETS.find((x) => x.id === sp.id)!;
+  const n = setCounts(equipped)[set.id] ?? 0;
+  const statText = (list: [StatKey, number][]) => list.map(([k, v]) => `+${formatStat(k, v)} ${STAT_LABELS[k]}`).join(' · ');
+  const trig: TriggerDef = { ...set.bonus4, id: '', name: '', tags: [], types: [] };
+  const rows: [number, string][] = [
+    [2, statText(set.bonus2)],
+    [4, describeTrigger(trig, trig.effect.value)],
+    [SET_PIECES, `${RULE_TEXT[set.bonus6.rule]} · ${statText(set.bonus6.mods)}`],
+  ];
+  return `
+    <div class="set-title">Set ${set.name} <span class="muted">${n}/${SET_PIECES} indossati</span></div>
+    <ul class="affixes set">${rows.map(([k, text]) => `<li class="${n >= k ? 'set-on' : 'muted'}">(${k}) ${text}</li>`).join('')}</ul>`;
 }
 
 const ON_TEXT: Record<TriggerDef['on'], string> = {
@@ -46,7 +74,7 @@ export function describeTrigger(t: TriggerDef, value: number): string {
   return `${ON_TEXT[t.on].replace('{n}', String(t.n))}: ${what}`;
 }
 
-function itemDetail(it: Item): string {
+function itemDetail(it: Item, equipped: Item[]): string {
   const r = RARITIES[it.rarity];
   const type = ITEM_TYPES.find((t) => t.id === it.type)!;
   const lines = it.affixes.map((a) => {
@@ -59,8 +87,9 @@ function itemDetail(it: Item): string {
   });
   return `
     <div class="item-name">${itemLabel(it)}</div>
-    <div class="muted">${r.name} · ${type.name} · Lv oggetto ${it.ilvl}</div>
+    <div class="muted">${it.special?.kind === 'unique' ? 'Unico · ' : ''}${r.name} · ${type.name} · Lv oggetto ${it.ilvl}</div>
     <div class="item-base">+${formatStat(it.base.stat, it.base.value)} ${STAT_LABELS[it.base.stat]}</div>
+    ${specialDetail(it, equipped)}
     <ul class="affixes">${lines.join('')}</ul>`;
 }
 
@@ -152,7 +181,7 @@ export function createGearPanel(root: HTMLElement, actions: GearActions) {
       const it = gear.equipped[selected.slot];
       if (!it) return '';
       const full = gear.inventory.length >= INVENTORY_SIZE;
-      return `${itemDetail(it)}
+      return `${itemDetail(it, Object.values(gear.equipped) as Item[])}
         <div class="actions"><button class="btn" data-act="unequip" data-slot="${selected.slot}" ${full ? 'disabled' : ''}>Togli</button></div>`;
     }
     if (selected?.kind === 'inv') {
@@ -169,7 +198,7 @@ export function createGearPanel(root: HTMLElement, actions: GearActions) {
           <button class="btn" data-act="equip" data-uid="${uid}" data-slot="${s}">${name}</button>
         </div>`;
       }).join('');
-      return `${itemDetail(it)}${cmp}
+      return `${itemDetail(it, Object.values(gear.equipped) as Item[])}${cmp}
         <div class="actions"><button class="btn" data-act="salvage" data-uid="${uid}">Smantella (+${salvageValue(it)} Frammenti)</button></div>`;
     }
     return '<p class="muted">Tocca un oggetto per vederne i dettagli.</p>';

@@ -2,6 +2,9 @@ import {
   AFFIX_TIERS, FLAT_STATS, ITEM_TYPES, RARITIES, SLOTS, STAT_LABELS, affixDef, affixesFor, triggersFor,
   type ItemType, type SlotId, type StatKey,
 } from '../data/items';
+import {
+  SETS, SET_CHANCE, SET_MIN_RARITY, SET_PIECES, UNIQUES, UNIQUE_CHANCE, UNIQUE_MIN_RARITY, type RuleId,
+} from '../data/uniques';
 import { nextRandom } from './rng';
 
 export interface Affix {
@@ -22,6 +25,8 @@ export interface Item {
   name: string;
   base: { stat: StatKey; value: number };
   affixes: Affix[];
+  /** Leggendario unico (con le sue statistiche fisse) o pezzo di un set. */
+  special?: { kind: 'unique' | 'set'; id: string; mods: { stat: StatKey; value: number }[] };
 }
 
 export type StatMods = Record<StatKey, number>;
@@ -64,9 +69,10 @@ export function rollRarity(rng: Rng, boss = false, magicFind = 0): number {
 
 /** Genera un oggetto casuale. Deterministico: dipende solo dallo stato dell'RNG. */
 export function rollItem(rng: Rng, uid: number, ilvl: number, rarity: number, type?: ItemType): Item {
-  const def = type ? ITEM_TYPES.find((t) => t.id === type)! : pick(rng, ITEM_TYPES);
   const r = RARITIES[rarity];
   const growth = Math.pow(ILVL_GROWTH, ilvl - 1);
+  const special = rollSpecial(rng, rarity, growth, type);
+  const def = ITEM_TYPES.find((t) => t.id === (special?.type ?? type)) ?? pick(rng, ITEM_TYPES);
   // piccola variazione (±10%) anche sulla statistica di base
   const base = { stat: def.base, value: def.baseValue * growth * r.power * (0.9 + 0.2 * nextRandom(rng)) };
 
@@ -89,19 +95,70 @@ export function rollItem(rng: Rng, uid: number, ilvl: number, rarity: number, ty
 
   const best = affixes.reduce<Affix | null>((b, a) => (!b || a.tier > b.tier ? a : b), null);
   const suffix = best ? ` ${affixDef(best.id)!.name}` : '';
-  return { uid, type: def.id, rarity, ilvl, name: pick(rng, def.names) + suffix, base, affixes };
+  const name = special?.name ?? pick(rng, def.names) + suffix;
+  const item: Item = { uid, type: def.id, rarity, ilvl, name, base, affixes };
+  if (special) item.special = { kind: special.kind, id: special.id, mods: special.mods };
+  return item;
+}
+
+/** Statistiche fisse degli unici: le piatte valgono come un affisso T3 e crescono con il livello oggetto. */
+const UNIQUE_FLAT_MULT = 2;
+
+/** Decide se l'oggetto è un unico o un pezzo di set (con `type` fissato, solo tra quelli di quel tipo). */
+function rollSpecial(rng: Rng, rarity: number, growth: number, type?: ItemType) {
+  if (rarity >= UNIQUE_MIN_RARITY && nextRandom(rng) < UNIQUE_CHANCE) {
+    const pool = UNIQUES.filter((u) => !type || u.type === type);
+    if (pool.length) {
+      const u = pick(rng, pool);
+      const mods = u.mods.map(([stat, value]) => ({ stat, value: FLAT_STATS.has(stat) ? value * UNIQUE_FLAT_MULT * growth : value }));
+      return { kind: 'unique' as const, id: u.id, type: u.type, name: u.name, mods };
+    }
+  } else if (rarity >= SET_MIN_RARITY && nextRandom(rng) < SET_CHANCE) {
+    const pool = SETS.flatMap((set) => set.pieces.map((p) => ({ set, ...p }))).filter((p) => !type || p.type === type);
+    if (pool.length) {
+      const p = pick(rng, pool);
+      return { kind: 'set' as const, id: p.set.id, type: p.type, name: p.name, mods: [] };
+    }
+  }
+  return null;
+}
+
+/** Pezzi indossati per ogni set (un pezzo conta una volta sola, anche con due anelli uguali). */
+export function setCounts(items: Iterable<Item | undefined>): Record<string, number> {
+  const types: Record<string, Set<ItemType>> = {};
+  for (const it of items) if (it?.special?.kind === 'set') (types[it.special.id] ??= new Set()).add(it.type);
+  return Object.fromEntries(Object.entries(types).map(([id, t]) => [id, t.size]));
+}
+
+/** Regole speciali attive: dagli unici e dai set completi. */
+export function gearRules(items: Iterable<Item | undefined>): Set<RuleId> {
+  const list = [...items];
+  const rules = new Set<RuleId>();
+  for (const it of list) if (it?.special?.kind === 'unique') rules.add(UNIQUES.find((u) => u.id === it.special!.id)!.rule);
+  const counts = setCounts(list);
+  for (const set of SETS) if ((counts[set.id] ?? 0) >= SET_PIECES) rules.add(set.bonus6.rule);
+  return rules;
 }
 
 export function emptyMods(): StatMods {
   return Object.fromEntries(Object.keys(STAT_LABELS).map((k) => [k, 0])) as StatMods;
 }
 
+/** Statistiche di un insieme di oggetti, compresi i bonus dei set (2 e 6 pezzi). */
 export function itemMods(items: Iterable<Item | undefined>): StatMods {
   const m = emptyMods();
-  for (const it of items) {
+  const list = [...items];
+  for (const it of list) {
     if (!it) continue;
     m[it.base.stat] += it.base.value;
     for (const a of it.affixes) for (const x of a.mods) m[x.stat] += x.value;
+    for (const x of it.special?.mods ?? []) m[x.stat] += x.value;
+  }
+  const counts = setCounts(list);
+  for (const set of SETS) {
+    const n = counts[set.id] ?? 0;
+    if (n >= 2) for (const [stat, value] of set.bonus2) m[stat] += value;
+    if (n >= SET_PIECES) for (const [stat, value] of set.bonus6.mods) m[stat] += value;
   }
   return m;
 }

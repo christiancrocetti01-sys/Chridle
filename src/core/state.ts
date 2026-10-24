@@ -28,6 +28,8 @@ export interface HeroState {
   hits: number;
   /** Effetti temporanei: uno per affisso a scatto, si rinnova quando riscatta. */
   buffs: { key: string; speedPct: number; ticks: number }[];
+  /** Il prossimo colpo è un critico garantito (regola "dodgeCrit"). */
+  nextCrit: boolean;
 }
 
 export interface GameState {
@@ -59,7 +61,7 @@ export interface GameState {
   totals: { kills: number; deaths: number; gold: number };
 }
 
-export const STATE_VERSION = 5;
+export const STATE_VERSION = 6;
 
 export function newGame(now: number, seed = now >>> 0): GameState {
   const upgrades = { forza: 0, corazza: 0, rapidita: 0 };
@@ -69,7 +71,7 @@ export function newGame(now: number, seed = now >>> 0): GameState {
     createdAt: now,
     lastSeen: now,
     rng: seed,
-    hero: { level: 1, xp: 0, hp: heroStats(1, upgrades).maxHp, swing: 0, shield: 0, hits: 0, buffs: [] },
+    hero: { level: 1, xp: 0, hp: heroStats(1, upgrades).maxHp, swing: 0, shield: 0, hits: 0, buffs: [], nextCrit: false },
     gold: 0,
     fragments: 0,
     gear: newGear(),
