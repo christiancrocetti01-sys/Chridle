@@ -3,13 +3,11 @@
 > File di passaggio di consegne tra sessioni. Aggiornato con `/handoff`.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
-**Ultimo aggiornamento:** 2026-10-24 (handoff: revisione chiusa, chiavi più rare, lotto 4 rune, Purezza/Corruzione)
+**Ultimo aggiornamento:** 2026-10-24 (collaudo massivo nel repo: 6 profili × 8 h, tutto pulito)
 **Fase corrente:** 7 — contenuti a lotti. Grafica e UI minime fino alla fine (prova da telefono rimandata a dopo).
-**Prossimo passo:** **test massivo** richiesto dall'utente: script di collaudo **nel repo** (es. `scripts/collaudo.ts`,
-`npx vite-node`) che simula ore di gioco con tutti i sistemi (Vie, Stelle, rune, skill, Ascensioni, Dungeon/Torre/Raid,
-Corruzione): cerca NaN/crash, misura ritmo, chiavi/ora, Essenza vs costo rune. Proponi il piano prima di scriverlo.
+**Prossimo passo:** decidere col collaudo i ritocchi di bilanciamento (vedi Note), poi
 Poi: Codex/Imprese/Lumi (GDD §14), altri unici e set; endgame (Abisso, Paragon, Rinascita) alla fine.
-**Online:** `main` = lotto 4 rune (commit 14187e9). **Purezza/Corruzione solo sul branch**: allineare `main` quando l'utente lo chiede.
+**Online:** `main` = Purezza/Corruzione (f39cdb4). Il collaudo è solo sul branch.
 
 ## Gioco online
 https://christiancrocetti01-sys.github.io/Chridle/ (ogni push su `main` lo ripubblica, ~1 min).
@@ -33,12 +31,15 @@ Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` (fast-forward) quand
 
 ## Test
 - `npm test`: **172 verdi** (16 file), `npm run build` ok.
-- Vecchio collaudo (script perso, era in scratchpad): 4 h con tutti i sistemi senza NaN/crash. Da rifare dopo chiavi/rune/Corruzione.
+- Collaudo: `npm run collaudo -- --ore 8 [--seed N] [--profilo id]` (`scripts/collaudo.ts`, un processo per profilo:
+  5 Vie + uno con sessioni offline). 8 h: nessun NaN/crash/salvataggio rotto, ~25 s.
 - Ritmo (`tests/combat.test.ts`, senza Via/Stelle): 2 h con equip automatico stage 50.
 
 ## Note / problemi noti
 - Muro al boss di zona 50 (scudo + rigenerazione): con Via+Stelle ~4 h fermi (rigenerazione 1%/s): **voluto**, spinge ad ascendere.
-- Da verificare col collaudo: quante chiavi/ora dopo il cambio; costo rune ×1,6 (la 40ª ~4,6 miliardi, voluto).
+- Collaudo 8 h (seme 1): chiavi 7,5-10/h (i Dungeon ne restituiscono), 5-9 Ascensioni, record 60-94, 13-14 rune
+  (la prossima 22-36k Essenza), Raid quasi sempre persi, Torre 30-45. Corruzione: Pur. fino a −86 (mai −100),
+  Eclissiarca solo +20…+45 (mai +50): forse troppo pochi punti di Corruzione.
 - Domanda aperta: Neutro (Corruzione vicina a 0) senza bonus va bene?
 - Il confronto oggetti ora usa tutte le statistiche (`stateStats`), non solo gli oggetti.
 - Revisione da telefono rimandata a dopo la grafica finale (decisione utente).

@@ -8,7 +8,8 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "collaudo": "vite-node scripts/collaudo.ts --"
   },
   "devDependencies": {
     "typescript": "~5.9",

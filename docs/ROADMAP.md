@@ -62,6 +62,6 @@ Spuntare `[x]` man mano. Le fasi possono essere ridefinite: è un documento vivo
   - [x] Revisione delle Fasi 3.5-7 con l'utente (2026-10-24), `main` pubblicato; chiavi più rare
   - [x] Lotto 4: rune 24 → 40 (costo di sblocco ×1,6 invariato)
   - [x] Purezza/Corruzione (sistema a parte, salvataggio v15)
-  - [ ] Collaudo massivo con tutti i sistemi (script nel repo, non più in scratchpad)
+  - [x] Collaudo massivo con tutti i sistemi (`scripts/collaudo.ts`, `npm run collaudo`)
   - [ ] Poi: Codex/Imprese/Lumi, altri unici e set
   - [ ] Endgame: Abisso, Paragon, Rinascita Solare
