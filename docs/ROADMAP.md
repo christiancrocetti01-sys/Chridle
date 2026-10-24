@@ -67,5 +67,6 @@ Spuntare `[x]` man mano. Le fasi possono essere ridefinite: è un documento vivo
   - [x] Collezione leggendari (salvataggio v17)
   - [x] Imprese (salvataggio v18, solo bonus permanenti)
   - [x] Lumi (salvataggio v19)
-  - [ ] Altri unici e set
-  - [ ] Endgame: Abisso, Paragon, Rinascita Solare
+  - [x] Altri unici e set (lotto 5: 30 unici, 8 set, 7 regole nuove)
+  - [x] Endgame: Abisso, Paragon, Rinascita Solare (salvataggio v20)
+  - [x] Collaudo di 10 giorni simulati

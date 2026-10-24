@@ -162,7 +162,10 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
 - **Deciso (collaudo, 2026-10-24):** boss di zona: chiave solo ogni 20 stage (`ZONE_KEY_EVERY`): ~5-6 chiavi/h invece
   di 8-10. Raid al livello record − 5 (`RAID_LEVEL_OFFSET`): vinti ~60% invece di ~45%. Corruzione invariata
   (un profilo che cerca le soglie arriva a +70 / −90).
-- **Deciso (Abisso):** dopo i contenuti, insieme a Paragon e Rinascita Solare (strati dell'endgame).
+- **Fatto (Abisso, scelte di Claude su delega dell'utente):** si sblocca dopo 3 Ascensioni (o con una Rinascita). Profondità
+  infinite: 10 nemici (25% élite) + un Guardiano (boss di zona), poi la profondità successiva finché non si cade.
+  Profondità d = stage 40 + 3d, vita ×2, attacco ×1,5. Si riparte da record − 3. Ricompense: bottino normale + esperienza
+  Paragon = profondità per uccisione (Guardiano ×10). Valori in `src/data/endgame.ts`.
 
 ## 11. Valute ed economia
 - **Oro**: base, per potenziamenti e acquisti.
@@ -181,7 +184,13 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
 - **Fatto (Fase 5, approvato 2026-10-24):** Ascensione dallo stage 40, valuta **Scintille** (non "Stelle": il nome
   è già delle Costellazioni) = ((record − 30) / 10)²; 9 potenziamenti permanenti in `src/data/ascension.ts`.
   Si azzerano livello, oro, potenziamenti, stage e Costellazioni; restano oggetti, valute, rune, Torre, Vie.
-  Paragon e Rinascita Solare: dopo i contenuti, con l'Abisso. Offline 75% approvato.
+  Offline 75% approvato.
+- **Fatto (Paragon):** livelli infiniti solo dall'Abisso (costo 100 × (l+1)^1,5), 1 punto per livello su 8 bonus a scelta
+  (+2% attacco/vita/difesa/danno critico/elementale, +0,5% velocità, +1% ritrovamento, +3% oro e +2% XP); i punti si
+  riprendono gratis. Permanente.
+- **Fatto (Rinascita Solare):** da 400 Scintille guadagnate nel ciclo; Soli = √(Scintille / 100). Azzera Ascensioni, Scintille
+  e potenziamenti (tranne Quinto Sole e Doppia Via) e riparte da capo. Ogni Sole, per sempre: attacco/vita/difesa +100%,
+  oro/XP/Essenza/Paragon +50%, Scintille +25%. Imprese nuove: Abissale, Paragone, Rinato.
 - Numeri grandi: supporto oltre 1e308 (libreria tipo `break_infinity.js`) **rimandato** finché non serve
   (stage ~3800); formattazione 1.2K, 3.4M… fino a Dc, poi notazione.
 
