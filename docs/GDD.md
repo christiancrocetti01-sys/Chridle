@@ -120,7 +120,7 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
   trasferisci un effetto leggendario (rende utile ogni drop).
 - **Auto-smantellamento** con filtri per rarità/statistiche (fondamentale in un idle).
 - **Deciso (2026-10-24):** tutti i 12 slot e le 7 rarità da subito; drop 1 ogni ~8 nemici, boss sempre
-  (almeno Magico); inventario 40 (pieno → smantella); statistiche piatte +10% per livello oggetto;
+  (almeno Magico); inventario senza limite (dal 2026-10-24, richiesta utente; prima 40); statistiche piatte +10% per livello oggetto;
   obiettivo: **varietà "infinita"** di armi, statistiche e sinergie (è il cuore del gioco).
 - **Deciso (varietà 1-3):** affissi con tag e tipi ammessi, ibridi a 2 statistiche; effetti a scatto solo da
   Epico in su, max 1 per oggetto, effetti uguali **si sommano**; leggendari unici = effetto/regola fissa +
@@ -129,6 +129,8 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
 - **Deciso (varietà 4, crafting):** ritira affisso, migliora tier (max T5), trasferisci affisso (donatore
   distrutto), fusione 3 uguali → rarità successiva (max Mitico); niente "aggiungi affisso"; unici e set non si
   modificano; ogni modifica sullo stesso oggetto costa ×1,5.
+- **Deciso (2026-10-24):** pulsante «Equipaggia il meglio» (`src/core/autoequip.ts`): indossa per ogni slot il pezzo che
+  alza `gearPower` (dps × resistenza, set inclusi); le regole degli unici non entrano nel conto (si scelgono a mano).
 - **Visione:** nemici sempre più forti, ma il giocatore arriva a build **assurde** combinando statistiche,
   skill e sinergie (numeri che esplodono).
 
@@ -234,5 +236,9 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
 - **Deciso (2026-10-24, sera):** la grafica si rifinisce **alla fine**, a gioco finito; fino ad allora stile minimo.
 - **Fatto (Fase 6):** icone SVG minimali degli oggetti, bagliore di Leggendario/Mitico, Divino che pulsa,
   lampi sulle barre, avvisi per livello e bottino raro, suoni sintetizzati WebAudio (spenti di default).
+- **Deciso (2026-10-24, UI divisa):** "una cosa per schermata". Header compatto sempre visibile (valute, livello/stage,
+  combattimento affiancato, log 3 righe, Abbandona); 5 schede fisse in basso con sotto-schede a pillola:
+  Eroe (Oggetti/Potenziamenti/Statistiche), Build (Skill/Rune/Stelle/Via/Lumi), Mondo (Zona/Modalità),
+  Progressi (Bestiario/Collezione/Imprese), Ascensione (Ascensione/Rinascita/Paragon). Pallini rossi = cose da fare.
 - Ispirazioni (solo concettuali): Diablo, Path of Exile, Melvor Idle, NGU Idle, Idle Champions.
 
