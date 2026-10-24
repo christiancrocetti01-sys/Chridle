@@ -246,7 +246,6 @@ function check(state: GameState, s: Stats, where: string) {
   walk(s, 'stats');
   if (state.gold < 0 || state.essence < 0 || state.fragments < 0 || state.keys < 0) bad('valute negative', JSON.stringify([state.gold, state.essence, state.fragments, state.keys]));
   if (state.hero.hp > s.maxHp * 1.0001 + 1) bad('hp > maxHp', `${state.hero.hp} / ${s.maxHp}`);
-  if (state.gear.inventory.length > 40) bad('inventario', state.gear.inventory.length);
 }
 
 function checkSave(state: GameState, where: string) {

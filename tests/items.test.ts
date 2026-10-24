@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { changeGear, step, type CombatEvent } from '../src/core/combat';
 import {
-  INVENTORY_SIZE, equip, gearMods, newGear, rollItem, rollRarity, salvage, salvageUpTo, salvageValue, unequip,
+  equip, gearMods, newGear, rollItem, rollRarity, salvage, salvageUpTo, salvageValue, unequip,
   type Item,
 } from '../src/core/items';
 import { deserialize, serialize } from '../src/core/save';
@@ -75,14 +75,13 @@ describe('equipaggiamento', () => {
     expect(g.inventory.map((i) => i.uid)).toEqual([2]);
   });
 
-  it('togliere riporta in inventario, ma non se è pieno', () => {
+  it('togliere riporta in inventario, senza limite di posti', () => {
     const g = newGear();
     g.inventory.push(ring(1));
     equip(g, 1);
+    for (let i = 0; i < 200; i++) g.inventory.push(ring(100 + i));
     expect(unequip(g, 'anello1')).toBe(true);
-    equip(g, 1);
-    for (let i = 0; i < INVENTORY_SIZE; i++) g.inventory.push(ring(100 + i));
-    expect(unequip(g, 'anello1')).toBe(false);
+    expect(g.inventory).toHaveLength(201);
   });
 
   it('smantellare dà Frammenti in base a rarità e livello', () => {
@@ -135,15 +134,15 @@ describe('drop', () => {
     expect(s.fragments).toBeGreaterThan(0);
   });
 
-  it('con inventario pieno i drop vengono smantellati', () => {
+  it('l\'inventario non ha limite: i drop si tengono anche con 200 oggetti', () => {
     const s = newGame(0, 3);
-    for (let i = 0; i < INVENTORY_SIZE; i++) s.gear.inventory.push(rollItem(rng(i), 1000 + i, 1, 0));
+    s.gear.autoSalvage = -1;
+    for (let i = 0; i < 200; i++) s.gear.inventory.push(rollItem(rng(i), 1000 + i, 1, 0));
     s.stage.kills = KILLS_PER_STAGE;
     while (!s.enemy) step(s);
     s.enemy.hp = 1;
     while (s.enemy) step(s);
-    expect(s.gear.inventory).toHaveLength(INVENTORY_SIZE);
-    expect(s.fragments).toBeGreaterThan(0);
+    expect(s.gear.inventory).toHaveLength(201);
   });
 });
 

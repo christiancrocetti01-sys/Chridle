@@ -5,7 +5,7 @@ import {
   type DungeonModId,
 } from '../data/modes';
 import { discover } from './collection';
-import { INVENTORY_SIZE, rollItem, rollRarity, salvageValue, type Item } from './items';
+import { rollItem, rollRarity, type Item } from './items';
 import { TICK_RATE } from './loop';
 import { nextRandom } from './rng';
 import type { GameState } from './state';
@@ -85,10 +85,8 @@ export function leaveMode(state: GameState, events: Events, text?: string, ok = 
 export const dungeonReward = (mods: DungeonModId[]) => 1 + mods.reduce((s, id) => s + DUNGEON_MODS.find((m) => m.id === id)!.reward, 0);
 
 function giveItem(state: GameState, item: Item, events: Events) {
-  const salvaged = state.gear.inventory.length >= INVENTORY_SIZE;
-  if (salvaged) state.fragments += salvageValue(item);
-  else state.gear.inventory.push(item);
-  events.push({ type: 'drop', item, salvaged, discovered: discover(state, item) });
+  state.gear.inventory.push(item);
+  events.push({ type: 'drop', item, salvaged: false, discovered: discover(state, item) });
 }
 
 /**

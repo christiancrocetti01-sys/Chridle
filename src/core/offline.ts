@@ -4,7 +4,7 @@ import { checkAchievements } from './achievements';
 import { checkLumi } from './lumi';
 import { offlineEfficiency } from './ascension';
 import { gainXp, step, type CombatEvent } from './combat';
-import { INVENTORY_SIZE, rollItem, rollRarity, salvageValue } from './items';
+import { rollItem, rollRarity, salvageValue } from './items';
 import { TICK_RATE } from './loop';
 import { leaveMode } from './modes';
 import type { GameState } from './state';
@@ -89,7 +89,7 @@ export function applyOffline(state: GameState, seconds: number): OfflineReport |
     const item = rollItem(state, state.gear.nextId++, state.stage.current, rollRarity(state, false, mf));
     value += salvageValue(item);
     discover(state, item);
-    if (item.rarity <= state.gear.autoSalvage || state.gear.inventory.length >= INVENTORY_SIZE) state.fragments += salvageValue(item);
+    if (item.rarity <= state.gear.autoSalvage) state.fragments += salvageValue(item);
     else state.gear.inventory.push(item);
   }
   if (real) state.fragments += (value / real) * (totalDrops - real);

@@ -10,6 +10,8 @@ affiancato, log 3 righe, Abbandona), barra schede fissa in basso: Eroe (Oggetti/
 Build (Skill/Rune/Stelle/Via/Lumi), Mondo (Zona/Modalità), Progressi (`src/ui/progress.ts`: Bestiario/Collezione/Imprese),
 Ascensione (Ascensione/Rinascita/Paragon). Sotto-schede = blocchi `data-sub`, il pane ha `data-view` (CSS generato in `hud.ts`,
 `TABS`); scelta ricordata in `chridle.ui`. Pallini: punti stella, Ascensione/Rinascita pronta, punti Paragon.
+Equip automatico (pulsante «Equipaggia il meglio», `src/core/autoequip.ts`: `gearPower` = dps × resistenza, ignora le regole
+degli unici) e inventario **senza limite** (via `INVENTORY_SIZE`; smantellamento automatico resta l'unico filtro).
 **Prossimo passo:** feedback dell'utente sulla nuova struttura, poi piano della grafica (palette, font, schede lunghe).
 **Online:** `main` = branch (6c655bd): lotto 5 ed endgame pubblicati.
 
@@ -44,7 +46,7 @@ Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` (fast-forward) quand
 - Salvataggio: **v20** (v20 `abyss`/`paragon`/`rebirth`), prima **v19** (v11 `vie`, v12 nemico + `keys`/`mode`/`tower`, v13 `ascension`, v14 campi opzionali rune, v15 `hero.sanctity`, v16 `codex`, v17 `collection`, v18 `achievements`, v19 `lumi`).
 
 ## Test
-- `npm test`: **218 verdi** (21 file), `npm run build` ok (verificato all'handoff).
+- `npm test`: **221 verdi** (22 file), `npm run build` ok (verificato all'handoff).
 - Collaudo: `npm run collaudo -- --ore 8 [--seed N] [--profilo id]` (`scripts/collaudo.ts`, un processo per profilo:
   5 Vie + uno con sessioni offline). 8 h: nessun NaN/crash/salvataggio rotto, ~30 s. Rilanciarlo dopo ogni sistema nuovo.
   Attenzione: nelle catene di comandi non fidarsi di `npm test | grep` (esce 0 anche se fallisce).

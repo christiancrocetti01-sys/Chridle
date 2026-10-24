@@ -43,7 +43,6 @@ export interface GearState {
 
 export type Rng = { rng: number };
 
-export const INVENTORY_SIZE = 40;
 /** Probabilità di drop da un nemico normale; i boss lasciano sempre un oggetto. */
 export const DROP_CHANCE = 1 / 8;
 /** Crescita delle statistiche piatte per livello oggetto. */
@@ -210,7 +209,7 @@ export function equip(gear: GearState, uid: number, slot?: SlotId): boolean {
 
 export function unequip(gear: GearState, slot: SlotId): boolean {
   const item = gear.equipped[slot];
-  if (!item || gear.inventory.length >= INVENTORY_SIZE) return false;
+  if (!item) return false;
   delete gear.equipped[slot];
   gear.inventory.push(item);
   return true;

@@ -15,6 +15,7 @@ import { showOfflineReport } from './ui/ascension';
 import { fuseItems, rerollAffix, transferAffix, upgradeAffix } from './core/craft';
 import { equip, salvage, salvageUpTo, unequip } from './core/items';
 import { newGame } from './core/state';
+import { equipBest } from './core/autoequip';
 import { createHud } from './ui/hud';
 
 const AUTOSAVE_MS = 10_000;
@@ -45,6 +46,11 @@ function main() {
     upgrade: (uid, i) => changeGear(state, () => upgradeAffix(state, uid, i)),
     transfer: (uid, i, d, j) => changeGear(state, () => transferAffix(state, uid, i, d, j)),
     fuse: (uids) => fuseItems(state, uids),
+    equipBest: () => {
+      let n = 0;
+      changeGear(state, () => (n = equipBest(state)) > 0);
+      return n;
+    },
     setSkillSlot: (slot, id) => setSlot(state, slot, id),
     moveSkillSlot: (slot, dir) => moveSlot(state, slot, dir),
     unlockRune: (id) => unlockRune(state, id),

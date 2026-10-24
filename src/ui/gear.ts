@@ -3,7 +3,7 @@ import {
   transferCost, upgradeCost,
 } from '../core/craft';
 import { formatNum } from '../core/format';
-import { INVENTORY_SIZE, setCounts, salvageValue, slotsFor, type Affix, type GearState, type Item } from '../core/items';
+import { setCounts, salvageValue, slotsFor, type Affix, type GearState, type Item } from '../core/items';
 import type { GameState } from '../core/state';
 import { elementalDamage, stateStats, type Stats } from '../core/stats';
 import { RULE_TEXT, SETS, SET_PIECES, UNIQUES } from '../data/uniques';
@@ -11,6 +11,8 @@ import { FUSE_COUNT, FUSE_MAX_RARITY } from '../data/craft';
 import { itemIcon } from './icons';
 import { DOLL_LEFT, DOLL_RIGHT, SILHOUETTE } from './doll';
 import { ITEM_TYPES, TRIGGER_AFFIXES, affixDef, type TriggerDef, type TriggerEffect, RARITIES, SLOTS, STAT_LABELS, TAG_LABELS, POINT_STATS, isPct, type SlotId, type StatKey } from '../data/items';
+
+import { toast } from './fx';
 
 export interface GearActions {
   equip(uid: number, slot: SlotId): void;
@@ -22,6 +24,8 @@ export interface GearActions {
   upgrade(uid: number, i: number): void;
   transfer(uid: number, i: number, donorUid: number, j: number): void;
   fuse(uids: number[]): void;
+  /** Equip automatico: restituisce quanti oggetti ha cambiato. */
+  equipBest(): number;
 }
 
 type Selection = { kind: 'inv'; uid: number } | { kind: 'slot'; slot: SlotId } | null;
@@ -192,7 +196,8 @@ function craftPanel(state: GameState, it: Item, pick: Pick): string {
 
 export function createGearPanel(root: HTMLElement, actions: GearActions) {
   root.innerHTML = `
-    <h2 class="section">Equipaggiamento</h2>
+    <div class="gear-head"><h2 class="section">Equipaggiamento</h2>
+      <button class="btn sm" data-g="best" title="Indossa il pezzo migliore per ogni slot">Equipaggia il meglio</button></div>
     <div class="doll">
       <div class="doll-col" data-g="left"></div>
       <div class="doll-figure">${SILHOUETTE}</div>
@@ -221,6 +226,12 @@ export function createGearPanel(root: HTMLElement, actions: GearActions) {
   let pick: Pick = '';
 
   auto.addEventListener('change', () => actions.setAutoSalvage(Number(auto.value)));
+  q('best').addEventListener('click', () => {
+    const n = actions.equipBest();
+    toast(n ? `Equipaggiati <b>${n}</b> ${n === 1 ? 'oggetto' : 'oggetti'} migliori` : 'Hai già addosso il meglio', 'gold');
+    selected = null;
+    lastKey = '';
+  });
   q('bulk').addEventListener('click', () => {
     const r = Number(auto.value);
     if (r >= 0) actions.salvageUpTo(r);
@@ -261,9 +272,8 @@ export function createGearPanel(root: HTMLElement, actions: GearActions) {
     if (selected?.kind === 'slot') {
       const it = gear.equipped[selected.slot];
       if (!it) return '';
-      const full = gear.inventory.length >= INVENTORY_SIZE;
       return `${itemDetail(it, Object.values(gear.equipped) as Item[])}
-        <div class="actions"><button class="btn" data-act="unequip" data-slot="${selected.slot}" ${full ? 'disabled' : ''}>Togli</button></div>
+        <div class="actions"><button class="btn" data-act="unequip" data-slot="${selected.slot}">Togli</button></div>
         ${craftPanel(state, it, pick)}`;
     }
     if (selected?.kind === 'inv') {
@@ -317,7 +327,7 @@ export function createGearPanel(root: HTMLElement, actions: GearActions) {
       };
       refs.left.innerHTML = DOLL_LEFT.map(slotHtml).join('');
       refs.right.innerHTML = DOLL_RIGHT.map(slotHtml).join('');
-      refs.count.textContent = `${gear.inventory.length} / ${INVENTORY_SIZE}`;
+      refs.count.textContent = `· ${gear.inventory.length} oggetti`;
       refs.inv.innerHTML = gear.inventory.length
         ? gear.inventory.slice().sort((a, b) => b.rarity - a.rarity || b.ilvl - a.ilvl).map((it) => {
             const sel = selected?.kind === 'inv' && selected.uid === it.uid ? ' sel' : '';

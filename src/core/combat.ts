@@ -6,7 +6,7 @@ import { checkLumi } from './lumi';
 import type { LumoId } from '../data/lumi';
 import { TICK_RATE } from './loop';
 import { SANCTITY_SECONDS } from '../data/corruption';
-import { DROP_CHANCE, INVENTORY_SIZE, rollItem, rollRarity, salvageValue, type Item } from './items';
+import { DROP_CHANCE, rollItem, rollRarity, salvageValue, type Item } from './items';
 import { nextRandom } from './rng';
 import { essenceFor } from './runes';
 import { castOnCrit, castSkills, gainLight, tickSkills, unlockSkills, type SkillEvent } from './skills';
@@ -248,7 +248,7 @@ function dropLoot(state: GameState, stage: number, boss: boolean, elite: boolean
   // Viandante: si tira solo con la regola (la sequenza dell'RNG non cambia)
   if (hero.rules.has('luckyDrops') && rarity < RARITIES.length - 1 && nextRandom(state) < LUCKY_DROP_CHANCE) rarity++;
   const item = rollItem(state, gear.nextId++, stage, rarity);
-  const salvaged = item.rarity <= gear.autoSalvage || gear.inventory.length >= INVENTORY_SIZE;
+  const salvaged = item.rarity <= gear.autoSalvage;
   if (salvaged) state.fragments += salvageValue(item);
   else gear.inventory.push(item);
   events.push({ type: 'drop', item, salvaged, discovered: discover(state, item) });
