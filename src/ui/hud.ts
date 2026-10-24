@@ -11,6 +11,9 @@ import { createViaPanel, type ViaActions } from './vie';
 import { createLumiPanel, type LumiActions } from './lumi';
 import { createAscensionPanel, type AscensionActions } from './ascension';
 import { createWorldPanel, modeTimer, type WorldActions } from './world';
+import { createProgressPanel } from './progress';
+import { canAscend, scintilleGain } from '../core/ascension';
+import { canRebirth, paragonFree } from '../core/endgame';
 import { DUNGEON_WAVES } from '../data/modes';
 import { ABYSS_WAVES } from '../data/endgame';
 import { soundOn, toggleSound } from './sound';
@@ -26,61 +29,106 @@ export interface Hud {
   onEvents(events: CombatEvent[]): void;
 }
 
+type Sub = [id: string, name: string];
+interface TabDef { id: string; name: string; subs: Sub[] }
+
+/** Schede principali (barra in basso) e sotto-schede: una cosa per schermata. */
+const TABS: TabDef[] = [
+  { id: 'hero', name: 'Eroe', subs: [['oggetti', 'Oggetti'], ['potenziamenti', 'Potenziamenti'], ['statistiche', 'Statistiche']] },
+  { id: 'build', name: 'Build', subs: [['skill', 'Skill'], ['rune', 'Rune'], ['stelle', 'Stelle'], ['via', 'Via'], ['lumi', 'Lumi']] },
+  { id: 'world', name: 'Mondo', subs: [['zona', 'Zona'], ['modi', 'Modalità']] },
+  { id: 'progress', name: 'Progressi', subs: [['bestiario', 'Bestiario'], ['collezione', 'Collezione'], ['imprese', 'Imprese']] },
+  { id: 'ascension', name: 'Ascensione', subs: [['ascensione', 'Ascensione'], ['rinascita', 'Rinascita'], ['paragon', 'Paragon']] },
+];
+
+const UI_KEY = 'chridle.ui';
+
+interface UiPrefs { tab: string; subs: Record<string, string> }
+
+function loadPrefs(): UiPrefs {
+  const def: UiPrefs = { tab: 'hero', subs: Object.fromEntries(TABS.map((t) => [t.id, t.subs[0][0]])) };
+  try {
+    const p = JSON.parse(localStorage.getItem(UI_KEY) ?? 'null') as Partial<UiPrefs> | null;
+    if (p && TABS.some((t) => t.id === p.tab)) def.tab = p.tab!;
+    for (const t of TABS) if (t.subs.some(([id]) => id === p?.subs?.[t.id])) def.subs[t.id] = p!.subs![t.id];
+  } catch { /* preferenze non leggibili: si usano quelle di base */ }
+  return def;
+}
+
+function savePrefs(p: UiPrefs) {
+  try { localStorage.setItem(UI_KEY, JSON.stringify(p)); } catch { /* storage bloccato */ }
+}
+
+/** Mostra solo la sotto-scheda scelta: il pane porta data-view, i blocchi data-sub (sopravvive ai ridisegni). */
+const SUB_CSS = `[data-view] [data-sub]{display:none}` +
+  TABS.flatMap((t) => t.subs).map(([id]) => `[data-view="${id}"] [data-sub="${id}"]{display:block}`).join('');
+
 export function createHud(root: HTMLElement, actions: HudActions): Hud {
+  const prefs = loadPrefs();
   root.innerHTML = `
-    <header class="hud-head">
-      <div>
+    <style>${SUB_CSS}</style>
+    <header class="top">
+      <div class="top-row">
         <h1 class="title">Chridle <button class="sound" data-k="sound" title="Suoni">♪</button></h1>
-        <p class="subtitle">Il Guerriero della Luce</p>
+        <div class="wallet">
+          <span class="gold"><span data-k="gold">0</span> <small>oro</small></span>
+          <span class="essence"><span data-k="essence">0</span> <small>Essenza</small></span>
+          <span class="essence"><span data-k="keys">0</span> <small>chiavi</small></span>
+        </div>
       </div>
-      <div class="wallet">
-        <div class="gold"><span data-k="gold">0</span> <small>oro</small></div>
-        <div class="essence"><span data-k="essence">0</span> <small>Essenza</small></div>
-        <div class="essence"><span data-k="keys">0</span> <small>chiavi</small></div>
+      <div class="meters">
+        <div>
+          <div class="row"><span>Livello <b data-k="level">1</b></span><span class="muted" data-k="xptext"></span></div>
+          <div class="bar"><div class="fill" data-k="xpbar"></div></div>
+        </div>
+        <div>
+          <div class="row"><span>Stage <b data-k="stage">1</b> <span class="muted" data-k="best"></span></span><span data-k="progress"></span></div>
+          <div class="bar"><div class="fill" data-k="stagebar"></div></div>
+        </div>
       </div>
+      <div class="row zone-row"><span class="muted" data-k="zone"></span></div>
+      <div class="combat" data-k="combat"></div>
+      <div class="notice-row"><p class="notice" data-k="notice"></p><button class="btn sm" data-k="leave" hidden>Abbandona</button></div>
     </header>
-    <div class="row"><span>Livello <b data-k="level">1</b></span><span class="muted" data-k="xptext"></span></div>
-    <div class="bar"><div class="fill" data-k="xpbar"></div></div>
-    <div class="row"><span>Stage <b data-k="stage">1</b> <span class="muted" data-k="best"></span></span><span data-k="progress"></span></div>
-    <div class="row zone-row"><span class="muted" data-k="zone"></span></div>
-    <div class="bar"><div class="fill" data-k="stagebar"></div></div>
-    <p class="notice" data-k="notice"></p>
-    <div class="combat" data-k="combat"></div>
+    <nav class="subtabs" data-k="subnav"></nav>
+    <div class="pane" data-pane="hero">
+      <div data-sub="oggetti"><div data-k="gear"></div></div>
+      <div data-sub="potenziamenti">
+        <h2 class="section">Potenziamenti <span class="muted">· con l'oro</span></h2>
+        <div class="upgrades">
+          ${UPGRADES.map((u) => `
+            <button class="card" data-up="${u.id}">
+              <span class="card-name">${u.name} <span class="muted" data-lv="${u.id}"></span></span>
+              <span class="card-desc">${u.description}</span>
+              <span class="card-cost" data-cost="${u.id}"></span>
+            </button>`).join('')}
+        </div>
+      </div>
+      <div data-sub="statistiche">
+        <h2 class="section">Statistiche</h2>
+        <dl class="stats" data-k="stats"></dl>
+      </div>
+    </div>
+    <div class="pane" data-pane="build">
+      <div data-k="skills"></div>
+      <div data-sub="stelle"><div data-k="stars"></div></div>
+      <div data-sub="via"><div data-k="vie"></div></div>
+      <div data-sub="lumi"><div data-k="lumi"></div></div>
+    </div>
+    <div class="pane" data-pane="world"><div data-k="world"></div></div>
+    <div class="pane" data-pane="progress"><div data-k="progress-panel"></div></div>
+    <div class="pane" data-pane="ascension"><div data-k="ascension"></div></div>
     <nav class="tabs">
-      <button class="tab on" data-tab="hero">Eroe</button>
-      <button class="tab" data-tab="skills">Skill</button>
-      <button class="tab" data-tab="stars">Stelle <span class="muted" data-k="starpts"></span></button>
-      <button class="tab" data-tab="world">Mondo</button>
-      <button class="tab" data-tab="ascension">Ascensione <span class="muted" data-k="asc"></span></button>
+      ${TABS.map((t) => `<button class="tab" data-tab="${t.id}">${t.name}<span class="badge" data-badge="${t.id}"></span></button>`).join('')}
     </nav>
-    <div data-pane="hero">
-    <div data-k="vie"></div>
-    <div data-k="lumi"></div>
-    <h2 class="section">Potenziamenti</h2>
-    <div class="upgrades">
-      ${UPGRADES.map((u) => `
-        <button class="card" data-up="${u.id}">
-          <span class="card-name">${u.name} <span class="muted" data-lv="${u.id}"></span></span>
-          <span class="card-desc">${u.description}</span>
-          <span class="card-cost" data-cost="${u.id}"></span>
-        </button>`).join('')}
-    </div>
-    <div data-k="gear"></div>
-    <h2 class="section">Statistiche</h2>
-    <dl class="stats" data-k="stats"></dl>
-    </div>
-    <div data-pane="skills" hidden><div data-k="skills"></div></div>
-    <div data-pane="stars" hidden><div data-k="stars"></div></div>
-    <div data-pane="world" hidden><div data-k="world"></div></div>
-    <div data-pane="ascension" hidden><div data-k="ascension"></div></div>
 `;
 
   const el = (k: string) => root.querySelector<HTMLElement>(`[data-k="${k}"]`)!;
   const refs = {
     gold: el('gold'), level: el('level'), xptext: el('xptext'), xpbar: el('xpbar'),
     stage: el('stage'), best: el('best'), progress: el('progress'), stagebar: el('stagebar'),
-    notice: el('notice'), stats: el('stats'), essence: el('essence'), starpts: el('starpts'),
-    keys: el('keys'), zone: el('zone'), asc: el('asc'), sound: el('sound'),
+    notice: el('notice'), stats: el('stats'), essence: el('essence'), subnav: el('subnav'),
+    keys: el('keys'), zone: el('zone'), sound: el('sound'), leave: el('leave'),
   };
 
   const soundLabel = () => {
@@ -92,17 +140,54 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
     toggleSound();
     soundLabel();
   });
+  refs.leave.addEventListener('click', () => actions.leaveMode());
 
   root.querySelectorAll<HTMLButtonElement>('[data-up]').forEach((b) =>
     b.addEventListener('click', () => actions.buy(b.dataset.up as UpgradeId)),
   );
 
+  /** Schede: mostra il pane scelto, ridisegna le sotto-schede e ricorda la scelta. */
+  function show(tab: string, sub = prefs.subs[tab]) {
+    prefs.tab = tab;
+    prefs.subs[tab] = sub;
+    savePrefs(prefs);
+    root.querySelectorAll<HTMLElement>('[data-tab]').forEach((t) => t.classList.toggle('on', t.dataset.tab === tab));
+    root.querySelectorAll<HTMLElement>('[data-pane]').forEach((p) => {
+      p.hidden = p.dataset.pane !== tab;
+      p.dataset.view = prefs.subs[p.dataset.pane!];
+    });
+    const def = TABS.find((t) => t.id === tab)!;
+    refs.subnav.innerHTML = def.subs.map(([id, name]) =>
+      `<button class="subtab${id === sub ? ' on' : ''}" data-subtab="${id}">${name}<span class="badge" data-badge="${id}"></span></button>`).join('');
+    badgeKey = '';
+  }
   root.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach((b) =>
     b.addEventListener('click', () => {
-      root.querySelectorAll<HTMLElement>('[data-tab]').forEach((t) => t.classList.toggle('on', t === b));
-      root.querySelectorAll<HTMLElement>('[data-pane]').forEach((p) => (p.hidden = p.dataset.pane !== b.dataset.tab));
+      show(b.dataset.tab!);
+      window.scrollTo({ top: 0 });
     }),
   );
+  refs.subnav.addEventListener('click', (ev) => {
+    const b = (ev.target as HTMLElement).closest<HTMLElement>('[data-subtab]');
+    if (b) show(prefs.tab, b.dataset.subtab);
+  });
+
+  /** Pallini sulle schede: qualcosa da fare (punti liberi, Ascensione pronta…). */
+  let badgeKey = '';
+  function badges(state: GameState) {
+    const pts = pointsLeft(state);
+    const asc = canAscend(state) && scintilleGain(state) > 0;
+    const sun = canRebirth(state);
+    const par = paragonFree(state.paragon);
+    const b: Record<string, string> = {
+      build: pts > 0 ? String(pts) : '', stelle: pts > 0 ? String(pts) : '',
+      ascension: asc || sun || par > 0 ? '•' : '', ascensione: asc ? '•' : '', rinascita: sun ? '•' : '', paragon: par > 0 ? String(par) : '',
+    };
+    const k = JSON.stringify(b);
+    if (k === badgeKey) return;
+    badgeKey = k;
+    root.querySelectorAll<HTMLElement>('[data-badge]').forEach((x) => (x.textContent = b[x.dataset.badge!] ?? ''));
+  }
 
   const gear = createGearPanel(el('gear'), actions);
   const skills = createSkillPanel(el('skills'), actions);
@@ -111,7 +196,9 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
   const vie = createViaPanel(el('vie'), actions);
   const lumi = createLumiPanel(el('lumi'), actions);
   const world = createWorldPanel(el('world'), actions);
+  const progress = createProgressPanel(el('progress-panel'));
   const ascension = createAscensionPanel(el('ascension'), actions);
+  show(prefs.tab);
 
   let frame = 0;
   return {
@@ -139,6 +226,7 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
         : m.kind === 'raid' ? `Raid: ${m.name} · ${modeTimer(state)}`
         : m.kind === 'abyss' ? `Abisso: profondità ${m.depth} · ${m.wave >= ABYSS_WAVES ? 'Guardiano' : `nemico ${m.wave + 1} di ${ABYSS_WAVES}`} (record ${state.abyss.best})`
         : state.stage.auto ? '' : "Troppo forte: allenamento finché non sali di livello.";
+      refs.leave.hidden = m.kind === 'campaign';
 
       for (const u of UPGRADES) {
         const price = upgradePrice(state, u.id);
@@ -150,15 +238,14 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
       vie.update(state);
       lumi.update(state);
       world.update(state);
+      progress.update(state);
       ascension.update(state);
-      refs.asc.textContent = state.ascension.scintille >= 1 ? `(${Math.floor(state.ascension.scintille)})` : '';
       refs.keys.textContent = String(state.keys);
       refs.zone.textContent = zoneName(state.stage.current);
       gear.update(state);
       skills.update(state);
       stars.update(state);
-      const pts = pointsLeft(state);
-      refs.starpts.textContent = pts > 0 ? `(${pts})` : '';
+      badges(state);
       combat.update(state);
       const s = stateStats(state);
       refs.stats.innerHTML = [

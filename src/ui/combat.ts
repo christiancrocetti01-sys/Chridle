@@ -13,21 +13,21 @@ import { SFX } from './sound';
 const MECHANIC_SHORT: Record<Mechanic, string> = { enrage: 'furia', shield: 'scudo', summon: 'evocazioni', regen: 'rigenerazione' };
 import { MAX_LIGHT, skillDef } from '../data/skills';
 
-const LOG_SIZE = 6;
+const LOG_SIZE = 3;
 
 /** Pannello di combattimento minimale: barre vita e registro degli eventi importanti. */
 export function createCombatPanel(root: HTMLElement) {
   root.innerHTML = `
     <div class="fighter">
-      <div class="row"><span>Guerriero della Luce</span><span class="muted" data-c="herohp"></span></div>
+      <div class="row"><span>Guerriero</span><span class="muted" data-c="herohp"></span></div>
       <div class="bar hp"><div class="fill" data-c="herobar"></div></div>
       <div class="bar light"><div class="fill" data-c="lightbar"></div></div>
     </div>
     <div class="fighter">
       <div class="row"><span data-c="enemy"></span><span class="muted" data-c="enemyhp"></span></div>
       <div class="bar hp enemy"><div class="fill" data-c="enemybar"></div></div>
-      <div class="enemy-info muted" data-c="einfo"></div>
     </div>
+    <div class="enemy-info muted" data-c="einfo"></div>
     <ul class="log" data-c="log"></ul>`;
   const q = (k: string) => root.querySelector<HTMLElement>(`[data-c="${k}"]`)!;
   const refs = { herohp: q('herohp'), herobar: q('herobar'), enemy: q('enemy'), enemyhp: q('enemyhp'), enemybar: q('enemybar'), einfo: q('einfo'), lightbar: q('lightbar'), log: q('log') };
@@ -71,7 +71,7 @@ export function createCombatPanel(root: HTMLElement) {
     }
     if (e.type === 'drop' && e.discovered) toast(`Collezione: <b>${e.item.name}</b><br><small>nuovo unico, bonus permanente</small>`, 'gold');
     else if (e.type === 'mode' && e.ok) toast(e.text, 'gold');
-    else if (e.type === 'lumo') toast(`Nuovo Lumo: <b>${lumoDef(e.id).name}</b><br><small>scheda Eroe</small>`, 'gold');
+    else if (e.type === 'lumo') toast(`Nuovo Lumo: <b>${lumoDef(e.id).name}</b><br><small>Build · Lumi</small>`, 'gold');
     else if (e.type === 'achievement') toast(`Impresa: <b>${achievementName(e.id)}</b>`, 'gold');
   }
 

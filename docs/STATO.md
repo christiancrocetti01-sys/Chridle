@@ -3,10 +3,14 @@
 > File di passaggio di consegne tra sessioni. Aggiornato con `/handoff`.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
-**Ultimo aggiornamento:** 2026-10-24 (handoff: contenuti e endgame finiti, collaudo 10 giorni ok, tutto su `main`)
+**Ultimo aggiornamento:** 2026-10-24 (UI riorganizzata in schede e sotto-schede, pubblicata su `main`)
 **Fase corrente:** lato tecnico/contenuti **completato**. Prossima: **grafica finale** (decisione utente).
-**Prossimo passo:** proporre all'utente il piano della grafica (3-6 punti, chiedere gusti: palette, font, layout
-mobile, schede lunghe Collezione/Imprese/Paragon da rifare). File UI: `src/ui/*.ts`, `src/style.css`. Niente codice prima del sì.
+**Fatto:** UI divisa (richiesta utente: "troppo caotica"). Header compatto (valute, livello/stage, combattimento
+affiancato, log 3 righe, Abbandona), barra schede fissa in basso: Eroe (Oggetti/Potenziamenti/Statistiche),
+Build (Skill/Rune/Stelle/Via/Lumi), Mondo (Zona/Modalità), Progressi (`src/ui/progress.ts`: Bestiario/Collezione/Imprese),
+Ascensione (Ascensione/Rinascita/Paragon). Sotto-schede = blocchi `data-sub`, il pane ha `data-view` (CSS generato in `hud.ts`,
+`TABS`); scelta ricordata in `chridle.ui`. Pallini: punti stella, Ascensione/Rinascita pronta, punti Paragon.
+**Prossimo passo:** feedback dell'utente sulla nuova struttura, poi piano della grafica (palette, font, schede lunghe).
 **Online:** `main` = branch (6c655bd): lotto 5 ed endgame pubblicati.
 
 ## Gioco online

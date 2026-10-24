@@ -53,6 +53,7 @@ Spuntare `[x]` man mano. Le fasi possono essere ridefinite: è un documento vivo
 - [x] Rifinitura della UI minimale (icone SVG degli oggetti, numeri tabellari, schede scorrevoli)
 - [x] Feedback: bagliori delle rarità (Divino pulsa), lampi sulle barre, avvisi per livello/bottino raro, suoni WebAudio (spenti di default)
 - [x] Crediti aggiornati (`docs/CREDITS.md`): nessun asset esterno oltre al font Cinzel
+- [x] UI riorganizzata: 5 schede in basso con sotto-schede, una cosa per schermata (richiesta utente)
 
 ## Fase 7+ — Espansione contenuti
 - [ ] Centinaia di skill/oggetti/perk generati per lotti dai file dati

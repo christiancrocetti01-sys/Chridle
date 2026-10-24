@@ -5,16 +5,6 @@ import type { GameState } from '../core/state';
 import { FAMILIES, MECHANIC_TEXT, ZONE_KEY_EVERY, ZONE_STAGES, zoneName, zoneOf, type DamageType, type Family } from '../data/enemies';
 import { DUNGEON_MODS, DUNGEON_WAVES, RAID_KEYS, RAID_SECONDS, RAID_LEVEL_OFFSET, RAID_STAGE, TOWER_MILESTONE, TOWER_SECONDS } from '../data/modes';
 import { TICK_RATE } from '../core/loop';
-import { codexTier } from '../core/codex';
-import { CODEX_DMG, CODEX_TIERS, CODEX_TIER_NAMES } from '../data/codex';
-import { formatNum } from '../core/format';
-import { reachedMilestones } from '../core/collection';
-import { COLLECTION_BONUS, COLLECTION_MILESTONES } from '../data/collection';
-import { STAT_LABELS, type StatKey } from '../data/items';
-import { UNIQUES } from '../data/uniques';
-import { formatStat } from './gear';
-import { trackSteps, trackValue } from '../core/achievements';
-import { ROMAN, TRACKS } from '../data/achievements';
 
 export interface WorldActions {
   enterDungeon(): void;
@@ -36,7 +26,7 @@ export function resText(family: Family): string {
   return [weak.length ? `debole: ${weak.join(', ')}` : '', strong.length ? `resiste: ${strong.join(', ')}` : ''].filter(Boolean).join(' · ');
 }
 
-/** Scheda Mondo: zona attuale, Dungeon, Torre dell'Alba e Raid. */
+/** Scheda Mondo: zona attuale (sotto-scheda «zona») e modalità: Dungeon, Torre, Raid, Abisso («modi»). */
 export function createWorldPanel(root: HTMLElement, actions: WorldActions) {
   let key = '';
   root.addEventListener('click', (ev) => {
@@ -49,7 +39,7 @@ export function createWorldPanel(root: HTMLElement, actions: WorldActions) {
   return {
     update(state: GameState) {
       const m = state.mode;
-      const k = JSON.stringify([state.stage.current, state.stage.best, state.keys, m.kind, m.kind === 'dungeon' ? m.mods : 0, state.tower.best, state.abyss.best, state.ascension.count, state.rebirth.count, codexKey(state), state.collection.length, state.achievements.length]);
+      const k = JSON.stringify([state.stage.current, state.stage.best, state.keys, m.kind, m.kind === 'dungeon' ? m.mods : 0, state.tower.best, state.abyss.best, state.ascension.count, state.rebirth.count]);
       if (k === key) return;
       key = k;
       const z = zoneOf(state.stage.current);
@@ -58,8 +48,7 @@ export function createWorldPanel(root: HTMLElement, actions: WorldActions) {
       const lvl = dungeonLevel(state);
       const dz = zoneOf(lvl);
       root.innerHTML = `
-        ${inMode ? `<div class="mode-banner"><span>${m.kind === 'dungeon' ? 'Dungeon in corso' : m.kind === 'tower' ? 'Torre in corso' : m.kind === 'abyss' ? 'Abisso in corso' : 'Raid in corso'}</span>
-          <button class="btn sm" data-w="leaveMode">Abbandona</button></div>` : ''}
+        <div data-sub="zona">
         <h2 class="section">Zona <span class="muted">· stage ${zStart}-${zStart + ZONE_STAGES - 1}</span></h2>
         <div class="skill-row">
           <div class="skill-head"><b>${zoneName(state.stage.current)}</b><span class="muted">${FAMILIES[z.zone.family].name}</span></div>
@@ -67,6 +56,8 @@ export function createWorldPanel(root: HTMLElement, actions: WorldActions) {
           <div class="skill-info">${resText(z.zone.family)}</div>
           <div class="skill-info">Boss di zona (stage ${zStart + ZONE_STAGES - 1}): <b>${z.zone.boss.name}</b> — ${z.zone.mechanics.map((x) => MECHANIC_TEXT[x]).join('; ')}.${(zStart + ZONE_STAGES - 1) % ZONE_KEY_EVERY === 0 ? ' Al record dà una chiave.' : ''}</div>
         </div>
+        </div>
+        <div data-sub="modi">
         <h2 class="section">Dungeon <span class="muted">· ${state.keys} chiavi</span></h2>
         <div class="skill-row">
           <div class="skill-head"><span><b>${zoneName(lvl)}</b> <span class="muted">livello ${lvl}</span></span>
@@ -101,61 +92,9 @@ export function createWorldPanel(root: HTMLElement, actions: WorldActions) {
             Nemici con vita ×${ABYSS_HP} e attacco ×${ABYSS_ATK}. Ogni uccisione dà esperienza <b>Paragon</b> pari alla profondità
             (il Guardiano ×${ABYSS_GUARDIAN_XP}), oltre al bottino normale. Gratis.</div>
         </div>
-        <h2 class="section">Bestiario <span class="muted">· +${Math.round(CODEX_DMG * 100)}% danni per grado, per sempre</span></h2>
-        ${bestiary(state)}
-        <h2 class="section">Collezione leggendari <span class="muted">· ${state.collection.length}/${UNIQUES.length} unici trovati</span></h2>
-        ${collection(state)}
-        <h2 class="section">Imprese <span class="muted">· ${state.achievements.length}/${TRACKS.reduce((s, t) => s + t.steps.length, 0)} completate</span></h2>
-        ${achievements(state)}`;
+        </div>`;
     },
   };
-}
-
-/** Il Bestiario si ridisegna solo a ogni 1% di avanzamento verso il grado successivo. */
-const codexKey = (state: GameState) => (Object.values(state.codex) as number[]).map((n) => {
-  const t = codexTier(n);
-  return t >= CODEX_TIERS.length ? t : `${t}.${Math.floor((n / CODEX_TIERS[t]) * 100)}`;
-}).join();
-
-/** Codex: uccisioni, grado e bonus per famiglia. */
-function bestiary(state: GameState): string {
-  return (Object.keys(FAMILIES) as Family[]).map((f) => {
-    const n = state.codex[f];
-    const t = codexTier(n);
-    const next = CODEX_TIERS[t];
-    const pct = next ? Math.min(100, (n / next) * 100) : 100;
-    return `<div class="skill-row">
-      <div class="skill-head"><span><b>${FAMILIES[f].name}</b> <span class="muted">${CODEX_TIER_NAMES[t]}</span></span>
-        <span>${t ? `+${Math.round(t * CODEX_DMG * 100)}% danni` : '<span class="muted">nessun bonus</span>'}</span></div>
-      <div class="bar"><div class="fill" style="width:${pct.toFixed(1)}%"></div></div>
-      <div class="skill-info muted">${formatNum(n)} uccisi${next ? ` · prossimo grado a ${formatNum(next)}` : ' · grado massimo'}</div>
-    </div>`;
-  }).join('');
-}
-
-const modsText = (mods: [StatKey, number][]) => mods.map(([k, v]) => `+${formatStat(k, v)} ${STAT_LABELS[k]}`).join(', ');
-
-/** Collezione: premi di completamento e bonus di ogni unico (quelli mancanti senza nome). */
-function collection(state: GameState): string {
-  const reached = reachedMilestones(state.collection);
-  const milestones = COLLECTION_MILESTONES.map((m) => `<div class="skill-info${reached.includes(m) ? '' : ' muted'}">
-    ${Math.round(m.frac * 100)}% (${Math.ceil(m.frac * UNIQUES.length)} unici): ${modsText(m.mods)}${reached.includes(m) ? ' ✓' : ''}</div>`).join('');
-  const rows = UNIQUES.map((u) => {
-    const found = state.collection.includes(u.id);
-    return `<div class="skill-info${found ? '' : ' muted'}">${found ? `<b>${u.name}</b>` : '???'} · ${modsText(COLLECTION_BONUS[u.id] ?? [])}</div>`;
-  }).join('');
-  return `<div class="skill-row">${milestones}</div><div class="skill-row">${rows}</div>`;
-}
-
-/** Imprese: gradino raggiunto, prossimo traguardo e bonus per traccia. */
-function achievements(state: GameState): string {
-  return TRACKS.map((t) => {
-    const n = trackSteps(state.achievements, t.id);
-    const next = t.steps[n];
-    const v = trackValue(state, t.id);
-    return `<div class="skill-info${n ? '' : ' muted'}"><b>${t.name}${n ? ` ${ROMAN[n - 1]}` : ''}</b> · ${n ? modsText(t.bonus.map(([k, x]) => [k, x * n])) : 'nessun bonus'}
-      <span class="muted">· ${next !== undefined ? `prossimo: ${t.text.replace('{n}', formatNum(next))} (${formatNum(Math.min(v, next))})` : 'completata'}</span></div>`;
-  }).join('');
 }
 
 /** Testo del timer di Torre e Raid. */

@@ -37,14 +37,18 @@ function socketsHtml(state: GameState, skill: string): string {
 /** Scheda Skill: slot in ordine di priorità con la ricarica, poi tutte le skill (sbloccate e no). */
 export function createSkillPanel(root: HTMLElement, actions: SkillActions) {
   root.innerHTML = `
+    <div data-sub="skill">
     <div class="row"><span>Luce</span><span class="muted" data-s="light"></span></div>
     <div class="bar light"><div class="fill" data-s="lightbar"></div></div>
     <h2 class="section">Skill attive <span class="muted">· in ordine di priorità</span></h2>
     <div class="skill-slots" data-s="slots"></div>
+    <h2 class="section">Tutte le skill</h2>
+    <div class="skill-list" data-s="list"></div>
+    </div>
+    <div data-sub="rune">
     <h2 class="section">Rune <span class="muted">· <span data-s="ess"></span> Essenza</span></h2>
     <div class="skill-list" data-s="runes"></div>
-    <h2 class="section">Tutte le skill</h2>
-    <div class="skill-list" data-s="list"></div>`;
+    </div>`;
   const q = (k: string) => root.querySelector<HTMLElement>(`[data-s="${k}"]`)!;
   const refs = { light: q('light'), lightbar: q('lightbar'), slots: q('slots'), list: q('list'), runes: q('runes'), ess: q('ess') };
   let lastKey = '';
@@ -96,7 +100,7 @@ export function createSkillPanel(root: HTMLElement, actions: SkillActions) {
           </div>`;
         }).join('');
         const vie = activeVie(state.vie);
-        // le skill delle altre Vie non si mostrano: si vedono nella sezione Via della scheda Eroe
+        // le skill delle altre Vie non si mostrano: si vedono nella sezione Via della scheda Build
         refs.list.innerHTML = SKILLS.filter((d) => !d.via || vie.includes(d.via)).map((d) => {
           const locked = d.level > state.hero.level;
           const at = slots.indexOf(d.id);

@@ -12,7 +12,7 @@ export interface LumiActions {
 
 const modsText = (mods: [StatKey, number][], mult = 1) => mods.map(([k, v]) => `+${formatStat(k, v * mult)} ${STAT_LABELS[k]}`).join(', ');
 
-/** Sezione Lumi della scheda Eroe: uno attivo (bonus pieno + effetto), gli altri al 25%. */
+/** Sezione Lumi della scheda Build: uno attivo (bonus pieno + effetto), gli altri al 25%. */
 export function createLumiPanel(root: HTMLElement, actions: LumiActions) {
   let key = '';
   root.addEventListener('click', (ev) => {

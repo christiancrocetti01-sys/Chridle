@@ -49,6 +49,7 @@ export function createAscensionPanel(root: HTMLElement, actions: AscensionAction
       key = k;
       const ok = canAscend(state);
       root.innerHTML = `
+        <div data-sub="ascensione">
         <h2 class="section">Ascensione <span class="muted">· ${a.count} volte</span></h2>
         <div class="skill-row">
           <div class="skill-head"><span><b class="scint">${formatNum(a.scintille)}</b> Scintille <span class="muted">(${formatNum(a.total)} in tutto)</span></span>
@@ -57,8 +58,6 @@ export function createAscensionPanel(root: HTMLElement, actions: AscensionAction
             perdendo oro, potenziamenti e Costellazioni (i punti tornano salendo). Restano oggetti, Frammenti, Essenza, rune, chiavi, Torre e Vie.</div>
           <div class="skill-info muted">${state.stage.best >= ASCEND_STAGE ? `Scintille = ((record − 30) / 10)²${sparkMult(state.rebirth) > 1 ? ` × ${sparkMult(state.rebirth).toFixed(2)} (Soli)` : ''}. Record attuale: stage ${state.stage.best}.` : `Si sblocca allo stage ${ASCEND_STAGE} (record attuale ${state.stage.best}).`}</div>
         </div>
-        ${rebirthBlock(state, confirmSun)}
-        ${paragonBlock(state)}
         <h2 class="section">Potenziamenti permanenti</h2>
         <div class="skill-list">${PERKS.map((d) => {
           const lv = perkLevel(a, d.id);
@@ -69,7 +68,10 @@ export function createAscensionPanel(root: HTMLElement, actions: AscensionAction
               <button class="btn sm" data-a="perk" data-id="${d.id}"${!maxed && a.scintille >= cost ? '' : ' disabled'}>${maxed ? 'Massimo' : `Compra · ${formatNum(cost)}`}</button></div>
             <div class="skill-info">${lv ? perkText(d, perkValue(a, d.id)) : `<span class="muted">${perkText(d, d.value)} al primo livello</span>`}</div>
           </div>`;
-        }).join('')}</div>`;
+        }).join('')}</div>
+        </div>
+        <div data-sub="rinascita">${rebirthBlock(state, confirmSun)}</div>
+        <div data-sub="paragon">${paragonBlock(state)}</div>`;
     },
   };
 }

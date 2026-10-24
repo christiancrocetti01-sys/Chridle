@@ -35,7 +35,7 @@ function corruptionLine(c: number): string {
     + `<br><span class="muted">Regole a ±${CORRUPTION_THRESHOLD} e ±100.</span></p>`;
 }
 
-/** Sezione Via della scheda Eroe: le 5 Vie con statistiche, regola e skill proprie. */
+/** Sezione Via della scheda Build: le 5 Vie con statistiche, regola e skill proprie. */
 export function createViaPanel(root: HTMLElement, actions: ViaActions) {
   let key = '';
   root.addEventListener('click', (ev) => {
