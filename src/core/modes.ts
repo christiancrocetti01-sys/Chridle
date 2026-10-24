@@ -4,6 +4,7 @@ import {
   RAID_KEYS, RAID_LEVEL_OFFSET, RAID_MIN_RARITY, RAID_MYTHIC, RAID_SECONDS, RAID_STAGE, TOWER_BONUS, TOWER_ESSENCE, TOWER_KEY_EVERY, TOWER_MILESTONE, TOWER_SECONDS,
   type DungeonModId,
 } from '../data/modes';
+import { discover } from './collection';
 import { INVENTORY_SIZE, rollItem, rollRarity, salvageValue, type Item } from './items';
 import { TICK_RATE } from './loop';
 import { nextRandom } from './rng';
@@ -13,7 +14,7 @@ import { stateStats } from './stats';
 export type ModeEvent =
   /** Fine di una modalità: `ok` = completata (o, per la Torre, nuovo piano raggiunto prima di cadere). */
   | { type: 'mode'; text: string; ok: boolean }
-  | { type: 'drop'; item: Item; salvaged: boolean }
+  | { type: 'drop'; item: Item; salvaged: boolean; discovered?: boolean }
   | { type: 'key'; keys: number };
 
 type Events = { push(e: ModeEvent): void };
@@ -74,7 +75,7 @@ function giveItem(state: GameState, item: Item, events: Events) {
   const salvaged = state.gear.inventory.length >= INVENTORY_SIZE;
   if (salvaged) state.fragments += salvageValue(item);
   else state.gear.inventory.push(item);
-  events.push({ type: 'drop', item, salvaged });
+  events.push({ type: 'drop', item, salvaged, discovered: discover(state, item) });
 }
 
 /**

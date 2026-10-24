@@ -6,6 +6,11 @@ import { TICK_RATE } from '../core/loop';
 import { codexTier } from '../core/codex';
 import { CODEX_DMG, CODEX_TIERS, CODEX_TIER_NAMES } from '../data/codex';
 import { formatNum } from '../core/format';
+import { reachedMilestones } from '../core/collection';
+import { COLLECTION_BONUS, COLLECTION_MILESTONES } from '../data/collection';
+import { STAT_LABELS, type StatKey } from '../data/items';
+import { UNIQUES } from '../data/uniques';
+import { formatStat } from './gear';
 
 export interface WorldActions {
   enterDungeon(): void;
@@ -39,7 +44,7 @@ export function createWorldPanel(root: HTMLElement, actions: WorldActions) {
   return {
     update(state: GameState) {
       const m = state.mode;
-      const k = JSON.stringify([state.stage.current, state.stage.best, state.keys, m.kind, m.kind === 'dungeon' ? m.mods : 0, state.tower.best, codexKey(state)]);
+      const k = JSON.stringify([state.stage.current, state.stage.best, state.keys, m.kind, m.kind === 'dungeon' ? m.mods : 0, state.tower.best, codexKey(state), state.collection.length]);
       if (k === key) return;
       key = k;
       const z = zoneOf(state.stage.current);
@@ -84,7 +89,9 @@ export function createWorldPanel(root: HTMLElement, actions: WorldActions) {
             In premio un oggetto <b>Leggendario</b> garantito (a volte Mitico o Divino).</div>
         </div>
         <h2 class="section">Bestiario <span class="muted">· +${Math.round(CODEX_DMG * 100)}% danni per grado, per sempre</span></h2>
-        ${bestiary(state)}`;
+        ${bestiary(state)}
+        <h2 class="section">Collezione leggendari <span class="muted">· ${state.collection.length}/${UNIQUES.length} unici trovati</span></h2>
+        ${collection(state)}`;
     },
   };
 }
@@ -109,6 +116,20 @@ function bestiary(state: GameState): string {
       <div class="skill-info muted">${formatNum(n)} uccisi${next ? ` · prossimo grado a ${formatNum(next)}` : ' · grado massimo'}</div>
     </div>`;
   }).join('');
+}
+
+const modsText = (mods: [StatKey, number][]) => mods.map(([k, v]) => `+${formatStat(k, v)} ${STAT_LABELS[k]}`).join(', ');
+
+/** Collezione: premi di completamento e bonus di ogni unico (quelli mancanti senza nome). */
+function collection(state: GameState): string {
+  const reached = reachedMilestones(state.collection);
+  const milestones = COLLECTION_MILESTONES.map((m) => `<div class="skill-info${reached.includes(m) ? '' : ' muted'}">
+    ${Math.round(m.frac * 100)}% (${Math.ceil(m.frac * UNIQUES.length)} unici): ${modsText(m.mods)}${reached.includes(m) ? ' ✓' : ''}</div>`).join('');
+  const rows = UNIQUES.map((u) => {
+    const found = state.collection.includes(u.id);
+    return `<div class="skill-info${found ? '' : ' muted'}">${found ? `<b>${u.name}</b>` : '???'} · ${modsText(COLLECTION_BONUS[u.id] ?? [])}</div>`;
+  }).join('');
+  return `<div class="skill-row">${milestones}</div><div class="skill-row">${rows}</div>`;
 }
 
 /** Testo del timer di Torre e Raid. */

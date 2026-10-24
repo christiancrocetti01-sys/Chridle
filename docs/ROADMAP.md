@@ -64,5 +64,6 @@ Spuntare `[x]` man mano. Le fasi possono essere ridefinite: è un documento vivo
   - [x] Purezza/Corruzione (sistema a parte, salvataggio v15)
   - [x] Collaudo massivo con tutti i sistemi (`scripts/collaudo.ts`, `npm run collaudo`)
   - [x] Codex/Bestiario (salvataggio v16) + Furia contro gli stalli
-  - [ ] Collezione leggendari, Imprese, Lumi; altri unici e set
+  - [x] Collezione leggendari (salvataggio v17)
+  - [ ] Imprese, Lumi; altri unici e set
   - [ ] Endgame: Abisso, Paragon, Rinascita Solare

@@ -66,7 +66,9 @@ export function createCombatPanel(root: HTMLElement) {
     else if (e.type === 'drop' && !e.salvaged && e.item.rarity >= 4) {
       SFX.loot(e.item.rarity);
       toast(`<span class="rar-${e.item.rarity}" style="color:${RARITIES[e.item.rarity].color}">${e.item.name}</span><br><small>${RARITIES[e.item.rarity].name}</small>`, `loot r${e.item.rarity}`);
-    } else if (e.type === 'mode' && e.ok) toast(e.text, 'gold');
+    }
+    if (e.type === 'drop' && e.discovered) toast(`Collezione: <b>${e.item.name}</b><br><small>nuovo unico, bonus permanente</small>`, 'gold');
+    else if (e.type === 'mode' && e.ok) toast(e.text, 'gold');
   }
 
   return {

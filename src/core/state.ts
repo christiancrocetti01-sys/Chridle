@@ -8,6 +8,7 @@ import { heroStats } from './stats';
 import { newVie, type ViaState } from './vie';
 import { newAscension, type AscensionState } from './ascension';
 import { newCodex, type CodexState } from './codex';
+import type { CollectionState } from './collection';
 
 export interface EnemyState {
   templateId: string;
@@ -109,9 +110,11 @@ export interface GameState {
   ascension: AscensionState;
   /** Codex/Bestiario: uccisioni per famiglia (permanenti). */
   codex: CodexState;
+  /** Collezione leggendari: id degli unici trovati (permanenti). */
+  collection: CollectionState;
 }
 
-export const STATE_VERSION = 16;
+export const STATE_VERSION = 17;
 
 export function newGame(now: number, seed = now >>> 0): GameState {
   const upgrades = { forza: 0, corazza: 0, rapidita: 0 };
@@ -140,5 +143,6 @@ export function newGame(now: number, seed = now >>> 0): GameState {
     tower: { best: 0 },
     ascension: newAscension(),
     codex: newCodex(),
+    collection: [],
   };
 }

@@ -3,11 +3,10 @@
 > File di passaggio di consegne tra sessioni. Aggiornato con `/handoff`.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
-**Ultimo aggiornamento:** 2026-10-24 (handoff: collaudo, bilanciamento chiavi/Raid, Codex, Furia; tutto su `main`)
+**Ultimo aggiornamento:** 2026-10-24 (Collezione leggendari fatta sul branch, `main` da allineare dopo l'ok)
 **Fase corrente:** 7 — contenuti a lotti. Grafica e UI minime fino alla fine (prova da telefono rimandata a dopo).
-**Prossimo passo:** chiedere all'utente com'è andata la prova online. Poi **Collezione leggendari** (GDD §14): nuovo
-`state.collection` (id degli unici trovati, salvataggio v17), piccolo bonus permanente per unico, sezione in UI;
-proporre il piano prima. Poi Imprese → Lumi; altri unici e set; endgame (Abisso, Paragon, Rinascita) alla fine.
+**Prossimo passo:** far provare la Collezione all'utente e allineare `main`. Poi **Imprese** (achievement con
+ricompense) → Lumi; altri unici e set; endgame (Abisso, Paragon, Rinascita) alla fine. Proporre il piano prima.
 **Online:** `main` = branch (6d9435d): Codex, Furia, bilanciamento e collaudo pubblicati.
 
 ## Gioco online
@@ -31,10 +30,12 @@ Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` (fast-forward) quand
   Raid al record − 5 (`RAID_LEVEL_OFFSET`). Dettagli e motivi in GDD §10.
 - Codex: `src/core/codex.ts`, `src/data/codex.ts`, `Stats.familyMult` in `damageMult`; UI in `src/ui/world.ts`.
 - Furia contro gli stalli: `enemyAtk` (`src/core/enemies.ts`, `FURY_AFTER_S`).
-- Salvataggio: **v16** (v11 `vie`, v12 nemico + `keys`/`mode`/`tower`, v13 `ascension`, v14 campi opzionali rune, v15 `hero.sanctity`, v16 `codex`).
+- Collezione leggendari: `src/core/collection.ts` (`discover` a ogni drop/fusione/offline), `src/data/collection.ts`,
+  bonus in `stateStats`; evento `drop.discovered`; elenco in `src/ui/world.ts`. UI da rifare alla fine.
+- Salvataggio: **v17** (v11 `vie`, v12 nemico + `keys`/`mode`/`tower`, v13 `ascension`, v14 campi opzionali rune, v15 `hero.sanctity`, v16 `codex`, v17 `collection`).
 
 ## Test
-- `npm test`: **180 verdi** (17 file), `npm run build` ok.
+- `npm test`: **187 verdi** (18 file), `npm run build` ok.
 - Collaudo: `npm run collaudo -- --ore 8 [--seed N] [--profilo id]` (`scripts/collaudo.ts`, un processo per profilo:
   5 Vie + uno con sessioni offline). 8 h: nessun NaN/crash/salvataggio rotto, ~30 s. Rilanciarlo dopo ogni sistema nuovo.
   Attenzione: nelle catene di comandi non fidarsi di `npm test | grep` (esce 0 anche se fallisce).

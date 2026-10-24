@@ -1,4 +1,5 @@
 import { ELITE_CHANCE, ELITE_FROM_STAGE, ELITE_KEY_CHANCE, type Family } from '../data/enemies';
+import { discover } from './collection';
 import { offlineEfficiency } from './ascension';
 import { gainXp, step, type CombatEvent } from './combat';
 import { INVENTORY_SIZE, rollItem, rollRarity, salvageValue } from './items';
@@ -85,6 +86,7 @@ export function applyOffline(state: GameState, seconds: number): OfflineReport |
   for (let i = 0; i < real; i++) {
     const item = rollItem(state, state.gear.nextId++, state.stage.current, rollRarity(state, false, mf));
     value += salvageValue(item);
+    discover(state, item);
     if (item.rarity <= state.gear.autoSalvage || state.gear.inventory.length >= INVENTORY_SIZE) state.fragments += salvageValue(item);
     else state.gear.inventory.push(item);
   }

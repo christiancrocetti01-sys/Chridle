@@ -4,6 +4,7 @@ import {
   itemGrowth, pick, rollAffix, rollItem, rollTrigger, salvageValue,
   type GearState, type Item,
 } from './items';
+import { discover } from './collection';
 import type { GameState } from './state';
 
 export const MAX_TIER = AFFIX_TIERS[AFFIX_TIERS.length - 1].tier;
@@ -128,5 +129,6 @@ export function fuseItems(state: GameState, uids: number[]): Item | null {
   gear.inventory = gear.inventory.filter((x) => !items.includes(x));
   const item = rollItem(state, gear.nextId++, fuseIlvl(items), items[0].rarity + 1, items[0].type);
   gear.inventory.push(item);
+  discover(state, item);
   return item;
 }

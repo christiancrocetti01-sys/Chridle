@@ -200,6 +200,10 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
 - **Fatto (Furia contro gli stalli):** dopo 120 s di combattimento ogni nemico raddoppia l'attacco ogni 10 s
   (il collaudo ha trovato un Dungeon bloccato per 6 h: boss che rigenera, eroe che non muore).
 - **Collezione leggendari**: ogni leggendario trovato almeno una volta dà un piccolo bonus permanente.
+  **Fatto (2026-10-24):** `state.collection` (id degli unici, resta all'Ascensione; conta anche smantellati, fusi,
+  offline e, alla migrazione v17, quelli già posseduti). Bonus a tema per unico (`src/data/collection.ts`, solo %)
+  + premi di completamento al 25/50/100% (+5/+10/+15% attacco e vita, al 100% anche +10% ritrovamento magico).
+  Elenco nella scheda Mondo, avviso alla scoperta. Collaudo: 7-10 unici su 18 in 8 h.
 - **Imprese** (achievement) con ricompense.
 - **Lumi**: piccoli spiriti compagni con bonus passivi, si fanno salire di livello.
 

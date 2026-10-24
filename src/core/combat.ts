@@ -1,5 +1,6 @@
 import { ELITE_DROP, ELITE_KEY_CHANCE, ELITE_REWARD, VAMPIRIC_SHARE, ZONE_KEY_EVERY } from '../data/enemies';
 import { UPGRADES, type UpgradeId } from '../data/upgrades';
+import { discover } from './collection';
 import { TICK_RATE } from './loop';
 import { SANCTITY_SECONDS } from '../data/corruption';
 import { DROP_CHANCE, INVENTORY_SIZE, rollItem, rollRarity, salvageValue, type Item } from './items';
@@ -29,7 +30,7 @@ export type CombatEvent =
   | { type: 'death' }
   | { type: 'stage'; stage: number }
   /** Oggetto caduto; se `salvaged` è stato smantellato subito (filtro o inventario pieno). */
-  | { type: 'drop'; item: Item; salvaged: boolean }
+  | { type: 'drop'; item: Item; salvaged: boolean; discovered?: boolean }
   | { type: 'key'; keys: number }
   | MechanicEvent
   | ModeEvent;
@@ -225,7 +226,7 @@ function dropLoot(state: GameState, stage: number, boss: boolean, elite: boolean
   const salvaged = item.rarity <= gear.autoSalvage || gear.inventory.length >= INVENTORY_SIZE;
   if (salvaged) state.fragments += salvageValue(item);
   else gear.inventory.push(item);
-  events.push({ type: 'drop', item, salvaged });
+  events.push({ type: 'drop', item, salvaged, discovered: discover(state, item) });
 }
 
 /** Cambia l'equipaggiamento mantenendo la vita persa (non si cura né si muore cambiando oggetti). */
