@@ -3,11 +3,11 @@
 > File di passaggio di consegne tra sessioni. Aggiornato con `/handoff`.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
-**Ultimo aggiornamento:** 2026-10-24 (Collezione su `main`; Imprese fatte sul branch, `main` da allineare dopo l'ok)
+**Ultimo aggiornamento:** 2026-10-24 (Collezione e Imprese su `main`)
 **Fase corrente:** 7 — contenuti a lotti. Grafica e UI minime fino alla fine (prova da telefono rimandata a dopo).
-**Prossimo passo:** far provare le Imprese e allineare `main`. Poi **Lumi** (spiriti compagni con bonus passivi,
+**Prossimo passo:** **Lumi** (spiriti compagni con bonus passivi,
 GDD §14); altri unici e set; endgame (Abisso, Paragon, Rinascita) alla fine. Proporre il piano prima.
-**Online:** `main` = 222462b (Collezione leggendari).
+**Online:** `main` = ef3dad6 (Collezione leggendari, Imprese).
 
 ## Gioco online
 https://christiancrocetti01-sys.github.io/Chridle/ (ogni push su `main` lo ripubblica, ~1 min).
