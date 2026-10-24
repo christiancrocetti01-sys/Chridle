@@ -7,6 +7,8 @@ import { RUNES, runeDef, type RuneId } from '../data/runes';
 import type { GameState } from '../core/state';
 import { MAX_LIGHT, SKILLS, SKILL_TAG_LABELS, skillDef, type SkillDef } from '../data/skills';
 import { describeEffect } from './gear';
+import { activeVie } from '../core/vie';
+import { viaDef } from '../data/vie';
 
 export interface SkillActions {
   setSkillSlot(slot: number, id: string | null): void;
@@ -76,7 +78,7 @@ export function createSkillPanel(root: HTMLElement, actions: SkillActions) {
 
       refs.ess.textContent = formatNum(state.essence);
       const hero = stateStats(state);
-      const key = JSON.stringify([slots, state.hero.level, state.runes, hero.skillPower, hero.skillCdr]);
+      const key = JSON.stringify([slots, state.hero.level, state.runes, hero.skillPower, hero.skillCdr, state.vie]);
       if (key !== lastKey) {
         lastKey = key;
         const n = slots.length;
@@ -93,15 +95,18 @@ export function createSkillPanel(root: HTMLElement, actions: SkillActions) {
             ${d ? `<div class="skill-info">${info(state, hero, d)}</div>${socketsHtml(state, d.id)}<div class="bar cd"><div class="fill" data-cd="${i}"></div></div>` : ''}
           </div>`;
         }).join('');
-        refs.list.innerHTML = SKILLS.map((d) => {
+        const vie = activeVie(state.vie);
+        // le skill delle altre Vie non si mostrano: si vedono nella sezione Via della scheda Eroe
+        refs.list.innerHTML = SKILLS.filter((d) => !d.via || vie.includes(d.via)).map((d) => {
           const locked = d.level > state.hero.level;
           const at = slots.indexOf(d.id);
+          const via = d.via ? ` <span class="via-tag">${viaDef(d.via)!.name}</span>` : '';
           const put = locked ? `<span class="muted">Si sblocca al livello ${d.level}</span>`
             : `<span class="skill-btns"><span class="muted">${at >= 0 ? `nello slot ${at + 1}` : 'metti in'}</span>${slots
                 .map((_, i) => `<button class="btn sm" data-act="put" data-slot="${i}" data-id="${d.id}"${i === at ? ' disabled' : ''}>${i + 1}</button>`)
                 .join('')}</span>`;
           return `<div class="skill-row${locked ? ' locked' : ''}">
-            <div class="skill-head"><b>${d.name}</b>${put}</div>
+            <div class="skill-head"><span><b>${d.name}</b>${via}</span>${put}</div>
             <div class="skill-info">${info(state, hero, d)}</div>
           </div>`;
         }).join('');

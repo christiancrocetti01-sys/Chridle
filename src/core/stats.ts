@@ -2,6 +2,8 @@ import { ELEMENTS, type Element } from '../data/items';
 import type { UpgradeId } from '../data/upgrades';
 import type { RuleId } from '../data/uniques';
 import { addStarMods } from './constellations';
+import { addViaMods, type ViaState } from './vie';
+import { BLOOD_PACT_MAX } from '../data/vie';
 import { emptyMods, gearMods, gearRules, type GearState, type StatMods } from './items';
 import type { HeroState } from './state';
 import { SKILL_TAGS, type SkillTag } from '../data/skills';
@@ -88,9 +90,10 @@ export function elementalDamage(s: Stats): number {
 }
 
 /** Statistiche dell'eroe con l'equipaggiamento indossato. */
-export function stateStats(state: { hero: HeroState; upgrades: Record<UpgradeId, number>; gear: GearState; stars?: string[] }): Stats {
+export function stateStats(state: { hero: HeroState; upgrades: Record<UpgradeId, number>; gear: GearState; stars?: string[]; vie?: ViaState }): Stats {
   const mods = gearMods(state.gear);
   const starRules = addStarMods(state.stars ?? [], mods);
+  for (const r of addViaMods(state.vie, mods)) starRules.add(r);
   for (const b of state.hero.buffs) mods.speedPct += b.speedPct;
   const s = heroStats(state.hero.level, state.upgrades, mods);
   s.rules = gearRules(Object.values(state.gear.equipped));
@@ -99,6 +102,12 @@ export function stateStats(state: { hero: HeroState; upgrades: Record<UpgradeId,
     s.critChance = 0;
     s.atk *= NO_CRIT_MULT;
     for (const e of ELEMENTS) s.elements[e] *= NO_CRIT_MULT;
+  }
+  if (s.rules.has('bloodPact')) {
+    // Eclissiarca: il danno sale con la vita mancante
+    const pact = 1 + BLOOD_PACT_MAX * Math.max(0, 1 - state.hero.hp / s.maxHp);
+    s.atk *= pact;
+    for (const e of ELEMENTS) s.elements[e] *= pact;
   }
   if (s.rules.has('frenzy') && state.hero.hp < s.maxHp * FRENZY_HP) s.attackSpeed *= FRENZY_SPEED;
   return s;

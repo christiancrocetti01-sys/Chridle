@@ -6,6 +6,7 @@ import { RUNE_EXECUTE_HP, RUNE_HASTE_SECONDS, RUNE_SHADOW_HP_COST, reduction, ty
 import { nextRandom } from './rng';
 import { isDamageSkill, skillRune } from './runes';
 import { applyEffect, heal } from './triggers';
+import { activeVie } from './vie';
 
 export interface SkillState {
   /** Skill negli slot (null = vuoto); l'ordine è la priorità di lancio. */
@@ -16,7 +17,9 @@ export interface SkillState {
 
 export type SkillEvent = { type: 'skill'; id: string; name: string; amount: number };
 
-export const unlockedSkills = (level: number) => SKILLS.filter((s) => s.level <= level);
+/** Skill disponibili a questo livello: quelle delle Vie solo con la Via attiva. */
+export const unlockedSkills = (level: number, vie: readonly string[] = []) =>
+  SKILLS.filter((s) => s.level <= level && (!s.via || vie.includes(s.via)));
 
 /** Skill iniziali per un eroe di questo livello: le prime sbloccate negli slot. */
 export function newSkills(level = 1): SkillState {
@@ -26,9 +29,9 @@ export function newSkills(level = 1): SkillState {
 }
 
 /** Mette le skill appena sbloccate nei primi slot liberi. Restituisce quelle nuove. */
-export function unlockSkills(s: SkillState, level: number): string[] {
+export function unlockSkills(s: SkillState, level: number, vie: readonly string[] = []): string[] {
   const added: string[] = [];
-  for (const def of unlockedSkills(level)) {
+  for (const def of unlockedSkills(level, vie)) {
     if (s.slots.includes(def.id) || def.id in s.cooldowns) continue;
     const free = s.slots.indexOf(null);
     s.cooldowns[def.id] = 0; // segna la skill come già vista: toglierla da uno slot non la rimette da sola
@@ -70,7 +73,8 @@ export const FREE_SKILLS_CD = 2;
 
 export const canCast = (state: GameState, hero: Stats, id: string) => {
   const def = skillDef(id);
-  return !!def && state.skills.cooldowns[id] <= 0 && state.hero.light >= lightCost(state, hero, def) && state.hero.level >= def.level;
+  return !!def && (state.skills.cooldowns[id] ?? 0) <= 0 && state.hero.light >= lightCost(state, hero, def) && state.hero.level >= def.level
+    && (!def.via || activeVie(state.vie).includes(def.via));
 };
 
 /** Soglie automatiche: niente cura a vita alta, niente scudo se c'è già, niente velocità se è ancora attiva. */
@@ -149,7 +153,7 @@ export function castOnCrit(state: GameState, hero: Stats, events: { push(e: Skil
 export function setSlot(state: GameState, slot: number, id: string | null): boolean {
   const s = state.skills;
   if (slot < 0 || slot >= s.slots.length) return false;
-  if (id !== null && !unlockedSkills(state.hero.level).some((d) => d.id === id)) return false;
+  if (id !== null && !unlockedSkills(state.hero.level, activeVie(state.vie)).some((d) => d.id === id)) return false;
   const from = id === null ? -1 : s.slots.indexOf(id);
   if (from >= 0) s.slots[from] = s.slots[slot];
   s.slots[slot] = id;

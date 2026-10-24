@@ -6,7 +6,9 @@ export type RuleId =
   | 'endlessPoison' | 'dodgeCrit' | 'overhealShield' | 'execute' | 'critBleed'
   | 'frenzy' | 'quickTriggers' | 'hasteStacks'
   // chiavi di volta delle Costellazioni
-  | 'noCrit' | 'freeSkills' | 'overhealHoly';
+  | 'noCrit' | 'freeSkills' | 'overhealHoly'
+  // Vie
+  | 'reflect' | 'doubleStrike' | 'burningHits' | 'starSpirit' | 'bloodPact';
 
 export const RULE_TEXT: Record<RuleId, string> = {
   echoFire: 'Le esplosioni di fuoco colpiscono due volte',
@@ -25,6 +27,11 @@ export const RULE_TEXT: Record<RuleId, string> = {
   noCrit: 'Niente più critici, ma ogni colpo fa +80% di danno',
   freeSkills: 'Le skill non costano Luce, ma la ricarica raddoppia',
   overhealHoly: 'Le cure in eccesso diventano danno sacro al nemico',
+  reflect: 'Restituisce al nemico il 30% del danno subito (prima dello scudo)',
+  doubleStrike: 'Ogni attacco ha il 25% di probabilità di colpire due volte',
+  burningHits: 'Ogni colpo brucia il nemico per il 25% del danno inflitto (nel tempo)',
+  starSpirit: "Uno spirito stellare colpisce ogni secondo per il 50% dell'attacco (sacro)",
+  bloodPact: 'Più vita manca, più danni: fino a +100% a vita quasi zero',
 };
 
 /** Esplosioni che raddoppiano con ogni regola "eco". */

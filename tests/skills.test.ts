@@ -114,6 +114,7 @@ describe('skill attive', () => {
     for (const def of SKILLS) {
       const s = fighting(30);
       s.skills.slots = [def.id, null, null, null];
+      if (def.via) s.vie.main = def.via;
       s.hero.light = 100;
       s.hero.hp = 1;
       s.hero.buffs = [];

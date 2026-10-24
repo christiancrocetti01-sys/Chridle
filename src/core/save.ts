@@ -2,6 +2,7 @@ import { cleanStars } from './constellations';
 import { newGear } from './items';
 import { newRunes } from './runes';
 import { newSkills } from './skills';
+import { newVie } from './vie';
 import { STATE_VERSION, newGame, type GameState } from './state';
 
 export const SAVE_KEY = 'chridle.save';
@@ -56,6 +57,8 @@ export const migrations: Record<number, Migration> = {
   8: (d) => ({ ...d, essence: 0, runes: newRunes() }),
   // v9 → v10: Costellazioni
   9: (d) => ({ ...d, stars: [] }),
+  // v10 → v11: Vie (sottoclassi)
+  10: (d) => ({ ...d, vie: newVie() }),
 };
 
 export function serialize(state: GameState): string {
@@ -83,7 +86,7 @@ export function deserialize(raw: string, migs = migrations, target = STATE_VERSI
 
 function isGameState(d: Record<string, unknown>): d is Record<string, unknown> & GameState {
   const numbers = ['tick', 'createdAt', 'lastSeen', 'rng', 'gold', 'fragments', 'essence', 'respawn'].every((k) => typeof d[k] === 'number');
-  const objects = ['hero', 'upgrades', 'stage', 'totals', 'gear', 'skills', 'runes', 'stars'].every((k) => d[k] && typeof d[k] === 'object');
+  const objects = ['hero', 'upgrades', 'stage', 'totals', 'gear', 'skills', 'runes', 'stars', 'vie'].every((k) => d[k] && typeof d[k] === 'object');
   return numbers && objects;
 }
 

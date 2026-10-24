@@ -7,9 +7,10 @@ import { createCombatPanel } from './combat';
 import { createGearPanel, type GearActions } from './gear';
 import { createSkillPanel, type SkillActions } from './skills';
 import { createStarPanel, type StarActions } from './stars';
+import { createViaPanel, type ViaActions } from './vie';
 import { UPGRADES, type UpgradeId } from '../data/upgrades';
 
-export interface HudActions extends GearActions, SkillActions, StarActions {
+export interface HudActions extends GearActions, SkillActions, StarActions, ViaActions {
   buy(id: UpgradeId): void;
 }
 
@@ -42,6 +43,7 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
       <button class="tab" data-tab="stars">Stelle <span class="muted" data-k="starpts"></span></button>
     </nav>
     <div data-pane="hero">
+    <div data-k="vie"></div>
     <h2 class="section">Potenziamenti</h2>
     <div class="upgrades">
       ${UPGRADES.map((u) => `
@@ -81,6 +83,7 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
   const skills = createSkillPanel(el('skills'), actions);
   const stars = createStarPanel(el('stars'), actions);
   const combat = createCombatPanel(el('combat'));
+  const vie = createViaPanel(el('vie'), actions);
 
   let frame = 0;
   return {
@@ -111,6 +114,7 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
         root.querySelector<HTMLButtonElement>(`[data-up="${u.id}"]`)!.disabled = state.gold < price;
       }
 
+      vie.update(state);
       gear.update(state);
       skills.update(state);
       stars.update(state);

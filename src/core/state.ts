@@ -3,6 +3,7 @@ import { newGear, type GearState } from './items';
 import { newRunes, type RuneState } from './runes';
 import { newSkills, type SkillState } from './skills';
 import { heroStats } from './stats';
+import { newVie, type ViaState } from './vie';
 
 export interface EnemyState {
   templateId: string;
@@ -57,6 +58,8 @@ export interface GameState {
   runes: RuneState;
   /** Costellazioni: id delle stelle prese, in ordine. */
   stars: string[];
+  /** Vie (sottoclassi) scelte. */
+  vie: ViaState;
   upgrades: Record<UpgradeId, number>;
   stage: {
     current: number;
@@ -71,7 +74,7 @@ export interface GameState {
   totals: { kills: number; deaths: number; gold: number };
 }
 
-export const STATE_VERSION = 10;
+export const STATE_VERSION = 11;
 
 export function newGame(now: number, seed = now >>> 0): GameState {
   const upgrades = { forza: 0, corazza: 0, rapidita: 0 };
@@ -89,6 +92,7 @@ export function newGame(now: number, seed = now >>> 0): GameState {
     essence: 0,
     runes: newRunes(),
     stars: [],
+    vie: newVie(),
     upgrades,
     stage: { current: 1, best: 1, kills: 0, auto: true },
     enemy: null,

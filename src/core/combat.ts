@@ -5,9 +5,11 @@ import { DROP_CHANCE, INVENTORY_SIZE, rollItem, rollRarity, salvageValue, type I
 import { nextRandom } from './rng';
 import { essenceFor } from './runes';
 import { castOnCrit, castSkills, gainLight, tickSkills, unlockSkills, type SkillEvent } from './skills';
-import { damageMult, fireTriggers, gearTriggers, heal, tickBuffs, type ProcEvent } from './triggers';
+import { damageMult, fireTriggers, gearTriggers, heal, tickBuffs, type ActiveTrigger, type ProcEvent } from './triggers';
+import { BURNING_SHARE, DOUBLE_STRIKE_CHANCE, REFLECT_SHARE, SPIRIT_ATK } from '../data/vie';
 import type { GameState } from './state';
-import { KILLS_PER_STAGE, elementalDamage, mitigate, stateStats, stageEnemy, upgradeCost, xpToNext } from './stats';
+import { activeVie } from './vie';
+import { KILLS_PER_STAGE, elementalDamage, mitigate, stateStats, stageEnemy, upgradeCost, xpToNext, type Stats } from './stats';
 
 export type CombatEvent =
   | { type: 'hit'; target: 'hero' | 'enemy'; amount: number; crit: boolean }
@@ -56,26 +58,22 @@ export function step(state: GameState, events: CombatEvent[] = []): CombatEvent[
   enemy.hp -= bleed + poison + (hero.poison * dmgMult) / TICK_RATE;
   if (enemy.hp <= 0) return kill(state, events);
 
+  // Custode Stellare: lo spirito colpisce una volta al secondo
+  if (hero.rules.has('starSpirit') && state.tick % TICK_RATE === 0) {
+    enemy.hp -= hero.atk * SPIRIT_ATK * hero.elemMult.holy * dmgMult;
+    if (enemy.hp <= 0) return kill(state, events);
+  }
+
   state.hero.swing += hero.attackSpeed / TICK_RATE;
   if (state.hero.swing >= 1) {
     state.hero.swing -= 1;
-    const crit = (nextRandom(state) < hero.critChance || state.hero.nextCrit) && !hero.rules.has('noCrit');
-    state.hero.nextCrit = false;
-    const mult = crit ? hero.critMult : 1;
-    const physical = mitigate(hero.atk * mult, enemy.def) * dmgMult;
-    const amount = physical + elementalDamage(hero) * mult * dmgMult;
-    enemy.hp -= amount;
-    enemy.bleed += physical * hero.bleed + (crit && hero.rules.has('critBleed') ? amount : 0);
-    if (hero.lifeSteal > 0) heal(state, hero, amount * hero.lifeSteal);
-    events.push({ type: 'hit', target: 'enemy', amount, crit });
-    state.hero.hits++;
-    gainLight(state);
-    if (crit) {
-      fireTriggers(state, hero, triggers, 'crit', events);
-      castOnCrit(state, hero, events);
-    }
-    fireTriggers(state, hero, triggers, 'everyN', events);
+    strike(state, hero, dmgMult, triggers, events);
     if (enemy.hp <= 0) return kill(state, events);
+    // Lama dell'Alba: si tira il colpo doppio solo con la regola (la sequenza dell'RNG non cambia)
+    if (hero.rules.has('doubleStrike') && nextRandom(state) < DOUBLE_STRIKE_CHANCE) {
+      strike(state, hero, dmgMult, triggers, events);
+      if (enemy.hp <= 0) return kill(state, events);
+    }
   }
 
   castSkills(state, hero, events);
@@ -93,6 +91,7 @@ export function step(state: GameState, events: CombatEvent[] = []): CombatEvent[
       return events;
     }
     let amount = mitigate(enemy.atk, hero.def);
+    if (hero.rules.has('reflect')) enemy.hp -= amount * REFLECT_SHARE * dmgMult;
     const absorbed = Math.min(state.hero.shield, amount);
     state.hero.shield -= absorbed;
     amount -= absorbed;
@@ -107,6 +106,28 @@ export function step(state: GameState, events: CombatEvent[] = []): CombatEvent[
     if (enemy.hp <= 0) kill(state, events);
   }
   return events;
+}
+
+/** Un attacco dell'eroe: critico, danno fisico ed elementale, sanguinamento, rubavita, Luce ed effetti a scatto. */
+function strike(state: GameState, hero: Stats, dmgMult: number, triggers: ActiveTrigger[], events: CombatEvent[]) {
+  const enemy = state.enemy!;
+  const crit = (nextRandom(state) < hero.critChance || state.hero.nextCrit) && !hero.rules.has('noCrit');
+  state.hero.nextCrit = false;
+  const mult = crit ? hero.critMult : 1;
+  const physical = mitigate(hero.atk * mult, enemy.def) * dmgMult;
+  const amount = physical + elementalDamage(hero) * mult * dmgMult;
+  enemy.hp -= amount;
+  enemy.bleed += physical * hero.bleed + (crit && hero.rules.has('critBleed') ? amount : 0);
+  if (hero.rules.has('burningHits')) enemy.poison += amount * BURNING_SHARE;
+  if (hero.lifeSteal > 0) heal(state, hero, amount * hero.lifeSteal);
+  events.push({ type: 'hit', target: 'enemy', amount, crit });
+  state.hero.hits++;
+  gainLight(state);
+  if (crit) {
+    fireTriggers(state, hero, triggers, 'crit', events);
+    castOnCrit(state, hero, events);
+  }
+  fireTriggers(state, hero, triggers, 'everyN', events);
 }
 
 function kill(state: GameState, events: CombatEvent[]): CombatEvent[] {
@@ -191,7 +212,7 @@ function gainXp(state: GameState, xp: number, events: CombatEvent[]) {
     state.hero.level++;
     state.hero.hp = stateStats(state).maxHp;
     state.stage.auto = true; // più forte: si riprova ad avanzare
-    for (const id of unlockSkills(state.skills, state.hero.level)) events.push({ type: 'unlock', id });
+    for (const id of unlockSkills(state.skills, state.hero.level, activeVie(state.vie))) events.push({ type: 'unlock', id });
     events.push({ type: 'levelup', level: state.hero.level });
   }
 }
