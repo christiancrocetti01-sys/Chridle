@@ -3,10 +3,11 @@
 > File di passaggio di consegne tra sessioni. Aggiornato con `/handoff`.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
-**Ultimo aggiornamento:** 2026-10-24 (sessione autonoma: Fasi 3.5 → 7 lotto 3)
+**Ultimo aggiornamento:** 2026-10-24 (handoff dopo la sessione autonoma: Fasi 3.5 → 7 lotto 3)
 **Fase corrente:** 7 — contenuti a lotti (lotti 1-3 fatti). Grafica: minima fino alla fine (decisione utente). Fasi 3-6 completate, **da rivedere con l'utente**.
-**Prossimo passo:** 1) l'utente legge `docs/REVISIONE.md` e risponde alle domande; 2) applicare le risposte
-(bilanciamento, nomi); 3) se approva, allineare `main` (fast-forward) per pubblicare; 4) lotto 4.
+**Prossimo passo:** 1) chiedere all'utente le risposte a `docs/REVISIONE.md` (domande 1-23, numerate; 15-16 risolte);
+2) applicarle (valori in `src/data/*.ts`, poi spostare le decisioni in GDD e togliere le risposte dal file);
+3) se approva (domanda 22), allineare `main` con fast-forward per pubblicare; 4) lotto 4 (domanda 18).
 **Online:** `main` = sinergie per tag (Fase 3 passo 3). Tutto il resto solo sul branch `claude/epic-allen-10jgj5`.
 
 ## Gioco online
@@ -26,7 +27,7 @@ Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` (fast-forward) quand
 - Salvataggio: **v13** (v11 `vie`, v12 nemico rigenerato + `keys`/`mode`/`tower`/totals, v13 `ascension`).
 
 ## Test
-- `npm test`: **156 verdi** (16 file), `npm run build` ok.
+- `npm test`: **156 verdi** (15 file), `npm run build` ok.
 - Collaudo (non nel repo): 4 h simulate con tutti i sistemi, nessun NaN/crash; 1ª Ascensione in < 1 h.
 - Ritmo (`tests/combat.test.ts`, senza Via/Stelle): 2 h con equip automatico stage 50.
 
