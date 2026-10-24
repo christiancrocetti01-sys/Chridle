@@ -3,57 +3,37 @@
 > File di passaggio di consegne tra sessioni. Aggiornato con `/handoff`.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
-**Ultimo aggiornamento:** 2026-10-24 (handoff dopo Fase 3 passo 4)
-**Fase corrente:** 3 — Skill e build, passi 1-4 su 5 fatti (skill, rune, sinergie per tag, Costellazioni).
-Decisioni in `docs/GDD.md` §6-7.
-**Prossimo passo:** 1) chiedere all'utente se approva le Costellazioni (provate da lui?) e allineare `main`
-(fast-forward); 2) passo 5 — **Vie** (classi e sottoclassi, GDD §5/§7): proporre il piano in 3-6 punti,
-legando ogni Via a una regione dell'albero (`src/data/constellations.ts`, rami offesa/difesa/luce).
-**Online:** `main` = sinergie per tag (passo 3). Costellazioni solo sul branch. **Grafica:** minimale.
+**Ultimo aggiornamento:** 2026-10-24 (sessione autonoma: Fasi 3.5 → 7 lotto 2)
+**Fase corrente:** 7 — contenuti a lotti (lotti 1-2 fatti). Fasi 3-6 completate, **da rivedere con l'utente**.
+**Prossimo passo:** 1) l'utente legge `docs/REVISIONE.md` e risponde alle domande; 2) applicare le risposte
+(bilanciamento, nomi); 3) se approva, allineare `main` (fast-forward) per pubblicare; 4) lotto 3 (rune/skill).
+**Online:** `main` = sinergie per tag (Fase 3 passo 3). Tutto il resto solo sul branch `claude/epic-allen-10jgj5`.
 
 ## Gioco online
 https://christiancrocetti01-sys.github.io/Chridle/ (ogni push su `main` lo ripubblica, ~1 min).
 Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` (fast-forward) quando un passo è approvato.
 
-## Fatto (sintesi)
-- Fasi 0-2: motore 10 tick/s deterministico, salvataggio versionato, combattimento, boss, potenziamenti;
-  12 slot, 7 rarità, affissi + effetti a scatto (`src/data/items.ts`, `src/core/triggers.ts`), unici e set
-  (`src/data/uniques.ts`), crafting (`src/core/craft.ts`).
-- Fase 3.1-3.2: Luce, 8 skill (`src/core/skills.ts`, scheda `src/ui/skills.ts`), 12 rune (`src/core/runes.ts`).
-- Fase 3.3: 16 affissi `${tag}Skill` / `${tag}Cdr`; `skillPower`/`skillCdr` in Stats; `skillValue`,
-  `cooldownTicks(state, hero, def)`, `lightCost(state, hero, def)`, `canCast(state, hero, id)` in skills.ts.
-- Fase 3.4: Costellazioni. Generatore `src/data/constellations.ts` (148 nodi: 3 rami con spina + 4 ammassi ad
-  anello, notevole al centro, chiave di volta in punta, ponti ibridi tra le punte), logica
-  `src/core/constellations.ts` (punti = livello − 1, restituzione solo se non stacca, respec gratis, mods
-  sommate in `stateStats`), chiavi di volta = RuleId `noCrit`, `freeSkills`, `overhealHoly`. Scheda Stelle
-  `src/ui/stars.ts` (SVG, trascina/pinch/rotella, dettaglio, riepilogo).
-- Salvataggio: **v10** (v8 skill, v9 essenza+rune, v10 `stars`; `cleanStars` scarta stelle ignote/staccate).
-
-## Sessione 2026-10-24 (questa)
-- Passo 3 (sinergie per tag) approvato e pubblicato su `main`.
-- L'utente vuole un albero stile PoE (migliaia di nodi a regime): fatto il primo lotto da 148 col generatore.
-
-## Scelte fatte da Claude (da confermare se l'utente obietta)
-- `triggerChance` 30/50/75/100% (Epico→Divino); max 20 buff; la rigenerazione conta come cura in eccesso.
-- Unici: piatte = valore × 2 × crescita livello oggetto. Costi del crafting (vedi `src/data/craft.ts`).
-- Valori di skill e rune (file dati); Rapidità/Parsimonia con `reduction`; Essenza 1/nemico, boss ×10.
-- Sinergie: tier coi moltiplicatori esistenti (effetto 10/15/20/27/35%, l'utente aveva detto 10/20/30: segnalato,
-  nessuna risposta), tetto ricarica 60% (`MAX_SKILL_CDR`). Effetto su arma/secondaria/anello/amuleto/reliquia,
-  ricarica su elmo/guanti/mantello/reliquia.
-- Costellazioni: valori dei nodi (piccoli ~ affisso T1, notevoli ~3×, alcune notevoli danno regole degli
-  unici); Colpo Assoluto moltiplica attacco ed elementi; Martirio vince su overhealShield; vista iniziale
-  zoomata sul centro.
+## Fatto (sintesi, dettagli in GDD "Fatto/Deciso")
+- Fasi 0-2: motore 10 tick/s, salvataggio versionato, combattimento, oggetti/affissi/trigger/unici/set/crafting.
+- Fase 3: Luce e skill (`src/core/skills.ts`), rune, sinergie per tag, Costellazioni (`src/data/constellations.ts`),
+  **Vie** (`src/data/vie.ts`, `src/core/vie.ts`, sezione in scheda Eroe `src/ui/vie.ts`).
+- Fase 4: zone/famiglie/élite/boss di zona (`src/data/enemies.ts`, `src/core/enemies.ts`), Dungeon/Torre/Raid
+  (`src/data/modes.ts`, `src/core/modes.ts`, scheda Mondo `src/ui/world.ts`). `state.mode` = modalità in corso.
+- Fase 5: Ascensione (`src/data/ascension.ts`, `src/core/ascension.ts`, scheda `src/ui/ascension.ts`),
+  offline (`src/core/offline.ts`, riepilogo in `main.ts`), suffissi numeri fino a Dc.
+- Fase 6: icone (`src/ui/icons.ts`), avvisi (`src/ui/fx.ts`), suoni (`src/ui/sound.ts`, chiave `chridle.sound`).
+- Fase 7: regioni delle Vie nell'albero (~250 nodi), 5 unici con le regole delle Vie.
+- Salvataggio: **v13** (v11 `vie`, v12 nemico rigenerato + `keys`/`mode`/`tower`/totals, v13 `ascension`).
 
 ## Test
-- `npm test`: **125 verdi** (12 file), `npm run build` ok (handoff 2026-10-24).
-- Simulazione (`tests/combat.test.ts`): 2 h senza equip stage 32, con equip automatico 51. Non usa rune,
-  crafting né Costellazioni; l'equip automatico non valuta trigger/unici/set/affissi delle skill.
+- `npm test`: **152 verdi** (16 file), `npm run build` ok.
+- Collaudo (non nel repo): 4 h simulate con tutti i sistemi, nessun NaN/crash; 1ª Ascensione in < 1 h.
+- Ritmo (`tests/combat.test.ts`, senza Via/Stelle): 2 h con equip automatico stage 50.
 
 ## Note / problemi noti
-- Un solo nemico (Ghoul) e un solo boss (Fase 4).
-- Progresso offline non calcolato: oltre 5 s per frame il resto si scarta (Fase 5). Proposto di anticiparlo:
-  nessuna risposta.
-- Pinch a due dita nella scheda Stelle non verificato (solo mouse/rotella in Playwright).
-- Verifica visiva: salvataggio di prova con `npx vite-node script.ts` (importa `src/core/*`), iniettato con
-  `page.addInitScript`; `vite preview` su `/`. Avviarlo con `setsid` e non usare `pkill -f` (uccide la shell).
-- Revisione dell'utente dal telefono (Fase 1) mai spuntata.
+- Muro al boss di zona 50 (scudo + rigenerazione): con Via+Stelle ~4 h fermi (rigenerazione già ridotta a 1%/s).
+- Le chiavi abbondano dopo le Ascensioni (i boss di zona si rifanno): da valutare.
+- Il confronto oggetti ora usa tutte le statistiche (`stateStats`), non solo gli oggetti.
+- Pinch a due dita nella scheda Stelle mai verificato su telefono; revisione da telefono (Fase 1) mai spuntata.
+- Verifica visiva: script in scratchpad (salvataggio con `npx vite-node`, iniettato con `addInitScript`;
+  `vite preview` avviato con `setsid`, non usare `pkill -f`). Un `lastSeen` vecchio apre il riepilogo offline.
