@@ -44,6 +44,8 @@ export const TOWER_ESSENCE = 2;
 export const RAID_STAGE = 50;
 export const RAID_KEYS = 3;
 export const RAID_SECONDS = 120;
+/** Il raid è al livello dello stage record meno questo scarto. */
+export const RAID_LEVEL_OFFSET = 5;
 export const RAID_HP = 40;
 export const RAID_ATK = 2;
 /** Soglie di vita delle fasi 2 e 3. */

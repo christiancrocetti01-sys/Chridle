@@ -3,10 +3,9 @@
 > File di passaggio di consegne tra sessioni. Aggiornato con `/handoff`.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
-**Ultimo aggiornamento:** 2026-10-24 (collaudo massivo nel repo: 6 profili × 8 h, tutto pulito)
+**Ultimo aggiornamento:** 2026-10-24 (collaudo massivo + bilanciamento chiavi/Raid)
 **Fase corrente:** 7 — contenuti a lotti. Grafica e UI minime fino alla fine (prova da telefono rimandata a dopo).
-**Prossimo passo:** decidere col collaudo i ritocchi di bilanciamento (vedi Note), poi
-Poi: Codex/Imprese/Lumi (GDD §14), altri unici e set; endgame (Abisso, Paragon, Rinascita) alla fine.
+**Prossimo passo:** Poi: Codex/Imprese/Lumi (GDD §14), altri unici e set; endgame (Abisso, Paragon, Rinascita) alla fine.
 **Online:** `main` = Purezza/Corruzione (f39cdb4). Il collaudo è solo sul branch.
 
 ## Gioco online
@@ -37,9 +36,8 @@ Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` (fast-forward) quand
 
 ## Note / problemi noti
 - Muro al boss di zona 50 (scudo + rigenerazione): con Via+Stelle ~4 h fermi (rigenerazione 1%/s): **voluto**, spinge ad ascendere.
-- Collaudo 8 h (seme 1): chiavi 7,5-10/h (i Dungeon ne restituiscono), 5-9 Ascensioni, record 60-94, 13-14 rune
-  (la prossima 22-36k Essenza), Raid quasi sempre persi, Torre 30-45. Corruzione: Pur. fino a −86 (mai −100),
-  Eclissiarca solo +20…+45 (mai +50): forse troppo pochi punti di Corruzione.
+- Collaudo 8 h dopo il bilanciamento: chiavi 5-6,5/h, Raid ~60% vinti, 5-8 Ascensioni, record 62-99
+  (Eclissiarca il più veloce, Paladino/Custode i più lenti), 13-14 rune (la prossima 22-36k Essenza).
 - Domanda aperta: Neutro (Corruzione vicina a 0) senza bonus va bene?
 - Il confronto oggetti ora usa tutte le statistiche (`stateStats`), non solo gli oggetti.
 - Revisione da telefono rimandata a dopo la grafica finale (decisione utente).

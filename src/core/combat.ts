@@ -1,4 +1,4 @@
-import { ELITE_DROP, ELITE_KEY_CHANCE, ELITE_REWARD, VAMPIRIC_SHARE } from '../data/enemies';
+import { ELITE_DROP, ELITE_KEY_CHANCE, ELITE_REWARD, VAMPIRIC_SHARE, ZONE_KEY_EVERY } from '../data/enemies';
 import { UPGRADES, type UpgradeId } from '../data/upgrades';
 import { TICK_RATE } from './loop';
 import { SANCTITY_SECONDS } from '../data/corruption';
@@ -201,9 +201,9 @@ function onKill(state: GameState, events: CombatEvent[]) {
     onModeKill(state, events);
     return;
   }
-  // chiavi: dal boss di zona solo al record (non ribattendolo dopo una morte), dalle élite a volte
+  // chiavi: dal boss di zona ogni due zone e solo al record (non ribattendolo dopo una morte), dalle élite a volte
   const newRecord = state.stage.current >= state.stage.best;
-  if ((zoneBoss && newRecord) || (elite && nextRandom(state) < ELITE_KEY_CHANCE)) {
+  if ((zoneBoss && newRecord && state.stage.current % ZONE_KEY_EVERY === 0) || (elite && nextRandom(state) < ELITE_KEY_CHANCE)) {
     state.keys++;
     events.push({ type: 'key', keys: state.keys });
   }

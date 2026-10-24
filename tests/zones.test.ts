@@ -5,7 +5,7 @@ import { canRaid, dungeonLevel, enterDungeon, enterRaid, enterTower, leaveMode, 
 import { deserialize, serialize } from '../src/core/save';
 import { newGame, type GameState } from '../src/core/state';
 import { KILLS_PER_STAGE, stateStats } from '../src/core/stats';
-import { ENEMIES, FAMILIES, ZONES, ZONE_STAGES, zoneName, zoneOf } from '../src/data/enemies';
+import { ENEMIES, FAMILIES, ZONES, ZONE_KEY_EVERY, ZONE_STAGES, zoneName, zoneOf } from '../src/data/enemies';
 import { DUNGEON_WAVES, RAID_KEYS, RAID_STAGE, TOWER_KEY_EVERY, TOWER_MILESTONE } from '../src/data/modes';
 
 const run = (s: GameState, ticks: number) => {
@@ -73,9 +73,12 @@ describe('zone e famiglie', () => {
     expect(e.name).toContain('Robusto');
   });
 
-  it('il boss di zona dà una chiave', () => {
+  it('il boss di zona dà una chiave ogni due zone', () => {
     const s = god(newGame(0, 1));
     s.stage.current = s.stage.best = 10;
+    s.stage.kills = KILLS_PER_STAGE;
+    expect(run(s, 100).some((e) => e.type === 'key')).toBe(false);
+    s.stage.current = s.stage.best = ZONE_KEY_EVERY;
     s.stage.kills = KILLS_PER_STAGE;
     const ev = run(s, 100);
     expect(ev).toContainEqual({ type: 'key', keys: 1 });
@@ -84,11 +87,11 @@ describe('zone e famiglie', () => {
 
   it('ribattere il boss di zona sotto il record non dà chiavi', () => {
     const s = god(newGame(0, 1));
-    s.stage.current = 10;
-    s.stage.best = 11; // si è morti allo stage 11 e si è tornati indietro
+    s.stage.current = ZONE_KEY_EVERY;
+    s.stage.best = ZONE_KEY_EVERY + 1; // si è morti dopo il boss e si è tornati indietro
     s.stage.kills = KILLS_PER_STAGE;
     const ev = run(s, 100);
-    expect(s.stage.current).toBeGreaterThan(10);
+    expect(s.stage.current).toBeGreaterThan(ZONE_KEY_EVERY);
     expect(ev.some((e) => e.type === 'key')).toBe(false);
   });
 });

@@ -159,6 +159,9 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
   Leggendario garantito, 15% Mitico, 2% Divino). La Campagna resta in pausa durante le modalità.
 - **Deciso (chiavi, 2026-10-24):** il boss di zona dà la chiave solo al **record** dell'Ascensione corrente
   (ribatterlo dopo una morte non ne dà); la Torre dà 1 chiave ogni 10 piani di record; élite 5% invariato.
+- **Deciso (collaudo, 2026-10-24):** boss di zona: chiave solo ogni 20 stage (`ZONE_KEY_EVERY`): ~5-6 chiavi/h invece
+  di 8-10. Raid al livello record − 5 (`RAID_LEVEL_OFFSET`): vinti ~60% invece di ~45%. Corruzione invariata
+  (un profilo che cerca le soglie arriva a +70 / −90).
 - **Deciso (Abisso):** dopo i contenuti, insieme a Paragon e Rinascita Solare (strati dell'endgame).
 
 ## 11. Valute ed economia

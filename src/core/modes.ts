@@ -1,7 +1,7 @@
 import { RARITIES } from '../data/items';
 import {
   DUNGEON_ESSENCE, DUNGEON_FRAGMENTS, DUNGEON_WAVES, DUNGEON_LEVEL_OFFSET, DUNGEON_MODS, DUNGEON_MODS_COUNT, RAID_BOSSES, RAID_DIVINE,
-  RAID_KEYS, RAID_MIN_RARITY, RAID_MYTHIC, RAID_SECONDS, RAID_STAGE, TOWER_BONUS, TOWER_ESSENCE, TOWER_KEY_EVERY, TOWER_MILESTONE, TOWER_SECONDS,
+  RAID_KEYS, RAID_LEVEL_OFFSET, RAID_MIN_RARITY, RAID_MYTHIC, RAID_SECONDS, RAID_STAGE, TOWER_BONUS, TOWER_ESSENCE, TOWER_KEY_EVERY, TOWER_MILESTONE, TOWER_SECONDS,
   type DungeonModId,
 } from '../data/modes';
 import { INVENTORY_SIZE, rollItem, rollRarity, salvageValue, type Item } from './items';
@@ -56,7 +56,7 @@ export function enterRaid(state: GameState): boolean {
   if (!canRaid(state)) return false;
   state.keys -= RAID_KEYS;
   const name = RAID_BOSSES[Math.floor(nextRandom(state) * RAID_BOSSES.length)];
-  switchTo(state, { kind: 'raid', level: state.stage.best, ticksLeft: RAID_SECONDS * TICK_RATE, name });
+  switchTo(state, { kind: 'raid', level: state.stage.best - RAID_LEVEL_OFFSET, ticksLeft: RAID_SECONDS * TICK_RATE, name });
   return true;
 }
 

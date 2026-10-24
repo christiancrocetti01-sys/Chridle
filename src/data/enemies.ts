@@ -146,4 +146,6 @@ export const ELITE_HP = 2;
 export const ELITE_REWARD = 3;
 export const ELITE_DROP = 0.5;
 export const ELITE_KEY_CHANCE = 0.05;
+/** Il boss di zona dà la chiave (al record) solo ogni tot stage: ogni due zone. */
+export const ZONE_KEY_EVERY = 20;
 export const VAMPIRIC_SHARE = 0.5;
