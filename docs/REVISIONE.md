@@ -2,7 +2,7 @@
 
 Mi hai chiesto di andare avanti con tutte le fasi e di raccogliere qui i dubbi. Ho fatto le Fasi 3.5 → 6 e due
 lotti della Fase 7. Ogni scelta qui sotto è **già nel gioco**: basta rispondere "ok" oppure dirmi cosa cambiare.
-Tutto è sul branch `claude/epic-allen-10jgj5` (152 test verdi). **`main` non l'ho toccato**: il gioco online è
+Tutto è sul branch `claude/epic-allen-10jgj5` (156 test verdi). **`main` non l'ho toccato**: il gioco online è
 ancora fermo alle sinergie per tag. Quando approvi, lo allineo e si ripubblica.
 
 Per rispondere in fretta: scrivi il numero della domanda e la risposta (es. "3: sì, 7: 50 invece di 40").
@@ -83,8 +83,7 @@ Leggendari e Mitici, il **Divino pulsa**; lampo sulla barra del nemico ai critic
 vieni colpito; avvisi in alto per livello, bottino Leggendario+ e Dungeon completati. **Suoni** sintetizzati
 (niente file): pulsante ♪ accanto al titolo.
 
-15. **Suoni spenti di default**: ok, o li vuoi accesi?
-16. Ti piacciono le **icone**? (sono semplici tratti; posso cambiarne lo stile)
+15. ~~Suoni~~ e 16. ~~icone~~: **risolte**, la grafica si rifinisce alla fine (resta lo stile minimo).
 
 ## Fase 7 — Contenuti a lotti
 
@@ -96,8 +95,12 @@ vieni colpito; avvisi in alto per livello, bottino Leggendario+ e Dungeon comple
 
 17. Le **regioni delle Vie sono aperte a tutti** (PoE-style), non solo a chi segue quella Via. Ok, o le rendo
     esclusive?
-18. **Prossimo lotto**: rune (12 → ~40) e skill (18 → ~30) come dice il GDD, oppure prima Codex/Bestiario,
-    Imprese e Lumi (GDD §14)?
+18. **Lotto 3 fatto dopo la tua risposta sulla grafica**: skill 18 → 30 (12 nuove dal livello 28 al 60, nuovo
+    tag Gelo) e rune 12 → 24 (Condanna, Apertura, Luminescenza, Consacrazione, Marchio, Rinnovamento, Catena,
+    Fulgore, Incendio, Brina, Tempesta, Custodia). Prossimo lotto: altre rune fino a ~40, oppure prima
+    Codex/Bestiario, Imprese e Lumi (GDD §14)?
+23. **Costo di sblocco delle rune**: con 24 rune la crescita ×1,6 per runa porta l'ultima a ~2,5 milioni di
+    Essenza. La abbasso (es. ×1,35) o va bene come obiettivo a lungo termine?
 
 ## Domande rimaste aperte dalle sessioni precedenti
 
@@ -115,4 +118,4 @@ vieni colpito; avvisi in alto per livello, bottino Leggendario+ e Dungeon comple
   viene rigenerato).
 - Il **confronto tra oggetti** ora tiene conto di Costellazioni, Vie, Torre e Ascensione (prima solo gli oggetti).
 - Entrando in una modalità la vita si ripristina; morire in una modalità non fa perdere stage.
-- Test: 152 verdi; collaudo di 4 ore simulate con tutti i sistemi senza errori.
+- Test: 156 verdi; collaudo di 4 ore simulate con tutti i sistemi senza errori.

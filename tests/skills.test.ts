@@ -112,7 +112,7 @@ describe('skill attive', () => {
 
   it('ogni skill fa qualcosa (danno, cura, scudo o velocità)', () => {
     for (const def of SKILLS) {
-      const s = fighting(30);
+      const s = fighting(Math.max(30, def.level));
       s.skills.slots = [def.id, null, null, null];
       if (def.via) s.vie.main = def.via;
       s.hero.light = 100;

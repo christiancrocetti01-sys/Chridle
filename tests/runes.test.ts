@@ -167,3 +167,70 @@ describe('salvataggio v9', () => {
     expect(deserialize(serialize(s))).toEqual(s);
   });
 });
+
+describe('rune del lotto 3', () => {
+  const base = () => dmg(castWith(fighting(), 'colpoSacro', []));
+
+  it('Condanna (boss), Apertura (vita piena), Fulgore (Luce piena)', () => {
+    const b = base();
+    const boss = fighting();
+    boss.enemy!.boss = true;
+    expect(dmg(castWith(boss, 'colpoSacro', ['condanna']))).toBeGreaterThan(b * 1.35 * stateStats(boss).bossMult - 1e-6);
+    expect(dmg(castWith(fighting(), 'colpoSacro', ['apertura']))).toBeCloseTo(b * 2);
+    const low = fighting();
+    low.enemy!.hp = low.enemy!.maxHp * 0.5;
+    expect(dmg(castWith(low, 'colpoSacro', ['apertura']))).toBeCloseTo(b);
+    expect(dmg(castWith(fighting(), 'colpoSacro', ['fulgore']))).toBeCloseTo(b * 1.6);
+  });
+
+  it('le conversioni cambiano elemento (resistenze comprese)', () => {
+    const s = fighting();
+    s.enemy!.family = 'bestie'; // fuoco −30% di resistenza (debolezza), gelo +20%
+    const ev = castWith(s, 'colpoSacro', ['incendio']);
+    expect(dmg(ev)).toBeGreaterThan(base() * 1.3);
+    const c = fighting();
+    c.enemy!.family = 'bestie';
+    expect(dmg(castWith(c, 'colpoSacro', ['brina']))).toBeLessThan(base() * 1.3);
+  });
+
+  it('Luminescenza restituisce Luce, Catena accorcia le altre ricariche, Marchio e Consacrazione', () => {
+    const s = fighting();
+    castWith(s, 'colpoSacro', ['luminescenza']);
+    expect(s.hero.light).toBeCloseTo(100 - 30 * 0.75);
+    const c = fighting();
+    c.skills.cooldowns.preghiera = 50;
+    socketRune(c, 'colpoSacro', 0, null);
+    unlockRune(c, 'catena');
+    socketRune(c, 'colpoSacro', 0, 'catena');
+    c.skills.slots = ['colpoSacro', 'preghiera', null, null];
+    c.skills.cooldowns.colpoSacro = 0;
+    c.hero.light = 100;
+    castSkills(c, stateStats(c), []);
+    expect(c.skills.cooldowns.preghiera).toBe(45);
+    const m = fighting();
+    m.runes.levels.marchio = 6; // 100%
+    castWith(m, 'colpoSacro', ['marchio']);
+    expect(m.hero.nextCrit).toBe(true);
+    const k = fighting();
+    const hp = k.enemy!.hp;
+    const d = dmg(castWith(k, 'colpoSacro', ['consacrazione']));
+    expect(hp - k.enemy!.hp).toBeCloseTo(d * 1.3);
+  });
+
+  it('Custodia solo sulle skill di supporto, Rinnovamento cura', () => {
+    const s = fighting();
+    unlockRune(s, 'custodia');
+    expect(canSocket(s, 'colpoSacro', 0, 'custodia')).toBe(false);
+    expect(canSocket(s, 'egida', 0, 'custodia')).toBe(true);
+    const plain = fighting();
+    plain.hero.shield = 0;
+    const a = dmg(castWith(plain, 'egida', []));
+    const boosted = fighting();
+    boosted.hero.shield = 0;
+    expect(dmg(castWith(boosted, 'egida', ['custodia']))).toBeCloseTo(a * 1.6);
+    const r = fighting();
+    r.hero.hp = 10;
+    castWith(r, 'colpoSacro', ['rinnovamento']);
+    expect(r.hero.hp).toBeGreaterThan(10);
+  });
+});

@@ -49,7 +49,7 @@ Spuntare `[x]` man mano. Le fasi possono essere ridefinite: è un documento vivo
 - [x] Numeri grandi: suffissi fino a Dc (1e33) poi notazione esponenziale; double fino a 1e308 (break_infinity solo se servirà)
 - [x] Progresso offline senza limite (campione di 5 min, efficienza 75% + Veglia), riepilogo al rientro
 
-## Fase 6 — Estetica e "juice"
+## Fase 6 — Estetica e "juice" (base fatta; rifinitura grafica vera **alla fine**, decisione utente)
 - [x] Rifinitura della UI minimale (icone SVG degli oggetti, numeri tabellari, schede scorrevoli)
 - [x] Feedback: bagliori delle rarità (Divino pulsa), lampi sulle barre, avvisi per livello/bottino raro, suoni WebAudio (spenti di default)
 - [x] Crediti aggiornati (`docs/CREDITS.md`): nessun asset esterno oltre al font Cinzel
@@ -58,4 +58,5 @@ Spuntare `[x]` man mano. Le fasi possono essere ridefinite: è un documento vivo
 - [ ] Centinaia di skill/oggetti/perk generati per lotti dai file dati
   - [x] Lotto 1 (con le Vie): 10 skill delle Vie, affissi Ombra
   - [x] Lotto 2: regioni delle Vie nelle Costellazioni (~250 nodi, 8 chiavi di volta), 5 unici con le meccaniche delle Vie
-  - [ ] Lotto 3+: rune (12 → ~40), skill (18 → ~30), altri unici e set, Abisso, Codex, Imprese, Lumi
+  - [x] Lotto 3: skill 18 → 30 (tag Gelo), rune 12 → 24
+  - [ ] Lotto 4+: rune (24 → ~40), altri unici e set, Abisso, Codex, Imprese, Lumi

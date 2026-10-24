@@ -4,9 +4,9 @@
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
 **Ultimo aggiornamento:** 2026-10-24 (sessione autonoma: Fasi 3.5 → 7 lotto 2)
-**Fase corrente:** 7 — contenuti a lotti (lotti 1-2 fatti). Fasi 3-6 completate, **da rivedere con l'utente**.
+**Fase corrente:** 7 — contenuti a lotti (lotti 1-3 fatti). Grafica: minima fino alla fine (decisione utente). Fasi 3-6 completate, **da rivedere con l'utente**.
 **Prossimo passo:** 1) l'utente legge `docs/REVISIONE.md` e risponde alle domande; 2) applicare le risposte
-(bilanciamento, nomi); 3) se approva, allineare `main` (fast-forward) per pubblicare; 4) lotto 3 (rune/skill).
+(bilanciamento, nomi); 3) se approva, allineare `main` (fast-forward) per pubblicare; 4) lotto 4.
 **Online:** `main` = sinergie per tag (Fase 3 passo 3). Tutto il resto solo sul branch `claude/epic-allen-10jgj5`.
 
 ## Gioco online
@@ -22,11 +22,11 @@ Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` (fast-forward) quand
 - Fase 5: Ascensione (`src/data/ascension.ts`, `src/core/ascension.ts`, scheda `src/ui/ascension.ts`),
   offline (`src/core/offline.ts`, riepilogo in `main.ts`), suffissi numeri fino a Dc.
 - Fase 6: icone (`src/ui/icons.ts`), avvisi (`src/ui/fx.ts`), suoni (`src/ui/sound.ts`, chiave `chridle.sound`).
-- Fase 7: regioni delle Vie nell'albero (~250 nodi), 5 unici con le regole delle Vie.
+- Fase 7: regioni delle Vie nell'albero (~250 nodi), 5 unici con le regole delle Vie; 30 skill, 24 rune.
 - Salvataggio: **v13** (v11 `vie`, v12 nemico rigenerato + `keys`/`mode`/`tower`/totals, v13 `ascension`).
 
 ## Test
-- `npm test`: **152 verdi** (16 file), `npm run build` ok.
+- `npm test`: **156 verdi** (16 file), `npm run build` ok.
 - Collaudo (non nel repo): 4 h simulate con tutti i sistemi, nessun NaN/crash; 1ª Ascensione in < 1 h.
 - Ritmo (`tests/combat.test.ts`, senza Via/Stelle): 2 h con equip automatico stage 50.
 

@@ -58,6 +58,7 @@ export function canSocket(state: GameState, skillId: string, i: number, id: Rune
   const rune = runeDef(id);
   if (!def || !rune || !state.runes.levels[id] || i < 0 || i >= RUNE_SOCKETS) return false;
   if (rune.damageOnly && !isDamageSkill(def)) return false;
+  if (rune.supportOnly && isDamageSkill(def)) return false;
   return !socketsOf(state, skillId).some((r, k) => k !== i && r === id);
 }
 

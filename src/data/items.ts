@@ -208,6 +208,7 @@ export const AFFIXES: AffixDef[] = [
   affix('fisicoSkill', 'del Gladiatore', ['fisico'], FOCUS, ['fisicoSkill', 0.1]),
   affix('fulmineSkill', 'della Folgore', ['fulmine'], FOCUS, ['fulmineSkill', 0.1]),
   affix('ombraSkill', 'del Crepuscolo', ['ombra'], FOCUS, ['ombraSkill', 0.1]),
+  affix('geloSkill', 'della Brina', ['gelo'], FOCUS, ['geloSkill', 0.1]),
   affix('sacroCdr', 'del Vespro', ['sacro'], CDR, ['sacroCdr', 0.05]),
   affix('curaCdr', 'della Fonte', ['vita'], CDR, ['curaCdr', 0.05]),
   affix('velocitaCdr', 'del Ritmo', ['velocita'], CDR, ['velocitaCdr', 0.05]),
@@ -217,6 +218,7 @@ export const AFFIXES: AffixDef[] = [
   affix('fisicoCdr', 'del Veterano', ['fisico'], CDR, ['fisicoCdr', 0.05]),
   affix('fulmineCdr', 'del Temporale', ['fulmine'], CDR, ['fulmineCdr', 0.05]),
   affix('ombraCdr', "dell'Ombra Lunga", ['ombra'], CDR, ['ombraCdr', 0.05]),
+  affix('geloCdr', 'del Lungo Inverno', ['gelo'], CDR, ['geloCdr', 0.05]),
 ];
 
 /** Quando scatta un effetto. */

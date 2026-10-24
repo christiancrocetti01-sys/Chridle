@@ -2,7 +2,8 @@ import { HEAL_BELOW, LIGHT_PER_HIT, LIGHT_PER_SECOND, MAX_LIGHT, SHIELD_BELOW, S
 import { TICK_RATE } from './loop';
 import type { GameState } from './state';
 import { MAX_SKILL_CDR, type Stats } from './stats';
-import { RUNE_EXECUTE_HP, RUNE_HASTE_SECONDS, RUNE_SHADOW_HP_COST, reduction, type RuneId } from '../data/runes';
+import { RUNE_EXECUTE_HP, RUNE_HASTE_SECONDS, RUNE_OPENING_HP, RUNE_SHADOW_HP_COST, reduction, type RuneId } from '../data/runes';
+import { resMult } from './enemies';
 import { nextRandom } from './rng';
 import { isDamageSkill, skillRune } from './runes';
 import { applyEffect, heal } from './triggers';
@@ -98,10 +99,24 @@ function perform(state: GameState, hero: Stats, def: SkillDef): number | null {
     value *= 1 + r('ombra');
     state.hero.hp = Math.max(1, state.hero.hp - hero.maxHp * RUNE_SHADOW_HP_COST);
   }
+  // conversioni elementali (l'ultima incastonata vince): +danno e, per le esplosioni, cambio di elemento
+  for (const [id, element] of [['incendio', 'fire'], ['brina', 'cold'], ['tempesta', 'lightning']] as const) {
+    if (!damage || !r(id)) continue;
+    if (effect.kind === 'burst') effect = { ...effect, element };
+    value *= 1 + r(id);
+  }
   if (damage && enemy && enemy.hp < enemy.maxHp * RUNE_EXECUTE_HP) value *= 1 + r('esecuzione');
+  if (damage && enemy && enemy.hp >= enemy.maxHp * RUNE_OPENING_HP) value *= 1 + r('apertura');
+  if (damage && enemy?.boss) value *= 1 + r('condanna');
+  if (damage && state.hero.light >= MAX_LIGHT) value *= 1 + r('fulgore');
+  if (!damage) value *= 1 + r('custodia');
   const amount = applyEffect(state, hero, effect, value, `skill:${def.id}`);
   if (amount === null) return null;
+  if (r('rinnovamento')) heal(state, hero, hero.maxHp * r('rinnovamento'));
   if (damage && enemy) {
+    if (r('consacrazione')) enemy.hp -= amount * r('consacrazione') * hero.elemMult.holy * resMult(enemy, 'holy');
+    // si tira il Marchio solo se la runa c'è
+    if (r('marchio') && nextRandom(state) < Math.min(1, r('marchio'))) state.hero.nextCrit = true;
     enemy.poison += amount * r('brace');
     enemy.bleed += amount * r('lacerazione');
     if (r('sete')) heal(state, hero, amount * r('sete'));
@@ -119,8 +134,15 @@ function castSkill(state: GameState, hero: Stats, def: SkillDef, events: { push(
   if (!worthCasting(state, hero, def)) return false;
   const amount = perform(state, hero, def);
   if (amount === null) return false;
-  if (!free) state.hero.light -= lightCost(state, hero, def);
+  if (!free) {
+    const cost = lightCost(state, hero, def);
+    state.hero.light -= cost * (1 - Math.min(1, skillRune(state, def.id, 'luminescenza')));
+  }
   state.skills.cooldowns[def.id] = cooldownTicks(state, hero, def);
+  const chain = skillRune(state, def.id, 'catena');
+  if (chain) for (const id of state.skills.slots) if (id && id !== def.id && state.skills.cooldowns[id] > 0) {
+    state.skills.cooldowns[id] = Math.max(0, state.skills.cooldowns[id] - Math.round(chain * TICK_RATE));
+  }
   events.push({ type: 'skill', id: def.id, name: def.name, amount });
   // si tira l'Eco solo se la runa c'è: senza, la sequenza dell'RNG non cambia
   const eco = skillRune(state, def.id, 'eco');

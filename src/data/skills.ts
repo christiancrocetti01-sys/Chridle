@@ -12,12 +12,12 @@ export const SHIELD_BELOW = 0.1;
 /** Slot delle skill attive; l'ordine degli slot è la priorità di lancio. */
 export const SKILL_SLOTS = 4;
 
-export const SKILL_TAGS = ['sacro', 'cura', 'velocita', 'fuoco', 'tempo', 'scudo', 'fisico', 'fulmine', 'ombra'] as const;
+export const SKILL_TAGS = ['sacro', 'cura', 'velocita', 'fuoco', 'tempo', 'scudo', 'fisico', 'fulmine', 'ombra', 'gelo'] as const;
 export type SkillTag = (typeof SKILL_TAGS)[number];
 
 export const SKILL_TAG_LABELS: Record<SkillTag, string> = {
   sacro: 'Sacro', cura: 'Cura', velocita: 'Velocità', fuoco: 'Fuoco', tempo: 'Nel tempo', scudo: 'Scudo',
-  fisico: 'Fisico', fulmine: 'Fulmine', ombra: 'Ombra',
+  fisico: 'Fisico', fulmine: 'Fulmine', ombra: 'Ombra', gelo: 'Gelo',
 };
 
 export interface SkillDef {
@@ -45,6 +45,19 @@ export const SKILLS: SkillDef[] = [
   { id: 'squarcio', name: 'Squarcio', level: 16, light: 40, cooldown: 6, effect: { kind: 'bleed', value: 2.5 }, tags: ['fisico', 'tempo'] },
   { id: 'giudizio', name: 'Giudizio', level: 20, light: 80, cooldown: 12, effect: { kind: 'burst', element: 'holy', value: 6 }, tags: ['sacro'] },
   { id: 'stellaCadente', name: 'Stella Cadente', level: 25, light: 100, cooldown: 20, effect: { kind: 'burst', element: 'lightning', value: 10 }, tags: ['fulmine'] },
+  // lotto 3: skill di livello alto (si sceglie quali tenere nei 4 slot)
+  { id: 'geloEterno', name: 'Gelo Eterno', level: 28, light: 50, cooldown: 7, effect: { kind: 'burst', element: 'cold', value: 5 }, tags: ['gelo'] },
+  { id: 'lanciaSolare', name: 'Lancia Solare', level: 30, light: 80, cooldown: 10, effect: { kind: 'burst', element: 'holy', value: 8 }, tags: ['sacro'] },
+  { id: 'catenaFulmini', name: 'Catena di Fulmini', level: 33, light: 50, cooldown: 5, effect: { kind: 'burst', element: 'lightning', value: 4 }, tags: ['fulmine'] },
+  { id: 'piaga', name: 'Piaga', level: 35, light: 70, cooldown: 12, effect: { kind: 'poison', value: 7 }, tags: ['tempo'] },
+  { id: 'corazzaLuce', name: 'Corazza di Luce', level: 36, light: 60, cooldown: 22, effect: { kind: 'shield', value: 0.5 }, tags: ['scudo', 'sacro'] },
+  { id: 'emorragia', name: 'Emorragia', level: 38, light: 70, cooldown: 12, effect: { kind: 'bleed', value: 7 }, tags: ['fisico', 'tempo'] },
+  { id: 'bufera', name: 'Bufera', level: 40, light: 100, cooldown: 18, effect: { kind: 'burst', element: 'cold', value: 12 }, tags: ['gelo'] },
+  { id: 'furiaAlba', name: "Furia dell'Alba", level: 42, light: 50, cooldown: 16, effect: { kind: 'haste', value: 0.6, seconds: 6 }, tags: ['velocita'] },
+  { id: 'rigenerazione', name: 'Rigenerazione', level: 45, light: 60, cooldown: 30, effect: { kind: 'heal', value: 0.5 }, tags: ['cura'] },
+  { id: 'meteora', name: 'Meteora', level: 50, light: 100, cooldown: 22, effect: { kind: 'burst', element: 'fire', value: 15 }, tags: ['fuoco'] },
+  { id: 'vortice', name: 'Vortice di Lame', level: 55, light: 90, cooldown: 18, effect: { kind: 'bleed', value: 12 }, tags: ['fisico', 'tempo'] },
+  { id: 'sentenza', name: 'Sentenza Divina', level: 60, light: 100, cooldown: 30, effect: { kind: 'burst', element: 'holy', value: 20 }, tags: ['sacro'] },
   // skill delle Vie (livello minimo: quello in cui si sceglie la Via e oltre)
   { id: 'martelloSacro', name: 'Martello Sacro', level: 10, light: 50, cooldown: 7, effect: { kind: 'burst', element: 'holy', value: 4 }, tags: ['sacro'], via: 'paladino' },
   { id: 'baluardo', name: 'Baluardo', level: 22, light: 60, cooldown: 18, effect: { kind: 'shield', value: 0.6 }, tags: ['scudo'], via: 'paladino' },

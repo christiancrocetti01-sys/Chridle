@@ -81,6 +81,8 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
   Catene di trigger = combo soddisfacenti.
 - Sinergie trasversali: oggetti e perk che dicono "le skill con tag X ottengono Y".
 - Contenuti: si parte con ~30 skill e ~40 rune, poi espansione per lotti fino a centinaia.
+  **Fatto (lotto 3):** 30 skill (12 nuove fino al livello 60, tag Gelo) e 24 rune (12 nuove: Condanna, Apertura,
+  Luminescenza, Consacrazione, Marchio, Rinnovamento, Catena, Fulgore, Incendio, Brina, Tempesta, Custodia).
 - **Deciso (Fase 3):** Luce +10 a colpo e +10/s in combattimento (max 100); 4 slot, l'ordine è la priorità;
   skill sbloccate a livello; soglie automatiche (cura < 50% vita, scudo < 10%, velocità se scaduta); scheda
   Skill separata. Rune: Essenza di Luce dai nemici, 2 incastonature per skill, stessa runa su più skill,
@@ -189,6 +191,7 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
 - **Combattimento**: barre vita di eroe e nemico + registro degli eventi importanti (critici, uccisioni, bottino).
 - **Rarità**: colore del nome e del bordo; le più alte (Leggendario, Mitico, Divino) con bagliore.
 - La vecchia scena PixiJS con filtro "inchiostro" resta nella storia di git (commit `caa9a3b`, `f43ab28`).
+- **Deciso (2026-10-24, sera):** la grafica si rifinisce **alla fine**, a gioco finito; fino ad allora stile minimo.
 - **Fatto (Fase 6):** icone SVG minimali degli oggetti, bagliore di Leggendario/Mitico, Divino che pulsa,
   lampi sulle barre, avvisi per livello e bottino raro, suoni sintetizzati WebAudio (spenti di default).
 - Ispirazioni (solo concettuali): Diablo, Path of Exile, Melvor Idle, NGU Idle, Idle Champions.

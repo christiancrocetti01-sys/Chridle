@@ -124,7 +124,7 @@ export function createSkillPanel(root: HTMLElement, actions: SkillActions) {
           const cost = lv ? levelCost(lv) : unlock;
           const btn = `<button class="btn sm" data-act="${lv ? 'level' : 'unlock'}" data-id="${r.id}"${state.essence >= cost ? '' : ' disabled'}>${lv ? 'Potenzia' : 'Sblocca'} · ${formatNum(cost)}</button>`;
           return `<div class="skill-row${lv ? '' : ' locked-rune'}">
-            <div class="skill-head"><span><b>${r.name}</b> <span class="muted">${lv ? `Lv ${lv}` : 'bloccata'}${r.damageOnly ? ' · solo skill di danno' : ''}</span></span>${btn}</div>
+            <div class="skill-head"><span><b>${r.name}</b> <span class="muted">${lv ? `Lv ${lv}` : 'bloccata'}${r.damageOnly ? ' · solo skill di danno' : r.supportOnly ? ' · solo skill di supporto' : ''}</span></span>${btn}</div>
             <div class="skill-info">${r.text(runeValue(state, r.id))}</div>
           </div>`;
         }).join('');
