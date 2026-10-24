@@ -3,10 +3,12 @@
 > File di passaggio di consegne tra sessioni. Aggiornato con `/handoff`.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
-**Ultimo aggiornamento:** 2026-10-24 (collaudo + bilanciamento, Codex/Bestiario, Furia contro gli stalli)
+**Ultimo aggiornamento:** 2026-10-24 (handoff: collaudo, bilanciamento chiavi/Raid, Codex, Furia; tutto su `main`)
 **Fase corrente:** 7 — contenuti a lotti. Grafica e UI minime fino alla fine (prova da telefono rimandata a dopo).
-**Prossimo passo:** GDD §14 un pezzo alla volta: Collezione leggendari → Imprese → Lumi; poi altri unici e set; endgame (Abisso, Paragon, Rinascita) alla fine.
-**Online:** `main` = Purezza/Corruzione (f39cdb4). Collaudo, bilanciamento, Codex e Furia solo sul branch.
+**Prossimo passo:** chiedere all'utente com'è andata la prova online. Poi **Collezione leggendari** (GDD §14): nuovo
+`state.collection` (id degli unici trovati, salvataggio v17), piccolo bonus permanente per unico, sezione in UI;
+proporre il piano prima. Poi Imprese → Lumi; altri unici e set; endgame (Abisso, Paragon, Rinascita) alla fine.
+**Online:** `main` = branch (6d9435d): Codex, Furia, bilanciamento e collaudo pubblicati.
 
 ## Gioco online
 https://christiancrocetti01-sys.github.io/Chridle/ (ogni push su `main` lo ripubblica, ~1 min).
@@ -25,7 +27,8 @@ Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` (fast-forward) quand
   (lotto 4: buff a tempo delle rune in `hero.buffs` con `dodge`/`defPct`/`reflect`; `enemy.dawn`/`harvest`).
 - Purezza/Corruzione: `src/data/corruption.ts`, `applyCorruption` in `src/core/stats.ts` (`Stats.corruption`,
   `healMult`), Santità in `hitHero` (`combat.ts`), riga UI in `src/ui/vie.ts`. Statistiche a punti: `POINT_STATS`.
-- Chiavi: boss di zona solo al record dell'Ascensione (`combat.ts`), Torre 1 ogni 10 piani (`TOWER_KEY_EVERY`).
+- Chiavi: boss di zona al record dell'Ascensione e solo ogni 20 stage (`ZONE_KEY_EVERY`), Torre 1 ogni 10 piani.
+  Raid al record − 5 (`RAID_LEVEL_OFFSET`). Dettagli e motivi in GDD §10.
 - Codex: `src/core/codex.ts`, `src/data/codex.ts`, `Stats.familyMult` in `damageMult`; UI in `src/ui/world.ts`.
 - Furia contro gli stalli: `enemyAtk` (`src/core/enemies.ts`, `FURY_AFTER_S`).
 - Salvataggio: **v16** (v11 `vie`, v12 nemico + `keys`/`mode`/`tower`, v13 `ascension`, v14 campi opzionali rune, v15 `hero.sanctity`, v16 `codex`).
@@ -33,7 +36,8 @@ Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` (fast-forward) quand
 ## Test
 - `npm test`: **180 verdi** (17 file), `npm run build` ok.
 - Collaudo: `npm run collaudo -- --ore 8 [--seed N] [--profilo id]` (`scripts/collaudo.ts`, un processo per profilo:
-  5 Vie + uno con sessioni offline). 8 h: nessun NaN/crash/salvataggio rotto, ~25 s.
+  5 Vie + uno con sessioni offline). 8 h: nessun NaN/crash/salvataggio rotto, ~30 s. Rilanciarlo dopo ogni sistema nuovo.
+  Attenzione: nelle catene di comandi non fidarsi di `npm test | grep` (esce 0 anche se fallisce).
 - Ritmo (`tests/combat.test.ts`, senza Via/Stelle): 2 h con equip automatico stage 50.
 
 ## Note / problemi noti
