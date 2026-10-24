@@ -11,6 +11,8 @@ import { COLLECTION_BONUS, COLLECTION_MILESTONES } from '../data/collection';
 import { STAT_LABELS, type StatKey } from '../data/items';
 import { UNIQUES } from '../data/uniques';
 import { formatStat } from './gear';
+import { trackSteps, trackValue } from '../core/achievements';
+import { ROMAN, TRACKS } from '../data/achievements';
 
 export interface WorldActions {
   enterDungeon(): void;
@@ -44,7 +46,7 @@ export function createWorldPanel(root: HTMLElement, actions: WorldActions) {
   return {
     update(state: GameState) {
       const m = state.mode;
-      const k = JSON.stringify([state.stage.current, state.stage.best, state.keys, m.kind, m.kind === 'dungeon' ? m.mods : 0, state.tower.best, codexKey(state), state.collection.length]);
+      const k = JSON.stringify([state.stage.current, state.stage.best, state.keys, m.kind, m.kind === 'dungeon' ? m.mods : 0, state.tower.best, codexKey(state), state.collection.length, state.achievements.length]);
       if (k === key) return;
       key = k;
       const z = zoneOf(state.stage.current);
@@ -91,7 +93,9 @@ export function createWorldPanel(root: HTMLElement, actions: WorldActions) {
         <h2 class="section">Bestiario <span class="muted">· +${Math.round(CODEX_DMG * 100)}% danni per grado, per sempre</span></h2>
         ${bestiary(state)}
         <h2 class="section">Collezione leggendari <span class="muted">· ${state.collection.length}/${UNIQUES.length} unici trovati</span></h2>
-        ${collection(state)}`;
+        ${collection(state)}
+        <h2 class="section">Imprese <span class="muted">· ${state.achievements.length}/${TRACKS.reduce((s, t) => s + t.steps.length, 0)} completate</span></h2>
+        ${achievements(state)}`;
     },
   };
 }
@@ -130,6 +134,17 @@ function collection(state: GameState): string {
     return `<div class="skill-info${found ? '' : ' muted'}">${found ? `<b>${u.name}</b>` : '???'} · ${modsText(COLLECTION_BONUS[u.id] ?? [])}</div>`;
   }).join('');
   return `<div class="skill-row">${milestones}</div><div class="skill-row">${rows}</div>`;
+}
+
+/** Imprese: gradino raggiunto, prossimo traguardo e bonus per traccia. */
+function achievements(state: GameState): string {
+  return TRACKS.map((t) => {
+    const n = trackSteps(state.achievements, t.id);
+    const next = t.steps[n];
+    const v = trackValue(state, t.id);
+    return `<div class="skill-info${n ? '' : ' muted'}"><b>${t.name}${n ? ` ${ROMAN[n - 1]}` : ''}</b> · ${n ? modsText(t.bonus.map(([k, x]) => [k, x * n])) : 'nessun bonus'}
+      <span class="muted">· ${next !== undefined ? `prossimo: ${t.text.replace('{n}', formatNum(next))} (${formatNum(Math.min(v, next))})` : 'completata'}</span></div>`;
+  }).join('');
 }
 
 /** Testo del timer di Torre e Raid. */

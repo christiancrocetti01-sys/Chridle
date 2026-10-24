@@ -1,5 +1,6 @@
 import { ELITE_CHANCE, ELITE_FROM_STAGE, ELITE_KEY_CHANCE, type Family } from '../data/enemies';
 import { discover } from './collection';
+import { checkAchievements } from './achievements';
 import { offlineEfficiency } from './ascension';
 import { gainXp, step, type CombatEvent } from './combat';
 import { INVENTORY_SIZE, rollItem, rollRarity, salvageValue } from './items';
@@ -97,6 +98,7 @@ export function applyOffline(state: GameState, seconds: number): OfflineReport |
   const lv = state.hero.level;
   gainXp(state, report.xp, []);
   report.levels = state.hero.level - lv;
+  checkAchievements(state);
   return report;
 }
 

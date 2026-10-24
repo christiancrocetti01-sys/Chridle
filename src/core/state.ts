@@ -9,6 +9,7 @@ import { newVie, type ViaState } from './vie';
 import { newAscension, type AscensionState } from './ascension';
 import { newCodex, type CodexState } from './codex';
 import type { CollectionState } from './collection';
+import type { AchievementState } from './achievements';
 
 export interface EnemyState {
   templateId: string;
@@ -112,9 +113,11 @@ export interface GameState {
   codex: CodexState;
   /** Collezione leggendari: id degli unici trovati (permanenti). */
   collection: CollectionState;
+  /** Imprese completate (permanenti). */
+  achievements: AchievementState;
 }
 
-export const STATE_VERSION = 17;
+export const STATE_VERSION = 18;
 
 export function newGame(now: number, seed = now >>> 0): GameState {
   const upgrades = { forza: 0, corazza: 0, rapidita: 0 };
@@ -144,5 +147,6 @@ export function newGame(now: number, seed = now >>> 0): GameState {
     ascension: newAscension(),
     codex: newCodex(),
     collection: [],
+    achievements: [],
   };
 }

@@ -205,6 +205,10 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
   + premi di completamento al 25/50/100% (+5/+10/+15% attacco e vita, al 100% anche +10% ritrovamento magico).
   Elenco nella scheda Mondo, avviso alla scoperta. Collaudo: 7-10 unici su 18 in 8 h.
 - **Imprese** (achievement) con ricompense.
+  **Fatto (2026-10-24):** 11 tracce a gradini, 54 imprese (`src/data/achievements.ts`): uccisioni, stage, livello,
+  Ascensioni, Dungeon, Raid, Torre, gradi del Bestiario, collezione, rune, oro. Ricompensa (decisione utente): solo
+  bonus permanenti a tema per gradino. Controllo ogni secondo in `step` e dopo l'offline; restano all'Ascensione.
+  Collaudo: ~25 imprese in 8 h.
 - **Lumi**: piccoli spiriti compagni con bonus passivi, si fanno salire di livello.
 
 ## 15. Direzione artistica

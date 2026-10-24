@@ -1,6 +1,7 @@
 import { ELITE_DROP, ELITE_KEY_CHANCE, ELITE_REWARD, VAMPIRIC_SHARE, ZONE_KEY_EVERY } from '../data/enemies';
 import { UPGRADES, type UpgradeId } from '../data/upgrades';
 import { discover } from './collection';
+import { checkAchievements } from './achievements';
 import { TICK_RATE } from './loop';
 import { SANCTITY_SECONDS } from '../data/corruption';
 import { DROP_CHANCE, INVENTORY_SIZE, rollItem, rollRarity, salvageValue, type Item } from './items';
@@ -32,6 +33,8 @@ export type CombatEvent =
   /** Oggetto caduto; se `salvaged` è stato smantellato subito (filtro o inventario pieno). */
   | { type: 'drop'; item: Item; salvaged: boolean; discovered?: boolean }
   | { type: 'key'; keys: number }
+  /** Impresa completata (id "traccia:gradino"). */
+  | { type: 'achievement'; id: string }
   | MechanicEvent
   | ModeEvent;
 
@@ -45,6 +48,7 @@ export const RESPAWN_TICKS = 6;
 /** Un tick di simulazione. Puro e deterministico: stessi input → stessi risultati. */
 export function step(state: GameState, events: CombatEvent[] = []): CombatEvent[] {
   state.tick++;
+  if (state.tick % TICK_RATE === 0) for (const id of checkAchievements(state)) events.push({ type: 'achievement', id });
   const hero = stateStats(state);
   const m = state.mode;
   if (!(m.kind === 'dungeon' && m.mods.includes('tenebra'))) heal(state, hero, hero.regen / TICK_RATE);

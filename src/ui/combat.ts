@@ -5,6 +5,7 @@ import { stateStats } from '../core/stats';
 import { RARITIES } from '../data/items';
 import { FAMILIES, type Mechanic } from '../data/enemies';
 import { modeTimer, resText } from './world';
+import { achievementName } from '../core/achievements';
 import { flash, toast } from './fx';
 import { SFX } from './sound';
 
@@ -69,6 +70,7 @@ export function createCombatPanel(root: HTMLElement) {
     }
     if (e.type === 'drop' && e.discovered) toast(`Collezione: <b>${e.item.name}</b><br><small>nuovo unico, bonus permanente</small>`, 'gold');
     else if (e.type === 'mode' && e.ok) toast(e.text, 'gold');
+    else if (e.type === 'achievement') toast(`Impresa: <b>${achievementName(e.id)}</b>`, 'gold');
   }
 
   return {
@@ -84,6 +86,7 @@ export function createCombatPanel(root: HTMLElement) {
         else if (e.type === 'proc') proc(e.name, e.id);
         else if (e.type === 'skill') proc(e.name, `skill:${e.id}`, 'Skill');
         else if (e.type === 'mechanic') log(e.text, 'down');
+        else if (e.type === 'achievement') log(`Impresa completata: ${achievementName(e.id)}`, 'gold');
         else if (e.type === 'mode') log(e.text, e.ok ? 'gold' : 'down');
         else if (e.type === 'key') log(`Chiave trovata! (${e.keys})`, 'gold');
         else if (e.type === 'unlock') log(`Nuova skill: ${skillDef(e.id)?.name}`, 'gold');
