@@ -3,7 +3,7 @@ import { UPGRADES, type UpgradeId } from '../data/upgrades';
 import { TICK_RATE } from './loop';
 import { DROP_CHANCE, INVENTORY_SIZE, rollItem, rollRarity, salvageValue, type Item } from './items';
 import { nextRandom } from './rng';
-import { castSkills, gainLight, tickCooldowns, unlockSkills, type SkillEvent } from './skills';
+import { castSkills, gainLight, tickSkills, unlockSkills, type SkillEvent } from './skills';
 import { damageMult, fireTriggers, gearTriggers, heal, tickBuffs, type ProcEvent } from './triggers';
 import type { GameState } from './state';
 import { KILLS_PER_STAGE, elementalDamage, mitigate, stateStats, stageEnemy, upgradeCost, xpToNext } from './stats';
@@ -36,7 +36,7 @@ export function step(state: GameState, events: CombatEvent[] = []): CombatEvent[
   const hero = stateStats(state);
   heal(state, hero, hero.regen / TICK_RATE);
   tickBuffs(state);
-  tickCooldowns(state);
+  tickSkills(state);
 
   if (!state.enemy) {
     if (state.respawn > 0) state.respawn--;

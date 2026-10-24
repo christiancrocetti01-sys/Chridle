@@ -1,4 +1,4 @@
-import { LIGHT_PER_HIT, MAX_LIGHT, SKILLS, SKILL_SLOTS, skillDef } from '../data/skills';
+import { HEAL_BELOW, LIGHT_PER_HIT, LIGHT_PER_SECOND, MAX_LIGHT, SHIELD_BELOW, SKILLS, SKILL_SLOTS, skillDef, type SkillDef } from '../data/skills';
 import { TICK_RATE } from './loop';
 import type { GameState } from './state';
 import type { Stats } from './stats';
@@ -36,12 +36,13 @@ export function unlockSkills(s: SkillState, level: number): string[] {
   return added;
 }
 
-export function gainLight(state: GameState) {
-  state.hero.light = Math.min(MAX_LIGHT, state.hero.light + LIGHT_PER_HIT);
+export function gainLight(state: GameState, amount = LIGHT_PER_HIT) {
+  state.hero.light = Math.min(MAX_LIGHT, state.hero.light + amount);
 }
 
-/** Ogni tick: scendono le ricariche. */
-export function tickCooldowns(state: GameState) {
+/** Ogni tick: scendono le ricariche e, se c'è un nemico, sale la Luce. */
+export function tickSkills(state: GameState) {
+  if (state.enemy) gainLight(state, LIGHT_PER_SECOND / TICK_RATE);
   const cd = state.skills.cooldowns;
   for (const id in cd) if (cd[id] > 0) cd[id]--;
 }
@@ -51,12 +52,22 @@ export const canCast = (state: GameState, id: string) => {
   return !!def && state.skills.cooldowns[id] <= 0 && state.hero.light >= def.light && state.hero.level >= def.level;
 };
 
+/** Soglie automatiche: niente cura a vita alta, niente scudo se c'è già, niente velocità se è ancora attiva. */
+export function worthCasting(state: GameState, hero: Stats, def: SkillDef): boolean {
+  const e = def.effect;
+  if (e.kind === 'heal') return state.hero.hp < hero.maxHp * HEAL_BELOW;
+  if (e.kind === 'shield') return state.hero.shield < hero.maxHp * SHIELD_BELOW;
+  if (e.kind === 'haste') return !state.hero.buffs.some((b) => b.key === `skill:${def.id}`);
+  return true;
+}
+
 /** Lancia la prima skill pronta in ordine di slot (al massimo una per tick). */
 export function castSkills(state: GameState, hero: Stats, events: { push(e: SkillEvent): void }) {
   if (!state.enemy) return;
   for (const id of state.skills.slots) {
     if (!id || !canCast(state, id)) continue;
     const def = skillDef(id)!;
+    if (!worthCasting(state, hero, def)) continue;
     const amount = applyEffect(state, hero, def.effect, def.effect.value, `skill:${id}`);
     if (amount === null) continue;
     state.hero.light -= def.light;

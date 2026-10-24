@@ -3,6 +3,11 @@ import type { TriggerEffect } from './items';
 /** Luce: si accumula colpendo e si spende per lanciare le skill attive. */
 export const LIGHT_PER_HIT = 10;
 export const MAX_LIGHT = 100;
+/** Luce in più al secondo mentre si combatte: le skill costose non restano a secco. */
+export const LIGHT_PER_SECOND = 10;
+/** Soglie automatiche: la cura parte sotto questa frazione di vita, lo scudo se è sotto questa frazione. */
+export const HEAL_BELOW = 0.5;
+export const SHIELD_BELOW = 0.1;
 /** Slot delle skill attive; l'ordine degli slot è la priorità di lancio. */
 export const SKILL_SLOTS = 4;
 

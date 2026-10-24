@@ -4,7 +4,7 @@ import { deserialize, serialize } from '../src/core/save';
 import { canCast, castSkills, moveSlot, newSkills, setSlot, unlockSkills } from '../src/core/skills';
 import { STATE_VERSION, newGame } from '../src/core/state';
 import { stateStats } from '../src/core/stats';
-import { LIGHT_PER_HIT, MAX_LIGHT, SKILLS, SKILL_SLOTS } from '../src/data/skills';
+import { LIGHT_PER_HIT, LIGHT_PER_SECOND, MAX_LIGHT, SKILLS, SKILL_SLOTS } from '../src/data/skills';
 
 function fighting(level = 1) {
   const s = newGame(0, 3);
@@ -32,14 +32,37 @@ describe('skill attive', () => {
     expect(s.skills.slots[1]).toBeNull();
   });
 
-  it('colpire dà Luce fino al massimo', () => {
+  it('la Luce sale colpendo e col tempo in combattimento, fino al massimo', () => {
     const s = fighting();
     s.skills.slots = [null, null, null, null];
     const ev: CombatEvent[] = [];
-    for (let i = 0; i < 200; i++) step(s, ev);
+    for (let i = 0; i < 20; i++) step(s, ev);
     const hits = ev.filter((e) => e.type === 'hit' && e.target === 'enemy').length;
     expect(hits).toBeGreaterThan(0);
-    expect(s.hero.light).toBe(Math.min(MAX_LIGHT, hits * LIGHT_PER_HIT));
+    expect(s.hero.light).toBeCloseTo(hits * LIGHT_PER_HIT + 2 * LIGHT_PER_SECOND);
+    for (let i = 0; i < 200; i++) step(s);
+    expect(s.hero.light).toBe(MAX_LIGHT);
+  });
+
+  it('soglie: cura solo a vita bassa, scudo solo se è quasi finito, velocità solo se scaduta', () => {
+    const s = fighting(12);
+    const hero = stateStats(s);
+    const cast = (id: string) => {
+      s.skills.slots = [id, null, null, null];
+      s.skills.cooldowns[id] = 0;
+      s.hero.light = 100;
+      const ev: CombatEvent[] = [];
+      castSkills(s, hero, ev);
+      return ev.length;
+    };
+    s.hero.hp = hero.maxHp * 0.6;
+    expect(cast('preghiera')).toBe(0);
+    s.hero.hp = hero.maxHp * 0.4;
+    expect(cast('preghiera')).toBe(1);
+    expect(cast('egida')).toBe(1);
+    expect(cast('egida')).toBe(0); // lo scudo c'è già
+    expect(cast('lamaRapida')).toBe(1);
+    expect(cast('lamaRapida')).toBe(0); // effetto ancora attivo
   });
 
   it('il lancio consuma Luce e avvia la ricarica', () => {
@@ -93,6 +116,7 @@ describe('skill attive', () => {
       s.skills.slots = [def.id, null, null, null];
       s.hero.light = 100;
       s.hero.hp = 1;
+      s.hero.buffs = [];
       const ev: CombatEvent[] = [];
       castSkills(s, stateStats(s), ev);
       expect(ev, def.id).toHaveLength(1);
