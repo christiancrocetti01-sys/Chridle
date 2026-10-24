@@ -3,7 +3,7 @@
 > File di passaggio di consegne tra sessioni. Aggiornato con `/handoff`.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
-**Ultimo aggiornamento:** 2026-10-24 (sessione autonoma: Fasi 3.5 → 7 lotto 2)
+**Ultimo aggiornamento:** 2026-10-24 (sessione autonoma: Fasi 3.5 → 7 lotto 3)
 **Fase corrente:** 7 — contenuti a lotti (lotti 1-3 fatti). Grafica: minima fino alla fine (decisione utente). Fasi 3-6 completate, **da rivedere con l'utente**.
 **Prossimo passo:** 1) l'utente legge `docs/REVISIONE.md` e risponde alle domande; 2) applicare le risposte
 (bilanciamento, nomi); 3) se approva, allineare `main` (fast-forward) per pubblicare; 4) lotto 4.
