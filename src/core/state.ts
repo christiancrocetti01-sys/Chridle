@@ -55,6 +55,8 @@ export interface GameState {
   /** Valuta delle rune, dai nemici. */
   essence: number;
   runes: RuneState;
+  /** Costellazioni: id delle stelle prese, in ordine. */
+  stars: string[];
   upgrades: Record<UpgradeId, number>;
   stage: {
     current: number;
@@ -69,7 +71,7 @@ export interface GameState {
   totals: { kills: number; deaths: number; gold: number };
 }
 
-export const STATE_VERSION = 9;
+export const STATE_VERSION = 10;
 
 export function newGame(now: number, seed = now >>> 0): GameState {
   const upgrades = { forza: 0, corazza: 0, rapidita: 0 };
@@ -86,6 +88,7 @@ export function newGame(now: number, seed = now >>> 0): GameState {
     skills: newSkills(),
     essence: 0,
     runes: newRunes(),
+    stars: [],
     upgrades,
     stage: { current: 1, best: 1, kills: 0, auto: true },
     enemy: null,

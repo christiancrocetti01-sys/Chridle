@@ -4,7 +4,9 @@ import type { Element, ItemType, StatKey, Tag, TriggerDef } from './items';
 export type RuleId =
   | 'echoFire' | 'echoCold' | 'echoLightning' | 'echoHoly' | 'echoShadow'
   | 'endlessPoison' | 'dodgeCrit' | 'overhealShield' | 'execute' | 'critBleed'
-  | 'frenzy' | 'quickTriggers' | 'hasteStacks';
+  | 'frenzy' | 'quickTriggers' | 'hasteStacks'
+  // chiavi di volta delle Costellazioni
+  | 'noCrit' | 'freeSkills' | 'overhealHoly';
 
 export const RULE_TEXT: Record<RuleId, string> = {
   echoFire: 'Le esplosioni di fuoco colpiscono due volte',
@@ -20,6 +22,9 @@ export const RULE_TEXT: Record<RuleId, string> = {
   frenzy: "Sotto il 50% della vita: +50% velocità d'attacco",
   quickTriggers: 'Gli effetti "ogni N colpi" scattano un colpo prima',
   hasteStacks: 'La velocità a tempo si accumula invece di rinnovarsi',
+  noCrit: 'Niente più critici, ma ogni colpo fa +80% di danno',
+  freeSkills: 'Le skill non costano Luce, ma la ricarica raddoppia',
+  overhealHoly: 'Le cure in eccesso diventano danno sacro al nemico',
 };
 
 /** Esplosioni che raddoppiano con ogni regola "eco". */

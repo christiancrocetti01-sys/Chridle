@@ -19,7 +19,7 @@ export interface SkillActions {
 /** Effetto, costo e ricarica (con le rune incastonate e le sinergie per tag degli oggetti). */
 const info = (state: GameState, hero: Stats, d: SkillDef) => {
   const sec = cooldownTicks(state, hero, d) / TICK_RATE;
-  return `${describeEffect(d.effect, skillValue(state, hero, d))} <span class="muted">· ${Math.round(lightCost(state, d))} Luce · ricarica ${+sec.toFixed(1)} s · ${d.tags.map((t) => SKILL_TAG_LABELS[t]).join(', ')}</span>`;
+  return `${describeEffect(d.effect, skillValue(state, hero, d))} <span class="muted">· ${Math.round(lightCost(state, hero, d))} Luce · ricarica ${+sec.toFixed(1)} s · ${d.tags.map((t) => SKILL_TAG_LABELS[t]).join(', ')}</span>`;
 };
 
 /** Le 2 incastonature di una skill: una tendina con le rune sbloccate compatibili. */
@@ -131,7 +131,7 @@ export function createSkillPanel(root: HTMLElement, actions: SkillActions) {
         if (!bar || !d) return;
         const left = cooldowns[d.id] ?? 0;
         bar.style.width = `${Math.max(0, 1 - left / cooldownTicks(state, hero, d)) * 100}%`;
-        bar.classList.toggle('ready', left <= 0 && state.hero.light >= lightCost(state, d));
+        bar.classList.toggle('ready', left <= 0 && state.hero.light >= lightCost(state, hero, d));
       });
     },
   };

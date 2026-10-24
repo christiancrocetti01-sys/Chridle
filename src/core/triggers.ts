@@ -45,13 +45,17 @@ export function damageMult(hero: Stats, enemy: EnemyState): number {
   return (enemy.boss ? hero.bossMult : 1) * execute;
 }
 
-/** Cura l'eroe; con la regola "overhealShield" l'eccesso diventa scudo (fino alla vita massima). */
+/**
+ * Cura l'eroe. L'eccesso: con "overhealHoly" diventa danno sacro al nemico, altrimenti con "overhealShield"
+ * diventa scudo (fino alla vita massima).
+ */
 export function heal(state: GameState, hero: Stats, amount: number) {
   const missing = hero.maxHp - state.hero.hp;
   state.hero.hp = Math.min(hero.maxHp, state.hero.hp + amount);
-  if (hero.rules.has('overhealShield') && amount > missing) {
-    state.hero.shield = Math.min(hero.maxHp, state.hero.shield + amount - Math.max(0, missing));
-  }
+  if (amount <= missing) return;
+  const excess = amount - Math.max(0, missing);
+  if (hero.rules.has('overhealHoly') && state.enemy) state.enemy.hp -= excess * hero.elemMult.holy * damageMult(hero, state.enemy);
+  else if (hero.rules.has('overhealShield')) state.hero.shield = Math.min(hero.maxHp, state.hero.shield + excess);
 }
 
 /** Ogni quanti colpi scatta un effetto "ogni N colpi". */

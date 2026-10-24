@@ -100,8 +100,8 @@ describe('effetti delle rune', () => {
     const def = skillDef('giudizio')!;
     castWith(s, 'giudizio', ['rapidita', 'parsimonia']);
     expect(cooldownTicks(s, stateStats(s), def)).toBe(Math.round(120 * 0.7));
-    expect(lightCost(s, def)).toBeCloseTo(80 * 0.7, 0);
-    expect(s.hero.light).toBeCloseTo(100 - lightCost(s, def));
+    expect(lightCost(s, stateStats(s), def)).toBeCloseTo(80 * 0.7, 0);
+    expect(s.hero.light).toBeCloseTo(100 - lightCost(s, stateStats(s), def));
   });
 
   it('Brace, Lacerazione e Sete aggiungono veleno, sanguinamento e cura', () => {

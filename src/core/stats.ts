@@ -1,6 +1,7 @@
 import { ELEMENTS, type Element } from '../data/items';
 import type { UpgradeId } from '../data/upgrades';
 import type { RuleId } from '../data/uniques';
+import { addStarMods } from './constellations';
 import { emptyMods, gearMods, gearRules, type GearState, type StatMods } from './items';
 import type { HeroState } from './state';
 import { SKILL_TAGS, type SkillTag } from '../data/skills';
@@ -77,6 +78,8 @@ export function heroStats(level: number, upgrades: Record<UpgradeId, number>, mo
 }
 
 export const FRENZY_HP = 0.5;
+/** Chiave di volta "noCrit": danno dei colpi (e di ciò che scala con l'attacco). */
+export const NO_CRIT_MULT = 1.8;
 export const FRENZY_SPEED = 1.5;
 
 /** Danno elementale totale per colpo. */
@@ -85,11 +88,18 @@ export function elementalDamage(s: Stats): number {
 }
 
 /** Statistiche dell'eroe con l'equipaggiamento indossato. */
-export function stateStats(state: { hero: HeroState; upgrades: Record<UpgradeId, number>; gear: GearState }): Stats {
+export function stateStats(state: { hero: HeroState; upgrades: Record<UpgradeId, number>; gear: GearState; stars?: string[] }): Stats {
   const mods = gearMods(state.gear);
+  const starRules = addStarMods(state.stars ?? [], mods);
   for (const b of state.hero.buffs) mods.speedPct += b.speedPct;
   const s = heroStats(state.hero.level, state.upgrades, mods);
   s.rules = gearRules(Object.values(state.gear.equipped));
+  for (const r of starRules) s.rules.add(r);
+  if (s.rules.has('noCrit')) {
+    s.critChance = 0;
+    s.atk *= NO_CRIT_MULT;
+    for (const e of ELEMENTS) s.elements[e] *= NO_CRIT_MULT;
+  }
   if (s.rules.has('frenzy') && state.hero.hp < s.maxHp * FRENZY_HP) s.attackSpeed *= FRENZY_SPEED;
   return s;
 }

@@ -58,14 +58,19 @@ export const tagCdr = (hero: Stats, def: SkillDef) => Math.min(MAX_SKILL_CDR, de
 export const skillValue = (state: GameState, hero: Stats, def: SkillDef) =>
   def.effect.value * (1 + skillRune(state, def.id, 'potenza')) * (1 + tagPower(hero, def));
 
-/** Costo in Luce e ricarica (in tick) con le rune Parsimonia e Rapidità e la riduzione ricarica per tag. */
-export const lightCost = (state: GameState, def: SkillDef) => def.light * (1 - reduction(skillRune(state, def.id, 'parsimonia')));
+/** Costo in Luce e ricarica (in tick) con le rune Parsimonia e Rapidità, la riduzione ricarica per tag e "freeSkills". */
+export const lightCost = (state: GameState, hero: Stats, def: SkillDef) =>
+  hero.rules.has('freeSkills') ? 0 : def.light * (1 - reduction(skillRune(state, def.id, 'parsimonia')));
 export const cooldownTicks = (state: GameState, hero: Stats, def: SkillDef) =>
-  Math.round(def.cooldown * TICK_RATE * (1 - reduction(skillRune(state, def.id, 'rapidita'))) * (1 - tagCdr(hero, def)));
+  Math.round(def.cooldown * TICK_RATE * (1 - reduction(skillRune(state, def.id, 'rapidita'))) * (1 - tagCdr(hero, def))
+    * (hero.rules.has('freeSkills') ? FREE_SKILLS_CD : 1));
 
-export const canCast = (state: GameState, id: string) => {
+/** Chiave di volta "freeSkills": moltiplicatore della ricarica. */
+export const FREE_SKILLS_CD = 2;
+
+export const canCast = (state: GameState, hero: Stats, id: string) => {
   const def = skillDef(id);
-  return !!def && state.skills.cooldowns[id] <= 0 && state.hero.light >= lightCost(state, def) && state.hero.level >= def.level;
+  return !!def && state.skills.cooldowns[id] <= 0 && state.hero.light >= lightCost(state, hero, def) && state.hero.level >= def.level;
 };
 
 /** Soglie automatiche: niente cura a vita alta, niente scudo se c'è già, niente velocità se è ancora attiva. */
@@ -110,7 +115,7 @@ function castSkill(state: GameState, hero: Stats, def: SkillDef, events: { push(
   if (!worthCasting(state, hero, def)) return false;
   const amount = perform(state, hero, def);
   if (amount === null) return false;
-  if (!free) state.hero.light -= lightCost(state, def);
+  if (!free) state.hero.light -= lightCost(state, hero, def);
   state.skills.cooldowns[def.id] = cooldownTicks(state, hero, def);
   events.push({ type: 'skill', id: def.id, name: def.name, amount });
   // si tira l'Eco solo se la runa c'è: senza, la sequenza dell'RNG non cambia
@@ -126,7 +131,7 @@ function castSkill(state: GameState, hero: Stats, def: SkillDef, events: { push(
 export function castSkills(state: GameState, hero: Stats, events: { push(e: SkillEvent): void }) {
   if (!state.enemy) return;
   for (const id of state.skills.slots) {
-    if (id && canCast(state, id) && castSkill(state, hero, skillDef(id)!, events)) return;
+    if (id && canCast(state, hero, id) && castSkill(state, hero, skillDef(id)!, events)) return;
   }
 }
 

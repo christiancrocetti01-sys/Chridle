@@ -74,7 +74,7 @@ describe('skill attive', () => {
     expect(ev).toEqual([expect.objectContaining({ type: 'skill', id: 'colpoSacro' })]);
     expect(s.hero.light).toBe(70);
     expect(s.enemy!.hp).toBeLessThan(hp);
-    expect(canCast(s, 'colpoSacro')).toBe(false);
+    expect(canCast(s, stateStats(s), 'colpoSacro')).toBe(false);
     for (let i = 0; i < 29; i++) step(s);
     expect(s.skills.cooldowns.colpoSacro).toBe(1);
     const next: CombatEvent[] = [];
