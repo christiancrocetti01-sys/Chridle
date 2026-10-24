@@ -13,7 +13,7 @@ Questo file viene caricato automaticamente a ogni sessione: tienilo **breve**.
 - Prima di un task non banale: proponi il piano in 3-6 punti e **chiedi conferma**.
   Mai implementare una fase intera in un colpo: un passo, verifica, conferma.
 - Messaggi brevi e diretti, niente elenchi infiniti.
-- Grafica: non disegnare sprite "a mano" come griglie di caratteri per il gioco vero; servono asset veri.
+- Grafica minimale: il valore del gioco è in oggetti, statistiche e sinergie. Niente sprite a griglia di caratteri.
 - Domande di design (bilanciamento, gusto, scelte grafiche) → chiedi, non inventare.
 - Dopo ogni task: test (`npm test`) + verifica nel browser se tocca la UI, poi commit.
 - A fine task aggiorna `docs/STATO.md` (breve) e spunta la ROADMAP.
@@ -27,8 +27,8 @@ Questo file viene caricato automaticamente a ogni sessione: tienilo **breve**.
 
 ## Convenzioni tecniche
 - Comandi: `npm run dev` (locale), `npm test` (Vitest), `npm run build` (tsc + vite).
-- `src/core` logica pura e deterministica (niente DOM/Pixi): è l'unica parte con test unitari.
-- `src/render` PixiJS: scena 320×180 scalata a multipli interi; logica a 10 tick/s, render 60 fps con `alpha`.
+- `src/core` logica pura e deterministica (niente DOM): è l'unica parte con test unitari.
+- Grafica minimale (decisione utente): niente scena animata, solo UI DOM + sagoma SVG del guerriero. Logica a 10 tick/s.
 - `src/ui` interfaccia DOM/CSS. `src/data` contenuti come dati.
 - Salvataggio in `src/core/save.ts`: cambi allo stato → alza `STATE_VERSION` e aggiungi una migrazione + test.
 - Asset esterni: verifica licenza e registrali in `docs/CREDITS.md`.

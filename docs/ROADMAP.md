@@ -19,11 +19,10 @@ Spuntare `[x]` man mano. Le fasi possono essere ridefinite: è un documento vivo
 - [x] Potenziamenti acquistabili con oro (Forza, Corazza, Rapidità)
 - [ ] Revisione dell'utente giocando dal telefono
 
-## Fase 1.5 — Identità visiva (scena vetrina)
-- [ ] Scelta asset con l'utente (budget, 3-4 opzioni con anteprime e licenze)
-- [ ] Scena di combattimento con asset veri, parallasse, nebbia, luce, particelle ambientali
-- [ ] UI con cornici ornamentali vere (riferimento manga anni '80)
-- [ ] Approvazione dell'utente: diventa lo standard visivo
+## Fase 1.5 — Grafica minimale (decisione dell'utente, 2026-10-24)
+- [x] Via la scena animata PixiJS: il valore del gioco è in oggetti, statistiche e sinergie
+- [x] Manichino: sagoma SVG del guerriero con i 12 slot attorno
+- [x] Pannello di combattimento testuale (barre vita + registro eventi)
 
 ## Fase 2 — Equipaggiamento
 - [x] Slot (arma, armatura, accessori…) e rarità
@@ -45,8 +44,8 @@ Spuntare `[x]` man mano. Le fasi possono essere ridefinite: è un documento vivo
 - [ ] Progresso offline
 
 ## Fase 6 — Estetica e "juice"
-- [ ] Direzione artistica dark + luce, palette, asset
-- [ ] Animazioni, particellari, suoni, feedback soddisfacenti
+- [ ] Rifinitura della UI minimale (tipografia, icone degli oggetti)
+- [ ] Feedback soddisfacenti nella UI (bagliori delle rarità, suoni)
 - [ ] Rifinitura asset e crediti (`docs/CREDITS.md`)
 
 ## Fase 7+ — Espansione contenuti

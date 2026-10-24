@@ -2,6 +2,7 @@ import { formatNum } from '../core/format';
 import { INVENTORY_SIZE, itemMods, salvageValue, slotsFor, type GearState, type Item } from '../core/items';
 import type { GameState } from '../core/state';
 import { heroStats, type Stats } from '../core/stats';
+import { DOLL_LEFT, DOLL_RIGHT, SILHOUETTE } from './doll';
 import { ITEM_TYPES, PCT_STATS, RARITIES, SLOTS, STAT_LABELS, type SlotId, type StatKey } from '../data/items';
 
 export interface GearActions {
@@ -64,7 +65,11 @@ function compare(state: GameState, item: Item | null, slot: SlotId): string {
 export function createGearPanel(root: HTMLElement, actions: GearActions) {
   root.innerHTML = `
     <h2 class="section">Equipaggiamento</h2>
-    <div class="slots" data-g="slots"></div>
+    <div class="doll">
+      <div class="doll-col" data-g="left"></div>
+      <div class="doll-figure">${SILHOUETTE}</div>
+      <div class="doll-col" data-g="right"></div>
+    </div>
     <h2 class="section">Inventario <span class="muted" data-g="count"></span></h2>
     <div class="inv" data-g="inv"></div>
     <div class="detail" data-g="detail"></div>
@@ -80,7 +85,7 @@ export function createGearPanel(root: HTMLElement, actions: GearActions) {
     </div>`;
 
   const q = (k: string) => root.querySelector<HTMLElement>(`[data-g="${k}"]`)!;
-  const refs = { slots: q('slots'), inv: q('inv'), detail: q('detail'), count: q('count'), frag: q('frag') };
+  const refs = { left: q('left'), right: q('right'), inv: q('inv'), detail: q('detail'), count: q('count'), frag: q('frag') };
   const auto = q('auto') as HTMLSelectElement;
   let selected: Selection = null;
   let lastKey = '';
@@ -150,12 +155,16 @@ export function createGearPanel(root: HTMLElement, actions: GearActions) {
       lastKey = key;
       if (auto.value !== String(gear.autoSalvage)) auto.value = String(gear.autoSalvage);
 
-      refs.slots.innerHTML = SLOTS.map((s) => {
-        const it = gear.equipped[s.id];
-        const sel = selected?.kind === 'slot' && selected.slot === s.id ? ' sel' : '';
-        return `<button class="slot${sel}" data-act="pick-slot" data-slot="${s.id}">
-          <span class="muted">${s.name}</span>${it ? itemLabel(it) : '<span class="muted">—</span>'}</button>`;
-      }).join('');
+      const slotHtml = (id: SlotId) => {
+        const it = gear.equipped[id];
+        const name = SLOTS.find((s) => s.id === id)!.name;
+        const sel = selected?.kind === 'slot' && selected.slot === id ? ' sel' : '';
+        const border = it ? ` style="border-color:${RARITIES[it.rarity].color}"` : '';
+        return `<button class="slot${sel}${it ? '' : ' empty'}" data-act="pick-slot" data-slot="${id}"${border}>
+          <span class="muted">${name}</span>${it ? itemLabel(it) : '<span class="muted">—</span>'}</button>`;
+      };
+      refs.left.innerHTML = DOLL_LEFT.map(slotHtml).join('');
+      refs.right.innerHTML = DOLL_RIGHT.map(slotHtml).join('');
       refs.count.textContent = `${gear.inventory.length} / ${INVENTORY_SIZE}`;
       refs.inv.innerHTML = gear.inventory.length
         ? gear.inventory.slice().sort((a, b) => b.rarity - a.rarity || b.ilvl - a.ilvl).map((it) => {

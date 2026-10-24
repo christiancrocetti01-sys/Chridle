@@ -39,7 +39,7 @@ export const INVENTORY_SIZE = 40;
 /** Probabilità di drop da un nemico normale; i boss lasciano sempre un oggetto. */
 export const DROP_CHANCE = 1 / 8;
 /** Crescita delle statistiche piatte per livello oggetto. */
-export const ILVL_GROWTH = 1.12;
+export const ILVL_GROWTH = 1.1;
 
 export function newGear(): GearState {
   return { equipped: {}, inventory: [], nextId: 1, autoSalvage: -1 };

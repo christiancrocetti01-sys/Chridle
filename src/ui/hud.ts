@@ -2,24 +2,20 @@ import { upgradePrice, type CombatEvent } from '../core/combat';
 import { formatNum } from '../core/format';
 import type { GameState } from '../core/state';
 import { KILLS_PER_STAGE, stateStats, xpToNext } from '../core/stats';
-import { RARITIES } from '../data/items';
+import { createCombatPanel } from './combat';
 import { createGearPanel, type GearActions } from './gear';
-import type { InkStyle } from '../render/dither';
 import { UPGRADES, type UpgradeId } from '../data/upgrades';
-
-const STYLES: InkStyle[] = ['oro', 'mono', 'colore'];
 
 export interface HudActions extends GearActions {
   buy(id: UpgradeId): void;
-  setStyle(style: InkStyle): void;
 }
 
 export interface Hud {
-  update(state: GameState, fps: number): void;
+  update(state: GameState): void;
   onEvents(events: CombatEvent[]): void;
 }
 
-export function createHud(root: HTMLElement, actions: HudActions, initialStyle: InkStyle): Hud {
+export function createHud(root: HTMLElement, actions: HudActions): Hud {
   root.innerHTML = `
     <header class="hud-head">
       <div>
@@ -33,7 +29,7 @@ export function createHud(root: HTMLElement, actions: HudActions, initialStyle: 
     <div class="row"><span>Stage <b data-k="stage">1</b> <span class="muted" data-k="best"></span></span><span data-k="progress"></span></div>
     <div class="bar"><div class="fill" data-k="stagebar"></div></div>
     <p class="notice" data-k="notice"></p>
-    <p class="loot" data-k="loot"></p>
+    <div class="combat" data-k="combat"></div>
     <h2 class="section">Potenziamenti</h2>
     <div class="upgrades">
       ${UPGRADES.map((u) => `
@@ -46,16 +42,13 @@ export function createHud(root: HTMLElement, actions: HudActions, initialStyle: 
     <div data-k="gear"></div>
     <h2 class="section">Statistiche</h2>
     <dl class="stats" data-k="stats"></dl>
-    <footer class="hud-foot">
-      <button class="btn" data-k="style"></button>
-      <span class="muted"><span data-k="fps">–</span> fps</span>
-    </footer>`;
+`;
 
   const el = (k: string) => root.querySelector<HTMLElement>(`[data-k="${k}"]`)!;
   const refs = {
     gold: el('gold'), level: el('level'), xptext: el('xptext'), xpbar: el('xpbar'),
     stage: el('stage'), best: el('best'), progress: el('progress'), stagebar: el('stagebar'),
-    notice: el('notice'), loot: el('loot'), stats: el('stats'), fps: el('fps'),
+    notice: el('notice'), stats: el('stats'),
   };
 
   root.querySelectorAll<HTMLButtonElement>('[data-up]').forEach((b) =>
@@ -63,28 +56,14 @@ export function createHud(root: HTMLElement, actions: HudActions, initialStyle: 
   );
 
   const gear = createGearPanel(el('gear'), actions);
-
-  const styleBtn = el('style');
-  let style = initialStyle;
-  const label = () => (styleBtn.textContent = `Stile: ${style}`);
-  label();
-  styleBtn.addEventListener('click', () => {
-    style = STYLES[(STYLES.indexOf(style) + 1) % STYLES.length];
-    label();
-    actions.setStyle(style);
-  });
+  const combat = createCombatPanel(el('combat'));
 
   let frame = 0;
   return {
     onEvents(events) {
-      for (const e of events) {
-        if (e.type !== 'drop') continue;
-        const r = RARITIES[e.item.rarity];
-        refs.loot.innerHTML = `Bottino: <span class="rar-${e.item.rarity}" style="color:${r.color}"></span>${e.salvaged ? ' <span class="muted">(smantellato)</span>' : ''}`;
-        refs.loot.querySelector('span')!.textContent = `${e.item.name} (${r.name})`;
-      }
+      combat.onEvents(events);
     },
-    update(state, fps) {
+    update(state) {
       // il DOM non serve a 60 fps: ~10 aggiornamenti al secondo bastano
       if (frame++ % 6) return;
       const need = xpToNext(state.hero.level);
@@ -108,9 +87,10 @@ export function createHud(root: HTMLElement, actions: HudActions, initialStyle: 
       }
 
       gear.update(state);
+      combat.update(state);
       const s = stateStats(state);
       refs.stats.innerHTML = [
-        ['Vita', `${formatNum(Math.max(0, state.hero.hp))} / ${formatNum(s.maxHp)}`],
+        ['Vita', formatNum(s.maxHp)],
         ['Attacco', formatNum(s.atk)],
         ['Difesa', formatNum(s.def)],
         ['Velocità', `${s.attackSpeed.toFixed(2)}/s`],
@@ -119,7 +99,6 @@ export function createHud(root: HTMLElement, actions: HudActions, initialStyle: 
         ['Uccisioni', formatNum(state.totals.kills)],
         ['Morti', String(state.totals.deaths)],
       ].map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
-      refs.fps.textContent = fps.toFixed(0);
     },
   };
 }

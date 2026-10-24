@@ -6,13 +6,12 @@ export interface EnemyTemplate {
   hp: number;
   atk: number;
   attackSpeed: number;
-  sprite: 'ghoul';
 }
 
 export const ENEMIES: EnemyTemplate[] = [
-  { id: 'ghoul', name: 'Ghoul', family: 'nonmorti', hp: 1, atk: 1, attackSpeed: 0.8, sprite: 'ghoul' },
+  { id: 'ghoul', name: 'Ghoul', family: 'nonmorti', hp: 1, atk: 1, attackSpeed: 0.8 },
 ];
 
 export const BOSSES: EnemyTemplate[] = [
-  { id: 'araldo', name: "Araldo dell'Eclissi", family: 'culto', hp: 6, atk: 1.6, attackSpeed: 0.7, sprite: 'ghoul' },
+  { id: 'araldo', name: "Araldo dell'Eclissi", family: 'culto', hp: 6, atk: 1.6, attackSpeed: 0.7 },
 ];

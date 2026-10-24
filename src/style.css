@@ -27,27 +27,10 @@ html, body {
   margin: 0 auto;
 }
 
-#stage {
-  /* rapporto 16:9 della scena; il canvas viene scalato a multipli interi */
-  aspect-ratio: 16 / 9;
-  width: 100%;
-  max-height: 60dvh;
-  display: grid;
-  place-items: center;
-  background: #000;
-}
-
-#stage canvas {
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
-  display: block;
-}
-
 #hud {
   flex: 1;
   padding: 16px;
   background: var(--panel);
-  border-top: 1px solid var(--gold-dim);
 }
 
 .title {
@@ -127,9 +110,7 @@ html, body {
 .rar-5 { text-shadow: 0 0 8px rgba(255, 59, 78, 0.6); }
 .rar-6 { text-shadow: 0 0 10px rgba(255, 240, 170, 0.9); }
 
-.loot { min-height: 1.4em; margin: 2px 0 0; font-size: 0.9em; }
 
-.slots { display: grid; gap: 6px; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
 .slot, .inv-item {
   display: grid;
   text-align: left;
@@ -160,3 +141,31 @@ html, body {
 
 .salvage-row { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin-top: 10px; font-size: 0.9em; }
 .salvage-row select { margin-left: 6px; background: #0b0e1f; color: var(--text); border: 1px solid #2a2f4a; font: inherit; padding: 4px; }
+
+/* Combattimento minimale */
+.combat { margin-top: 12px; padding: 10px 12px; border: 1px solid #2a2f4a; background: #080a17; }
+.fighter + .fighter { margin-top: 6px; }
+.bar.hp { height: 8px; }
+.bar.hp .fill { background: linear-gradient(90deg, #8a6a2a, #f4e3a0); transition: none; }
+.bar.hp.enemy .fill { background: linear-gradient(90deg, #5a1f24, #c9484f); }
+.log { list-style: none; margin: 10px 0 0; padding: 0; font-size: 0.85em; min-height: 7.5em; }
+.log li { opacity: 0.9; }
+.log li:nth-child(n + 4) { opacity: 0.5; }
+.log .crit { color: #f4e3a0; }
+.log .gold { color: var(--gold); }
+.log .down { color: #ff6b6b; }
+
+/* Manichino: sagoma al centro, slot ai lati */
+.doll { display: grid; grid-template-columns: minmax(0, 1fr) minmax(80px, 160px) minmax(0, 1fr); gap: 8px; align-items: center; }
+.doll-col { display: grid; gap: 6px; }
+.doll-figure { display: grid; place-items: center; }
+.silhouette { width: 100%; max-height: 340px; }
+.silhouette .cape { fill: #0d1024; stroke: #2a2f4a; }
+.silhouette .body path { fill: #1a1e36; stroke: var(--gold-dim); stroke-width: 0.8; }
+.silhouette .belt { fill: #2a2f4a; }
+.silhouette .visor { stroke: var(--gold); stroke-width: 1.5; }
+.silhouette .sword rect { fill: #d9dcf0; }
+.slot { min-height: 46px; overflow: hidden; }
+.slot > span:last-child { overflow-wrap: anywhere; line-height: 1.25; }
+.slot.empty { opacity: 0.6; }
+.slot.sel { box-shadow: 0 0 0 1px var(--gold); }

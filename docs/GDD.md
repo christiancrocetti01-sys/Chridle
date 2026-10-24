@@ -137,34 +137,11 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
 - **Lumi**: piccoli spiriti compagni con bonus passivi, si fanno salire di livello.
 
 ## 15. Direzione artistica
-- **Pixel art "a inchiostro"**: monocromatica ad alto contrasto, dithering/retino (halftone), grana,
-  neri pieni e bianchi che bruciano. Riferimenti dell'utente: illustrazione manga anni '80 in bianco e nero
-  con cornici ornamentali (stile Saint Seiya) + pixel art monocroma con dithering e particelle che si sgretolano.
-- Fluida a 60 fps. **Deciso: stile "oro"**, mondo in bianco e nero e la Luce dorata come colore principale.
-- Interfaccia: **cornici ornamentali** in stile manga/art nouveau (filigrane, stelle, spine) attorno a
-  pannelli, carte di skill e oggetti; titoli con ideogrammi/sigilli decorativi.
-- Rarità: si distinguono con bagliore, cornici più elaborate e particelle; **le rarità alte (Mitico, Divino)
-  possono avere più colori** (il filtro dovrà lasciar passare il loro colore, es. maschera o layer fuori filtro).
-- Tecnica chiave: **filtro di post-processing** (`src/render/dither.ts`) che converte tutta la scena in
-  scala di grigi a 4 livelli con dithering Bayer: rende coerenti asset di fonti diverse.
+- **Deciso (2026-10-24): grafica minimale.** Non si vede il personaggio combattere: il gioco è
+  numeri, oggetti, statistiche e sinergie, in un'interfaccia DOM/CSS pulita e leggibile.
+- **Manichino**: sagoma SVG sobria del guerriero al centro, i 12 slot attorno con bordo del colore della rarità.
+- **Combattimento**: barre vita di eroe e nemico + registro degli eventi importanti (critici, uccisioni, bottino).
+- **Rarità**: colore del nome e del bordo; le più alte (Leggendario, Mitico, Divino) con bagliore.
+- La vecchia scena PixiJS con filtro "inchiostro" resta nella storia di git (commit `caa9a3b`, `f43ab28`).
 - Ispirazioni (solo concettuali): Diablo, Path of Exile, Melvor Idle, NGU Idle, Idle Champions.
 
-### Tecnica
-- **Area di combattimento**: canvas con **PixiJS** (WebGL), sprite animati, particelle, luci additive
-  (glow della luce sui pixel scuri), shake e flash. Rendering a 60 fps con **interpolazione**
-  tra i tick della logica (logica a 10 tick/s, deterministica).
-- Pixel perfect: risoluzione interna bassa (es. 320×180 o 480×270) scalata a multipli interi,
-  `image-rendering: pixelated`, nessun filtro di smoothing.
-- **Interfaccia** (inventario, alberi, statistiche): DOM/CSS con font pixel/fantasy (es. Cinzel per i titoli,
-  un font pixel leggibile per i numeri), cornici dorate sottili, vetro scuro.
-
-### Asset
-- Si parte da pack pixel art gratuiti scelti per coerenza dark-fantasy (itch.io, OpenGameArt, CC0/free-commercial):
-  eroe, famiglie di nemici, boss, sfondi a parallasse, effetti (slash, esplosioni, luce).
-- Icone di skill/oggetti: pack di icone pixel coerenti con gli sprite; game-icons.net come riserva.
-- Ogni asset va verificato per licenza e registrato in `docs/CREDITS.md` prima dell'uso.
-- Gli asset temporanei si sostituiscono con altri più curati in Fase 6.
-
-### "Juice"
-Numeri di danno che volano, critici più grandi, hit-stop di pochi frame, drop che brillano per rarità,
-barre fluide, scie di luce sulle armi, suoni brevi (opzionali).
