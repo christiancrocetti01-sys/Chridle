@@ -28,7 +28,7 @@ Questo file viene caricato automaticamente a ogni sessione: tienilo **breve**.
 ## Convenzioni tecniche
 - Comandi: `npm run dev` (locale), `npm test` (Vitest), `npm run build` (tsc + vite).
 - `src/core` logica pura e deterministica (niente DOM): è l'unica parte con test unitari.
-- Grafica minimale (decisione utente): niente scena animata, solo UI DOM + sagoma SVG del guerriero. Logica a 10 tick/s.
+- Grafica (decisione utente): stile "testo puro" B/N, serif, niente scena né sagoma; colore solo a rarità/vita/elementi/avvisi (GDD §15). Logica a 10 tick/s.
   La rifinitura grafica si fa solo alla fine, a gioco finito.
 - `src/ui` interfaccia DOM/CSS. `src/data` contenuti come dati.
 - Salvataggio in `src/core/save.ts`: cambi allo stato → alza `STATE_VERSION` e aggiungi una migrazione + test.

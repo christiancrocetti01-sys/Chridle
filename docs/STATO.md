@@ -3,23 +3,25 @@
 > File di passaggio di consegne tra sessioni. Aggiornato con `/handoff`.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
-**Ultimo aggiornamento:** 2026-10-24 (handoff: UI divisa in schede, equip automatico, inventario senza limite; tutto su `main`)
-**Fase corrente:** **grafica finale**: stile "testo puro" alla Kittens Game/Evolve (scelta utente), B/N, serif.
-Fatto: palette B/N (token in `:root` di `src/style.css`; colore solo a rarità, barre vita, elementi `.el-*`, avvisi);
-font EB Garamond (titolo Cinzel); schede in alto come parole, fisse allo scorrimento (`.navs` in `src/ui/hud.ts`),
-sotto-schede in corsivo; niente riquadri; equipaggiamento come righe con i puntini (sagoma tolta, `doll.ts` eliminato);
-statistiche e potenziamenti a puntini; inventario a griglia; liste apribili `src/ui/list.ts`; elementi colorati (`elem` in `icons.ts`).
-Guida: pulsante «?» in alto (`src/ui/guide.ts`, testi in `src/data/guide.ts`: aggiornarli quando cambiano le regole); `README.md` per GitHub.
-**Prossimo passo:** sentire l'utente dal telefono (`?v=5`); poi stesso schema per Vie, Stelle (pannello dettagli), Modalità.
-Valutare con l'utente: smantellamento automatico "fino a Comune" di default (inventario ora illimitato → salvataggio grande).
-**Online:** `main` = branch (d3790c8 + handoff).
+**Ultimo aggiornamento:** 2026-10-24 (handoff: stile "testo puro" B/N e guida; tutto su `main`)
+**Fase corrente:** **grafica finale** in stile "testo puro" (decisioni in GDD §15).
+**Prossimo passo:** chiedere all'utente il parere dal telefono (`?v=6` contro la cache) su interfaccia e testi della guida;
+poi stesso schema per Vie (`src/ui/vie.ts`), pannello dettagli Stelle (`src/ui/stars.ts`), Modalità (`src/ui/world.ts`).
+**Online:** `main` = branch (466dbd3 + handoff).
 
 ## Questa sessione (2026-10-24)
-- UI divisa (utente: "troppo caotica"): `src/ui/hud.ts` con `TABS` (schede/sotto-schede), blocchi `data-sub` nei pannelli,
-  il pane ha `data-view` (CSS generato), scelta ricordata in `localStorage` `chridle.ui`; nuovo `src/ui/progress.ts`
-  (Bestiario/Collezione/Imprese tolti da `world.ts`). Dettagli in GDD §15.
-- Equip automatico: `src/core/autoequip.ts` (`gearPower`, `equipBest`), pulsante in `src/ui/gear.ts`, test `tests/autoequip.test.ts`.
-- Inventario senza limite: tolto `INVENTORY_SIZE` (items/combat/modes/offline, UI, collaudo).
+- Palette B/N: token in `:root` di `src/style.css` (`--accent`, `--line`, `--hp`, `--foe`, `--alert`…), elementi `.el-*`
+  via `elem()` in `src/ui/icons.ts` (skill, trigger, debolezze dei nemici).
+- Liste apribili: `src/ui/list.ts` (`createExpander`: righe `.li`, aperte ricordate per chiave; `lockedLine`; gruppo `.group`).
+  Usate in Skill, Rune (non comprate in gruppo), Bestiario, Collezione, Imprese, Lumi bloccati, Guida.
+- Font EB Garamond (CREDITS), schede in alto (`.navs` in `src/ui/hud.ts`), slot a puntini in `src/ui/gear.ts`
+  (`doll.ts` eliminato), inventario a griglia (`.inv-item`).
+- Guida: `src/ui/guide.ts` + testi `src/data/guide.ts` (aggiornarli quando cambiano le regole). `README.md` nuovo.
+
+## Domande aperte
+- Smantellamento automatico "fino a Comune" di default? (inventario illimitato → salvataggio grande)
+- "Equipaggia il meglio" ha detto "16 oggetti" con 12 slot: probabilmente conta i cambi intermedi (messaggio da verificare).
+- Bilanciamento: Neutro (Corruzione ~0) senza bonus va bene? Ritmo Rinascite (~30-45 in 10 giorni) ok?
 
 ## Gioco online
 https://christiancrocetti01-sys.github.io/Chridle/ (ogni push su `main` lo ripubblica, ~1 min).
@@ -52,7 +54,7 @@ Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` (fast-forward) quand
 - Salvataggio: **v20** (v20 `abyss`/`paragon`/`rebirth`), prima **v19** (v11 `vie`, v12 nemico + `keys`/`mode`/`tower`, v13 `ascension`, v14 campi opzionali rune, v15 `hero.sanctity`, v16 `codex`, v17 `collection`, v18 `achievements`, v19 `lumi`).
 
 ## Test
-- `npm test`: **221 verdi** (22 file), `npm run build` ok (verificato all'handoff del 2026-10-24, collaudo 2 h ok dopo l'inventario illimitato).
+- `npm test`: **221 verdi** (22 file), `npm run build` ok (handoff 2026-10-24, sera, dopo lo stile testo puro).
 - Collaudo: `npm run collaudo -- --ore 8 [--seed N] [--profilo id]` (`scripts/collaudo.ts`, un processo per profilo:
   5 Vie + uno con sessioni offline). 8 h: nessun NaN/crash/salvataggio rotto, ~30 s. Rilanciarlo dopo ogni sistema nuovo.
   Attenzione: nelle catene di comandi non fidarsi di `npm test | grep` (esce 0 anche se fallisce).
@@ -61,8 +63,6 @@ Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` (fast-forward) quand
 
 ## Note / problemi noti
 - Muro al boss di zona 50 (scudo + rigenerazione): con Via+Stelle ~4 h fermi (rigenerazione 1%/s): **voluto**, spinge ad ascendere.
-- Domande aperte (bilanciamento, non bloccano la grafica): Neutro (Corruzione ~0) senza bonus va bene?
-  Rinascite ~30-45 in 10 giorni (prima ogni ~10 h, poi ogni ~4-5 h): ritmo ok?
 - Numeri oltre 1e308 rimandati (servono verso stage ~3800; a 10 giorni il record è ~175).
 - Revisione da telefono rimandata a dopo la grafica finale (decisione utente).
 - Verifica visiva: script in scratchpad (salvataggio con `npx vite-node`, iniettato con `addInitScript`;

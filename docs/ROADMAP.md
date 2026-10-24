@@ -55,6 +55,9 @@ Spuntare `[x]` man mano. Le fasi possono essere ridefinite: è un documento vivo
 - [x] Crediti aggiornati (`docs/CREDITS.md`): nessun asset esterno oltre al font Cinzel
 - [x] UI riorganizzata: 5 schede in basso con sotto-schede, una cosa per schermata (richiesta utente)
 - [x] Equip automatico a pulsante e inventario senza limite (richiesta utente)
+- [x] Stile "testo puro" B/N (palette, serif, schede in alto, liste apribili, slot e statistiche a puntini, inventario a griglia)
+- [x] Guida nel gioco (pulsante «?») e `README.md`
+- [ ] Stesso schema per Vie, pannello dettagli delle Stelle, Modalità (dopo il parere dell'utente)
 
 ## Fase 7+ — Espansione contenuti
 - [ ] Centinaia di skill/oggetti/perk generati per lotti dai file dati

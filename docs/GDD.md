@@ -229,7 +229,6 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
 ## 15. Direzione artistica
 - **Deciso (2026-10-24): grafica minimale.** Non si vede il personaggio combattere: il gioco è
   numeri, oggetti, statistiche e sinergie, in un'interfaccia DOM/CSS pulita e leggibile.
-- **Manichino**: sagoma SVG sobria del guerriero al centro, i 12 slot attorno con bordo del colore della rarità.
 - **Combattimento**: barre vita di eroe e nemico + registro degli eventi importanti (critici, uccisioni, bottino).
 - **Rarità**: colore del nome e del bordo; le più alte (Leggendario, Mitico, Divino) con bagliore.
 - La vecchia scena PixiJS con filtro "inchiostro" resta nella storia di git (commit `caa9a3b`, `f43ab28`).
@@ -240,5 +239,12 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
   combattimento affiancato, log 3 righe, Abbandona); 5 schede fisse in basso con sotto-schede a pillola:
   Eroe (Oggetti/Potenziamenti/Statistiche), Build (Skill/Rune/Stelle/Via/Lumi), Mondo (Zona/Modalità),
   Progressi (Bestiario/Collezione/Imprese), Ascensione (Ascensione/Rinascita/Paragon). Pallini rossi = cose da fare.
+- **Deciso (2026-10-24, stile "testo puro", sostituisce manichino e schede in basso):** ispirazione Kittens Game/Evolve/
+  A Dark Room. Bianco e nero; colore **solo** a rarità (nome e cornice), barre vita (verde eroe, rosso nemico), elementi
+  (Fuoco arancio, Gelo azzurro, Fulmine giallo, Sacro avorio, Ombra viola) e avvisi (pallini rossi). Font EB Garamond
+  (titolo Cinzel). Schede in alto come parole, fisse allo scorrimento, sotto-schede in corsivo. Niente riquadri: linee
+  sottili. Equipaggiamento come righe con i puntini (sagoma tolta), statistiche e potenziamenti a puntini, inventario a
+  griglia di icone con cornice della rarità. Liste lunghe = una riga per elemento, dettagli al tocco; i bloccati riassunti.
+- **Deciso:** guida per i giocatori nel gioco (pulsante «?»), `README.md` per GitHub.
 - Ispirazioni (solo concettuali): Diablo, Path of Exile, Melvor Idle, NGU Idle, Idle Champions.
 
