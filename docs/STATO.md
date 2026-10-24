@@ -3,12 +3,11 @@
 > File di passaggio di consegne tra sessioni. Aggiornato con `/handoff`.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
-**Ultimo aggiornamento:** 2026-10-24 (handoff: Collezione leggendari, Imprese, Lumi; tutto su `main`)
-**Fase corrente:** 7 — contenuti a lotti. Grafica e UI minime fino alla fine (prova da telefono rimandata a dopo).
-**Prossimo passo:** chiedere com'è andata la prova dei Lumi. Poi **altri unici e set** (lotto di dati in
-`src/data/uniques.ts`; ogni unico nuovo va anche in `COLLECTION_BONUS` di `src/data/collection.ts`, c'è un test).
-Poi endgame (Abisso, Paragon, Rinascita Solare), poi grafica finale. Proporre il piano prima.
-**Online:** `main` = branch (fa48854): Collezione, Imprese e Lumi pubblicati.
+**Ultimo aggiornamento:** 2026-10-24 (contenuti finiti: lotto 5 unici/set + endgame; collaudo 10 giorni ok)
+**Fase corrente:** contenuti **completati** (Fase 7). Prossima: **grafica finale** (decisione utente).
+**Prossimo passo:** far approvare all'utente lotto 5 + endgame e allineare `main`; poi proporre il piano della grafica.
+Domanda aperta: Rinascite ~30-45 in 10 giorni (prima ogni ~10 h, poi ogni ~4-5 h): va bene il ritmo?
+**Online:** `main` (fa48854) = Lumi; il branch ha in più lotto 5 ed endgame (non ancora su `main`).
 
 ## Gioco online
 https://christiancrocetti01-sys.github.io/Chridle/ (ogni push su `main` lo ripubblica, ~1 min).
@@ -35,14 +34,20 @@ Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` (fast-forward) quand
   bonus in `stateStats`; evento `drop.discovered`; elenco in `src/ui/world.ts`. UI da rifare alla fine.
 - Imprese: `src/core/achievements.ts` (`checkAchievements` in `step` ogni secondo), `src/data/achievements.ts`.
 - Lumi: `src/core/lumi.ts` (`checkLumi` accanto alle Imprese), `src/data/lumi.ts`, sezione `src/ui/lumi.ts` (scheda Eroe).
-- Salvataggio: **v19** (v11 `vie`, v12 nemico + `keys`/`mode`/`tower`, v13 `ascension`, v14 campi opzionali rune, v15 `hero.sanctity`, v16 `codex`, v17 `collection`, v18 `achievements`, v19 `lumi`).
+- Lotto 5: 30 unici, 8 set, 7 regole nuove (`src/data/uniques.ts`, costanti in fondo; logica in `combat.ts`/`stats.ts`).
+- Endgame: `src/data/endgame.ts`, `src/core/endgame.ts` (Paragon, Rinascita), Abisso in `src/core/modes.ts`/`enemies.ts`;
+  UI: Abisso in scheda Mondo, Rinascita e Paragon in scheda Ascensione. Imprese Abissale/Paragone/Rinato.
+- Salvataggio: **v20** (v20 `abyss`/`paragon`/`rebirth`), prima **v19** (v11 `vie`, v12 nemico + `keys`/`mode`/`tower`, v13 `ascension`, v14 campi opzionali rune, v15 `hero.sanctity`, v16 `codex`, v17 `collection`, v18 `achievements`, v19 `lumi`).
 
 ## Test
-- `npm test`: **200 verdi** (20 file), `npm run build` ok.
+- `npm test`: **218 verdi** (21 file), `npm run build` ok.
 - Collaudo: `npm run collaudo -- --ore 8 [--seed N] [--profilo id]` (`scripts/collaudo.ts`, un processo per profilo:
   5 Vie + uno con sessioni offline). 8 h: nessun NaN/crash/salvataggio rotto, ~30 s. Rilanciarlo dopo ogni sistema nuovo.
   Attenzione: nelle catene di comandi non fidarsi di `npm test | grep` (esce 0 anche se fallisce).
 - Ritmo (`tests/combat.test.ts`, senza Via/Stelle): 2 h con equip automatico stage 50.
+
+- Collaudo 10 giorni (`--ore 240`, ~20 min): nessun problema. A 240 h: livello ~125, record 160-175, Abisso 37-47,
+  Paragon ~170-190, Soli 58-92, collezione 30/30 (dalle ~70 h), imprese 56-57/69, rune 27-30/40.
 
 ## Note / problemi noti
 - Muro al boss di zona 50 (scudo + rigenerazione): con Via+Stelle ~4 h fermi (rigenerazione 1%/s): **voluto**, spinge ad ascendere.
