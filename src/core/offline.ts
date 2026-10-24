@@ -1,4 +1,4 @@
-import { ELITE_CHANCE, ELITE_FROM_STAGE, ELITE_KEY_CHANCE } from '../data/enemies';
+import { ELITE_CHANCE, ELITE_FROM_STAGE, ELITE_KEY_CHANCE, type Family } from '../data/enemies';
 import { offlineEfficiency } from './ascension';
 import { gainXp, step, type CombatEvent } from './combat';
 import { INVENTORY_SIZE, rollItem, rollRarity, salvageValue } from './items';
@@ -72,6 +72,8 @@ export function applyOffline(state: GameState, seconds: number): OfflineReport |
   state.essence += report.essence;
   state.keys += report.keys;
   state.totals.kills += kills;
+  // Codex: le uccisioni del campione per famiglia, allo stesso ritmo
+  for (const f of Object.keys(state.codex) as Family[]) state.codex[f] += Math.floor((sim.codex[f] - state.codex[f]) * factor);
 
   // bottino: i primi oggetti veri (filtro e inventario come al solito), il resto in Frammenti alla loro media
   const totalDrops = Math.round(drops * factor);

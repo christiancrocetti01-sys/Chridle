@@ -63,5 +63,6 @@ Spuntare `[x]` man mano. Le fasi possono essere ridefinite: è un documento vivo
   - [x] Lotto 4: rune 24 → 40 (costo di sblocco ×1,6 invariato)
   - [x] Purezza/Corruzione (sistema a parte, salvataggio v15)
   - [x] Collaudo massivo con tutti i sistemi (`scripts/collaudo.ts`, `npm run collaudo`)
-  - [ ] Poi: Codex/Imprese/Lumi, altri unici e set
+  - [x] Codex/Bestiario (salvataggio v16) + Furia contro gli stalli
+  - [ ] Collezione leggendari, Imprese, Lumi; altri unici e set
   - [ ] Endgame: Abisso, Paragon, Rinascita Solare

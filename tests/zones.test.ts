@@ -5,7 +5,7 @@ import { canRaid, dungeonLevel, enterDungeon, enterRaid, enterTower, leaveMode, 
 import { deserialize, serialize } from '../src/core/save';
 import { newGame, type GameState } from '../src/core/state';
 import { KILLS_PER_STAGE, stateStats } from '../src/core/stats';
-import { ENEMIES, FAMILIES, ZONES, ZONE_KEY_EVERY, ZONE_STAGES, zoneName, zoneOf } from '../src/data/enemies';
+import { ENEMIES, FAMILIES, FURY_AFTER_S, ZONES, ZONE_KEY_EVERY, ZONE_STAGES, zoneName, zoneOf } from '../src/data/enemies';
 import { DUNGEON_WAVES, RAID_KEYS, RAID_STAGE, TOWER_KEY_EVERY, TOWER_MILESTONE } from '../src/data/modes';
 
 const run = (s: GameState, ticks: number) => {
@@ -172,5 +172,25 @@ describe('Dungeon, Torre e Raid', () => {
     while (!ev.some((e) => e.type === 'death')) step(s, ev);
     expect(s.mode.kind).toBe('campaign');
     expect(s.stage.current).toBe(5);
+  });
+
+  it('Furia: dopo due minuti ogni nemico raddoppia l’attacco ogni 10 s', () => {
+    const e = spawnEnemy(newGame(0, 1));
+    e.age = FURY_AFTER_S * 10;
+    expect(enemyAtk(e)).toBe(e.atk);
+    e.age += 100;
+    expect(enemyAtk(e)).toBe(e.atk * 2);
+  });
+
+  it('uno stallo nel Dungeon (boss che non muore, eroe che non muore) finisce con la sconfitta', () => {
+    const s = god(newGame(0, 5));
+    s.keys = 1;
+    enterDungeon(s);
+    while (!s.enemy) step(s);
+    Object.assign(s.enemy, { hp: 1e300, maxHp: 1e300, atk: 1 }); // non lo si scalfisce e quasi non fa male
+    const ev: CombatEvent[] = [];
+    for (let i = 0; i < 3600 * 10 && s.mode.kind === 'dungeon'; i++) step(s, ev);
+    expect(s.mode.kind).toBe('campaign');
+    expect(ev.some((e) => e.type === 'mode' && !e.ok)).toBe(true);
   });
 });

@@ -335,7 +335,7 @@ function simulate(p: Profile) {
     counters: c, ascendAt, checkpoints,
     end: {
       vie: activeVie(state.vie), stars: state.stars.length, corruption: s.corruption, rules: [...s.rules],
-      skills: state.skills.slots, perks: state.ascension.perks,
+      skills: state.skills.slots, perks: state.ascension.perks, codex: state.codex,
       gear: Object.values(state.gear.equipped).map((it) => `${it!.rarity}:${it!.special?.id ?? it!.type}`),
     },
   };
@@ -362,6 +362,7 @@ function report(results: Result[]) {
     console.log(`  ascensioni ${c.ascensions} a ${r.ascendAt.join(', ') || '—'} h  ·  fusioni ${c.fusions}  affissi alzati ${c.crafts}  rune ${c.runesUnlocked} sbloccate / ${c.runeLevels} livelli`);
     console.log(`  fine: Vie ${r.end.vie.join('+')}, stelle ${r.end.stars}, corruzione ${r.end.corruption}, regole ${r.end.rules.join(' ') || '—'}`);
     console.log(`  skill ${r.end.skills.join(', ')}  ·  perk ${JSON.stringify(r.end.perks)}`);
+    console.log(`  codex ${JSON.stringify(r.end.codex)}`);
   }
   const bad = results.filter((r) => r.issues.length);
   console.log(bad.length ? `\n❌ ${bad.length} profili con problemi` : `\n✅ nessun NaN, crash o salvataggio rotto in ${results.length} profili`);

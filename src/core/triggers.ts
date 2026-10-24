@@ -40,10 +40,10 @@ export const EXECUTE_HP = 0.25;
 /** Limite dei buff attivi insieme (con "hasteStacks" si accumulano). */
 export const MAX_BUFFS = 20;
 
-/** Moltiplicatore del danno inflitto al nemico: boss e regola "execute". */
+/** Moltiplicatore del danno inflitto al nemico: boss, Codex della famiglia e regola "execute". */
 export function damageMult(hero: Stats, enemy: EnemyState): number {
   const execute = hero.rules.has('execute') && enemy.hp < enemy.maxHp * EXECUTE_HP ? 2 : 1;
-  return (enemy.boss ? hero.bossMult : 1) * execute;
+  return (enemy.boss ? hero.bossMult : 1) * hero.familyMult[enemy.family] * execute;
 }
 
 /**

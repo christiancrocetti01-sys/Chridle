@@ -1,8 +1,11 @@
 import { dungeonLevel, dungeonReward, towerBonus, towerMilestones } from '../core/modes';
 import type { GameState } from '../core/state';
-import { FAMILIES, MECHANIC_TEXT, ZONE_STAGES, zoneName, zoneOf, type DamageType, type Family } from '../data/enemies';
+import { FAMILIES, MECHANIC_TEXT, ZONE_KEY_EVERY, ZONE_STAGES, zoneName, zoneOf, type DamageType, type Family } from '../data/enemies';
 import { DUNGEON_MODS, DUNGEON_WAVES, RAID_KEYS, RAID_SECONDS, RAID_LEVEL_OFFSET, RAID_STAGE, TOWER_MILESTONE, TOWER_SECONDS } from '../data/modes';
 import { TICK_RATE } from '../core/loop';
+import { codexTier } from '../core/codex';
+import { CODEX_DMG, CODEX_TIERS, CODEX_TIER_NAMES } from '../data/codex';
+import { formatNum } from '../core/format';
 
 export interface WorldActions {
   enterDungeon(): void;
@@ -36,7 +39,7 @@ export function createWorldPanel(root: HTMLElement, actions: WorldActions) {
   return {
     update(state: GameState) {
       const m = state.mode;
-      const k = JSON.stringify([state.stage.current, state.stage.best, state.keys, m.kind, m.kind === 'dungeon' ? m.mods : 0, state.tower.best]);
+      const k = JSON.stringify([state.stage.current, state.stage.best, state.keys, m.kind, m.kind === 'dungeon' ? m.mods : 0, state.tower.best, codexKey(state)]);
       if (k === key) return;
       key = k;
       const z = zoneOf(state.stage.current);
@@ -52,7 +55,7 @@ export function createWorldPanel(root: HTMLElement, actions: WorldActions) {
           <div class="skill-head"><b>${zoneName(state.stage.current)}</b><span class="muted">${FAMILIES[z.zone.family].name}</span></div>
           <div class="skill-info muted">${z.zone.lore}</div>
           <div class="skill-info">${resText(z.zone.family)}</div>
-          <div class="skill-info">Boss di zona (stage ${zStart + ZONE_STAGES - 1}): <b>${z.zone.boss.name}</b> — ${z.zone.mechanics.map((x) => MECHANIC_TEXT[x]).join('; ')}. Dà una chiave.</div>
+          <div class="skill-info">Boss di zona (stage ${zStart + ZONE_STAGES - 1}): <b>${z.zone.boss.name}</b> — ${z.zone.mechanics.map((x) => MECHANIC_TEXT[x]).join('; ')}.${(zStart + ZONE_STAGES - 1) % ZONE_KEY_EVERY === 0 ? ' Al record dà una chiave.' : ''}</div>
         </div>
         <h2 class="section">Dungeon <span class="muted">· ${state.keys} chiavi</span></h2>
         <div class="skill-row">
@@ -64,7 +67,7 @@ export function createWorldPanel(root: HTMLElement, actions: WorldActions) {
             const d = DUNGEON_MODS.find((x) => x.id === id)!;
             return `${d.name} (${d.text})`;
           }).join(', ')} · ricompense ×${dungeonReward(m.mods).toFixed(2)} · nemico ${Math.min(m.wave + 1, DUNGEON_WAVES + 1)}/${DUNGEON_WAVES + 1}</div>` : ''}
-          <div class="skill-info muted">Chiavi: dai boss di zona e, a volte, dalle élite.</div>
+          <div class="skill-info muted">Chiavi: dai boss di zona ogni ${ZONE_KEY_EVERY} stage (al record), dalla Torre e, a volte, dalle élite.</div>
         </div>
         <h2 class="section">Torre dell'Alba <span class="muted">· record piano ${state.tower.best}</span></h2>
         <div class="skill-row">
@@ -79,9 +82,33 @@ export function createWorldPanel(root: HTMLElement, actions: WorldActions) {
             <button class="btn sm" data-w="enterRaid"${state.stage.best >= RAID_STAGE && state.keys >= RAID_KEYS && !inMode ? '' : ' disabled'}>Entra · ${RAID_KEYS} chiavi</button></div>
           <div class="skill-info">${RAID_SECONDS} s per abbatterlo. Fase 2: evoca servitori e si scuda; fase 3: furia e rigenerazione.
             In premio un oggetto <b>Leggendario</b> garantito (a volte Mitico o Divino).</div>
-        </div>`;
+        </div>
+        <h2 class="section">Bestiario <span class="muted">· +${Math.round(CODEX_DMG * 100)}% danni per grado, per sempre</span></h2>
+        ${bestiary(state)}`;
     },
   };
+}
+
+/** Il Bestiario si ridisegna solo a ogni 1% di avanzamento verso il grado successivo. */
+const codexKey = (state: GameState) => (Object.values(state.codex) as number[]).map((n) => {
+  const t = codexTier(n);
+  return t >= CODEX_TIERS.length ? t : `${t}.${Math.floor((n / CODEX_TIERS[t]) * 100)}`;
+}).join();
+
+/** Codex: uccisioni, grado e bonus per famiglia. */
+function bestiary(state: GameState): string {
+  return (Object.keys(FAMILIES) as Family[]).map((f) => {
+    const n = state.codex[f];
+    const t = codexTier(n);
+    const next = CODEX_TIERS[t];
+    const pct = next ? Math.min(100, (n / next) * 100) : 100;
+    return `<div class="skill-row">
+      <div class="skill-head"><span><b>${FAMILIES[f].name}</b> <span class="muted">${CODEX_TIER_NAMES[t]}</span></span>
+        <span>${t ? `+${Math.round(t * CODEX_DMG * 100)}% danni` : '<span class="muted">nessun bonus</span>'}</span></div>
+      <div class="bar"><div class="fill" style="width:${pct.toFixed(1)}%"></div></div>
+      <div class="skill-info muted">${formatNum(n)} uccisi${next ? ` · prossimo grado a ${formatNum(next)}` : ' · grado massimo'}</div>
+    </div>`;
+  }).join('');
 }
 
 /** Testo del timer di Torre e Raid. */

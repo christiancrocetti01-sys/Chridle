@@ -1,5 +1,6 @@
 import {
   BOSS_REGEN, BOSS_SHIELD, CHAMPIONS, ELITES, ELITE_CHANCE, ELITE_FROM_STAGE, ELITE_HP, ENEMIES, ENRAGE_EVERY_S, ENRAGE_STEP,
+  FURY_AFTER_S, FURY_MAX_DOUBLINGS,
   FAMILIES, SUMMON_ATK, SUMMON_EVERY_S, ZONES, ZONE_BOSS_HP, zoneOf, type DamageType, type EliteId, type EnemyTemplate, type Family,
 } from '../data/enemies';
 import {
@@ -139,8 +140,11 @@ export function tickEnemy(enemy: EnemyState, raid: boolean, events: { push(e: Me
   return 0;
 }
 
-/** Attacco attuale del nemico (con la furia che cresce nel tempo). */
+/** Attacco attuale del nemico: furia della meccanica e, oltre FURY_AFTER_S, furia contro gli stalli. */
 export function enemyAtk(enemy: EnemyState): number {
-  if (!enemy.mechanics.includes('enrage')) return enemy.atk;
-  return enemy.atk * (1 + ENRAGE_STEP * Math.floor(enemy.age / (ENRAGE_EVERY_S * TICK_RATE)));
+  const every = ENRAGE_EVERY_S * TICK_RATE;
+  const enrage = enemy.mechanics.includes('enrage') ? 1 + ENRAGE_STEP * Math.floor(enemy.age / every) : 1;
+  // nessun combattimento dura per sempre (boss che rigenera più del danno subito, eroe che non muore)
+  const late = enemy.age - FURY_AFTER_S * TICK_RATE;
+  return enemy.atk * enrage * (late > 0 ? 2 ** Math.min(FURY_MAX_DOUBLINGS, Math.floor(late / every)) : 1);
 }

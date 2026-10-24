@@ -188,6 +188,7 @@ function onKill(state: GameState, events: CombatEvent[]) {
   state.essence += essence;
   state.totals.gold += gold;
   state.totals.kills++;
+  state.codex[enemy.family]++;
   state.enemy = null;
   state.respawn = RESPAWN_TICKS;
   state.hero.swing = 0;

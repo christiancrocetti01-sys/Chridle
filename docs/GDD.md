@@ -194,6 +194,11 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
 
 ## 14. Meta e collezione
 - **Codex/Bestiario**: uccidere N nemici di un tipo dà bonus permanenti contro quella famiglia.
+  **Fatto (2026-10-24):** uccisioni per famiglia (`state.codex`, restano all'Ascensione, contano anche offline),
+  5 gradi a 50/500/2,5K/10K/50K, +5% danni per grado contro la famiglia (`src/data/codex.ts`); sezione Bestiario
+  nella scheda Mondo. Collaudo: ~1.500 uccisioni per famiglia in 8 h.
+- **Fatto (Furia contro gli stalli):** dopo 120 s di combattimento ogni nemico raddoppia l'attacco ogni 10 s
+  (il collaudo ha trovato un Dungeon bloccato per 6 h: boss che rigenera, eroe che non muore).
 - **Collezione leggendari**: ogni leggendario trovato almeno una volta dà un piccolo bonus permanente.
 - **Imprese** (achievement) con ricompense.
 - **Lumi**: piccoli spiriti compagni con bonus passivi, si fanno salire di livello.

@@ -4,6 +4,7 @@ import { newRunes } from './runes';
 import { newSkills } from './skills';
 import { newVie } from './vie';
 import { newAscension } from './ascension';
+import { newCodex } from './codex';
 import { STATE_VERSION, newGame, type GameState } from './state';
 
 export const SAVE_KEY = 'chridle.save';
@@ -75,6 +76,8 @@ export const migrations: Record<number, Migration> = {
   13: (d) => d,
   // v14 → v15: Purezza/Corruzione (ricarica della Santità)
   14: (d) => ({ ...d, hero: { ...(d.hero as object), sanctity: 0 } }),
+  // v15 → v16: Codex/Bestiario
+  15: (d) => ({ ...d, codex: newCodex() }),
 };
 
 export function serialize(state: GameState): string {

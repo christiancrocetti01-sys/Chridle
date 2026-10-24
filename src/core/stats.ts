@@ -4,6 +4,8 @@ import type { RuleId } from '../data/uniques';
 import { addStarMods } from './constellations';
 import { addViaMods, type ViaState } from './vie';
 import { addPerkMods, type AscensionState } from './ascension';
+import { familyMult, type CodexState } from './codex';
+import type { Family } from '../data/enemies';
 import { BLOOD_PACT_MAX } from '../data/vie';
 import {
   CORRUPTION_MAX, CORRUPTION_THRESHOLD, CORRUPT_DMG, CORRUPT_TANK, ECLIPSE_MULT, PURE_DMG, PURE_TANK,
@@ -45,6 +47,8 @@ export interface Stats {
   skillPower: Record<SkillTag, number>;
   /** Riduzione della ricarica delle skill per tag (si somma, al massimo MAX_SKILL_CDR). */
   skillCdr: Record<SkillTag, number>;
+  /** Moltiplicatore del danno contro ogni famiglia (Codex). */
+  familyMult: Record<Family, number>;
   /** Moltiplicatore di tutte le cure (rigenerazione e rubavita compresi). */
   healMult: number;
   /** Purezza/Corruzione netta, da −100 a +100. */
@@ -84,6 +88,7 @@ export function heroStats(level: number, upgrades: Record<UpgradeId, number>, mo
     bossMult: 1 + mods.bossDmg,
     skillPower: Object.fromEntries(SKILL_TAGS.map((t) => [t, mods[`${t}Skill`]])) as Record<SkillTag, number>,
     skillCdr: Object.fromEntries(SKILL_TAGS.map((t) => [t, mods[`${t}Cdr`]])) as Record<SkillTag, number>,
+    familyMult: familyMult(undefined),
     healMult: 1,
     corruption: 0,
     rules: new Set(),
@@ -101,7 +106,7 @@ export function elementalDamage(s: Stats): number {
 }
 
 /** Statistiche dell'eroe con l'equipaggiamento indossato. */
-export function stateStats(state: { hero: HeroState; upgrades: Record<UpgradeId, number>; gear: GearState; stars?: string[]; vie?: ViaState; tower?: { best: number }; ascension?: AscensionState }): Stats {
+export function stateStats(state: { hero: HeroState; upgrades: Record<UpgradeId, number>; gear: GearState; stars?: string[]; vie?: ViaState; tower?: { best: number }; ascension?: AscensionState; codex?: CodexState }): Stats {
   const mods = gearMods(state.gear);
   addPerkMods(state.ascension, mods);
   // traguardi della Torre dell'Alba: attacco e vita permanenti
@@ -116,6 +121,7 @@ export function stateStats(state: { hero: HeroState; upgrades: Record<UpgradeId,
     mods.defPct += b.defPct ?? 0;
   }
   const s = heroStats(state.hero.level, state.upgrades, mods);
+  s.familyMult = familyMult(state.codex);
   s.rules = gearRules(Object.values(state.gear.equipped));
   for (const r of starRules) s.rules.add(r);
   applyKeystones(s);

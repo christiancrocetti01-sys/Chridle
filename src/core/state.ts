@@ -7,6 +7,7 @@ import { newSkills, type SkillState } from './skills';
 import { heroStats } from './stats';
 import { newVie, type ViaState } from './vie';
 import { newAscension, type AscensionState } from './ascension';
+import { newCodex, type CodexState } from './codex';
 
 export interface EnemyState {
   templateId: string;
@@ -106,9 +107,11 @@ export interface GameState {
   /** Torre dell'Alba: piano record. */
   tower: { best: number };
   ascension: AscensionState;
+  /** Codex/Bestiario: uccisioni per famiglia (permanenti). */
+  codex: CodexState;
 }
 
-export const STATE_VERSION = 15;
+export const STATE_VERSION = 16;
 
 export function newGame(now: number, seed = now >>> 0): GameState {
   const upgrades = { forza: 0, corazza: 0, rapidita: 0 };
@@ -136,5 +139,6 @@ export function newGame(now: number, seed = now >>> 0): GameState {
     mode: { kind: 'campaign' },
     tower: { best: 0 },
     ascension: newAscension(),
+    codex: newCodex(),
   };
 }

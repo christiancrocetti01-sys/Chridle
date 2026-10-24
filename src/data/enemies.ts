@@ -71,6 +71,10 @@ export const MECHANIC_TEXT: Record<Mechanic, string> = {
 };
 export const ENRAGE_EVERY_S = 10;
 export const ENRAGE_STEP = 0.5;
+/** Furia contro gli stalli (oltre i timer di Torre e Raid): dopo tot secondi di combattimento ogni nemico raddoppia l'attacco ogni ENRAGE_EVERY_S. */
+export const FURY_AFTER_S = 120;
+/** Raddoppi massimi (2^200 ≈ 1e60: niente Infinity). */
+export const FURY_MAX_DOUBLINGS = 200;
 export const BOSS_SHIELD = 0.25;
 export const SUMMON_EVERY_S = 3;
 export const SUMMON_ATK = 0.4;
