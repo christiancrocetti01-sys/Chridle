@@ -5,9 +5,9 @@
 
 **Ultimo aggiornamento:** 2026-10-24 (handoff dopo Fase 3 passo 2)
 **Fase corrente:** 3 — Skill e build, passi 1-3 su 5 fatti (skill attive, rune, sinergie per tag). Decisioni in `docs/GDD.md` §6.
-**Prossimo passo:** far approvare il passo 3 all'utente e allineare `main`; poi passo 4 — **Costellazioni**
+**Prossimo passo:** passo 4 — **Costellazioni**
 (~30 nodi, 1 punto/livello, respec economico: proporre il piano). Poi Vie.
-**Online:** `main` allineato con il passo 2 (rune); passo 3 solo sul branch. **Grafica:** minimale (UI DOM + sagoma SVG).
+**Online:** `main` allineato con il passo 3 (sinergie per tag). **Grafica:** minimale (UI DOM + sagoma SVG).
 
 ## Gioco online
 https://christiancrocetti01-sys.github.io/Chridle/ (ogni push su `main` lo ripubblica, ~1 min).
