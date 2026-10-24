@@ -147,6 +147,7 @@ function hitHero(state: GameState, hero: Stats, raw: number, events: CombatEvent
   const enemy = state.enemy!;
   let amount = mitigate(raw, hero.def);
   if (hero.rules.has('reflect')) enemy.hp -= amount * REFLECT_SHARE * damageMult(hero, enemy);
+  for (const b of state.hero.buffs) if (b.reflect) enemy.hp -= amount * b.reflect * damageMult(hero, enemy);
   const absorbed = Math.min(state.hero.shield, amount);
   state.hero.shield -= absorbed;
   amount -= absorbed;
@@ -174,7 +175,8 @@ function onKill(state: GameState, events: CombatEvent[]) {
   const mult = raid ? 20 : zoneBoss ? 10 : boss ? 5 : elite ? ELITE_REWARD : 1;
   const gold = base.gold * mult * hero.goldMult;
   const xp = base.xp * mult * hero.xpMult;
-  const essence = essenceFor(stage, boss) * (elite ? ELITE_REWARD : 1) * (1 + perkValue(state.ascension, 'essenza'));
+  const essence = essenceFor(stage, boss) * (elite ? ELITE_REWARD : 1) * (1 + perkValue(state.ascension, 'essenza'))
+    * (1 + (enemy.harvest ?? 0));
   state.gold += gold;
   state.essence += essence;
   state.totals.gold += gold;

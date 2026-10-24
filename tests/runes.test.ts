@@ -233,4 +233,106 @@ describe('rune del lotto 3', () => {
     castWith(r, 'colpoSacro', ['rinnovamento']);
     expect(r.hero.hp).toBeGreaterThan(10);
   });
+
+  it('lotto 4: Crepuscolo, Penetrazione, Massacro, Ferita Aperta, Disperazione, Pazienza', () => {
+    const b = base();
+    expect(dmg(castWith(fighting(), 'colpoSacro', ['crepuscolo']))).toBeCloseTo(b * 1.3);
+    const cold = fighting();
+    cold.enemy!.family = 'bestie'; // gelo +20% di resistenza
+    const frozen = dmg(castWith(cold, 'colpoSacro', ['brina']));
+    const pen = fighting();
+    pen.enemy!.family = 'bestie';
+    expect(dmg(castWith(pen, 'colpoSacro', ['brina', 'penetrazione']))).toBeCloseTo(frozen * (1 - 0.2 * 0.7) / 0.8);
+    const elite = fighting();
+    elite.enemy!.elite = 'robusto';
+    expect(dmg(castWith(elite, 'colpoSacro', ['massacro']))).toBeCloseTo(b * 1.6);
+    const bleeding = fighting();
+    bleeding.enemy!.bleed = 1;
+    expect(dmg(castWith(bleeding, 'colpoSacro', ['feritaAperta']))).toBeCloseTo(b * 1.5);
+    expect(dmg(castWith(fighting(), 'colpoSacro', ['feritaAperta']))).toBeCloseTo(b);
+    const low = fighting();
+    low.hero.hp = stateStats(low).maxHp * 0.2;
+    expect(dmg(castWith(low, 'colpoSacro', ['disperazione']))).toBeCloseTo(b * 1.8);
+    expect(dmg(castWith(fighting(), 'colpoSacro', ['pazienza']))).toBeCloseTo(b * (1 + 0.08 * skillDef('colpoSacro')!.cooldown));
+  });
+
+  it('Risonanza conta le altre skill con un tag in comune; Supernova triplica; Alba solo al primo lancio', () => {
+    const b = base();
+    const s = fighting();
+    unlockRune(s, 'risonanza');
+    socketRune(s, 'colpoSacro', 0, 'risonanza');
+    s.skills.slots = ['colpoSacro', 'preghiera', 'lamaRapida', null]; // Preghiera ha il tag sacro, Lama Rapida no
+    s.hero.light = 100;
+    const ev: CombatEvent[] = [];
+    castSkills(s, stateStats(s), ev);
+    expect(dmg(ev)).toBeCloseTo(b * 1.1);
+    const nova = fighting();
+    unlockRune(nova, 'supernova');
+    nova.runes.levels.supernova = 100; // probabilità oltre il 100%
+    expect(dmg(castWith(nova, 'colpoSacro', ['supernova']))).toBeCloseTo(b * 3);
+    const dawn = fighting();
+    expect(dmg(castWith(dawn, 'colpoSacro', ['alba']))).toBeCloseTo(b * 2);
+    dawn.skills.cooldowns.colpoSacro = 0;
+    dawn.hero.light = 100;
+    const again: CombatEvent[] = [];
+    castSkills(dawn, stateStats(dawn), again);
+    expect(dmg(again)).toBeCloseTo(b);
+  });
+
+  it('Mietitura azzera la ricarica e Raccolto dà Essenza se il colpo uccide', () => {
+    const s = fighting();
+    s.enemy!.hp = 1;
+    castWith(s, 'colpoSacro', ['mietitura', 'raccolto']);
+    expect(s.skills.cooldowns.colpoSacro).toBe(0);
+    expect(s.enemy!.harvest).toBeCloseTo(0.5);
+    const alive = fighting();
+    castWith(alive, 'colpoSacro', ['mietitura', 'raccolto']);
+    expect(alive.skills.cooldowns.colpoSacro).toBeGreaterThan(0);
+    expect(alive.enemy!.harvest).toBeUndefined();
+  });
+
+  it('Persistenza allunga la velocità, Purificazione cura la vita mancante, Grazia/Fortezza/Riflesso danno buff', () => {
+    const s = fighting();
+    castWith(s, 'lamaRapida', ['persistenza']);
+    expect(s.hero.buffs.find((x) => x.key === 'skill:lamaRapida')!.ticks).toBe(4 * 1.5 * 10);
+    const plain = fighting();
+    plain.hero.hp = 10;
+    castWith(plain, 'preghiera', []);
+    const pure = fighting();
+    pure.hero.hp = 10;
+    castWith(pure, 'preghiera', ['purificazione']);
+    expect(pure.hero.hp).toBeGreaterThan(plain.hero.hp);
+    const g = fighting();
+    const before = stateStats(g);
+    castWith(g, 'colpoSacro', ['grazia', 'fortezza']);
+    const after = stateStats(g);
+    expect(after.dodge).toBeCloseTo(before.dodge + 0.1);
+    expect(after.def).toBeGreaterThan(before.def * 1.29);
+    const r = fighting();
+    castWith(r, 'colpoSacro', ['riflesso']);
+    expect(r.hero.buffs).toContainEqual(expect.objectContaining({ key: 'rune:riflesso:colpoSacro', reflect: 0.2, ticks: 30 }));
+    // il riflesso colpisce il nemico quando l'eroe viene colpito (l'eroe non attacca e non lancia skill)
+    r.hero.hp = stateStats(r).maxHp;
+    r.enemy!.atk = r.hero.hp * 0.3; // colpisce senza uccidere
+    r.hero.swing = -1e9;
+    r.skills.slots = [null, null, null, null];
+    const foe = r.enemy!;
+    const hp = foe.hp;
+    const ev: CombatEvent[] = [];
+    for (let i = 0; i < 30 && !ev.some((e) => e.type === 'hit' && e.target === 'hero'); i++) step(r, ev);
+    expect(ev.some((e) => e.type === 'hit' && e.target === 'hero')).toBe(true);
+    expect(foe.hp).toBeLessThan(hp);
+  });
+
+  it('migra da v13 senza perdere rune ed Essenza (lotto 4: solo campi opzionali)', () => {
+    const s = newGame(0, 2);
+    s.essence = 123;
+    unlockRune(s, 'potenza');
+    const back = deserialize(serialize({ ...s, version: 13 }))!;
+    expect(back.version).toBe(STATE_VERSION);
+    expect(back.essence).toBe(s.essence);
+    expect(back.runes.levels.potenza).toBe(1);
+  });
+
+  it('ci sono 40 rune', () => expect(RUNES).toHaveLength(40));
 });

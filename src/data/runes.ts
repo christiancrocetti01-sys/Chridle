@@ -19,13 +19,22 @@ export const RUNE_SHADOW_HP_COST = 0.03;
 export const RUNE_HASTE_SECONDS = 3;
 /** Apertura: il nemico deve avere almeno questa frazione di vita. */
 export const RUNE_OPENING_HP = 0.9;
+/** Disperazione: la tua vita deve essere sotto questa frazione. */
+export const RUNE_DESPAIR_HP = 0.35;
+/** Supernova: moltiplicatore del danno quando scatta. */
+export const RUNE_SUPERNOVA_MULT = 3;
+/** Durata dei buff di Grazia, Fortezza e Riflesso. */
+export const RUNE_BUFF_SECONDS = 3;
 
 export type RuneId =
   | 'potenza' | 'rapidita' | 'parsimonia' | 'eco' | 'scintilla' | 'brace'
   | 'lacerazione' | 'ombra' | 'esecuzione' | 'sete' | 'bastione' | 'fervore'
   // lotto 3
   | 'condanna' | 'apertura' | 'luminescenza' | 'consacrazione' | 'marchio' | 'rinnovamento'
-  | 'catena' | 'fulgore' | 'incendio' | 'brina' | 'tempesta' | 'custodia';
+  | 'catena' | 'fulgore' | 'incendio' | 'brina' | 'tempesta' | 'custodia'
+  // lotto 4
+  | 'crepuscolo' | 'penetrazione' | 'risonanza' | 'supernova' | 'feritaAperta' | 'disperazione' | 'massacro' | 'pazienza'
+  | 'mietitura' | 'raccolto' | 'persistenza' | 'purificazione' | 'grazia' | 'fortezza' | 'riflesso' | 'alba';
 
 export interface RuneDef {
   id: RuneId;
@@ -70,6 +79,23 @@ export const RUNES: RuneDef[] = [
   { id: 'brina', name: 'Brina', value: 0.3, damageOnly: true, text: (v) => `converte l'esplosione in gelo, +${pct(v)} danno` },
   { id: 'tempesta', name: 'Tempesta', value: 0.3, damageOnly: true, text: (v) => `converte l'esplosione in fulmine, +${pct(v)} danno` },
   { id: 'custodia', name: 'Custodia', value: 0.6, supportOnly: true, text: (v) => `+${pct(v)} all'effetto delle skill di cura, scudo e velocità` },
+  // lotto 4
+  { id: 'crepuscolo', name: 'Crepuscolo', value: 0.3, damageOnly: true, text: (v) => `converte l'esplosione in ombra, +${pct(v)} danno` },
+  { id: 'penetrazione', name: 'Penetrazione', value: 0.3, damageOnly: true, text: (v) => `le esplosioni ignorano il ${pct(Math.min(1, v))} delle resistenze del nemico` },
+  { id: 'risonanza', name: 'Risonanza', value: 0.1, damageOnly: true, text: (v) => `+${pct(v)} danno per ogni altra skill equipaggiata con un tag in comune` },
+  { id: 'supernova', name: 'Supernova', value: 0.15, damageOnly: true, text: (v) => `${pct(Math.min(1, v))} di probabilità di fare danno ×${RUNE_SUPERNOVA_MULT}` },
+  { id: 'feritaAperta', name: 'Ferita Aperta', value: 0.5, damageOnly: true, text: (v) => `+${pct(v)} danno contro nemici che sanguinano o sono avvelenati` },
+  { id: 'disperazione', name: 'Disperazione', value: 0.8, damageOnly: true, text: (v) => `+${pct(v)} danno se la tua vita è sotto il ${pct(RUNE_DESPAIR_HP)}` },
+  { id: 'massacro', name: 'Massacro', value: 0.6, damageOnly: true, text: (v) => `+${pct(v)} danno contro le élite` },
+  { id: 'pazienza', name: 'Pazienza', value: 0.08, damageOnly: true, text: (v) => `+${pct(v)} danno per ogni secondo di ricarica della skill` },
+  { id: 'mietitura', name: 'Mietitura', value: 1, damageOnly: true, text: (v) => (v >= 1 ? 'se il colpo uccide, la ricarica si azzera' : `se il colpo uccide, restituisce il ${pct(v)} della ricarica`) },
+  { id: 'raccolto', name: 'Raccolto', value: 0.5, damageOnly: true, text: (v) => `se il colpo uccide, +${pct(v)} Essenza da quel nemico` },
+  { id: 'persistenza', name: 'Persistenza', value: 0.5, supportOnly: true, text: (v) => `+${pct(v)} alla durata degli effetti a tempo (velocità e rune a tempo)` },
+  { id: 'purificazione', name: 'Purificazione', value: 0.1, supportOnly: true, text: (v) => `cura anche il ${pct(v)} della vita mancante` },
+  { id: 'grazia', name: 'Grazia', value: 0.1, text: (v) => `dopo il lancio +${pct(v)} schivata per ${RUNE_BUFF_SECONDS} s` },
+  { id: 'fortezza', name: 'Fortezza', value: 0.3, text: (v) => `dopo il lancio +${pct(v)} difesa per ${RUNE_BUFF_SECONDS} s` },
+  { id: 'riflesso', name: 'Riflesso', value: 0.2, text: (v) => `per ${RUNE_BUFF_SECONDS} s rimanda al nemico il ${pct(v)} del danno subito` },
+  { id: 'alba', name: 'Alba', value: 1, text: (v) => `+${pct(v)} all'effetto al primo lancio contro ogni nuovo nemico` },
 ];
 
 export const runeDef = (id: string) => RUNES.find((r) => r.id === id);

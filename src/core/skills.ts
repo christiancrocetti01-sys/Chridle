@@ -2,11 +2,14 @@ import { HEAL_BELOW, LIGHT_PER_HIT, LIGHT_PER_SECOND, MAX_LIGHT, SHIELD_BELOW, S
 import { TICK_RATE } from './loop';
 import type { GameState } from './state';
 import { MAX_SKILL_CDR, type Stats } from './stats';
-import { RUNE_EXECUTE_HP, RUNE_HASTE_SECONDS, RUNE_OPENING_HP, RUNE_SHADOW_HP_COST, reduction, type RuneId } from '../data/runes';
+import {
+  RUNE_BUFF_SECONDS, RUNE_DESPAIR_HP, RUNE_EXECUTE_HP, RUNE_HASTE_SECONDS, RUNE_OPENING_HP, RUNE_SHADOW_HP_COST, RUNE_SUPERNOVA_MULT,
+  reduction, type RuneId,
+} from '../data/runes';
 import { resMult } from './enemies';
 import { nextRandom } from './rng';
 import { isDamageSkill, skillRune } from './runes';
-import { applyEffect, heal } from './triggers';
+import { MAX_BUFFS, applyEffect, heal } from './triggers';
 import { activeVie } from './vie';
 
 export interface SkillState {
@@ -100,7 +103,7 @@ function perform(state: GameState, hero: Stats, def: SkillDef): number | null {
     state.hero.hp = Math.max(1, state.hero.hp - hero.maxHp * RUNE_SHADOW_HP_COST);
   }
   // conversioni elementali (l'ultima incastonata vince): +danno e, per le esplosioni, cambio di elemento
-  for (const [id, element] of [['incendio', 'fire'], ['brina', 'cold'], ['tempesta', 'lightning']] as const) {
+  for (const [id, element] of [['incendio', 'fire'], ['brina', 'cold'], ['tempesta', 'lightning'], ['crepuscolo', 'shadow']] as const) {
     if (!damage || !r(id)) continue;
     if (effect.kind === 'burst') effect = { ...effect, element };
     value *= 1 + r(id);
@@ -110,8 +113,28 @@ function perform(state: GameState, hero: Stats, def: SkillDef): number | null {
   if (damage && enemy?.boss) value *= 1 + r('condanna');
   if (damage && state.hero.light >= MAX_LIGHT) value *= 1 + r('fulgore');
   if (!damage) value *= 1 + r('custodia');
+  if (damage && enemy) {
+    if (enemy.elite) value *= 1 + r('massacro');
+    if (enemy.bleed > 0 || enemy.poison > 0) value *= 1 + r('feritaAperta');
+    if (r('penetrazione') && effect.kind === 'burst') {
+      const res = resMult(enemy, effect.element);
+      if (res > 0 && res < 1) value *= (1 - (1 - res) * (1 - Math.min(1, r('penetrazione')))) / res;
+    }
+  }
+  if (damage && state.hero.hp < hero.maxHp * RUNE_DESPAIR_HP) value *= 1 + r('disperazione');
+  if (damage) value *= 1 + r('pazienza') * def.cooldown;
+  if (damage && r('risonanza')) value *= 1 + r('risonanza') * resonance(state, def);
+  if (enemy && r('alba') && !enemy.dawn?.includes(def.id)) {
+    value *= 1 + r('alba');
+    (enemy.dawn ??= []).push(def.id);
+  }
+  // si tira la Supernova solo se la runa c'è
+  if (damage && r('supernova') && nextRandom(state) < Math.min(1, r('supernova'))) value *= RUNE_SUPERNOVA_MULT;
+  const lasting = 1 + r('persistenza');
+  if (effect.kind === 'haste') effect = { ...effect, seconds: effect.seconds * lasting };
   const amount = applyEffect(state, hero, effect, value, `skill:${def.id}`);
   if (amount === null) return null;
+  if (r('purificazione')) heal(state, hero, (hero.maxHp - state.hero.hp) * r('purificazione'));
   if (r('rinnovamento')) heal(state, hero, hero.maxHp * r('rinnovamento'));
   if (damage && enemy) {
     if (r('consacrazione')) enemy.hp -= amount * r('consacrazione') * hero.elemMult.holy * resMult(enemy, 'holy');
@@ -120,13 +143,31 @@ function perform(state: GameState, hero: Stats, def: SkillDef): number | null {
     enemy.poison += amount * r('brace');
     enemy.bleed += amount * r('lacerazione');
     if (r('sete')) heal(state, hero, amount * r('sete'));
+    if (r('raccolto') && enemy.hp <= 0) enemy.harvest = r('raccolto');
   }
   if (r('bastione')) state.hero.shield = Math.min(hero.maxHp, state.hero.shield + hero.maxHp * r('bastione'));
   if (r('fervore')) {
-    const haste = { kind: 'haste' as const, value: r('fervore'), seconds: RUNE_HASTE_SECONDS };
+    const haste = { kind: 'haste' as const, value: r('fervore'), seconds: RUNE_HASTE_SECONDS * lasting };
     applyEffect(state, hero, haste, haste.value, `rune:fervore:${def.id}`);
   }
+  const seconds = RUNE_BUFF_SECONDS * lasting;
+  if (r('grazia')) runeBuff(state, `rune:grazia:${def.id}`, seconds, { dodge: r('grazia') });
+  if (r('fortezza')) runeBuff(state, `rune:fortezza:${def.id}`, seconds, { defPct: r('fortezza') });
+  if (r('riflesso')) runeBuff(state, `rune:riflesso:${def.id}`, seconds, { reflect: r('riflesso') });
   return amount;
+}
+
+/** Runa Risonanza: altre skill negli slot che hanno almeno un tag in comune con questa. */
+function resonance(state: GameState, def: SkillDef): number {
+  return state.skills.slots.filter((id) => id && id !== def.id && skillDef(id)?.tags.some((t) => def.tags.includes(t))).length;
+}
+
+/** Buff a tempo delle rune (schivata, difesa, riflesso): si rinnova se c'è già. */
+function runeBuff(state: GameState, key: string, seconds: number, b: { dodge?: number; defPct?: number; reflect?: number }) {
+  const ticks = Math.round(seconds * TICK_RATE);
+  const old = state.hero.buffs.find((x) => x.key === key);
+  if (old) old.ticks = ticks;
+  else if (state.hero.buffs.length < MAX_BUFFS) state.hero.buffs.push({ key, speedPct: 0, ticks, ...b });
 }
 
 /** Lancia una skill (senza controllare ricarica e Luce: lo fa chi chiama). `free` = non consuma Luce. */
@@ -139,6 +180,8 @@ function castSkill(state: GameState, hero: Stats, def: SkillDef, events: { push(
     state.hero.light -= cost * (1 - Math.min(1, skillRune(state, def.id, 'luminescenza')));
   }
   state.skills.cooldowns[def.id] = cooldownTicks(state, hero, def);
+  const reap = skillRune(state, def.id, 'mietitura');
+  if (reap && state.enemy && state.enemy.hp <= 0) state.skills.cooldowns[def.id] = Math.round(state.skills.cooldowns[def.id] * (1 - Math.min(1, reap)));
   const chain = skillRune(state, def.id, 'catena');
   if (chain) for (const id of state.skills.slots) if (id && id !== def.id && state.skills.cooldowns[id] > 0) {
     state.skills.cooldowns[id] = Math.max(0, state.skills.cooldowns[id] - Math.round(chain * TICK_RATE));

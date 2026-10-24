@@ -71,6 +71,8 @@ export const migrations: Record<number, Migration> = {
   }),
   // v12 → v13: Ascensione
   12: (d) => ({ ...d, ascension: newAscension() }),
+  // v13 → v14: rune del lotto 4 (campi opzionali su buff e nemico, assenti = 0): niente da convertire
+  13: (d) => d,
 };
 
 export function serialize(state: GameState): string {

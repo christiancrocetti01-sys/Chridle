@@ -60,6 +60,6 @@ Spuntare `[x]` man mano. Le fasi possono essere ridefinite: è un documento vivo
   - [x] Lotto 2: regioni delle Vie nelle Costellazioni (~250 nodi, 8 chiavi di volta), 5 unici con le meccaniche delle Vie
   - [x] Lotto 3: skill 18 → 30 (tag Gelo), rune 12 → 24
   - [x] Revisione delle Fasi 3.5-7 con l'utente (2026-10-24), `main` pubblicato; chiavi più rare
-  - [ ] Lotto 4: rune 24 → ~40 (costo di sblocco ×1,6 invariato)
+  - [x] Lotto 4: rune 24 → 40 (costo di sblocco ×1,6 invariato)
   - [ ] Poi: Purezza/Corruzione (sistema a parte), Codex/Imprese/Lumi, altri unici e set
   - [ ] Endgame: Abisso, Paragon, Rinascita Solare

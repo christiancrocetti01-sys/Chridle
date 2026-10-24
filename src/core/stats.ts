@@ -101,7 +101,11 @@ export function stateStats(state: { hero: HeroState; upgrades: Record<UpgradeId,
   mods.hpPct += tower;
   const starRules = addStarMods(state.stars ?? [], mods);
   for (const r of addViaMods(state.vie, mods)) starRules.add(r);
-  for (const b of state.hero.buffs) mods.speedPct += b.speedPct;
+  for (const b of state.hero.buffs) {
+    mods.speedPct += b.speedPct;
+    mods.dodge += b.dodge ?? 0;
+    mods.defPct += b.defPct ?? 0;
+  }
   const s = heroStats(state.hero.level, state.upgrades, mods);
   s.rules = gearRules(Object.values(state.gear.equipped));
   for (const r of starRules) s.rules.add(r);

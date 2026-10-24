@@ -4,9 +4,9 @@
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
 **Ultimo aggiornamento:** 2026-10-24 (revisione con l'utente chiusa, `main` pubblicato, chiavi più rare)
-**Fase corrente:** 7 — contenuti a lotti (lotti 1-3 fatti). Grafica: minima fino alla fine. Fasi 3-6 **approvate**.
-**Prossimo passo:** 1) l'utente prova il gioco dal telefono (Fase 1, mai fatto); 2) lotto 4: rune 24 → ~40
-(costo ×1,6 invariato); poi Purezza/Corruzione come sistema a parte (da progettare con l'utente), Codex/Imprese/Lumi.
+**Fase corrente:** 7 — contenuti a lotti (lotti 1-4 fatti; lotto 4 = 40 rune, solo sul branch). Grafica: minima fino alla fine. Fasi 3-6 **approvate**.
+**Prossimo passo:** 1) l'utente prova il gioco dal telefono (Fase 1, mai fatto); 2) se approva il lotto 4,
+allineare `main`; poi Purezza/Corruzione come sistema a parte (da progettare con l'utente), Codex/Imprese/Lumi.
 **Online:** `main` allineato al branch il 2026-10-24. Le decisioni della revisione sono nel GDD ("Deciso").
 
 ## Gioco online
@@ -22,11 +22,12 @@ Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` (fast-forward) quand
 - Fase 5: Ascensione (`src/data/ascension.ts`, `src/core/ascension.ts`, scheda `src/ui/ascension.ts`),
   offline (`src/core/offline.ts`, riepilogo in `main.ts`), suffissi numeri fino a Dc.
 - Fase 6: icone (`src/ui/icons.ts`), avvisi (`src/ui/fx.ts`), suoni (`src/ui/sound.ts`, chiave `chridle.sound`).
-- Fase 7: regioni delle Vie nell'albero (~250 nodi), 5 unici con le regole delle Vie; 30 skill, 24 rune.
-- Salvataggio: **v13** (v11 `vie`, v12 nemico rigenerato + `keys`/`mode`/`tower`/totals, v13 `ascension`).
+- Fase 7: regioni delle Vie nell'albero (~250 nodi), 5 unici con le regole delle Vie; 30 skill, 40 rune
+  (lotto 4: buff a tempo delle rune in `hero.buffs` con `dodge`/`defPct`/`reflect`; `enemy.dawn`/`harvest`).
+- Salvataggio: **v14** (v11 `vie`, v12 nemico rigenerato + `keys`/`mode`/`tower`/totals, v13 `ascension`, v14 campi opzionali delle rune).
 
 ## Test
-- `npm test`: **157 verdi** (15 file), `npm run build` ok.
+- `npm test`: **163 verdi** (15 file), `npm run build` ok.
 - Collaudo (non nel repo): 4 h simulate con tutti i sistemi, nessun NaN/crash; 1ª Ascensione in < 1 h.
 - Ritmo (`tests/combat.test.ts`, senza Via/Stelle): 2 h con equip automatico stage 50.
 
