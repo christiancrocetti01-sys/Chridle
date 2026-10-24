@@ -1,5 +1,4 @@
 import { SECOND_VIA_SHARE, VIA_LEVEL, viaDef, type ViaId } from '../data/vie';
-import { skillDef } from '../data/skills';
 import type { RuleId } from '../data/uniques';
 import type { StatMods } from './items';
 import type { GameState } from './state';
@@ -31,20 +30,10 @@ export function addViaMods(v: ViaState | undefined, m: StatMods): Set<RuleId> {
   return rules;
 }
 
-/** Toglie dagli slot le skill di Vie non più attive, poi mette le nuove sbloccate. */
+/** Le Vie non hanno più skill proprie: si riallineano solo gli slot. */
 function refreshSkills(state: GameState) {
-  const vie = activeVie(state.vie);
-  const s = state.skills;
-  s.slots = s.slots.map((id) => (id && !skillAllowed(id, vie) ? null : id));
-  // le skill della Via appena scelta vanno negli slot liberi anche se erano già state viste
-  for (const id of Object.keys(s.cooldowns)) if (!skillAllowed(id, vie)) delete s.cooldowns[id];
-  unlockSkills(s, state.hero.level, vie);
+  unlockSkills(state.skills, state.hero.level);
 }
-
-const skillAllowed = (id: string, vie: ViaId[]) => {
-  const d = skillDef(id);
-  return !!d && (!d.via || vie.includes(d.via));
-};
 
 /** Sceglie (o cambia, gratis) la Via principale. */
 export function chooseVia(state: GameState, id: ViaId): boolean {

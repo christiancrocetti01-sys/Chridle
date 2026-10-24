@@ -14,8 +14,8 @@ function fighting(level = 30) {
   const s = newGame(0, 3);
   s.hero.level = level;
   s.skills = newSkills(level);
-  s.essence = 1e9;
   while (!s.enemy) step(s);
+  s.essence = 1e9; // dopo i passi: altrimenti l'Essenza si spenderebbe da sola
   s.enemy!.hp = s.enemy!.maxHp = 1e12;
   s.enemy!.atk = 0;
   s.enemy!.family = 'bestie'; // niente resistenze a sacro e ombra
@@ -97,11 +97,11 @@ describe('effetti delle rune', () => {
   });
 
   it('Rapidità e Parsimonia riducono ricarica e costo', () => {
-    const s = fighting();
+    const s = fighting(50);
     const def = skillDef('giudizio')!;
     castWith(s, 'giudizio', ['rapidita', 'parsimonia']);
-    expect(cooldownTicks(s, stateStats(s), def)).toBe(Math.round(120 * 0.7));
-    expect(lightCost(s, stateStats(s), def)).toBeCloseTo(80 * 0.7, 0);
+    expect(cooldownTicks(s, stateStats(s), def)).toBe(Math.round(def.cooldown * 10 * 0.7));
+    expect(lightCost(s, stateStats(s), def)).toBeCloseTo(def.light * 0.7, 0);
     expect(s.hero.light).toBeCloseTo(100 - lightCost(s, stateStats(s), def));
   });
 
@@ -137,7 +137,7 @@ describe('effetti delle rune', () => {
   });
 
   it('Scintilla lancia gratis al critico se la ricarica è finita', () => {
-    const s = fighting();
+    const s = fighting(50);
     castWith(s, 'giudizio', ['scintilla']);
     s.runes.levels.scintilla = 20; // probabilità 100%
     const ev: CombatEvent[] = [];
@@ -183,14 +183,9 @@ describe('rune del lotto 3', () => {
     expect(dmg(castWith(fighting(), 'colpoSacro', ['fulgore']))).toBeCloseTo(b * 1.6);
   });
 
-  it('le conversioni cambiano elemento (resistenze comprese)', () => {
-    const s = fighting();
-    s.enemy!.family = 'bestie'; // fuoco −30% di resistenza (debolezza), gelo +20%
-    const ev = castWith(s, 'colpoSacro', ['incendio']);
-    expect(dmg(ev)).toBeGreaterThan(base() * 1.3);
-    const c = fighting();
-    c.enemy!.family = 'bestie';
-    expect(dmg(castWith(c, 'colpoSacro', ['brina']))).toBeLessThan(base() * 1.3);
+  it('le ex conversioni danno solo danno in più: l\'elemento lo sceglie la debolezza del nemico', () => {
+    expect(dmg(castWith(fighting(), 'colpoSacro', ['incendio']))).toBeCloseTo(base() * 1.3);
+    expect(dmg(castWith(fighting(), 'colpoSacro', ['brina']))).toBeCloseTo(base() * 1.3);
   });
 
   it('Luminescenza restituisce Luce, Catena accorcia le altre ricariche, Marchio e Consacrazione', () => {
@@ -237,12 +232,9 @@ describe('rune del lotto 3', () => {
   it('lotto 4: Crepuscolo, Penetrazione, Massacro, Ferita Aperta, Disperazione, Pazienza', () => {
     const b = base();
     expect(dmg(castWith(fighting(), 'colpoSacro', ['crepuscolo']))).toBeCloseTo(b * 1.3);
-    const cold = fighting();
-    cold.enemy!.family = 'bestie'; // gelo +20% di resistenza
-    const frozen = dmg(castWith(cold, 'colpoSacro', ['brina']));
-    const pen = fighting();
-    pen.enemy!.family = 'bestie';
-    expect(dmg(castWith(pen, 'colpoSacro', ['brina', 'penetrazione']))).toBeCloseTo(frozen * (1 - 0.2 * 0.7) / 0.8);
+    // l'elemento scelto è già una debolezza: la Penetrazione non ha resistenze da ignorare
+    const frozen = dmg(castWith(fighting(), 'colpoSacro', ['brina']));
+    expect(dmg(castWith(fighting(), 'colpoSacro', ['brina', 'penetrazione']))).toBeCloseTo(frozen);
     const elite = fighting();
     elite.enemy!.elite = 'robusto';
     expect(dmg(castWith(elite, 'colpoSacro', ['massacro']))).toBeCloseTo(b * 1.6);
@@ -294,7 +286,7 @@ describe('rune del lotto 3', () => {
   it('Persistenza allunga la velocità, Purificazione cura la vita mancante, Grazia/Fortezza/Riflesso danno buff', () => {
     const s = fighting();
     castWith(s, 'lamaRapida', ['persistenza']);
-    expect(s.hero.buffs.find((x) => x.key === 'skill:lamaRapida')!.ticks).toBe(4 * 1.5 * 10);
+    expect(s.hero.buffs.find((x) => x.key === 'skill:lamaRapida')!.ticks).toBe(5 * 1.5 * 10);
     const plain = fighting();
     plain.hero.hp = 10;
     castWith(plain, 'preghiera', []);
@@ -324,14 +316,16 @@ describe('rune del lotto 3', () => {
     expect(foe.hp).toBeLessThan(hp);
   });
 
-  it('migra da v13 senza perdere rune ed Essenza (lotto 4: solo campi opzionali)', () => {
+  it('migra da v13: le rune tornano Essenza (v21, rune automatiche)', () => {
     const s = newGame(0, 2);
-    s.essence = 123;
+    s.essence = 1000;
     unlockRune(s, 'potenza');
+    unlockRune(s, 'eco');
+    levelRune(s, 'eco');
     const back = deserialize(serialize({ ...s, version: 13 }))!;
     expect(back.version).toBe(STATE_VERSION);
-    expect(back.essence).toBe(s.essence);
-    expect(back.runes.levels.potenza).toBe(1);
+    expect(back.essence).toBe(1000);
+    expect(back.runes.levels).toEqual({});
   });
 
   it('ci sono 40 rune', () => expect(RUNES).toHaveLength(40));

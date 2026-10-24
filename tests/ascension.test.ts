@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { skillLevel } from '../src/core/skills';
 import { ascend, buyPerk, canAscend, offlineEfficiency, perkCost, startStage } from '../src/core/ascension';
 import { step } from '../src/core/combat';
 import { enterTower } from '../src/core/modes';
@@ -49,7 +50,7 @@ describe('Ascensione', () => {
     expect(stateStats(s).atk).toBeCloseTo(atk * 1.2);
     expect(perkCost(s.ascension, 'fiamma')).toBe(2);
     expect(buyPerk(s, 'slot')).toBe(true);
-    expect(s.skills.slots).toHaveLength(5);
+    expect(skillLevel(s, 'colpoSacro')).toBe(6); // +5 livelli gratis
     expect(buyPerk(s, 'secondaVia')).toBe(true);
     expect(s.vie.secondUnlocked).toBe(true);
     expect(buyPerk(s, 'secondaVia')).toBe(false); // massimo 1

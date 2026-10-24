@@ -1,4 +1,8 @@
-import { HEAL_BELOW, LIGHT_PER_HIT, LIGHT_PER_SECOND, MAX_LIGHT, SHIELD_BELOW, SKILLS, SKILL_SLOTS, skillDef, type SkillDef } from '../data/skills';
+import {
+  HEAL_BELOW, LIGHT_PER_HIT, LIGHT_PER_SECOND, MAX_LIGHT, SHIELD_BELOW, SKILLS, SKILL_LEVEL_BASE, SKILL_LEVEL_BONUS, SKILL_LEVEL_GROWTH,
+  skillDef, type SkillDef,
+} from '../data/skills';
+import { ELEMENTS, type Element } from '../data/items';
 import { TICK_RATE } from './loop';
 import type { GameState } from './state';
 import { MAX_SKILL_CDR, type Stats } from './stats';
@@ -11,40 +15,60 @@ import { nextRandom } from './rng';
 import { isDamageSkill, skillRune } from './runes';
 import { MAX_BUFFS, applyEffect, heal } from './triggers';
 import { CORRUPT_HP_PER_LIGHT } from '../data/corruption';
-import { activeVie } from './vie';
+import { perkValue } from './ascension';
 
 export interface SkillState {
-  /** Skill negli slot (null = vuoto); l'ordine è la priorità di lancio. */
+  /** Skill sbloccate, nell'ordine di priorità di lancio (sempre quello di SKILLS). */
   slots: (string | null)[];
+  /** Livello comprato di ogni skill (assente = 1). */
+  levels: Record<string, number>;
   /** Tick di ricarica rimasti per skill. */
   cooldowns: Record<string, number>;
 }
 
 export type SkillEvent = { type: 'skill'; id: string; name: string; amount: number };
 
-/** Skill disponibili a questo livello: quelle delle Vie solo con la Via attiva. */
-export const unlockedSkills = (level: number, vie: readonly string[] = []) =>
-  SKILLS.filter((s) => s.level <= level && (!s.via || vie.includes(s.via)));
+/** Skill disponibili a questo livello dell'eroe. */
+export const unlockedSkills = (level: number) => SKILLS.filter((s) => s.level <= level);
 
-/** Skill iniziali per un eroe di questo livello: le prime sbloccate negli slot. */
 export function newSkills(level = 1): SkillState {
-  const s: SkillState = { slots: Array(SKILL_SLOTS).fill(null), cooldowns: {} };
+  const s: SkillState = { slots: [], cooldowns: {}, levels: {} };
   unlockSkills(s, level);
   return s;
 }
 
-/** Mette le skill appena sbloccate nei primi slot liberi. Restituisce quelle nuove. */
-export function unlockSkills(s: SkillState, level: number, vie: readonly string[] = []): string[] {
-  const added: string[] = [];
-  for (const def of unlockedSkills(level, vie)) {
-    if (s.slots.includes(def.id) || def.id in s.cooldowns) continue;
-    const free = s.slots.indexOf(null);
-    s.cooldowns[def.id] = 0; // segna la skill come già vista: toglierla da uno slot non la rimette da sola
-    if (free < 0) continue;
-    s.slots[free] = def.id;
-    added.push(def.id);
-  }
+/** Tiene negli slot tutte le skill sbloccate, in ordine di priorità. Restituisce quelle nuove. */
+export function unlockSkills(s: SkillState, level: number): string[] {
+  const ids = unlockedSkills(level).map((d) => d.id);
+  const added = ids.filter((id) => !s.slots.includes(id));
+  s.slots = ids;
+  for (const id of ids) s.cooldowns[id] ??= 0;
   return added;
+}
+
+/** Livello effettivo: quello comprato più i livelli gratuiti dell'Ascensione. */
+export const skillLevel = (state: GameState, id: string) =>
+  (state.skills.levels[id] ?? 1) + (state.ascension ? perkValue(state.ascension, 'slot') : 0);
+/** Essenza per passare dal livello comprato `level` al successivo. */
+export const skillLevelCost = (level: number) => Math.ceil(SKILL_LEVEL_BASE * Math.pow(SKILL_LEVEL_GROWTH, level - 1));
+
+export function levelSkill(state: GameState, id: string): boolean {
+  const level = state.skills.levels[id] ?? 1;
+  if (!state.skills.slots.includes(id) || state.essence < skillLevelCost(level)) return false;
+  state.essence -= skillLevelCost(level);
+  state.skills.levels[id] = level + 1;
+  return true;
+}
+
+/** Elemento a cui il nemico è più debole, tenendo conto dei bonus elementali dell'eroe. */
+export function bestElement(state: GameState, hero: Stats): Element {
+  let best: Element = 'holy';
+  let value = 0;
+  for (const e of ELEMENTS) {
+    const v = hero.elemMult[e] * resMult(state.enemy, e);
+    if (v > value + 1e-9) { value = v; best = e; }
+  }
+  return best;
 }
 
 export function gainLight(state: GameState, amount = LIGHT_PER_HIT) {
@@ -64,14 +88,14 @@ export const tagCdr = (hero: Stats, def: SkillDef) => Math.min(MAX_SKILL_CDR, de
 
 /** Valore dell'effetto con la runa Potenza e le sinergie per tag (senza i bonus a condizione: Ombra, Esecuzione). */
 export const skillValue = (state: GameState, hero: Stats, def: SkillDef) =>
-  def.effect.value * (1 + skillRune(state, def.id, 'potenza')) * (1 + tagPower(hero, def));
+  def.effect.value * (1 + SKILL_LEVEL_BONUS * (skillLevel(state, def.id) - 1)) * (1 + skillRune(state, def.id, 'potenza')) * (1 + tagPower(hero, def));
 
 /** Costo in Luce e ricarica (in tick) con le rune Parsimonia e Rapidità, la riduzione ricarica per tag e "freeSkills". */
 export const lightCost = (state: GameState, hero: Stats, def: SkillDef) =>
   hero.rules.has('freeSkills') || paidInBlood(hero, def) ? 0 : baseLightCost(state, def);
 const baseLightCost = (state: GameState, def: SkillDef) => def.light * (1 - reduction(skillRune(state, def.id, 'parsimonia')));
-/** Corrotto: le skill d'Ombra si pagano con la vita invece che con la Luce. */
-const paidInBlood = (hero: Stats, def: SkillDef) => hero.rules.has('corruptShadow') && def.tags.includes('ombra');
+/** Corrotto: le skill di danno si pagano con la vita invece che con la Luce. */
+const paidInBlood = (hero: Stats, def: SkillDef) => hero.rules.has('corruptShadow') && isDamageSkill(def);
 export const cooldownTicks = (state: GameState, hero: Stats, def: SkillDef) =>
   Math.round(def.cooldown * TICK_RATE * (1 - reduction(skillRune(state, def.id, 'rapidita'))) * (1 - tagCdr(hero, def))
     * (hero.rules.has('freeSkills') ? FREE_SKILLS_CD : 1));
@@ -81,8 +105,7 @@ export const FREE_SKILLS_CD = 2;
 
 export const canCast = (state: GameState, hero: Stats, id: string) => {
   const def = skillDef(id);
-  return !!def && (state.skills.cooldowns[id] ?? 0) <= 0 && state.hero.light >= lightCost(state, hero, def) && state.hero.level >= def.level
-    && (!def.via || activeVie(state.vie).includes(def.via));
+  return !!def && (state.skills.cooldowns[id] ?? 0) <= 0 && state.hero.light >= lightCost(state, hero, def) && state.hero.level >= def.level;
 };
 
 /** Soglie automatiche: niente cura a vita alta, niente scudo se c'è già, niente velocità se è ancora attiva. */
@@ -101,17 +124,13 @@ function perform(state: GameState, hero: Stats, def: SkillDef): number | null {
   const damage = isDamageSkill(def);
   let effect = def.effect;
   let value = skillValue(state, hero, def);
+  if (effect.kind === 'burst' && enemy) effect = { ...effect, element: bestElement(state, hero) };
   if (damage && r('ombra')) {
-    if (effect.kind === 'burst') effect = { ...effect, element: 'shadow' };
     value *= 1 + r('ombra');
     state.hero.hp = Math.max(1, state.hero.hp - hero.maxHp * RUNE_SHADOW_HP_COST);
   }
-  // conversioni elementali (l'ultima incastonata vince): +danno e, per le esplosioni, cambio di elemento
-  for (const [id, element] of [['incendio', 'fire'], ['brina', 'cold'], ['tempesta', 'lightning'], ['crepuscolo', 'shadow']] as const) {
-    if (!damage || !r(id)) continue;
-    if (effect.kind === 'burst') effect = { ...effect, element };
-    value *= 1 + r(id);
-  }
+  // ex conversioni elementali: l'elemento ora si sceglie da solo, resta il danno in più
+  for (const id of ['incendio', 'brina', 'tempesta', 'crepuscolo'] as const) if (damage && r(id)) value *= 1 + r(id);
   if (damage && enemy && enemy.hp < enemy.maxHp * RUNE_EXECUTE_HP) value *= 1 + r('esecuzione');
   if (damage && enemy && enemy.hp >= enemy.maxHp * RUNE_OPENING_HP) value *= 1 + r('apertura');
   if (damage && enemy?.boss) value *= 1 + r('condanna');
@@ -219,25 +238,4 @@ export function castOnCrit(state: GameState, hero: Stats, events: { push(e: Skil
     if (!chance || state.skills.cooldowns[id!] > 0) continue;
     if (nextRandom(state) < Math.min(1, chance)) castSkill(state, hero, skillDef(id!)!, events, true);
   }
-}
-
-/** Mette una skill sbloccata in uno slot (se era già in un altro, i due si scambiano). */
-export function setSlot(state: GameState, slot: number, id: string | null): boolean {
-  const s = state.skills;
-  if (slot < 0 || slot >= s.slots.length) return false;
-  if (id !== null && !unlockedSkills(state.hero.level, activeVie(state.vie)).some((d) => d.id === id)) return false;
-  const from = id === null ? -1 : s.slots.indexOf(id);
-  if (from >= 0) s.slots[from] = s.slots[slot];
-  s.slots[slot] = id;
-  if (id !== null) s.cooldowns[id] ??= 0;
-  return true;
-}
-
-/** Sposta la skill dello slot `slot` di una posizione (−1 su, +1 giù) nella priorità. */
-export function moveSlot(state: GameState, slot: number, dir: -1 | 1): boolean {
-  const s = state.skills.slots;
-  const to = slot + dir;
-  if (to < 0 || to >= s.length) return false;
-  [s[slot], s[to]] = [s[to], s[slot]];
-  return true;
 }

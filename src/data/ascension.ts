@@ -27,7 +27,7 @@ export const PERKS: PerkDef[] = [
   { id: 'fortuna', name: 'Stella Fortunata', text: '+{v}% ritrovamento magico', value: 0.1, cost: 2, growth: 1.5 },
   { id: 'balzo', name: 'Balzo Solare', text: 'si riparte dallo stage {v}+1', value: 5, cost: 3, growth: 1.6, max: 20 },
   { id: 'veglia', name: 'Veglia Eterna', text: 'progresso offline al {v}% (base 75%)', value: 0.05, cost: 2, growth: 2, max: 5 },
-  { id: 'slot', name: 'Quinto Sole', text: '+{v} slot delle skill', value: 1, cost: 10, growth: 5, max: 2 },
+  { id: 'slot', name: 'Quinto Sole', text: '+{v} livelli a tutte le skill', value: 5, cost: 10, growth: 5, max: 2 },
   { id: 'secondaVia', name: 'Doppia Via', text: 'sblocca la seconda Via (ibrido)', value: 1, cost: 5, growth: 1, max: 1 },
 ];
 

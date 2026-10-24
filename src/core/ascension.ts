@@ -3,7 +3,6 @@ import type { StatMods } from './items';
 import { unlockSkills } from './skills';
 import type { GameState } from './state';
 import { stateStats } from './stats';
-import { activeVie } from './vie';
 import { sparkMult } from './endgame';
 
 export interface AscensionState {
@@ -48,7 +47,6 @@ export function buyPerk(state: GameState, id: PerkId): boolean {
   if (a.scintille < cost) return false;
   a.scintille -= cost;
   a.perks[id] = perkLevel(a, id) + 1;
-  if (id === 'slot') state.skills.slots.push(null);
   if (id === 'secondaVia') state.vie.secondUnlocked = true;
   return true;
 }
@@ -81,9 +79,8 @@ export function restartRun(state: GameState) {
   state.enemy = null;
   state.respawn = 0;
   state.stars = []; // i punti vengono dal livello: si riassegnano salendo
-  state.skills.slots = state.skills.slots.map(() => null);
   state.skills.cooldowns = {};
-  unlockSkills(state.skills, 1, activeVie(state.vie));
+  unlockSkills(state.skills, 1);
   state.hero.hp = stateStats(state).maxHp;
 }
 

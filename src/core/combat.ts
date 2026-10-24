@@ -3,6 +3,7 @@ import { UPGRADES, type UpgradeId } from '../data/upgrades';
 import { discover } from './collection';
 import { checkAchievements } from './achievements';
 import { checkLumi } from './lumi';
+import { autoEssence } from './auto';
 import type { LumoId } from '../data/lumi';
 import { TICK_RATE } from './loop';
 import { SANCTITY_SECONDS } from '../data/corruption';
@@ -18,7 +19,6 @@ import {
 } from '../data/uniques';
 import { RARITIES, type SlotId } from '../data/items';
 import { takeItem } from './autoequip';
-import { activeVie } from './vie';
 import { perkValue } from './ascension';
 import { elementalVs, enemyAtk, resMult, spawnEnemy, tickEnemy, type MechanicEvent } from './enemies';
 import { abyssStage, onModeDeath, onModeKill, tickMode, type ModeEvent } from './modes';
@@ -61,6 +61,7 @@ export function step(state: GameState, events: CombatEvent[] = []): CombatEvent[
   if (state.tick % TICK_RATE === 0) {
     for (const id of checkAchievements(state)) events.push({ type: 'achievement', id });
     for (const id of checkLumi(state)) events.push({ type: 'lumo', id });
+    autoEssence(state);
   }
   const hero = stateStats(state);
   const m = state.mode;
@@ -270,7 +271,7 @@ export function gainXp(state: GameState, xp: number, events: CombatEvent[]) {
     state.hero.level++;
     state.hero.hp = stateStats(state).maxHp;
     state.stage.auto = true; // più forte: si riprova ad avanzare
-    for (const id of unlockSkills(state.skills, state.hero.level, activeVie(state.vie))) events.push({ type: 'unlock', id });
+    for (const id of unlockSkills(state.skills, state.hero.level)) events.push({ type: 'unlock', id });
     events.push({ type: 'levelup', level: state.hero.level });
   }
 }

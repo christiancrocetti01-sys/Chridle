@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { skillLevel } from '../src/core/skills';
 import { step, type CombatEvent } from '../src/core/combat';
 import { abyssUnlocked, canRebirth, gainParagon, paragonFree, rebirth, resetParagon, spendParagon } from '../src/core/endgame';
 import { abyssStage, abyssStart, enterAbyss } from '../src/core/modes';
@@ -122,7 +123,7 @@ describe('Rinascita Solare', () => {
     expect(s.ascension).toEqual({ count: 0, scintille: 0, total: 0, perks: { slot: 1, secondaVia: 1 } });
     expect(s.stage).toMatchObject({ current: 1, best: 1 });
     expect(s.hero.level).toBe(1);
-    expect(s.skills.slots).toHaveLength(5);
+    expect(skillLevel(s, 'colpoSacro')).toBe(6);
     expect(s.vie.secondUnlocked).toBe(true);
     expect(s.paragon.level).toBe(7);
   });

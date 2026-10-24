@@ -6,7 +6,7 @@ export const CORRUPT_TANK = 0.005;
 /** Per punto di Purezza: −danni, +difesa e cure. */
 export const PURE_DMG = 0.005;
 export const PURE_TANK = 0.01;
-/** Soglia delle regole "Corrotto" (skill d'Ombra pagate con la vita) e "Puro" (cure in eccesso → scudo). */
+/** Soglia delle regole "Corrotto" (skill di danno pagate con la vita) e "Puro" (cure in eccesso → scudo). */
 export const CORRUPTION_THRESHOLD = 50;
 /** Corrotto: vita spesa per punto di Luce (frazione della vita massima). */
 export const CORRUPT_HP_PER_LIGHT = 0.001;

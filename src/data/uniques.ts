@@ -25,7 +25,7 @@ export const RULE_TEXT: Record<RuleId, string> = {
   endlessPoison: 'Il veleno sul nemico non si esaurisce più',
   dodgeCrit: 'Dopo una schivata il colpo successivo è sempre critico',
   overhealShield: 'Le cure in eccesso diventano scudo',
-  corruptShadow: "Le skill d'Ombra costano vita invece di Luce",
+  corruptShadow: 'Le skill di danno costano vita invece di Luce',
   eclipse: 'Eclissi: danni ×2, ma nessuna cura',
   sanctity: 'Santità: sopravvivi a un colpo mortale ogni 30 s',
   execute: 'Danno doppio ai nemici sotto il 25% della vita',

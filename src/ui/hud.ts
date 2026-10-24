@@ -5,7 +5,7 @@ import type { GameState } from '../core/state';
 import { KILLS_PER_STAGE, elementalDamage, stateStats, xpToNext, type Stats } from '../core/stats';
 import { createCombatPanel } from './combat';
 import { createGearPanel, type GearActions } from './gear';
-import { createSkillPanel, type SkillActions } from './skills';
+import { createSkillPanel } from './skills';
 import { createStarPanel, type StarActions } from './stars';
 import { createViaPanel, type ViaActions } from './vie';
 import { createLumiPanel, type LumiActions } from './lumi';
@@ -21,7 +21,7 @@ import { zoneName } from '../data/enemies';
 import { UPGRADES, type UpgradeId } from '../data/upgrades';
 import { openGuide } from './guide';
 
-export interface HudActions extends GearActions, SkillActions, StarActions, ViaActions, WorldActions, AscensionActions, LumiActions {
+export interface HudActions extends GearActions, StarActions, ViaActions, WorldActions, AscensionActions, LumiActions {
   buy(id: UpgradeId): void;
 }
 
@@ -194,7 +194,7 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
   }
 
   const gear = createGearPanel(el('gear'), actions);
-  const skills = createSkillPanel(el('skills'), actions);
+  const skills = createSkillPanel(el('skills'));
   const stars = createStarPanel(el('stars'), actions);
   const combat = createCombatPanel(el('combat'));
   const vie = createViaPanel(el('vie'), actions);

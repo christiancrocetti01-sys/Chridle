@@ -3,6 +3,7 @@ import { discover } from './collection';
 import { takeItem } from './autoequip';
 import { checkAchievements } from './achievements';
 import { checkLumi } from './lumi';
+import { autoEssence } from './auto';
 import { offlineEfficiency } from './ascension';
 import { gainXp, step, type CombatEvent } from './combat';
 import { rollItem, rollRarity, salvageValue } from './items';
@@ -44,8 +45,9 @@ export function applyOffline(state: GameState, seconds: number): OfflineReport |
   sim.stage.auto = false;
   sim.stage.kills = Math.min(sim.stage.kills, KILLS_PER_STAGE - 1);
   const ev: CombatEvent[] = [];
-  const before = { gold: sim.gold, essence: sim.essence, kills: sim.totals.kills };
+  const before = { gold: sim.gold, kills: sim.totals.kills };
   let xp = 0;
+  let essence = 0;
   let drops = 0;
   for (let i = 0; i < SAMPLE_TICKS; i++) {
     const n = ev.length;
@@ -53,7 +55,7 @@ export function applyOffline(state: GameState, seconds: number): OfflineReport |
     // il campione non deve salire di livello o di stage: si conta l'esperienza e si annulla il resto
     for (let j = n; j < ev.length; j++) {
       const e = ev[j];
-      if (e.type === 'kill') xp += e.xp;
+      if (e.type === 'kill') { xp += e.xp; essence += e.essence; }
       if (e.type === 'drop') drops++;
     }
     sim.stage.auto = false;
@@ -64,7 +66,8 @@ export function applyOffline(state: GameState, seconds: number): OfflineReport |
     seconds, efficiency: eff, kills,
     gold: (sim.gold - before.gold) * factor,
     xp: xp * factor,
-    essence: (sim.essence - before.essence) * factor,
+    // dalle uccisioni: nel campione l'Essenza si spende da sola
+    essence: essence * factor,
     fragments: 0,
     keys: state.stage.current >= ELITE_FROM_STAGE ? Math.floor(kills * ELITE_CHANCE * ELITE_KEY_CHANCE) : 0,
     levels: 0,
@@ -99,6 +102,7 @@ export function applyOffline(state: GameState, seconds: number): OfflineReport |
   report.levels = state.hero.level - lv;
   checkAchievements(state);
   checkLumi(state);
+  autoEssence(state);
   return report;
 }
 

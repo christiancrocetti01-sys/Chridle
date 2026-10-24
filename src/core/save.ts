@@ -1,6 +1,7 @@
 import { cleanStars } from './constellations';
 import { newGear } from './items';
-import { newRunes } from './runes';
+import { levelCost, newRunes, type RuneState } from './runes';
+import { RUNE_UNLOCK_BASE, RUNE_UNLOCK_GROWTH } from '../data/runes';
 import { newSkills } from './skills';
 import { newVie } from './vie';
 import { newAscension } from './ascension';
@@ -102,7 +103,22 @@ export const migrations: Record<number, Migration> = {
   },
   // v19 → v20: endgame (Abisso, Paragon, Rinascita Solare)
   19: (d) => ({ ...d, abyss: { best: 0 }, paragon: newParagon(), rebirth: newRebirth() }),
+  // v20 → v21: 6 skill fisse con livelli e rune automatiche: l'Essenza spesa nelle rune torna indietro
+  20: (d) => {
+    const hero = d.hero as { level: number };
+    const runes = d.runes as RuneState;
+    return { ...d, essence: (d.essence as number) + runeRefund(runes), runes: newRunes(), skills: newSkills(hero.level) };
+  },
 };
+
+/** Essenza spesa per sbloccare e potenziare le rune. */
+export function runeRefund(runes: RuneState): number {
+  const levels = Object.values(runes.levels);
+  let total = 0;
+  for (let k = 0; k < levels.length; k++) total += Math.ceil(RUNE_UNLOCK_BASE * Math.pow(RUNE_UNLOCK_GROWTH, k));
+  for (const lv of levels) for (let l = 1; l < (lv ?? 1); l++) total += levelCost(l);
+  return total;
+}
 
 export function serialize(state: GameState): string {
   return JSON.stringify(state);

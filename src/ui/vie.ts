@@ -4,7 +4,6 @@ import {
   CORRUPTION_NAMES, CORRUPTION_THRESHOLD, CORRUPT_DMG, CORRUPT_TANK, PURE_DMG, PURE_TANK, corruptionState,
 } from '../data/corruption';
 import { STAT_LABELS } from '../data/items';
-import { SKILLS } from '../data/skills';
 import { RULE_TEXT } from '../data/uniques';
 import { SECOND_VIA_SHARE, VIA_LEVEL, VIE, type ViaDef, type ViaId } from '../data/vie';
 import { formatStat } from './gear';
@@ -35,7 +34,7 @@ function corruptionLine(c: number): string {
     + `<br><span class="muted">Regole a ±${CORRUPTION_THRESHOLD} e ±100.</span></p>`;
 }
 
-/** Sezione Via della scheda Build: le 5 Vie con statistiche, regola e skill proprie. */
+/** Sezione Via della scheda Build: le 5 Vie con statistiche e regola. */
 export function createViaPanel(root: HTMLElement, actions: ViaActions) {
   let key = '';
   root.addEventListener('click', (ev) => {
@@ -55,13 +54,12 @@ export function createViaPanel(root: HTMLElement, actions: ViaActions) {
       const open = state.hero.level >= VIA_LEVEL;
       const head = `<h2 class="section">Via ${v.main ? `<span class="muted">· ${VIE.find((x) => x.id === v.main)!.name}</span>` : ''}</h2>${corruptionLine(c)}`;
       if (!open) {
-        root.innerHTML = `${head}<p class="muted">Al livello ${VIA_LEVEL} scegli una Via: statistiche, una meccanica propria e 2 skill esclusive.</p>`;
+        root.innerHTML = `${head}<p class="muted">Al livello ${VIA_LEVEL} scegli una Via: statistiche e una meccanica propria.</p>`;
         return;
       }
       const cards = VIE.map((d) => {
         const main = v.main === d.id;
         const second = v.second === d.id;
-        const skills = SKILLS.filter((s) => s.via === d.id).map((s) => `${s.name} <span class="muted">(Lv ${s.level})</span>`).join(', ');
         const btns = [
           main ? '<span class="via-tag">Via principale</span>'
             : `<button class="btn sm" data-via="${d.id}">${v.main ? 'Cambia in questa' : 'Scegli'}</button>`,
@@ -74,7 +72,6 @@ export function createViaPanel(root: HTMLElement, actions: ViaActions) {
           <div class="skill-info muted">${d.fantasy} Ramo affine: ${BRANCH_TEXT[d.branch]}.</div>
           <div class="skill-info">${modsText(d, second ? SECOND_VIA_SHARE : 1)}</div>
           <div class="skill-info rule">${RULE_TEXT[d.rule]}</div>
-          <div class="skill-info">Skill: ${skills}</div>
         </div>`;
       }).join('');
       const note = v.secondUnlocked ? `<p class="muted">Seconda Via: ${Math.round(SECOND_VIA_SHARE * 100)}% delle statistiche, regola e skill intere.</p>`

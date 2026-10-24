@@ -1,11 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { step, type CombatEvent } from '../src/core/combat';
 import { deserialize, serialize } from '../src/core/save';
-import { canCast, newSkills, setSlot } from '../src/core/skills';
+import { newSkills } from '../src/core/skills';
 import { newGame } from '../src/core/state';
 import { stateStats } from '../src/core/stats';
 import { activeVie, chooseSecondVia, chooseVia } from '../src/core/vie';
-import { SKILLS } from '../src/data/skills';
 import { VIA_LEVEL, VIE } from '../src/data/vie';
 
 function hero(level = VIA_LEVEL) {
@@ -32,20 +31,6 @@ describe('Vie', () => {
     expect(chooseVia(s, 'paladino')).toBe(true);
     expect(chooseVia(s, 'lama')).toBe(true);
     expect(s.vie.main).toBe('lama');
-  });
-
-  it('ogni Via ha 2 skill proprie, disponibili solo con quella Via', () => {
-    for (const v of VIE) expect(SKILLS.filter((d) => d.via === v.id)).toHaveLength(2);
-    const s = hero(30);
-    expect(setSlot(s, 0, 'martelloSacro')).toBe(false);
-    chooseVia(s, 'paladino');
-    expect(setSlot(s, 0, 'martelloSacro')).toBe(true);
-    s.hero.light = 100;
-    expect(canCast(s, stateStats(s), 'martelloSacro')).toBe(true);
-    // cambiando Via le skill della vecchia escono dagli slot
-    chooseVia(s, 'lama');
-    expect(s.skills.slots).not.toContain('martelloSacro');
-    expect(s.skills.slots).toContain('danzaLame'); // va nello slot liberato
   });
 
   it('le statistiche della Via si applicano, la seconda a metà', () => {

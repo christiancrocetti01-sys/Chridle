@@ -2,9 +2,7 @@ import './style.css';
 import { MAX_TICKS_PER_FRAME, TICK_MS, stepAccumulator } from './core/loop';
 import { loadGame, saveGame, type StorageLike } from './core/save';
 import { buyUpgrade, changeGear, step, type CombatEvent } from './core/combat';
-import { levelRune, socketRune, unlockRune } from './core/runes';
 import { refundStar, resetStars, takeStar } from './core/constellations';
-import { moveSlot, setSlot } from './core/skills';
 import { chooseSecondVia, chooseVia } from './core/vie';
 import { levelLumo, setActiveLumo } from './core/lumi';
 import { enterAbyss, enterDungeon, enterRaid, enterTower, leaveMode } from './core/modes';
@@ -41,11 +39,6 @@ function main() {
     upgrade: (uid, i) => changeGear(state, () => upgradeAffix(state, uid, i)),
     transfer: (uid, i, d, j) => changeGear(state, () => transferAffix(state, uid, i, d, j)),
     fuse: (uids) => fuseItems(state, uids),
-    setSkillSlot: (slot, id) => setSlot(state, slot, id),
-    moveSkillSlot: (slot, dir) => moveSlot(state, slot, dir),
-    unlockRune: (id) => unlockRune(state, id),
-    levelRune: (id) => levelRune(state, id),
-    socketRune: (skill, i, id) => socketRune(state, skill, i, id),
     takeStar: (id) => takeStar(state, id),
     refundStar: (id) => refundStar(state, id),
     resetStars: () => resetStars(state),

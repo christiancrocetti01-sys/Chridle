@@ -63,10 +63,9 @@ describe('Purezza e Corruzione', () => {
     expect(stateStats(p).corruption).toBe(-30);
   });
 
-  it('Corrotto (≥50): le skill d\'Ombra costano vita invece di Luce', () => {
-    const def = SKILLS.find((k) => k.tags.includes('ombra'))!;
+  it('Corrotto (≥50): le skill di danno costano vita invece di Luce', () => {
+    const def = SKILLS.find((k) => k.id === 'giudizio')!;
     const s = withCorruption(CORRUPTION_THRESHOLD, 60);
-    chooseVia(s, def.via!);
     s.skills = newSkills(60);
     const hero = stateStats(s);
     expect(hero.rules.has('corruptShadow')).toBe(true);

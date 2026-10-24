@@ -7,7 +7,7 @@ import { MAX_SKILL_CDR, stateStats } from '../src/core/stats';
 import { AFFIXES, STAT_LABELS, type StatKey } from '../src/data/items';
 import { SKILL_TAGS, skillDef } from '../src/data/skills';
 
-function fighting(level = 30) {
+function fighting(level = 50) {
   const s = newGame(0, 3);
   s.hero.level = level;
   s.skills = newSkills(level);
@@ -64,10 +64,10 @@ describe('sinergie per tag', () => {
     const s = fighting();
     const def = skillDef('giudizio')!;
     wear(s, 'anello1', [['sacroCdr', 0.1]]);
-    expect(cooldownTicks(s, stateStats(s), def)).toBe(Math.round(120 * 0.9));
+    expect(cooldownTicks(s, stateStats(s), def)).toBe(Math.round(def.cooldown * 10 * 0.9));
     cast(s, 'giudizio');
-    expect(s.skills.cooldowns.giudizio).toBe(Math.round(120 * 0.9));
+    expect(s.skills.cooldowns.giudizio).toBe(Math.round(def.cooldown * 10 * 0.9));
     wear(s, 'anello2', [['sacroCdr', 5]]);
-    expect(cooldownTicks(s, stateStats(s), def)).toBe(Math.round(120 * (1 - MAX_SKILL_CDR)));
+    expect(cooldownTicks(s, stateStats(s), def)).toBe(Math.round(def.cooldown * 10 * (1 - MAX_SKILL_CDR)));
   });
 });

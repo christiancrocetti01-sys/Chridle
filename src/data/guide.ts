@@ -3,7 +3,7 @@ export interface GuideSection { id: string; title: string; text: string[] }
 
 export const GUIDE_INTRO =
   "Il Sole è stato divorato dall'Eclissi. Tu sei il guerriero della luce: combatti da solo, anche a gioco chiuso. " +
-  'Il tuo compito è scegliere oggetti, skill e build sempre più forti.';
+  'Il guerriero fa quasi tutto da solo: tu scegli la Via, quando ascendere e le modalità.';
 
 export const GUIDE: GuideSection[] = [
   {
@@ -37,9 +37,9 @@ export const GUIDE: GuideSection[] = [
   {
     id: 'skill', title: 'Skill e rune', text: [
       'Colpendo accumuli <b>Luce</b> (max 100); le skill la spendono e partono da sole.',
-      "Hai 4 slot: l'ordine è la priorità. Cure e scudi aspettano il momento giusto (vita bassa).",
-      'Nuove skill si sbloccano salendo di livello (Build › Skill).',
-      'Le <b>rune</b> si comprano con l\'Essenza e si incastonano nelle skill (2 per skill): le modificano. Si possono potenziare all\'infinito.',
+      '6 skill fisse, sbloccate salendo di livello: Colpo Sacro (1), Preghiera (5), Squarcio (12), Egida (20), Lama Rapida (30), Giudizio (45). Cure e scudi aspettano il momento giusto (vita bassa).',
+      'Le esplosioni usano da sole l\'elemento a cui il nemico è più debole.',
+      'Tutto automatico: l\'<b>Essenza</b> compra sempre la cosa più economica tra livelli delle skill (+10% ciascuno), <b>rune</b> (2 per skill, scelte e incastonate da sole) e livelli del Lumo attivo.',
       'I tag (Sacro, Fuoco, Nel tempo…) contano: alcuni affissi potenziano tutte le skill con un certo tag.',
     ],
   },
@@ -53,7 +53,7 @@ export const GUIDE: GuideSection[] = [
   {
     id: 'vie', title: 'Vie', text: [
       'Al <b>livello 10</b> scegli una Via (Build › Via): Paladino, Lama dell\'Alba, Inquisitore, Custode Stellare o Eclissiarca.',
-      'Ogni Via dà statistiche, una regola speciale, 2 skill esclusive e una regione delle Stelle. Cambiarla è gratis.',
+      'Ogni Via dà statistiche, una regola speciale e una regione delle Stelle. Cambiarla è gratis.',
       "Con il potenziamento d'Ascensione «Doppia Via» ne aggiungi una seconda.",
       '<b>Purezza e Corruzione</b>: alcuni oggetti e Vie spostano l\'ago. Corruzione = più danni, meno difesa e cure; Purezza = il contrario. Agli estremi si sbloccano effetti speciali.',
     ],
@@ -89,7 +89,7 @@ export const GUIDE: GuideSection[] = [
       'A gioco chiuso il guerriero continua (al 75%, di più con «Veglia Eterna»): al rientro trovi il riepilogo.',
       'Il gioco salva da solo nel browser. Il ♪ in alto accende i suoni.',
       'I pallini rossi sulle schede indicano qualcosa da fare (punti liberi, Ascensione pronta…).',
-      'Bloccato? Prova, in ordine: punti nelle Stelle → rune → Potenziamenti → Torre → Ascensione.',
+      'Bloccato? Prova, in ordine: punti nelle Stelle → Potenziamenti → Torre → Ascensione.',
     ],
   },
 ];

@@ -3,12 +3,17 @@
 > File di passaggio di consegne tra sessioni. Aggiornato con `/handoff`.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
-**Ultimo aggiornamento:** 2026-10-24 (handoff: stile "testo puro" B/N e guida; tutto su `main`)
+**Ultimo aggiornamento:** 2026-10-24 (Fase 8, passi 1-2)
 **Fase corrente:** **Fase 8 — Tutto automatico** (ROADMAP). Grafica finale in pausa.
-**Prossimo passo:** passo 2, le 6 skill fisse con livelli automatici (proporre piano e chiedere conferma).
-- Passo 1 fatto: `takeItem` in `src/core/autoequip.ts` (drop, premi delle modalità, offline); `absorbInventory` al caricamento
-  svuota gli inventari vecchi. `gear.inventory` resta nello stato ma è sempre vuoto; `autoSalvage` non si usa più.
-  Pannello Oggetti senza inventario (`src/ui/gear.ts`), il crafting manuale resta sugli oggetti indossati fino al passo 3.
+**Prossimo passo:** passo 3, crafting automatico + spese permanenti automatiche (oro, Paragon, Ascensione, Lumo attivo?).
+- Passo 1: `takeItem` in `src/core/autoequip.ts` (drop, premi modalità, offline); `absorbInventory` al caricamento.
+  `gear.inventory` sempre vuoto, `autoSalvage` inutilizzato. Crafting manuale ancora sugli oggetti indossati.
+- Passo 2 (salvataggio **v21**): `SKILLS` = 6 in ordine di priorità (`src/data/skills.ts`), `skills.levels`,
+  `bestElement` in `src/core/skills.ts`; `src/core/auto.ts` (`autoEssence` ogni secondo in `step` e a fine offline,
+  `RUNE_PLAN` 2 rune per skill, `RUNE_ORDER`). Perk `slot` = +5 livelli a tutte le skill. Corrotto: skill di danno pagate
+  con la vita. Migrazione v21 rimborsa l'Essenza delle rune. UI Skill/Rune in sola lettura.
+- Collaudo 8 h dopo il passo 2: più veloce di prima (Scintille ~200-300 contro ~80-160, Torre ~52 contro ~37):
+  conta la spesa "intelligente" dell'Essenza, non i livelli delle skill. Ribilanciare al passo 5 (240 h).
 **Online:** `main` = branch (466dbd3 + handoff).
 
 ## Questa sessione (2026-10-24)
@@ -53,10 +58,10 @@ Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` (fast-forward) quand
 - Lotto 5: 30 unici, 8 set, 7 regole nuove (`src/data/uniques.ts`, costanti in fondo; logica in `combat.ts`/`stats.ts`).
 - Endgame: `src/data/endgame.ts`, `src/core/endgame.ts` (Paragon, Rinascita), Abisso in `src/core/modes.ts`/`enemies.ts`;
   UI: Abisso in scheda Mondo, Rinascita e Paragon in scheda Ascensione. Imprese Abissale/Paragone/Rinato.
-- Salvataggio: **v20** (v20 `abyss`/`paragon`/`rebirth`), prima **v19** (v11 `vie`, v12 nemico + `keys`/`mode`/`tower`, v13 `ascension`, v14 campi opzionali rune, v15 `hero.sanctity`, v16 `codex`, v17 `collection`, v18 `achievements`, v19 `lumi`).
+- Salvataggio: **v21** (v21 skill fisse + rimborso rune, v20 `abyss`/`paragon`/`rebirth`), prima **v19** (v11 `vie`, v12 nemico + `keys`/`mode`/`tower`, v13 `ascension`, v14 campi opzionali rune, v15 `hero.sanctity`, v16 `codex`, v17 `collection`, v18 `achievements`, v19 `lumi`).
 
 ## Test
-- `npm test`: **221 verdi** (22 file), `npm run build` ok (handoff 2026-10-24, sera, dopo lo stile testo puro).
+- `npm test`: **223 verdi** (22 file), `npm run build` ok (dopo il passo 2 della Fase 8).
 - Collaudo: `npm run collaudo -- --ore 8 [--seed N] [--profilo id]` (`scripts/collaudo.ts`, un processo per profilo:
   5 Vie + uno con sessioni offline). 8 h: nessun NaN/crash/salvataggio rotto, ~30 s. Rilanciarlo dopo ogni sistema nuovo.
   Attenzione: nelle catene di comandi non fidarsi di `npm test | grep` (esce 0 anche se fallisce).

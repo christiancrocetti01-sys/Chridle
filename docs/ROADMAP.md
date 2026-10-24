@@ -79,7 +79,7 @@ Spuntare `[x]` man mano. Le fasi possono essere ridefinite: è un documento vivo
 ## Fase 8 — Tutto automatico (decisione utente, 2026-10-24)
 Manuali restano solo: scelta della Via, quando ascendere/rinascere, modalità (Dungeon/Torre/Raid/Abisso).
 - [x] Equipaggiamento automatico: ogni drop si indossa se alza la potenza, il resto (e il pezzo tolto) → Frammenti; niente inventario
-- [ ] 6 skill fisse (attacco forte, area, colpo nel tempo, cura, scudo, velocità) sbloccate a livello, livelli automatici con la Luce; rune passive automatiche
+- [x] 6 skill fisse (Colpo Sacro, Preghiera, Squarcio, Egida, Lama Rapida, Giudizio), elemento = debolezza del nemico; Essenza spesa da sola (livelli skill, 8 rune in piano, Lumo attivo)
 - [ ] Crafting automatico (tier e fusione sull'equipaggiamento indossato) e spese permanenti automatiche (oro, Paragon, Ascensione)
 - [ ] Albero (Stelle) automatico per priorità finché non è completo
 - [ ] UI in sola lettura, guida, salvataggio v21 con migrazione, collaudo 8 h / 240 h e ribilanciamento
