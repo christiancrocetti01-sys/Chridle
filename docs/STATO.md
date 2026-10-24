@@ -4,9 +4,12 @@
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
 **Ultimo aggiornamento:** 2026-10-24 (handoff: UI divisa in schede, equip automatico, inventario senza limite; tutto su `main`)
-**Fase corrente:** lato tecnico/contenuti **completato**. Prossima: **grafica finale** (decisione utente).
-**Prossimo passo:** chiedere all'utente se la nuova struttura va bene dal telefono (lui vedeva la versione vecchia in
-cache: consigliato `?v=3` o Ctrl+F5). Poi proporre il piano della grafica (palette, font, schede lunghe) in `src/style.css`.
+**Fase corrente:** **grafica finale** (piano approvato dall'utente, un passo alla volta).
+Piano: 1) palette B/N ✅ (colore solo a rarità, barre vita, elementi, avvisi; token in `:root` di `src/style.css`);
+2) inventario a griglia di icone ✅ (`.inv-item` in `src/ui/gear.ts`); 3) liste lunghe a una riga con dettagli al tocco
+(Skill › tutte, Rune, Imprese, Bestiario, Collezione) e bloccati riassunti in una riga "N da sbloccare · prossima: …";
+4) colorare gli elementi (Fuoco/Gelo/Fulmine/Sacro…) nei testi.
+**Prossimo passo:** passo 3, partendo da Skill › "Tutte le skill" (`src/ui/skills.ts`), screenshot e conferma.
 Valutare con l'utente: smantellamento automatico "fino a Comune" di default (inventario ora illimitato → salvataggio grande).
 **Online:** `main` = branch (d3790c8 + handoff).
 
