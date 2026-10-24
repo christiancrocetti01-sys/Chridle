@@ -1,7 +1,7 @@
 import { HEAL_BELOW, LIGHT_PER_HIT, LIGHT_PER_SECOND, MAX_LIGHT, SHIELD_BELOW, SKILLS, SKILL_SLOTS, skillDef, type SkillDef } from '../data/skills';
 import { TICK_RATE } from './loop';
 import type { GameState } from './state';
-import type { Stats } from './stats';
+import { MAX_SKILL_CDR, type Stats } from './stats';
 import { RUNE_EXECUTE_HP, RUNE_HASTE_SECONDS, RUNE_SHADOW_HP_COST, reduction, type RuneId } from '../data/runes';
 import { nextRandom } from './rng';
 import { isDamageSkill, skillRune } from './runes';
@@ -50,10 +50,18 @@ export function tickSkills(state: GameState) {
   for (const id in cd) if (cd[id] > 0) cd[id]--;
 }
 
-/** Costo in Luce e ricarica (in tick) con le rune Parsimonia e Rapidità. */
+/** Sinergie per tag: i bonus degli oggetti per ogni tag della skill si sommano. */
+export const tagPower = (hero: Stats, def: SkillDef) => def.tags.reduce((sum, t) => sum + hero.skillPower[t], 0);
+export const tagCdr = (hero: Stats, def: SkillDef) => Math.min(MAX_SKILL_CDR, def.tags.reduce((sum, t) => sum + hero.skillCdr[t], 0));
+
+/** Valore dell'effetto con la runa Potenza e le sinergie per tag (senza i bonus a condizione: Ombra, Esecuzione). */
+export const skillValue = (state: GameState, hero: Stats, def: SkillDef) =>
+  def.effect.value * (1 + skillRune(state, def.id, 'potenza')) * (1 + tagPower(hero, def));
+
+/** Costo in Luce e ricarica (in tick) con le rune Parsimonia e Rapidità e la riduzione ricarica per tag. */
 export const lightCost = (state: GameState, def: SkillDef) => def.light * (1 - reduction(skillRune(state, def.id, 'parsimonia')));
-export const cooldownTicks = (state: GameState, def: SkillDef) =>
-  Math.round(def.cooldown * TICK_RATE * (1 - reduction(skillRune(state, def.id, 'rapidita'))));
+export const cooldownTicks = (state: GameState, hero: Stats, def: SkillDef) =>
+  Math.round(def.cooldown * TICK_RATE * (1 - reduction(skillRune(state, def.id, 'rapidita'))) * (1 - tagCdr(hero, def)));
 
 export const canCast = (state: GameState, id: string) => {
   const def = skillDef(id);
@@ -75,7 +83,7 @@ function perform(state: GameState, hero: Stats, def: SkillDef): number | null {
   const enemy = state.enemy;
   const damage = isDamageSkill(def);
   let effect = def.effect;
-  let value = effect.value * (1 + r('potenza'));
+  let value = skillValue(state, hero, def);
   if (damage && r('ombra')) {
     if (effect.kind === 'burst') effect = { ...effect, element: 'shadow' };
     value *= 1 + r('ombra');
@@ -103,7 +111,7 @@ function castSkill(state: GameState, hero: Stats, def: SkillDef, events: { push(
   const amount = perform(state, hero, def);
   if (amount === null) return false;
   if (!free) state.hero.light -= lightCost(state, def);
-  state.skills.cooldowns[def.id] = cooldownTicks(state, def);
+  state.skills.cooldowns[def.id] = cooldownTicks(state, hero, def);
   events.push({ type: 'skill', id: def.id, name: def.name, amount });
   // si tira l'Eco solo se la runa c'è: senza, la sequenza dell'RNG non cambia
   const eco = skillRune(state, def.id, 'eco');

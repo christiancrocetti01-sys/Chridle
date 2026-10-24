@@ -1,7 +1,8 @@
 import { TICK_RATE } from '../core/loop';
 import { formatNum } from '../core/format';
 import { canSocket, levelCost, runeValue, socketsOf, unlockCost } from '../core/runes';
-import { cooldownTicks, lightCost } from '../core/skills';
+import { cooldownTicks, lightCost, skillValue } from '../core/skills';
+import { stateStats, type Stats } from '../core/stats';
 import { RUNES, runeDef, type RuneId } from '../data/runes';
 import type { GameState } from '../core/state';
 import { MAX_LIGHT, SKILLS, SKILL_TAG_LABELS, skillDef, type SkillDef } from '../data/skills';
@@ -15,10 +16,10 @@ export interface SkillActions {
   socketRune(skill: string, i: number, id: RuneId | null): void;
 }
 
-/** Effetto, costo e ricarica (già ridotti dalle rune incastonate). */
-const info = (state: GameState, d: SkillDef) => {
-  const sec = cooldownTicks(state, d) / TICK_RATE;
-  return `${describeEffect(d.effect, d.effect.value)} <span class="muted">· ${Math.round(lightCost(state, d))} Luce · ricarica ${+sec.toFixed(1)} s · ${d.tags.map((t) => SKILL_TAG_LABELS[t]).join(', ')}</span>`;
+/** Effetto, costo e ricarica (con le rune incastonate e le sinergie per tag degli oggetti). */
+const info = (state: GameState, hero: Stats, d: SkillDef) => {
+  const sec = cooldownTicks(state, hero, d) / TICK_RATE;
+  return `${describeEffect(d.effect, skillValue(state, hero, d))} <span class="muted">· ${Math.round(lightCost(state, d))} Luce · ricarica ${+sec.toFixed(1)} s · ${d.tags.map((t) => SKILL_TAG_LABELS[t]).join(', ')}</span>`;
 };
 
 /** Le 2 incastonature di una skill: una tendina con le rune sbloccate compatibili. */
@@ -74,7 +75,8 @@ export function createSkillPanel(root: HTMLElement, actions: SkillActions) {
       refs.lightbar.style.width = `${(state.hero.light / MAX_LIGHT) * 100}%`;
 
       refs.ess.textContent = formatNum(state.essence);
-      const key = JSON.stringify([slots, state.hero.level, state.runes]);
+      const hero = stateStats(state);
+      const key = JSON.stringify([slots, state.hero.level, state.runes, hero.skillPower, hero.skillCdr]);
       if (key !== lastKey) {
         lastKey = key;
         const n = slots.length;
@@ -88,7 +90,7 @@ export function createSkillPanel(root: HTMLElement, actions: SkillActions) {
                 <button class="btn sm" data-act="down" data-slot="${i}"${i < n - 1 ? '' : ' disabled'}>↓</button>
                 <button class="btn sm" data-act="clear" data-slot="${i}">✕</button></span>` : ''}
             </div>
-            ${d ? `<div class="skill-info">${info(state, d)}</div>${socketsHtml(state, d.id)}<div class="bar cd"><div class="fill" data-cd="${i}"></div></div>` : ''}
+            ${d ? `<div class="skill-info">${info(state, hero, d)}</div>${socketsHtml(state, d.id)}<div class="bar cd"><div class="fill" data-cd="${i}"></div></div>` : ''}
           </div>`;
         }).join('');
         refs.list.innerHTML = SKILLS.map((d) => {
@@ -100,7 +102,7 @@ export function createSkillPanel(root: HTMLElement, actions: SkillActions) {
                 .join('')}</span>`;
           return `<div class="skill-row${locked ? ' locked' : ''}">
             <div class="skill-head"><b>${d.name}</b>${put}</div>
-            <div class="skill-info">${info(state, d)}</div>
+            <div class="skill-info">${info(state, hero, d)}</div>
           </div>`;
         }).join('');
       }
@@ -128,7 +130,7 @@ export function createSkillPanel(root: HTMLElement, actions: SkillActions) {
         const d = id ? skillDef(id) : undefined;
         if (!bar || !d) return;
         const left = cooldowns[d.id] ?? 0;
-        bar.style.width = `${Math.max(0, 1 - left / cooldownTicks(state, d)) * 100}%`;
+        bar.style.width = `${Math.max(0, 1 - left / cooldownTicks(state, hero, d)) * 100}%`;
         bar.classList.toggle('ready', left <= 0 && state.hero.light >= lightCost(state, d));
       });
     },

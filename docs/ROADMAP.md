@@ -36,7 +36,7 @@ Spuntare `[x]` man mano. Le fasi possono essere ridefinite: è un documento vivo
 ## Fase 3 — Skill e build
 - [x] Luce e skill attive (4 slot con priorità, 8 skill sbloccate a livello)
 - [x] Rune (Essenza di Luce): 12 rune con livelli, 2 incastonature per skill
-- [ ] Sinergie per tag (oggetti/regole "le skill con tag X ottengono Y")
+- [x] Sinergie per tag (oggetti/regole "le skill con tag X ottengono Y")
 - [ ] Albero delle abilità / perk
 - [ ] Classi e sottoclassi
 

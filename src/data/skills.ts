@@ -11,7 +11,8 @@ export const SHIELD_BELOW = 0.1;
 /** Slot delle skill attive; l'ordine degli slot è la priorità di lancio. */
 export const SKILL_SLOTS = 4;
 
-export type SkillTag = 'sacro' | 'cura' | 'velocita' | 'fuoco' | 'tempo' | 'scudo' | 'fisico' | 'fulmine';
+export const SKILL_TAGS = ['sacro', 'cura', 'velocita', 'fuoco', 'tempo', 'scudo', 'fisico', 'fulmine'] as const;
+export type SkillTag = (typeof SKILL_TAGS)[number];
 
 export const SKILL_TAG_LABELS: Record<SkillTag, string> = {
   sacro: 'Sacro', cura: 'Cura', velocita: 'Velocità', fuoco: 'Fuoco', tempo: 'Nel tempo', scudo: 'Scudo',

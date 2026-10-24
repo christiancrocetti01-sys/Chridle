@@ -1,3 +1,5 @@
+import { SKILL_TAGS, SKILL_TAG_LABELS, type SkillTag } from './skills';
+
 /** Statistiche che gli oggetti possono modificare. I "Pct" e le probabilità sono frazioni (0.1 = +10%). */
 export type StatKey =
   | 'atk' | 'def' | 'hp'
@@ -5,7 +7,8 @@ export type StatKey =
   | 'speedPct' | 'crit' | 'critDmg' | 'regenPct'
   | Element | `${Element}Pct` | 'elemPct'
   | 'poison' | 'bleed' | 'lifeSteal' | 'dodge' | 'thorns'
-  | 'goldPct' | 'xpPct' | 'magicFind' | 'bossDmg';
+  | 'goldPct' | 'xpPct' | 'magicFind' | 'bossDmg'
+  | `${SkillTag}Skill` | `${SkillTag}Cdr`;
 
 /** Elementi: danno aggiunto a ogni colpo, non ridotto dalla difesa. */
 export const ELEMENTS = ['fire', 'cold', 'lightning', 'holy', 'shadow'] as const;
@@ -20,6 +23,10 @@ export const STAT_LABELS: Record<StatKey, string> = {
   elemPct: 'Danno elementale',
   poison: 'Veleno al secondo', bleed: 'Sanguinamento (del danno fisico)', lifeSteal: 'Rubavita', dodge: 'Schivata', thorns: 'Danno da spine',
   goldPct: 'Oro', xpPct: 'Esperienza', magicFind: 'Ritrovamento magico', bossDmg: 'Danno ai boss',
+  ...(Object.fromEntries(SKILL_TAGS.flatMap((t) => [
+    [`${t}Skill`, `Effetto delle skill ${SKILL_TAG_LABELS[t]}`],
+    [`${t}Cdr`, `Riduzione ricarica delle skill ${SKILL_TAG_LABELS[t]}`],
+  ])) as Record<`${SkillTag}Skill` | `${SkillTag}Cdr`, string>),
 };
 
 /** Statistiche piatte: crescono con il livello oggetto. Tutte le altre sono percentuali. */
@@ -125,6 +132,7 @@ const OFFENSE: T[] = ['arma', 'guanti', 'anello', 'amuleto'];
 const ARMOR: T[] = ['secondaria', 'elmo', 'armatura', 'guanti', 'stivali', 'cintura', 'mantello'];
 const BODY: T[] = ['elmo', 'armatura', 'cintura', 'mantello'];
 const FOCUS: T[] = ['arma', 'secondaria', 'anello', 'amuleto', 'reliquia'];
+const CDR: T[] = ['elmo', 'guanti', 'mantello', 'reliquia'];
 
 const affix = (id: string, name: string, tags: Tag[], types: T[], ...mods: [StatKey, number][]): AffixDef =>
   ({ id, name, tags, types, mods: mods.map(([stat, value]) => ({ stat, value })) });
@@ -190,6 +198,23 @@ export const AFFIXES: AffixDef[] = [
   affix('kingslayer', 'del Cacciatore di Re', ['critico'], ['arma', 'guanti'], ['bossDmg', 0.04], ['critDmg', 0.04]),
   affix('giant', 'del Gigante', ['vita'], ['armatura', 'cintura'], ['hp', 7], ['hpPct', 0.02]),
   affix('merchant', 'del Mercante', ['fortuna'], ['cintura', 'anello'], ['goldPct', 0.04], ['magicFind', 0.04]),
+  // sinergie per tag delle skill: effetto (danno, cura, scudo, velocità) e ricarica
+  affix('sacroSkill', 'del Salmo', ['sacro'], FOCUS, ['sacroSkill', 0.1]),
+  affix('curaSkill', 'del Guaritore', ['vita'], FOCUS, ['curaSkill', 0.1]),
+  affix('velocitaSkill', 'del Vento', ['velocita'], FOCUS, ['velocitaSkill', 0.1]),
+  affix('fuocoSkill', 'del Rogo', ['fuoco'], FOCUS, ['fuocoSkill', 0.1]),
+  affix('tempoSkill', 'della Clessidra', ['veleno', 'sanguinamento'], FOCUS, ['tempoSkill', 0.1]),
+  affix('scudoSkill', 'del Custode', ['difesa'], FOCUS, ['scudoSkill', 0.1]),
+  affix('fisicoSkill', 'del Gladiatore', ['fisico'], FOCUS, ['fisicoSkill', 0.1]),
+  affix('fulmineSkill', 'della Folgore', ['fulmine'], FOCUS, ['fulmineSkill', 0.1]),
+  affix('sacroCdr', 'del Vespro', ['sacro'], CDR, ['sacroCdr', 0.05]),
+  affix('curaCdr', 'della Fonte', ['vita'], CDR, ['curaCdr', 0.05]),
+  affix('velocitaCdr', 'del Ritmo', ['velocita'], CDR, ['velocitaCdr', 0.05]),
+  affix('fuocoCdr', 'della Fiamma Eterna', ['fuoco'], CDR, ['fuocoCdr', 0.05]),
+  affix('tempoCdr', "dell'Attesa", ['veleno', 'sanguinamento'], CDR, ['tempoCdr', 0.05]),
+  affix('scudoCdr', 'del Baluardo', ['difesa'], CDR, ['scudoCdr', 0.05]),
+  affix('fisicoCdr', 'del Veterano', ['fisico'], CDR, ['fisicoCdr', 0.05]),
+  affix('fulmineCdr', 'del Temporale', ['fulmine'], CDR, ['fulmineCdr', 0.05]),
 ];
 
 /** Quando scatta un effetto. */

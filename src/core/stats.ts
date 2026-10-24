@@ -3,6 +3,7 @@ import type { UpgradeId } from '../data/upgrades';
 import type { RuleId } from '../data/uniques';
 import { emptyMods, gearMods, gearRules, type GearState, type StatMods } from './items';
 import type { HeroState } from './state';
+import { SKILL_TAGS, type SkillTag } from '../data/skills';
 
 export interface Stats {
   maxHp: number;
@@ -32,12 +33,17 @@ export interface Stats {
   magicFind: number;
   /** Moltiplicatore di tutto il danno contro i boss. */
   bossMult: number;
+  /** Bonus all'effetto delle skill per tag (si sommano sui tag della skill). */
+  skillPower: Record<SkillTag, number>;
+  /** Riduzione della ricarica delle skill per tag (si somma, al massimo MAX_SKILL_CDR). */
+  skillCdr: Record<SkillTag, number>;
   /** Regole speciali attive (unici e set completi). */
   rules: Set<RuleId>;
 }
 
 export const MAX_CRIT_CHANCE = 0.75;
 export const MAX_DODGE = 0.5;
+export const MAX_SKILL_CDR = 0.6;
 
 /** Statistiche dell'eroe: base da livello, poi oggetti (piatti e %), poi potenziamenti. */
 export function heroStats(level: number, upgrades: Record<UpgradeId, number>, mods: StatMods = emptyMods()): Stats {
@@ -64,6 +70,8 @@ export function heroStats(level: number, upgrades: Record<UpgradeId, number>, mo
     xpMult: 1 + mods.xpPct,
     magicFind: mods.magicFind,
     bossMult: 1 + mods.bossDmg,
+    skillPower: Object.fromEntries(SKILL_TAGS.map((t) => [t, mods[`${t}Skill`]])) as Record<SkillTag, number>,
+    skillCdr: Object.fromEntries(SKILL_TAGS.map((t) => [t, mods[`${t}Cdr`]])) as Record<SkillTag, number>,
     rules: new Set(),
   };
 }
