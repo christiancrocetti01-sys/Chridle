@@ -6,6 +6,7 @@ import { newRunes, type RuneState } from './runes';
 import { newSkills, type SkillState } from './skills';
 import { heroStats } from './stats';
 import { newVie, type ViaState } from './vie';
+import { newAscension, type AscensionState } from './ascension';
 
 export interface EnemyState {
   templateId: string;
@@ -98,9 +99,10 @@ export interface GameState {
   mode: Mode;
   /** Torre dell'Alba: piano record. */
   tower: { best: number };
+  ascension: AscensionState;
 }
 
-export const STATE_VERSION = 12;
+export const STATE_VERSION = 13;
 
 export function newGame(now: number, seed = now >>> 0): GameState {
   const upgrades = { forza: 0, corazza: 0, rapidita: 0 };
@@ -127,5 +129,6 @@ export function newGame(now: number, seed = now >>> 0): GameState {
     keys: 0,
     mode: { kind: 'campaign' },
     tower: { best: 0 },
+    ascension: newAscension(),
   };
 }

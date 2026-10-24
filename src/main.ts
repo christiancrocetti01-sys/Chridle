@@ -7,6 +7,9 @@ import { refundStar, resetStars, takeStar } from './core/constellations';
 import { moveSlot, setSlot } from './core/skills';
 import { chooseSecondVia, chooseVia } from './core/vie';
 import { enterDungeon, enterRaid, enterTower, leaveMode } from './core/modes';
+import { ascend, buyPerk } from './core/ascension';
+import { applyOffline } from './core/offline';
+import { showOfflineReport } from './ui/ascension';
 import { fuseItems, rerollAffix, transferAffix, upgradeAffix } from './core/craft';
 import { equip, salvage, salvageUpTo, unequip } from './core/items';
 import { newGame } from './core/state';
@@ -52,9 +55,19 @@ function main() {
     enterTower: () => enterTower(state),
     enterRaid: () => enterRaid(state),
     leaveMode: () => leaveMode(state, []),
+    ascend: () => ascend(state),
+    buyPerk: (id) => changeGear(state, () => buyPerk(state, id)),
     chooseVia: (id) => changeGear(state, () => chooseVia(state, id)),
     chooseSecondVia: (id) => changeGear(state, () => chooseSecondVia(state, id)),
   });
+
+  // progresso offline: all'apertura e al ritorno sulla scheda del browser
+  const catchUp = () => {
+    const report = applyOffline(state, (Date.now() - state.lastSeen) / 1000);
+    state.lastSeen = Date.now();
+    if (report) showOfflineReport(report);
+  };
+  catchUp();
 
   let acc = 0;
   let last = performance.now();
@@ -72,7 +85,13 @@ function main() {
 
   const save = () => saveGame(storage, state, Date.now());
   setInterval(save, AUTOSAVE_MS);
-  document.addEventListener('visibilitychange', () => document.hidden && save());
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) save();
+    else {
+      catchUp();
+      last = performance.now();
+    }
+  });
   window.addEventListener('pagehide', save);
 }
 

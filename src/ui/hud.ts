@@ -8,12 +8,13 @@ import { createGearPanel, type GearActions } from './gear';
 import { createSkillPanel, type SkillActions } from './skills';
 import { createStarPanel, type StarActions } from './stars';
 import { createViaPanel, type ViaActions } from './vie';
+import { createAscensionPanel, type AscensionActions } from './ascension';
 import { createWorldPanel, modeTimer, type WorldActions } from './world';
 import { DUNGEON_WAVES } from '../data/modes';
 import { zoneName } from '../data/enemies';
 import { UPGRADES, type UpgradeId } from '../data/upgrades';
 
-export interface HudActions extends GearActions, SkillActions, StarActions, ViaActions, WorldActions {
+export interface HudActions extends GearActions, SkillActions, StarActions, ViaActions, WorldActions, AscensionActions {
   buy(id: UpgradeId): void;
 }
 
@@ -47,6 +48,7 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
       <button class="tab" data-tab="skills">Skill</button>
       <button class="tab" data-tab="stars">Stelle <span class="muted" data-k="starpts"></span></button>
       <button class="tab" data-tab="world">Mondo</button>
+      <button class="tab" data-tab="ascension">Ascensione <span class="muted" data-k="asc"></span></button>
     </nav>
     <div data-pane="hero">
     <div data-k="vie"></div>
@@ -66,6 +68,7 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
     <div data-pane="skills" hidden><div data-k="skills"></div></div>
     <div data-pane="stars" hidden><div data-k="stars"></div></div>
     <div data-pane="world" hidden><div data-k="world"></div></div>
+    <div data-pane="ascension" hidden><div data-k="ascension"></div></div>
 `;
 
   const el = (k: string) => root.querySelector<HTMLElement>(`[data-k="${k}"]`)!;
@@ -73,7 +76,7 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
     gold: el('gold'), level: el('level'), xptext: el('xptext'), xpbar: el('xpbar'),
     stage: el('stage'), best: el('best'), progress: el('progress'), stagebar: el('stagebar'),
     notice: el('notice'), stats: el('stats'), essence: el('essence'), starpts: el('starpts'),
-    keys: el('keys'), zone: el('zone'),
+    keys: el('keys'), zone: el('zone'), asc: el('asc'),
   };
 
   root.querySelectorAll<HTMLButtonElement>('[data-up]').forEach((b) =>
@@ -93,6 +96,7 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
   const combat = createCombatPanel(el('combat'));
   const vie = createViaPanel(el('vie'), actions);
   const world = createWorldPanel(el('world'), actions);
+  const ascension = createAscensionPanel(el('ascension'), actions);
 
   let frame = 0;
   return {
@@ -129,6 +133,8 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
 
       vie.update(state);
       world.update(state);
+      ascension.update(state);
+      refs.asc.textContent = state.ascension.scintille >= 1 ? `(${Math.floor(state.ascension.scintille)})` : '';
       refs.keys.textContent = String(state.keys);
       refs.zone.textContent = zoneName(state.stage.current);
       gear.update(state);

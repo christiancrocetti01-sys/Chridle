@@ -67,14 +67,14 @@ export const MECHANIC_TEXT: Record<Mechanic, string> = {
   enrage: 'si infuria col tempo (+50% attacco ogni 10 s)',
   shield: 'a metà vita si avvolge in uno scudo (25% della vita)',
   summon: 'evoca servitori che colpiscono ogni 3 s (40% del suo attacco)',
-  regen: 'si rigenera (1,5% della vita al secondo)',
+  regen: 'si rigenera (1% della vita al secondo)',
 };
 export const ENRAGE_EVERY_S = 10;
 export const ENRAGE_STEP = 0.5;
 export const BOSS_SHIELD = 0.25;
 export const SUMMON_EVERY_S = 3;
 export const SUMMON_ATK = 0.4;
-export const BOSS_REGEN = 0.015;
+export const BOSS_REGEN = 0.01;
 
 export interface ZoneDef {
   name: string;

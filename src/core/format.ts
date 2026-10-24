@@ -1,6 +1,7 @@
-const SUFFIXES = ['', 'K', 'M', 'B', 'T'];
+/** Suffissi fino ai decilioni (1e33), poi notazione esponenziale fino a 1e308. */
+const SUFFIXES = ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'Dc'];
 
-/** 999 → "999", 12345 → "12.3K". Oltre i trilioni notazione esponenziale (fino ai numeri grandi in Fase 5). */
+/** 999 → "999", 12345 → "12.3K", 1e15 → "1.00Qa"; oltre i decilioni "1.23e40". */
 export function formatNum(n: number): string {
   if (!Number.isFinite(n)) return '∞';
   const sign = n < 0 ? '-' : '';

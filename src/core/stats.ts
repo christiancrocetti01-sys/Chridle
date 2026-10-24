@@ -3,6 +3,7 @@ import type { UpgradeId } from '../data/upgrades';
 import type { RuleId } from '../data/uniques';
 import { addStarMods } from './constellations';
 import { addViaMods, type ViaState } from './vie';
+import { addPerkMods, type AscensionState } from './ascension';
 import { BLOOD_PACT_MAX } from '../data/vie';
 import { TOWER_BONUS, TOWER_MILESTONE } from '../data/modes';
 import { emptyMods, gearMods, gearRules, type GearState, type StatMods } from './items';
@@ -91,8 +92,9 @@ export function elementalDamage(s: Stats): number {
 }
 
 /** Statistiche dell'eroe con l'equipaggiamento indossato. */
-export function stateStats(state: { hero: HeroState; upgrades: Record<UpgradeId, number>; gear: GearState; stars?: string[]; vie?: ViaState; tower?: { best: number } }): Stats {
+export function stateStats(state: { hero: HeroState; upgrades: Record<UpgradeId, number>; gear: GearState; stars?: string[]; vie?: ViaState; tower?: { best: number }; ascension?: AscensionState }): Stats {
   const mods = gearMods(state.gear);
+  addPerkMods(state.ascension, mods);
   // traguardi della Torre dell'Alba: attacco e vita permanenti
   const tower = Math.floor((state.tower?.best ?? 0) / TOWER_MILESTONE) * TOWER_BONUS;
   mods.atkPct += tower;

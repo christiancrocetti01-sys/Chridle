@@ -9,6 +9,7 @@ import { damageMult, fireTriggers, gearTriggers, heal, tickBuffs, type ActiveTri
 import { BURNING_SHARE, DOUBLE_STRIKE_CHANCE, REFLECT_SHARE, SPIRIT_ATK } from '../data/vie';
 import type { GameState } from './state';
 import { activeVie } from './vie';
+import { perkValue } from './ascension';
 import { elementalVs, enemyAtk, resMult, spawnEnemy, tickEnemy, type MechanicEvent } from './enemies';
 import { onModeDeath, onModeKill, tickMode, type ModeEvent } from './modes';
 import { TOWER_BASE, TOWER_STEP } from '../data/modes';
@@ -167,7 +168,7 @@ function onKill(state: GameState, events: CombatEvent[]) {
   const mult = raid ? 20 : zoneBoss ? 10 : boss ? 5 : elite ? ELITE_REWARD : 1;
   const gold = base.gold * mult * hero.goldMult;
   const xp = base.xp * mult * hero.xpMult;
-  const essence = essenceFor(stage, boss) * (elite ? ELITE_REWARD : 1);
+  const essence = essenceFor(stage, boss) * (elite ? ELITE_REWARD : 1) * (1 + perkValue(state.ascension, 'essenza'));
   state.gold += gold;
   state.essence += essence;
   state.totals.gold += gold;
@@ -219,7 +220,7 @@ export function changeGear(state: GameState, change: () => boolean): boolean {
   return true;
 }
 
-function gainXp(state: GameState, xp: number, events: CombatEvent[]) {
+export function gainXp(state: GameState, xp: number, events: CombatEvent[]) {
   state.hero.xp += xp;
   while (state.hero.xp >= xpToNext(state.hero.level)) {
     state.hero.xp -= xpToNext(state.hero.level);

@@ -234,3 +234,11 @@ html, body {
 .mode-banner { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding: 8px 10px; border: 1px solid var(--gold-dim); color: var(--gold); background: rgba(232, 193, 90, 0.06); }
 .tabs { overflow-x: auto; scrollbar-width: none; }
 .tab { flex: 0 0 auto; }
+
+/* Ascensione e riepilogo offline */
+.scint { color: #ffd98a; text-shadow: 0 0 10px rgba(255, 200, 100, 0.5); }
+.btn.danger { color: #ff8a8a; border-color: #a33; }
+.modal { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 16px; background: rgba(2, 3, 8, 0.75); }
+.modal-box { width: min(420px, 100%); padding: 18px; border: 1px solid var(--gold-dim); background: #0b0e1f; box-shadow: 0 0 40px rgba(232, 193, 90, 0.15); }
+.title.sm { font-size: 1.5em; margin: 0 0 6px; }
+.modal-ok { width: 100%; margin-top: 12px; text-align: center; }

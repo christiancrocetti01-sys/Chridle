@@ -45,9 +45,9 @@ Spuntare `[x]` man mano. Le fasi possono essere ridefinite: è un documento vivo
 - [x] Dungeon (chiavi, modificatori, set garantito), Torre dell’Alba (bonus permanenti), Raid in 3 fasi
 
 ## Fase 5 — Progressione infinita
-- [ ] Prestige / rinascita con valuta meta
-- [ ] Scaling numerico infinito (numeri grandi) e bilanciamento
-- [ ] Progresso offline
+- [x] Prestige: Ascensione dallo stage 40, Scintille, 9 potenziamenti permanenti (Rinascita Solare e Paragon: più avanti)
+- [x] Numeri grandi: suffissi fino a Dc (1e33) poi notazione esponenziale; double fino a 1e308 (break_infinity solo se servirà)
+- [x] Progresso offline senza limite (campione di 5 min, efficienza 75% + Veglia), riepilogo al rientro
 
 ## Fase 6 — Estetica e "juice"
 - [ ] Rifinitura della UI minimale (tipografia, icone degli oggetti)
