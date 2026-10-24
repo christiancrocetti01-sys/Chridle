@@ -121,3 +121,42 @@ html, body {
   font: inherit;
   cursor: pointer;
 }
+
+/* Rarità degli oggetti: il colore arriva dai dati, qui solo il bagliore delle più alte */
+.rar-4 { text-shadow: 0 0 6px rgba(255, 138, 31, 0.5); }
+.rar-5 { text-shadow: 0 0 8px rgba(255, 59, 78, 0.6); }
+.rar-6 { text-shadow: 0 0 10px rgba(255, 240, 170, 0.9); }
+
+.loot { min-height: 1.4em; margin: 2px 0 0; font-size: 0.9em; }
+
+.slots { display: grid; gap: 6px; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+.slot, .inv-item {
+  display: grid;
+  text-align: left;
+  padding: 6px 8px;
+  background: #0b0e1f;
+  color: var(--text);
+  border: 1px solid #2a2f4a;
+  font: inherit;
+  font-size: 0.85em;
+  cursor: pointer;
+}
+.slot .muted { font-size: 0.85em; }
+.slot.sel, .inv-item.sel { border-color: var(--gold); }
+.inv { display: grid; gap: 4px; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); max-height: 260px; overflow-y: auto; }
+.inv-item { display: block; }
+
+.detail { margin-top: 10px; padding: 10px 12px; border: 1px solid #2a2f4a; background: #080a17; min-height: 3em; }
+.detail p { margin: 0; }
+.item-name { font-weight: 600; }
+.item-base { margin-top: 6px; }
+.affixes { margin: 4px 0 0; padding-left: 18px; }
+.cmp-block { margin-top: 10px; display: grid; gap: 4px; justify-items: start; }
+.compare { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 0.9em; font-variant-numeric: tabular-nums; }
+.compare .up { color: #6fd38a; }
+.compare .down { color: #ff6b6b; }
+.actions { margin-top: 10px; }
+.btn:disabled { opacity: 0.45; cursor: default; }
+
+.salvage-row { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin-top: 10px; font-size: 0.9em; }
+.salvage-row select { margin-left: 6px; background: #0b0e1f; color: var(--text); border: 1px solid #2a2f4a; font: inherit; padding: 4px; }

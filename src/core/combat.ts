@@ -1,16 +1,19 @@
 import { BOSSES, ENEMIES } from '../data/enemies';
 import { UPGRADES, type UpgradeId } from '../data/upgrades';
 import { TICK_RATE } from './loop';
+import { DROP_CHANCE, INVENTORY_SIZE, rollItem, rollRarity, salvageValue, type Item } from './items';
 import { nextRandom } from './rng';
 import type { GameState } from './state';
-import { KILLS_PER_STAGE, heroStats, mitigate, stageEnemy, upgradeCost, xpToNext } from './stats';
+import { KILLS_PER_STAGE, mitigate, stateStats, stageEnemy, upgradeCost, xpToNext } from './stats';
 
 export type CombatEvent =
   | { type: 'hit'; target: 'hero' | 'enemy'; amount: number; crit: boolean }
   | { type: 'kill'; gold: number; xp: number; boss: boolean }
   | { type: 'levelup'; level: number }
   | { type: 'death' }
-  | { type: 'stage'; stage: number };
+  | { type: 'stage'; stage: number }
+  /** Oggetto caduto; se `salvaged` è stato smantellato subito (filtro o inventario pieno). */
+  | { type: 'drop'; item: Item; salvaged: boolean };
 
 /** Tick di pausa tra un nemico e il successivo (per l'animazione di morte). */
 export const RESPAWN_TICKS = 6;
@@ -18,7 +21,7 @@ export const RESPAWN_TICKS = 6;
 /** Un tick di simulazione. Puro e deterministico: stessi input → stessi risultati. */
 export function step(state: GameState, events: CombatEvent[] = []): CombatEvent[] {
   state.tick++;
-  const hero = heroStats(state.hero.level, state.upgrades);
+  const hero = stateStats(state);
   state.hero.hp = Math.min(hero.maxHp, state.hero.hp + hero.regen / TICK_RATE);
 
   if (!state.enemy) {
@@ -84,6 +87,7 @@ function onKill(state: GameState, events: CombatEvent[]) {
   state.hero.swing = 0;
   events.push({ type: 'kill', gold, xp, boss });
   gainXp(state, xp, events);
+  dropLoot(state, boss, events);
 
   if (boss) {
     state.stage.kills = 0;
@@ -95,12 +99,31 @@ function onKill(state: GameState, events: CombatEvent[]) {
   }
 }
 
+function dropLoot(state: GameState, boss: boolean, events: CombatEvent[]) {
+  if (!boss && nextRandom(state) >= DROP_CHANCE) return;
+  const gear = state.gear;
+  const item = rollItem(state, gear.nextId++, state.stage.current, rollRarity(state, boss));
+  const salvaged = item.rarity <= gear.autoSalvage || gear.inventory.length >= INVENTORY_SIZE;
+  if (salvaged) state.fragments += salvageValue(item);
+  else gear.inventory.push(item);
+  events.push({ type: 'drop', item, salvaged });
+}
+
+/** Cambia l'equipaggiamento mantenendo la vita persa (non si cura né si muore cambiando oggetti). */
+export function changeGear(state: GameState, change: () => boolean): boolean {
+  const before = stateStats(state).maxHp;
+  if (!change()) return false;
+  const after = stateStats(state).maxHp;
+  state.hero.hp = Math.max(1, Math.min(after, state.hero.hp + after - before));
+  return true;
+}
+
 function gainXp(state: GameState, xp: number, events: CombatEvent[]) {
   state.hero.xp += xp;
   while (state.hero.xp >= xpToNext(state.hero.level)) {
     state.hero.xp -= xpToNext(state.hero.level);
     state.hero.level++;
-    state.hero.hp = heroStats(state.hero.level, state.upgrades).maxHp;
+    state.hero.hp = stateStats(state).maxHp;
     state.stage.auto = true; // più forte: si riprova ad avanzare
     events.push({ type: 'levelup', level: state.hero.level });
   }
@@ -111,7 +134,7 @@ function onDeath(state: GameState, events: CombatEvent[]) {
   const wasBoss = state.enemy?.boss;
   state.enemy = null;
   state.respawn = RESPAWN_TICKS * 2;
-  state.hero.hp = heroStats(state.hero.level, state.upgrades).maxHp;
+  state.hero.hp = stateStats(state).maxHp;
   state.hero.swing = 0;
   state.stage.auto = false;
   if (!wasBoss && state.stage.current > 1) {
@@ -134,10 +157,10 @@ export function upgradePrice(state: GameState, id: UpgradeId): number {
 export function buyUpgrade(state: GameState, id: UpgradeId): boolean {
   const price = upgradePrice(state, id);
   if (state.gold < price) return false;
-  const before = heroStats(state.hero.level, state.upgrades).maxHp;
+  const before = stateStats(state).maxHp;
   state.gold -= price;
   state.upgrades[id]++;
-  const after = heroStats(state.hero.level, state.upgrades).maxHp;
+  const after = stateStats(state).maxHp;
   state.hero.hp += after - before;
   return true;
 }

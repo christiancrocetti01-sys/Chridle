@@ -1,19 +1,22 @@
-import { upgradePrice } from '../core/combat';
+import { upgradePrice, type CombatEvent } from '../core/combat';
 import { formatNum } from '../core/format';
 import type { GameState } from '../core/state';
-import { KILLS_PER_STAGE, heroStats, xpToNext } from '../core/stats';
+import { KILLS_PER_STAGE, stateStats, xpToNext } from '../core/stats';
+import { RARITIES } from '../data/items';
+import { createGearPanel, type GearActions } from './gear';
 import type { InkStyle } from '../render/dither';
 import { UPGRADES, type UpgradeId } from '../data/upgrades';
 
 const STYLES: InkStyle[] = ['oro', 'mono', 'colore'];
 
-export interface HudActions {
+export interface HudActions extends GearActions {
   buy(id: UpgradeId): void;
   setStyle(style: InkStyle): void;
 }
 
 export interface Hud {
   update(state: GameState, fps: number): void;
+  onEvents(events: CombatEvent[]): void;
 }
 
 export function createHud(root: HTMLElement, actions: HudActions, initialStyle: InkStyle): Hud {
@@ -30,6 +33,7 @@ export function createHud(root: HTMLElement, actions: HudActions, initialStyle: 
     <div class="row"><span>Stage <b data-k="stage">1</b> <span class="muted" data-k="best"></span></span><span data-k="progress"></span></div>
     <div class="bar"><div class="fill" data-k="stagebar"></div></div>
     <p class="notice" data-k="notice"></p>
+    <p class="loot" data-k="loot"></p>
     <h2 class="section">Potenziamenti</h2>
     <div class="upgrades">
       ${UPGRADES.map((u) => `
@@ -39,6 +43,7 @@ export function createHud(root: HTMLElement, actions: HudActions, initialStyle: 
           <span class="card-cost" data-cost="${u.id}"></span>
         </button>`).join('')}
     </div>
+    <div data-k="gear"></div>
     <h2 class="section">Statistiche</h2>
     <dl class="stats" data-k="stats"></dl>
     <footer class="hud-foot">
@@ -50,12 +55,14 @@ export function createHud(root: HTMLElement, actions: HudActions, initialStyle: 
   const refs = {
     gold: el('gold'), level: el('level'), xptext: el('xptext'), xpbar: el('xpbar'),
     stage: el('stage'), best: el('best'), progress: el('progress'), stagebar: el('stagebar'),
-    notice: el('notice'), stats: el('stats'), fps: el('fps'),
+    notice: el('notice'), loot: el('loot'), stats: el('stats'), fps: el('fps'),
   };
 
   root.querySelectorAll<HTMLButtonElement>('[data-up]').forEach((b) =>
     b.addEventListener('click', () => actions.buy(b.dataset.up as UpgradeId)),
   );
+
+  const gear = createGearPanel(el('gear'), actions);
 
   const styleBtn = el('style');
   let style = initialStyle;
@@ -69,6 +76,14 @@ export function createHud(root: HTMLElement, actions: HudActions, initialStyle: 
 
   let frame = 0;
   return {
+    onEvents(events) {
+      for (const e of events) {
+        if (e.type !== 'drop') continue;
+        const r = RARITIES[e.item.rarity];
+        refs.loot.innerHTML = `Bottino: <span class="rar-${e.item.rarity}" style="color:${r.color}"></span>${e.salvaged ? ' <span class="muted">(smantellato)</span>' : ''}`;
+        refs.loot.querySelector('span')!.textContent = `${e.item.name} (${r.name})`;
+      }
+    },
     update(state, fps) {
       // il DOM non serve a 60 fps: ~10 aggiornamenti al secondo bastano
       if (frame++ % 6) return;
@@ -92,13 +107,15 @@ export function createHud(root: HTMLElement, actions: HudActions, initialStyle: 
         root.querySelector<HTMLButtonElement>(`[data-up="${u.id}"]`)!.disabled = state.gold < price;
       }
 
-      const s = heroStats(state.hero.level, state.upgrades);
+      gear.update(state);
+      const s = stateStats(state);
       refs.stats.innerHTML = [
         ['Vita', `${formatNum(Math.max(0, state.hero.hp))} / ${formatNum(s.maxHp)}`],
         ['Attacco', formatNum(s.atk)],
         ['Difesa', formatNum(s.def)],
         ['Velocità', `${s.attackSpeed.toFixed(2)}/s`],
-        ['Critico', `${(s.critChance * 100).toFixed(0)}% ×${s.critMult}`],
+        ['Critico', `${(s.critChance * 100).toFixed(0)}% ×${s.critMult.toFixed(2)}`],
+        ['Rigenerazione', `${formatNum(s.regen)}/s`],
         ['Uccisioni', formatNum(state.totals.kills)],
         ['Morti', String(state.totals.deaths)],
       ].map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');

@@ -2,7 +2,7 @@ import { AnimatedSprite, Application, Container, Graphics, Sprite, TextureStyle 
 import { GHOUL, HERO, breathFrame, type PixelSprite } from '../data/sprites';
 import type { CombatEvent } from '../core/combat';
 import { formatNum } from '../core/format';
-import { heroStats } from '../core/stats';
+import { stateStats } from '../core/stats';
 import { Effects } from './effects';
 import { TICK_RATE } from '../core/loop';
 import type { GameState } from '../core/state';
@@ -191,7 +191,7 @@ export async function createScene(host: HTMLElement): Promise<Scene> {
         enemy.root.alpha = enemySpawnT;
       }
 
-      const stats = heroStats(state.hero.level, state.upgrades);
+      const stats = stateStats(state);
       bars.clear();
       drawBar(bars, HERO_X - 12, GROUND_Y - 46, 24, state.hero.hp / stats.maxHp);
       if (e) drawBar(bars, enemy.root.x - 12 * (enemyScale / 2), GROUND_Y - GHOUL.rows.length * enemyScale - 6, 24 * (enemyScale / 2), e.hp / e.maxHp);

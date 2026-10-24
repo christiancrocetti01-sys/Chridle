@@ -26,9 +26,9 @@ Spuntare `[x]` man mano. Le fasi possono essere ridefinite: è un documento vivo
 - [ ] Approvazione dell'utente: diventa lo standard visivo
 
 ## Fase 2 — Equipaggiamento
-- [ ] Slot (arma, armatura, accessori…) e rarità
-- [ ] Affissi casuali sugli oggetti, inventario, confronto
-- [ ] Generatore di oggetti data-driven
+- [x] Slot (arma, armatura, accessori…) e rarità
+- [x] Affissi casuali sugli oggetti, inventario, confronto
+- [x] Generatore di oggetti data-driven
 
 ## Fase 3 — Skill e build
 - [ ] Sistema di skill attive/passive con trigger e sinergie (tag)

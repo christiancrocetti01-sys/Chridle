@@ -1,4 +1,5 @@
 import type { UpgradeId } from '../data/upgrades';
+import { newGear, type GearState } from './items';
 import { heroStats } from './stats';
 
 export interface EnemyState {
@@ -25,6 +26,9 @@ export interface GameState {
   rng: number;
   hero: { level: number; xp: number; hp: number; swing: number };
   gold: number;
+  /** Valuta del crafting, dallo smantellamento. */
+  fragments: number;
+  gear: GearState;
   upgrades: Record<UpgradeId, number>;
   stage: {
     current: number;
@@ -39,7 +43,7 @@ export interface GameState {
   totals: { kills: number; deaths: number; gold: number };
 }
 
-export const STATE_VERSION = 2;
+export const STATE_VERSION = 3;
 
 export function newGame(now: number, seed = now >>> 0): GameState {
   const upgrades = { forza: 0, corazza: 0, rapidita: 0 };
@@ -51,6 +55,8 @@ export function newGame(now: number, seed = now >>> 0): GameState {
     rng: seed,
     hero: { level: 1, xp: 0, hp: heroStats(1, upgrades).maxHp, swing: 0 },
     gold: 0,
+    fragments: 0,
+    gear: newGear(),
     upgrades,
     stage: { current: 1, best: 1, kills: 0, auto: true },
     enemy: null,

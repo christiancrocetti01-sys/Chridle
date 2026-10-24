@@ -1,3 +1,4 @@
+import { newGear } from './items';
 import { STATE_VERSION, newGame, type GameState } from './state';
 
 export const SAVE_KEY = 'chridle.save';
@@ -13,6 +14,8 @@ type Migration = (data: Record<string, unknown>) => Record<string, unknown>;
 export const migrations: Record<number, Migration> = {
   // v1 → v2: arrivano combattimento, livelli e oro; si conserva il tempo di gioco
   1: (d) => ({ ...newGame(d.createdAt as number), tick: d.tick, lastSeen: d.lastSeen }),
+  // v2 → v3: arriva l'equipaggiamento
+  2: (d) => ({ ...d, fragments: 0, gear: newGear() }),
 };
 
 export function serialize(state: GameState): string {
@@ -37,8 +40,8 @@ export function deserialize(raw: string, migs = migrations, target = STATE_VERSI
 }
 
 function isGameState(d: Record<string, unknown>): d is Record<string, unknown> & GameState {
-  const numbers = ['tick', 'createdAt', 'lastSeen', 'rng', 'gold', 'respawn'].every((k) => typeof d[k] === 'number');
-  const objects = ['hero', 'upgrades', 'stage', 'totals'].every((k) => d[k] && typeof d[k] === 'object');
+  const numbers = ['tick', 'createdAt', 'lastSeen', 'rng', 'gold', 'fragments', 'respawn'].every((k) => typeof d[k] === 'number');
+  const objects = ['hero', 'upgrades', 'stage', 'totals', 'gear'].every((k) => d[k] && typeof d[k] === 'object');
   return numbers && objects;
 }
 
