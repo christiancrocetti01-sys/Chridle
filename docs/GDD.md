@@ -44,8 +44,12 @@ Si sceglie una Via a un certo livello; con l'endgame si sblocca una seconda Via 
 - **Luce**: si accumula colpendo, si spende per le skill attive (barra che si riempie = soddisfazione).
 - **Purezza / Corruzione**: alcuni oggetti e la Via Eclissiarca aumentano la Corruzione: più danni, meno difese.
   Crea build "pure" vs "corrotte" senza aggiungere classi.
-- **Deciso (2026-10-24):** Purezza/Corruzione si fa come **sistema a parte** (lotto futuro, da progettare con
-  l'utente); oggi l'Eclissiarca usa solo la vita come rischio. Tag Ombra e affissi Ombra approvati.
+- **Fatto (2026-10-24, design approvato):** Purezza/Corruzione = **valore fisso** −100…+100 = Corruzione − Purezza
+  (statistiche a punti, `src/data/corruption.ts`). Fonti: 6 affissi (3 corrotti, 3 puri), 4 notevoli delle regioni
+  delle Vie, Vie (Eclissiarca +30, Paladino −30). Per punto: Corruzione +1% danni, −0,5% difesa e cure; Purezza
+  −0,5% danni, +1% difesa e cure. Soglie: +50 skill d'Ombra pagate con la vita (0,1% vita per Luce), −50 cure in
+  eccesso → scudo, +100 Eclissi (danni ×2, niente cure), −100 Santità (salva da un colpo mortale ogni 30 s).
+  Neutro: nessun bonus (scelta mia, da confermare). Riga in scheda Eroe sopra le Vie. Tag e affissi Ombra approvati.
 
 ## 4. Statistiche
 Molte statistiche, raggruppate in schede per non sommergere la UI.
