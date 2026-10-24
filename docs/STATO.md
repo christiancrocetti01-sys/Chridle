@@ -3,56 +3,48 @@
 > File di passaggio di consegne tra sessioni. Aggiornato con `/handoff`.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
-**Ultimo aggiornamento:** 2026-10-24 (varietà 3)
-**Fase corrente:** 2 — Equipaggiamento, varietà (punti 1-3 fatti).
-**Prossimo passo:** Varietà 4 — crafting con i Frammenti (da proporre e confermare). Poi Fase 3 (skill e build).
+**Ultimo aggiornamento:** 2026-10-24 (handoff dopo varietà 3)
+**Fase corrente:** 2 — Equipaggiamento, varietà (punti 1-3 fatti, manca il crafting).
+**Prossimo passo:** Varietà 4 — **crafting con i Frammenti**. Proposta in attesa di risposta dell'utente:
+ritirare un affisso (costo crescente), migliorare il tier, aggiungere un affisso se c'è spazio (o altro, es.
+fondere oggetti). Logica in `src/core/items.ts` (o nuovo `src/core/craft.ts`), costi in `src/data/`, UI nel
+dettaglio oggetto di `src/ui/gear.ts`. Poi Fase 3 (skill e build).
+**Da chiedere subito:** allineare `main` con la varietà 3 (non ancora fatto; varietà 1-2 già online).
 **Grafica:** decisa **minimale** (niente scena, niente asset da scaricare): UI DOM + sagoma SVG.
 
 ## Gioco online
 https://christiancrocetti01-sys.github.io/Chridle/ (ogni push su `main` lo ripubblica, ~1 min).
-Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` quando un passo è approvato.
+Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` (fast-forward) quando un passo è approvato.
 
-## Fatto
-- Flusso di lavoro: `CLAUDE.md`, STATO, ROADMAP, GDD (approvato), skill `/handoff` e `/riprendi`.
-- Fase 0: Vite + TS + Vitest; logica 10 tick/s; salvataggio versionato (`src/core/save.ts`);
-  deploy GitHub Pages funzionante.
-- Fase 1 (prototipo): combattimento deterministico `src/core/combat.ts`, statistiche `src/core/stats.ts`,
-  boss ogni 10 uccisioni, morte → stage precedente + allenamento, 3 potenziamenti, HUD DOM.
-- Fase 1.5 (grafica minimale): rimossa la scena PixiJS; manichino `src/ui/doll.ts` (sagoma SVG + 12 slot),
-  pannello di combattimento `src/ui/combat.ts` (barre vita + registro eventi). Bundle 23 kB.
-- Fase 2 (primo passo): 12 slot, 7 rarità, 10 affissi con tier T1-T5 (`src/data/items.ts`),
-  generatore deterministico + equip/smantellamento (`src/core/items.ts`), drop 1/8 e boss sempre
-  (almeno Magico), inventario 40, Frammenti, smantellamento automatico per rarità. UI `src/ui/gear.ts`
-  con confronto statistiche. Salvataggio v3. Crescita oggetti `ILVL_GROWTH` = 1.10 (scelta utente).
-- Varietà 1: 52 affissi in `src/data/items.ts` con **tag** (Fisico, Sacro, Fuoco, Gelo, Fulmine, Ombra, Critico,
-  Sanguinamento, Veleno, Difesa, Rubavita + Vita, Velocità, Fortuna) e **tipi ammessi**; 16 ibridi a 2 statistiche.
-  Nuove stat: elementi piatti/% (ignorano la difesa), veleno/s, sanguinamento (% del fisico, istantaneo per ora),
-  rubavita, schivata (max 50%), spine, oro/XP/ritrovamento magico, danno ai boss. Affisso salvato come `mods[]`.
-  Salvataggio v4 (migrazione affissi v3). Confronto e HUD mostrano le nuove stat.
-- Varietà 2: 16 effetti a scatto (`TRIGGER_AFFIXES` in `src/data/items.ts`, logica in `src/core/triggers.ts`):
-  al critico / ogni N colpi / all'uccisione / quando colpito / alla schivata → esplosione elementale, sanguinamento,
-  veleno, cura, scudo, velocità a tempo. Solo da Epico in su (`triggerChance` per rarità: 30/50/75/100%), max 1
-  per oggetto, effetti uguali **si sommano** (scelta utente). Sanguinamento e veleno ora sono riserve sul nemico
-  che si consumano nel tempo. Salvataggio v5 (scudo, buff, colpi; riserve sul nemico).
-- Varietà 3 (`src/data/uniques.ts`): 13 **regole speciali** (eco per elemento, veleno infinito, critico dopo
-  schivata, cure in eccesso → scudo, esecuzione, critico che sanguina, frenesia, trigger più rapidi, velocità che
-  si accumula, max 20 buff). 13 **unici** (nome + statistiche fisse + regola + affissi casuali; 25% dei drop da
-  Leggendario in su). 4 **set** da 6 pezzi (Paladino, Piromante, Assassino, Pestilenza; 8% dei drop da Epico):
-  2 pezzi statistiche, 4 effetto a scatto, 6 regola + statistiche. `item.special` sull'oggetto. Salvataggio v6.
-- Test: **76 verdi** (7 file), build ok. Simulazione 2 h con equip: stage 43 (non valuta trigger/regole).
+## Fatto (sintesi)
+- Fasi 0-1.5: Vite + TS + Vitest, logica 10 tick/s deterministica, salvataggio versionato con migrazioni,
+  combattimento/statistiche/boss/potenziamenti, UI DOM minimale (manichino SVG, pannello combattimento).
+- Fase 2: 12 slot, 7 rarità, generatore deterministico, drop, inventario 40, Frammenti, smantellamento auto.
+- Varietà 1: 52 affissi (`AFFIXES` in `src/data/items.ts`) con tag e tipi ammessi, 16 ibridi; stat nuove:
+  elementi (ignorano la difesa), veleno/s, sanguinamento, rubavita, schivata (max 50%), spine, oro/XP/
+  ritrovamento magico, danno ai boss. HUD mostra solo le stat speciali possedute.
+- Varietà 2: 16 effetti a scatto (`TRIGGER_AFFIXES`, logica `src/core/triggers.ts`): critico / ogni N colpi /
+  uccisione / colpito / schivata → esplosione, sanguinamento, veleno, cura, scudo, velocità a tempo.
+  Sanguinamento e veleno = riserve sul nemico consumate nel tempo (`BLEED_RATE`, `POISON_RATE`).
+- Varietà 3 (`src/data/uniques.ts`): 13 regole speciali (`RuleId`), 13 unici, 4 set (bonus 2/4/6).
+  Oggetto: `item.special`; regole in `Stats.rules` (da `gearRules`); bonus set in `itemMods`.
+- Salvataggio: **v6** (v4 affissi `mods[]`, v5 scudo/buff/colpi/riserve, v6 `hero.nextCrit`).
 
-## Feedback dell'utente (importante)
-- La vecchia grafica era "AI slop". Ora la direzione è: **grafica minimale**, non serve vedere il
-  combattimento; ciò che conta è **una varietà infinita di armi, statistiche e sinergie**.
+## Scelte fatte da Claude (da confermare se l'utente obietta)
+- `triggerChance` per rarità 30/50/75/100% (Epico→Divino).
+- Max 20 buff di velocità insieme (regola "hasteStacks").
+- Anche la rigenerazione conta come "cura in eccesso" → con quella regola lo scudo si riempie a vita piena.
+- Statistiche piatte degli unici = valore × 2 (come un T3) × crescita del livello oggetto.
 
-- Visione dell'utente: nemici sempre più forti, ma il giocatore deve arrivare a build **assurde** combinando
-  statistiche, skill e sinergie (numeri che esplodono: Fase 5).
-
-## Domande aperte
-- I Frammenti non si spendono ancora (arriva il crafting).
+## Test
+- `npm test`: **76 verdi** (7 file), `npm run build` ok (handoff 2026-10-24).
+- Simulazione (`tests/combat.test.ts`): 2 h senza equip stage 27, con equip automatico 43. L'equip automatico
+  **non valuta** trigger, unici e set: la potenza reale di quelle build non è misurata.
 
 ## Note / problemi noti
 - Un solo nemico (Ghoul) e un solo boss.
 - Progresso offline non calcolato: oltre 50 tick/frame (5 s) il resto viene scartato (Fase 5).
-- Bilanciamento simulato (`combat.test.ts`): senza equip stage 27 a 2 h; con equip automatico 43 a 2 h.
+- I Frammenti non si spendono ancora (arriva il crafting).
+- Verifica visiva: salvataggio di prova iniettato con `page.addInitScript` (il gioco salva alla chiusura e
+  sovrascriverebbe un `localStorage.setItem` + reload). `vite preview` va aperto su `/`, non su `/Chridle/`.
 - GitHub Pages: l'ambiente `github-pages` deve consentire il branch `main` (già sistemato).

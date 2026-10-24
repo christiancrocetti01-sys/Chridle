@@ -96,6 +96,12 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
 - **Deciso (2026-10-24):** tutti i 12 slot e le 7 rarità da subito; drop 1 ogni ~8 nemici, boss sempre
   (almeno Magico); inventario 40 (pieno → smantella); statistiche piatte +10% per livello oggetto;
   obiettivo: **varietà "infinita"** di armi, statistiche e sinergie (è il cuore del gioco).
+- **Deciso (varietà 1-3):** affissi con tag e tipi ammessi, ibridi a 2 statistiche; effetti a scatto solo da
+  Epico in su, max 1 per oggetto, effetti uguali **si sommano**; leggendari unici = effetto/regola fissa +
+  affissi casuali (25% dei drop da Leggendario); 4 set da 6 pezzi legati agli stili (Paladino, Piromante,
+  Assassino, Pestilenza; 8% dei drop da Epico).
+- **Visione:** nemici sempre più forti, ma il giocatore arriva a build **assurde** combinando statistiche,
+  skill e sinergie (numeri che esplodono).
 
 ## 9. Nemici
 - **Famiglie**: Non-morti, Demoni, Bestie corrotte, Culto dell'Eclissi, Creature del Vuoto.
