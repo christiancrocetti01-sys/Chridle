@@ -4,6 +4,7 @@ import type { GameState } from '../core/state';
 import { STAT_LABELS, type StatKey } from '../data/items';
 import { LUMI, LUMO_IDLE_SHARE, type LumoId } from '../data/lumi';
 import { formatStat } from './gear';
+import { createExpander } from './list';
 
 export interface LumiActions {
   activateLumo(id: LumoId): void;
@@ -14,6 +15,7 @@ const modsText = (mods: [StatKey, number][], mult = 1) => mods.map(([k, v]) => `
 
 /** Sezione Lumi della scheda Build: uno attivo (bonus pieno + effetto), gli altri al 25%. */
 export function createLumiPanel(root: HTMLElement, actions: LumiActions) {
+  const li = createExpander(root);
   let key = '';
   root.addEventListener('click', (ev) => {
     const t = (ev.target as HTMLElement).closest<HTMLElement>('[data-lumo]');
@@ -31,7 +33,7 @@ export function createLumiPanel(root: HTMLElement, actions: LumiActions) {
       key = k;
       const rows = LUMI.map((d) => {
         const lv = l.levels[d.id];
-        if (!lv) return `<div class="skill-row locked"><div class="skill-head"><b>???</b><span class="muted">si sblocca: ${d.unlock.text}</span></div></div>`;
+        if (!lv) return '';
         const on = l.active === d.id;
         const cost = lumoCost(lv);
         return `<div class="skill-row${on ? ' on' : ''}">
@@ -43,8 +45,11 @@ export function createLumiPanel(root: HTMLElement, actions: LumiActions) {
           <div class="skill-info${on ? ' rule' : ' muted'}">Da attivo: ${modsText(d.special)}</div>
         </div>`;
       }).join('');
+      const locked = LUMI.filter((d) => !l.levels[d.id]);
+      const rest = locked.length ? li.row('lu:bloccati', `<span class="muted">${locked.length} da sbloccare</span>`, '',
+        locked.map((d) => `<div class="muted">??? · si sblocca: ${d.unlock.text}</div>`).join(''), 'dim') : '';
       root.innerHTML = `<h2 class="section">Lumi <span class="muted">· uno attivo, gli altri al ${Math.round(LUMO_IDLE_SHARE * 100)}%</span></h2>
-        <div class="skill-list">${rows}</div>`;
+        <div class="skill-list">${rows}</div>${rest}`;
     },
   };
 }

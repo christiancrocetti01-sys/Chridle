@@ -107,7 +107,7 @@ export function createCombatPanel(root: HTMLElement) {
       refs.enemy.classList.toggle('boss', !!e?.boss || !!e?.elite);
       const timer = modeTimer(state);
       const mech = e?.mechanics.length ? ` · ${e.mechanics.map((x) => MECHANIC_SHORT[x]).join(', ')}` : '';
-      refs.einfo.textContent = e ? `${FAMILIES[e.family].name} · ${resText(e.family)}${mech}${timer ? ` · ⏳ ${timer}` : ''}` : '';
+      refs.einfo.innerHTML = e ? `${FAMILIES[e.family].name} · ${resText(e.family)}${mech}${timer ? ` · ⏳ ${timer}` : ''}` : '';
       refs.enemyhp.textContent = e ? `${formatNum(Math.max(0, e.hp))} / ${formatNum(e.maxHp)}` : '';
       refs.enemybar.style.width = e ? `${(Math.max(0, e.hp) / e.maxHp) * 100}%` : '0%';
     },

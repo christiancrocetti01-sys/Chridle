@@ -1,3 +1,4 @@
+import type { DamageType } from '../data/enemies';
 import type { ItemType } from '../data/items';
 
 /** Icone minimali degli oggetti: tratti SVG 24×24 colorati con la rarità (currentColor). */
@@ -17,3 +18,6 @@ const PATHS: Record<ItemType, string> = {
 
 export const itemIcon = (type: ItemType) =>
   `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="${PATHS[type]}"/></svg>`;
+
+/** Nome di un elemento nel suo colore (il fisico resta bianco). */
+export const elem = (type: DamageType, text: string) => (type === 'physical' ? text : `<span class="el-${type}">${text}</span>`);

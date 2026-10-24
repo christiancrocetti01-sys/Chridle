@@ -8,7 +8,7 @@ import type { GameState } from '../core/state';
 import { elementalDamage, stateStats, type Stats } from '../core/stats';
 import { RULE_TEXT, SETS, SET_PIECES, UNIQUES } from '../data/uniques';
 import { FUSE_COUNT, FUSE_MAX_RARITY } from '../data/craft';
-import { itemIcon } from './icons';
+import { elem, itemIcon } from './icons';
 import { DOLL_LEFT, DOLL_RIGHT, SILHOUETTE } from './doll';
 import { ITEM_TYPES, TRIGGER_AFFIXES, affixDef, type TriggerDef, type TriggerEffect, RARITIES, SLOTS, STAT_LABELS, TAG_LABELS, POINT_STATS, isPct, type SlotId, type StatKey } from '../data/items';
 
@@ -82,7 +82,7 @@ export function describeTrigger(t: TriggerDef, value: number): string {
 
 /** "esplosione di fuoco (120% dell'attacco)". */
 export function describeEffect(e: TriggerEffect, value: number): string {
-  return e.kind === 'burst' ? `esplosione di ${ELEMENT_TEXT[e.element]} (${pct(value)} dell'attacco)`
+  return e.kind === 'burst' ? `esplosione di ${elem(e.element, ELEMENT_TEXT[e.element])} (${pct(value)} dell'attacco)`
     : e.kind === 'bleed' ? `sanguinamento (${pct(value)} dell'attacco)`
     : e.kind === 'poison' ? `veleno (${pct(value)} dell'attacco)`
     : e.kind === 'heal' ? `cura ${pct(value)} della vita`

@@ -5,6 +5,7 @@ import type { GameState } from '../core/state';
 import { FAMILIES, MECHANIC_TEXT, ZONE_KEY_EVERY, ZONE_STAGES, zoneName, zoneOf, type DamageType, type Family } from '../data/enemies';
 import { DUNGEON_MODS, DUNGEON_WAVES, RAID_KEYS, RAID_SECONDS, RAID_LEVEL_OFFSET, RAID_STAGE, TOWER_MILESTONE, TOWER_SECONDS } from '../data/modes';
 import { TICK_RATE } from '../core/loop';
+import { elem } from './icons';
 
 export interface WorldActions {
   enterDungeon(): void;
@@ -21,8 +22,8 @@ const TYPE_TEXT: Record<DamageType, string> = {
 /** "debole a Sacro (+50%) · resiste a Ombra (−50%)". */
 export function resText(family: Family): string {
   const res = Object.entries(FAMILIES[family].res) as [DamageType, number][];
-  const weak = res.filter(([, v]) => v < 0).map(([t, v]) => `${TYPE_TEXT[t]} +${Math.round(-v * 100)}%`);
-  const strong = res.filter(([, v]) => v > 0).map(([t, v]) => `${TYPE_TEXT[t]} −${Math.round(v * 100)}%`);
+  const weak = res.filter(([, v]) => v < 0).map(([t, v]) => `${elem(t, TYPE_TEXT[t])} +${Math.round(-v * 100)}%`);
+  const strong = res.filter(([, v]) => v > 0).map(([t, v]) => `${elem(t, TYPE_TEXT[t])} −${Math.round(v * 100)}%`);
   return [weak.length ? `debole: ${weak.join(', ')}` : '', strong.length ? `resiste: ${strong.join(', ')}` : ''].filter(Boolean).join(' · ');
 }
 

@@ -5,10 +5,13 @@ import { cooldownTicks, lightCost, skillValue } from '../core/skills';
 import { stateStats, type Stats } from '../core/stats';
 import { RUNES, runeDef, type RuneId } from '../data/runes';
 import type { GameState } from '../core/state';
-import { MAX_LIGHT, SKILLS, SKILL_TAG_LABELS, skillDef, type SkillDef } from '../data/skills';
+import { MAX_LIGHT, SKILLS, SKILL_TAG_LABELS, skillDef, type SkillDef, type SkillTag } from '../data/skills';
+import type { Element } from '../data/items';
+import { elem } from './icons';
 import { describeEffect } from './gear';
 import { activeVie } from '../core/vie';
 import { viaDef } from '../data/vie';
+import { createExpander, lockedLine } from './list';
 
 export interface SkillActions {
   setSkillSlot(slot: number, id: string | null): void;
@@ -18,10 +21,13 @@ export interface SkillActions {
   socketRune(skill: string, i: number, id: RuneId | null): void;
 }
 
+/** Tag di skill che sono elementi: si colorano come tali. */
+const TAG_ELEMENT: Partial<Record<SkillTag, Element>> = { fuoco: 'fire', gelo: 'cold', fulmine: 'lightning', sacro: 'holy', ombra: 'shadow' };
+
 /** Effetto, costo e ricarica (con le rune incastonate e le sinergie per tag degli oggetti). */
 const info = (state: GameState, hero: Stats, d: SkillDef) => {
   const sec = cooldownTicks(state, hero, d) / TICK_RATE;
-  return `${describeEffect(d.effect, skillValue(state, hero, d))} <span class="muted">· ${Math.round(lightCost(state, hero, d))} Luce · ricarica ${+sec.toFixed(1)} s · ${d.tags.map((t) => SKILL_TAG_LABELS[t]).join(', ')}</span>`;
+  return `${describeEffect(d.effect, skillValue(state, hero, d))} <span class="muted">· ${Math.round(lightCost(state, hero, d))} Luce · ricarica ${+sec.toFixed(1)} s · ${d.tags.map((t) => (TAG_ELEMENT[t] ? elem(TAG_ELEMENT[t]!, SKILL_TAG_LABELS[t]) : SKILL_TAG_LABELS[t])).join(', ')}</span>`;
 };
 
 /** Le 2 incastonature di una skill: una tendina con le rune sbloccate compatibili. */
@@ -43,14 +49,15 @@ export function createSkillPanel(root: HTMLElement, actions: SkillActions) {
     <h2 class="section">Skill attive <span class="muted">· in ordine di priorità</span></h2>
     <div class="skill-slots" data-s="slots"></div>
     <h2 class="section">Tutte le skill</h2>
-    <div class="skill-list" data-s="list"></div>
+    <div data-s="list"></div>
     </div>
     <div data-sub="rune">
     <h2 class="section">Rune <span class="muted">· <span data-s="ess"></span> Essenza</span></h2>
-    <div class="skill-list" data-s="runes"></div>
+    <div data-s="runes"></div>
     </div>`;
   const q = (k: string) => root.querySelector<HTMLElement>(`[data-s="${k}"]`)!;
   const refs = { light: q('light'), lightbar: q('lightbar'), slots: q('slots'), list: q('list'), runes: q('runes'), ess: q('ess') };
+  const li = createExpander(root);
   let lastKey = '';
   let runeKey = '';
 
@@ -101,19 +108,16 @@ export function createSkillPanel(root: HTMLElement, actions: SkillActions) {
         }).join('');
         const vie = activeVie(state.vie);
         // le skill delle altre Vie non si mostrano: si vedono nella sezione Via della scheda Build
-        refs.list.innerHTML = SKILLS.filter((d) => !d.via || vie.includes(d.via)).map((d) => {
-          const locked = d.level > state.hero.level;
+        const shown = SKILLS.filter((d) => !d.via || vie.includes(d.via));
+        const locked = shown.filter((d) => d.level > state.hero.level).sort((a, b) => a.level - b.level);
+        refs.list.innerHTML = shown.filter((d) => !locked.includes(d)).map((d) => {
           const at = slots.indexOf(d.id);
           const via = d.via ? ` <span class="via-tag">${viaDef(d.via)!.name}</span>` : '';
-          const put = locked ? `<span class="muted">Si sblocca al livello ${d.level}</span>`
-            : `<span class="skill-btns"><span class="muted">${at >= 0 ? `nello slot ${at + 1}` : 'metti in'}</span>${slots
-                .map((_, i) => `<button class="btn sm" data-act="put" data-slot="${i}" data-id="${d.id}"${i === at ? ' disabled' : ''}>${i + 1}</button>`)
-                .join('')}</span>`;
-          return `<div class="skill-row${locked ? ' locked' : ''}">
-            <div class="skill-head"><span><b>${d.name}</b>${via}</span>${put}</div>
-            <div class="skill-info">${info(state, hero, d)}</div>
-          </div>`;
-        }).join('');
+          const put = `<span class="skill-btns"><span class="muted">${at >= 0 ? `nello slot ${at + 1}` : 'metti in'}</span>${slots
+            .map((_, i) => `<button class="btn sm" data-act="put" data-slot="${i}" data-id="${d.id}"${i === at ? ' disabled' : ''}>${i + 1}</button>`)
+            .join('')}</span>`;
+          return li.row(`sk:${d.id}`, `<b>${d.name}</b>${via}`, at >= 0 ? `slot ${at + 1}` : '', `<div>${info(state, hero, d)}</div>${put}`);
+        }).join('') + lockedLine(locked.length, 'da sbloccare', locked[0] && `${locked[0].name} (liv. ${locked[0].level})`);
       }
       // rune: si ridisegnano quando cambia cosa si può comprare, non a ogni Essenza raccolta
       const unlock = unlockCost(state);
@@ -123,15 +127,18 @@ export function createSkillPanel(root: HTMLElement, actions: SkillActions) {
       })]);
       if (rk !== runeKey) {
         runeKey = rk;
-        refs.runes.innerHTML = RUNES.map((r) => {
+        const runeRow = (r: (typeof RUNES)[number]) => {
           const lv = state.runes.levels[r.id];
           const cost = lv ? levelCost(lv) : unlock;
           const btn = `<button class="btn sm" data-act="${lv ? 'level' : 'unlock'}" data-id="${r.id}"${state.essence >= cost ? '' : ' disabled'}>${lv ? 'Potenzia' : 'Sblocca'} · ${formatNum(cost)}</button>`;
-          return `<div class="skill-row${lv ? '' : ' locked-rune'}">
-            <div class="skill-head"><span><b>${r.name}</b> <span class="muted">${lv ? `Lv ${lv}` : 'bloccata'}${r.damageOnly ? ' · solo skill di danno' : r.supportOnly ? ' · solo skill di supporto' : ''}</span></span>${btn}</div>
-            <div class="skill-info">${r.text(runeValue(state, r.id))}</div>
-          </div>`;
-        }).join('');
+          const only = r.damageOnly ? '<span class="muted">solo skill di danno</span>' : r.supportOnly ? '<span class="muted">solo skill di supporto</span>' : '';
+          return li.row(`ru:${r.id}`, `<b>${r.name}</b>`, lv ? `Lv ${lv}` : '', `<div>${r.text(runeValue(state, r.id))}</div>${only}${btn}`);
+        };
+        // le rune non ancora comprate stanno in un gruppo chiuso: costano tutte uguale
+        const locked = RUNES.filter((r) => !state.runes.levels[r.id]);
+        refs.runes.innerHTML = RUNES.filter((r) => state.runes.levels[r.id]).map(runeRow).join('') + (locked.length
+          ? li.row('ru:bloccate', `<span class="muted">${locked.length} da sbloccare</span>`, `${formatNum(unlock)} Essenza l'una`, locked.map(runeRow).join(''), 'group')
+          : '');
       }
       // ricariche: la barra si riempie fino a "pronta"
       slots.forEach((id, i) => {

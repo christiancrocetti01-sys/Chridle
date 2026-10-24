@@ -323,3 +323,35 @@ html, body {
 .fighter .row { margin-top: 0; font-size: 0.85em; gap: 6px; white-space: nowrap; }
 .fighter .row > span:first-child { overflow: hidden; text-overflow: ellipsis; }
 .combat .log, .combat .enemy-info { grid-column: 1 / -1; }
+
+/* Liste piatte: righe separate da una linea, niente riquadri */
+.skill-list { gap: 0; }
+.skill-list > .skill-row, .upgrades > .card { border: none; border-bottom: 1px solid var(--line); background: transparent; padding: 10px 2px; }
+.upgrades { gap: 0; grid-template-columns: 1fr; }
+.card:not(:disabled):hover { background: transparent; }
+
+/* Righe che si aprono al tocco (src/ui/list.ts) */
+.li { border-bottom: 1px solid var(--line); }
+.li-head {
+  display: flex; width: 100%; justify-content: space-between; align-items: baseline; gap: 10px;
+  padding: 11px 2px; background: transparent; color: var(--text); border: none; font: inherit; text-align: left; cursor: pointer;
+}
+.li-head::after { content: '›'; color: var(--muted); transition: transform 0.15s; }
+.li.open > .li-head::after { transform: rotate(90deg); }
+.li-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.li-right { flex: 0 0 auto; color: var(--muted); font-size: 0.85em; font-variant-numeric: tabular-nums; }
+.li-body { display: none; padding: 0 2px 12px; font-size: 0.88em; }
+.li.open > .li-body { display: grid; gap: 6px; justify-items: start; }
+.li.dim > .li-head .li-name { color: var(--muted); }
+.li .bar { margin: -6px 2px 8px; height: 3px; }
+.li-locked { margin: 0; padding: 11px 2px; color: var(--muted); font-size: 0.88em; border-bottom: 1px solid var(--line); }
+.li.group > .li-body { display: none; padding: 0 0 0 12px; gap: 0; justify-items: stretch; font-size: 1em; }
+.li.group.open > .li-body { display: grid; }
+.li.group > .li-body > .li:last-child { border-bottom: none; }
+
+/* Elementi: unico colore nei testi oltre alle rarità */
+.el-fire { color: #ff7a3d; }
+.el-cold { color: #6cc7ff; }
+.el-lightning { color: #f5d742; }
+.el-holy { color: #fff0a8; }
+.el-shadow { color: #a98bff; }

@@ -4,12 +4,12 @@
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
 **Ultimo aggiornamento:** 2026-10-24 (handoff: UI divisa in schede, equip automatico, inventario senza limite; tutto su `main`)
-**Fase corrente:** **grafica finale** (piano approvato dall'utente, un passo alla volta).
-Piano: 1) palette B/N ✅ (colore solo a rarità, barre vita, elementi, avvisi; token in `:root` di `src/style.css`);
-2) inventario a griglia di icone ✅ (`.inv-item` in `src/ui/gear.ts`); 3) liste lunghe a una riga con dettagli al tocco
-(Skill › tutte, Rune, Imprese, Bestiario, Collezione) e bloccati riassunti in una riga "N da sbloccare · prossima: …";
-4) colorare gli elementi (Fuoco/Gelo/Fulmine/Sacro…) nei testi.
-**Prossimo passo:** passo 3, partendo da Skill › "Tutte le skill" (`src/ui/skills.ts`), screenshot e conferma.
+**Fase corrente:** **grafica finale** (piano approvato dall'utente: bianco e nero, liste semplici).
+Fatto: palette B/N (token in `:root` di `src/style.css`; colore solo a rarità, barre vita, elementi `.el-*`, avvisi);
+inventario a griglia di icone (`.inv-item`); liste a righe apribili `src/ui/list.ts` (`createExpander`, `lockedLine`)
+in Skill, Rune (non comprate in un gruppo), Bestiario, Collezione, Imprese, Lumi bloccati; elementi colorati (`elem` in `src/ui/icons.ts`).
+**Prossimo passo:** sentire l'utente dal telefono (`?v=4` per evitare la cache); poi eventuali altre liste
+(Ascensione/Paragon/Vie/Modalità) con lo stesso schema.
 Valutare con l'utente: smantellamento automatico "fino a Comune" di default (inventario ora illimitato → salvataggio grande).
 **Online:** `main` = branch (d3790c8 + handoff).
 
