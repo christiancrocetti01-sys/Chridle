@@ -30,7 +30,7 @@ Questo file viene caricato automaticamente a ogni sessione: tienilo **breve**.
 - `src/core` logica pura e deterministica (niente DOM): è l'unica parte con test unitari.
 - Grafica (decisione utente): stile "testo puro" B/N, serif, niente scena né sagoma; colore solo a rarità/vita/elementi/avvisi (GDD §15). Logica a 10 tick/s.
   La rifinitura grafica si fa solo alla fine, a gioco finito.
-- `src/ui` interfaccia DOM/CSS. `src/data` contenuti come dati.
+- `src/ui` interfaccia DOM/CSS. `src/data` contenuti come dati. Scelte automatiche del gioco (Fase 8) in `src/core/auto.ts`/`autoequip.ts`.
 - Salvataggio in `src/core/save.ts`: cambi allo stato → alza `STATE_VERSION` e aggiungi una migrazione + test.
 - Asset esterni: verifica licenza e registrali in `docs/CREDITS.md`.
 - Verifica visiva: build + `vite preview` + screenshot Playwright (Chromium in /opt/pw-browsers).

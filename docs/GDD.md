@@ -248,3 +248,14 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
 - **Deciso:** guida per i giocatori nel gioco (pulsante «?»), `README.md` per GitHub.
 - Ispirazioni (solo concettuali): Diablo, Path of Exile, Melvor Idle, NGU Idle, Idle Champions.
 
+
+## 16. Tutto automatico (decisione utente, 2026-10-24, Fase 8)
+- Manuali restano solo: scelta della Via, quando ascendere/rinascere, modalità (Dungeon/Torre/Raid/Abisso).
+  Il resto (equip, smantellamento, skill, rune, crafting, spese permanenti, albero) lo fa il gioco.
+- Equip: ogni drop si indossa nello slot dove alza di più `gearPower` (danni × resistenza), altrimenti → Frammenti;
+  niente inventario. Le regole degli unici non entrano nel confronto (bonus fisso agli unici: proposto, non deciso).
+- Skill: 6 fisse (Colpo Sacro 1, Preghiera 5, Squarcio 12, Egida 20, Lama Rapida 30, Giudizio 45), priorità fissa
+  (difese → velocità → danno); le esplosioni usano l'elemento più debole del nemico. Niente skill delle Vie.
+- Essenza: ogni secondo compra la cosa più economica tra livelli delle skill (+10%, costo 25×1,4^(lv−1)),
+  8 rune in piano (2 per skill) e livelli del Lumo attivo. Perk "Quinto Sole" = +5 livelli a tutte le skill.
+  Corrotto: le skill di danno costano vita invece di Luce.

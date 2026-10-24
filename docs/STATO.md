@@ -3,31 +3,27 @@
 > File di passaggio di consegne tra sessioni. Aggiornato con `/handoff`.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
-**Ultimo aggiornamento:** 2026-10-24 (Fase 8, passi 1-2)
-**Fase corrente:** **Fase 8 — Tutto automatico** (ROADMAP). Grafica finale in pausa.
-**Prossimo passo:** passo 3, crafting automatico + spese permanenti automatiche (oro, Paragon, Ascensione, Lumo attivo?).
-- Passo 1: `takeItem` in `src/core/autoequip.ts` (drop, premi modalità, offline); `absorbInventory` al caricamento.
-  `gear.inventory` sempre vuoto, `autoSalvage` inutilizzato. Crafting manuale ancora sugli oggetti indossati.
-- Passo 2 (salvataggio **v21**): `SKILLS` = 6 in ordine di priorità (`src/data/skills.ts`), `skills.levels`,
-  `bestElement` in `src/core/skills.ts`; `src/core/auto.ts` (`autoEssence` ogni secondo in `step` e a fine offline,
-  `RUNE_PLAN` 2 rune per skill, `RUNE_ORDER`). Perk `slot` = +5 livelli a tutte le skill. Corrotto: skill di danno pagate
-  con la vita. Migrazione v21 rimborsa l'Essenza delle rune. UI Skill/Rune in sola lettura.
-- Collaudo 8 h dopo il passo 2: più veloce di prima (Scintille ~200-300 contro ~80-160, Torre ~52 contro ~37):
-  conta la spesa "intelligente" dell'Essenza, non i livelli delle skill. Ribilanciare al passo 5 (240 h).
-**Online:** `main` = branch (466dbd3 + handoff).
+**Ultimo aggiornamento:** 2026-10-24 (handoff: Fase 8 passi 1-2, tutto su `main`)
+**Fase corrente:** **Fase 8 — Tutto automatico** (ROADMAP; decisioni in GDD §16). Grafica finale in pausa.
+**Prossimo passo:** passo 3 — proporre il piano e chiedere conferma: crafting automatico sugli oggetti indossati
+(`src/core/craft.ts`, togliere il pannello in `src/ui/gear.ts`), oro sui Potenziamenti (cfr. `autoBuy` in
+`scripts/collaudo.ts`), Paragon e potenziamenti dell'Ascensione automatici, tutto in `src/core/auto.ts` (chiamato in `step`).
+**Online:** `main` = branch (866ec4d + handoff).
 
 ## Questa sessione (2026-10-24)
-- Palette B/N: token in `:root` di `src/style.css` (`--accent`, `--line`, `--hp`, `--foe`, `--alert`…), elementi `.el-*`
-  via `elem()` in `src/ui/icons.ts` (skill, trigger, debolezze dei nemici).
-- Liste apribili: `src/ui/list.ts` (`createExpander`: righe `.li`, aperte ricordate per chiave; `lockedLine`; gruppo `.group`).
-  Usate in Skill, Rune (non comprate in gruppo), Bestiario, Collezione, Imprese, Lumi bloccati, Guida.
-- Font EB Garamond (CREDITS), schede in alto (`.navs` in `src/ui/hud.ts`), slot a puntini in `src/ui/gear.ts`
-  (`doll.ts` eliminato), inventario a griglia (`.inv-item`).
-- Guida: `src/ui/guide.ts` + testi `src/data/guide.ts` (aggiornarli quando cambiano le regole). `README.md` nuovo.
+- Passo 1: `takeItem`/`absorbInventory` in `src/core/autoequip.ts` (drop, premi modalità, offline, caricamento).
+  `gear.inventory` sempre vuoto, `autoSalvage` inutilizzato. Pannello Oggetti senza inventario; crafting manuale rimasto.
+- Passo 2 (salvataggio **v21**): `SKILLS` = 6 (`src/data/skills.ts`), `skills.levels`, `bestElement`/`levelSkill`
+  in `src/core/skills.ts`; `src/core/auto.ts` (`autoEssence` ogni secondo in `step` e a fine offline, `RUNE_PLAN`,
+  `RUNE_ORDER`). Migrazione v21 rimborsa l'Essenza delle rune. UI Skill/Rune in sola lettura. Offline: l'Essenza
+  si conta dalle uccisioni (il campione la spende). Collaudo: niente più gestione skill/rune/Lumi manuale.
 
 ## Domande aperte
-- Smantellamento automatico "fino a Comune" di default? (inventario illimitato → salvataggio grande)
-- "Equipaggia il meglio" ha detto "16 oggetti" con 12 slot: probabilmente conta i cambi intermedi (messaggio da verificare).
+- Ritmo: a 8 h l'eroe è ~2× più avanti di prima (Scintille ~200-300 contro ~80-160, Torre ~52 contro ~37), per la spesa
+  "intelligente" dell'Essenza. Ribilanciare al passo 5 (collaudo 240 h) salvo diversa richiesta.
+- Lumo attivo: automatico anche lui? (ora lo sceglie il giocatore, il gioco ne compra i livelli)
+- Bonus fisso agli unici nel confronto dell'equip (+20%)?
+- Achievement "Runologo" ora a 1/2/4/6/8 rune; 32 rune su 40 non si usano più (da togliere o riusare?).
 - Bilanciamento: Neutro (Corruzione ~0) senza bonus va bene? Ritmo Rinascite (~30-45 in 10 giorni) ok?
 
 ## Gioco online
@@ -61,12 +57,12 @@ Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` (fast-forward) quand
 - Salvataggio: **v21** (v21 skill fisse + rimborso rune, v20 `abyss`/`paragon`/`rebirth`), prima **v19** (v11 `vie`, v12 nemico + `keys`/`mode`/`tower`, v13 `ascension`, v14 campi opzionali rune, v15 `hero.sanctity`, v16 `codex`, v17 `collection`, v18 `achievements`, v19 `lumi`).
 
 ## Test
-- `npm test`: **223 verdi** (22 file), `npm run build` ok (dopo il passo 2 della Fase 8).
+- `npm test`: **223 verdi** (22 file), `npm run build` ok (handoff 2026-10-24, dopo il passo 2 della Fase 8).
 - Collaudo: `npm run collaudo -- --ore 8 [--seed N] [--profilo id]` (`scripts/collaudo.ts`, un processo per profilo:
   5 Vie + uno con sessioni offline). 8 h: nessun NaN/crash/salvataggio rotto, ~30 s. Rilanciarlo dopo ogni sistema nuovo.
   Attenzione: nelle catene di comandi non fidarsi di `npm test | grep` (esce 0 anche se fallisce).
 - Collaudo 10 giorni (`--ore 240`, ~20 min): nessun problema. A 240 h: livello ~125, record 160-175, Abisso 37-47,
-  Paragon ~170-190, Soli 58-92, collezione 30/30 (dalle ~70 h), imprese 56-57/69, rune 27-30/40.
+  Paragon ~170-190, Soli 58-92, collezione 30/30 (dalle ~70 h), imprese 56-57/69 (prima della Fase 8: da rifare).
 
 ## Note / problemi noti
 - Muro al boss di zona 50 (scudo + rigenerazione): con Via+Stelle ~4 h fermi (rigenerazione 1%/s): **voluto**, spinge ad ascendere.
