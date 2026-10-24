@@ -8,6 +8,7 @@ export type StatKey =
   | Element | `${Element}Pct` | 'elemPct'
   | 'poison' | 'bleed' | 'lifeSteal' | 'dodge' | 'thorns'
   | 'goldPct' | 'xpPct' | 'magicFind' | 'bossDmg'
+  | 'corruption' | 'purity'
   | `${SkillTag}Skill` | `${SkillTag}Cdr`;
 
 /** Elementi: danno aggiunto a ogni colpo, non ridotto dalla difesa. */
@@ -23,6 +24,7 @@ export const STAT_LABELS: Record<StatKey, string> = {
   elemPct: 'Danno elementale',
   poison: 'Veleno al secondo', bleed: 'Sanguinamento (del danno fisico)', lifeSteal: 'Rubavita', dodge: 'Schivata', thorns: 'Danno da spine',
   goldPct: 'Oro', xpPct: 'Esperienza', magicFind: 'Ritrovamento magico', bossDmg: 'Danno ai boss',
+  corruption: 'Corruzione', purity: 'Purezza',
   ...(Object.fromEntries(SKILL_TAGS.flatMap((t) => [
     [`${t}Skill`, `Effetto delle skill ${SKILL_TAG_LABELS[t]}`],
     [`${t}Cdr`, `Riduzione ricarica delle skill ${SKILL_TAG_LABELS[t]}`],
@@ -31,7 +33,9 @@ export const STAT_LABELS: Record<StatKey, string> = {
 
 /** Statistiche piatte: crescono con il livello oggetto. Tutte le altre sono percentuali. */
 export const FLAT_STATS: ReadonlySet<StatKey> = new Set<StatKey>(['atk', 'def', 'hp', ...ELEMENTS, 'poison', 'thorns']);
-export const isPct = (stat: StatKey) => !FLAT_STATS.has(stat);
+/** Punti (Corruzione e Purezza): né percentuali né crescenti con il livello oggetto. */
+export const POINT_STATS: ReadonlySet<StatKey> = new Set<StatKey>(['corruption', 'purity']);
+export const isPct = (stat: StatKey) => !FLAT_STATS.has(stat) && !POINT_STATS.has(stat);
 
 export type ItemType =
   | 'arma' | 'secondaria' | 'elmo' | 'armatura' | 'guanti' | 'stivali'
@@ -197,6 +201,13 @@ export const AFFIXES: AffixDef[] = [
   affix('duelist', 'del Duellante', ['critico', 'difesa'], ['guanti', 'stivali', 'anello'], ['crit', 0.008], ['dodge', 0.008]),
   affix('kingslayer', 'del Cacciatore di Re', ['critico'], ['arma', 'guanti'], ['bossDmg', 0.04], ['critDmg', 0.04]),
   affix('giant', 'del Gigante', ['vita'], ['armatura', 'cintura'], ['hp', 7], ['hpPct', 0.02]),
+  // Corruzione e Purezza: un bonus forte che sposta l'eroe verso uno dei due estremi
+  affix('corruptFury', 'della Corruzione', ['ombra', 'fisico'], OFFENSE, ['atkPct', 0.06], ['corruption', 6]),
+  affix('corruptAbyss', "dell'Abisso", ['ombra'], FOCUS, ['shadowPct', 0.08], ['corruption', 6]),
+  affix('corruptSin', 'del Peccato', ['critico', 'ombra'], ['guanti', 'anello', 'amuleto'], ['critDmg', 0.1], ['corruption', 5]),
+  affix('pureWard', 'della Purezza', ['difesa', 'sacro'], ARMOR, ['defPct', 0.05], ['purity', 6]),
+  affix('pureGrace', 'della Grazia', ['vita', 'sacro'], BODY, ['hpPct', 0.05], ['purity', 6]),
+  affix('pureSeal', 'del Sigillo Santo', ['sacro'], FOCUS, ['holyPct', 0.06], ['purity', 5]),
   affix('merchant', 'del Mercante', ['fortuna'], ['cintura', 'anello'], ['goldPct', 0.04], ['magicFind', 0.04]),
   // sinergie per tag delle skill: effetto (danno, cura, scudo, velocità) e ricarica
   affix('sacroSkill', 'del Salmo', ['sacro'], FOCUS, ['sacroSkill', 0.1]),

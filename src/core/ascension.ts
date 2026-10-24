@@ -64,7 +64,7 @@ export function ascend(state: GameState): number {
   a.scintille += gain;
   a.total += gain;
   const start = startStage(a);
-  state.hero = { level: 1, xp: 0, hp: 0, swing: 0, shield: 0, hits: 0, buffs: [], nextCrit: false, light: 0 };
+  state.hero = { level: 1, xp: 0, hp: 0, swing: 0, shield: 0, hits: 0, buffs: [], nextCrit: false, light: 0, sanctity: 0 };
   state.gold = 0;
   state.upgrades = { forza: 0, corazza: 0, rapidita: 0 };
   state.stage = { current: start, best: start, kills: 0, auto: true };

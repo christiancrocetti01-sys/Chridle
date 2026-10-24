@@ -10,6 +10,7 @@ import { resMult } from './enemies';
 import { nextRandom } from './rng';
 import { isDamageSkill, skillRune } from './runes';
 import { MAX_BUFFS, applyEffect, heal } from './triggers';
+import { CORRUPT_HP_PER_LIGHT } from '../data/corruption';
 import { activeVie } from './vie';
 
 export interface SkillState {
@@ -67,7 +68,10 @@ export const skillValue = (state: GameState, hero: Stats, def: SkillDef) =>
 
 /** Costo in Luce e ricarica (in tick) con le rune Parsimonia e Rapidità, la riduzione ricarica per tag e "freeSkills". */
 export const lightCost = (state: GameState, hero: Stats, def: SkillDef) =>
-  hero.rules.has('freeSkills') ? 0 : def.light * (1 - reduction(skillRune(state, def.id, 'parsimonia')));
+  hero.rules.has('freeSkills') || paidInBlood(hero, def) ? 0 : baseLightCost(state, def);
+const baseLightCost = (state: GameState, def: SkillDef) => def.light * (1 - reduction(skillRune(state, def.id, 'parsimonia')));
+/** Corrotto: le skill d'Ombra si pagano con la vita invece che con la Luce. */
+const paidInBlood = (hero: Stats, def: SkillDef) => hero.rules.has('corruptShadow') && def.tags.includes('ombra');
 export const cooldownTicks = (state: GameState, hero: Stats, def: SkillDef) =>
   Math.round(def.cooldown * TICK_RATE * (1 - reduction(skillRune(state, def.id, 'rapidita'))) * (1 - tagCdr(hero, def))
     * (hero.rules.has('freeSkills') ? FREE_SKILLS_CD : 1));
@@ -175,6 +179,9 @@ function castSkill(state: GameState, hero: Stats, def: SkillDef, events: { push(
   if (!worthCasting(state, hero, def)) return false;
   const amount = perform(state, hero, def);
   if (amount === null) return false;
+  if (!free && paidInBlood(hero, def) && !hero.rules.has('freeSkills')) {
+    state.hero.hp = Math.max(1, state.hero.hp - baseLightCost(state, def) * CORRUPT_HP_PER_LIGHT * hero.maxHp);
+  }
   if (!free) {
     const cost = lightCost(state, hero, def);
     state.hero.light -= cost * (1 - Math.min(1, skillRune(state, def.id, 'luminescenza')));

@@ -51,6 +51,7 @@ export function damageMult(hero: Stats, enemy: EnemyState): number {
  * diventa scudo (fino alla vita massima).
  */
 export function heal(state: GameState, hero: Stats, amount: number) {
+  amount *= hero.healMult;
   const missing = hero.maxHp - state.hero.hp;
   state.hero.hp = Math.min(hero.maxHp, state.hero.hp + amount);
   if (amount <= missing) return;

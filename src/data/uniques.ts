@@ -10,7 +10,9 @@ export type RuleId =
   // Vie
   | 'reflect' | 'doubleStrike' | 'burningHits' | 'starSpirit' | 'bloodPact'
   // chiavi di volta delle regioni delle Vie
-  | 'oath' | 'twinStrike' | 'dotDouble' | 'spiritHost' | 'blackBlood';
+  | 'oath' | 'twinStrike' | 'dotDouble' | 'spiritHost' | 'blackBlood'
+  // Purezza/Corruzione (soglie)
+  | 'corruptShadow' | 'eclipse' | 'sanctity';
 
 export const RULE_TEXT: Record<RuleId, string> = {
   echoFire: 'Le esplosioni di fuoco colpiscono due volte',
@@ -21,6 +23,9 @@ export const RULE_TEXT: Record<RuleId, string> = {
   endlessPoison: 'Il veleno sul nemico non si esaurisce più',
   dodgeCrit: 'Dopo una schivata il colpo successivo è sempre critico',
   overhealShield: 'Le cure in eccesso diventano scudo',
+  corruptShadow: "Le skill d'Ombra costano vita invece di Luce",
+  eclipse: 'Eclissi: danni ×2, ma nessuna cura',
+  sanctity: 'Santità: sopravvivi a un colpo mortale ogni 30 s',
   execute: 'Danno doppio ai nemici sotto il 25% della vita',
   critBleed: 'Ogni critico fa sanguinare per il 100% del danno del colpo',
   frenzy: "Sotto il 50% della vita: +50% velocità d'attacco",

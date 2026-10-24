@@ -73,6 +73,8 @@ export const migrations: Record<number, Migration> = {
   12: (d) => ({ ...d, ascension: newAscension() }),
   // v13 → v14: rune del lotto 4 (campi opzionali su buff e nemico, assenti = 0): niente da convertire
   13: (d) => d,
+  // v14 → v15: Purezza/Corruzione (ricarica della Santità)
+  14: (d) => ({ ...d, hero: { ...(d.hero as object), sanctity: 0 } }),
 };
 
 export function serialize(state: GameState): string {

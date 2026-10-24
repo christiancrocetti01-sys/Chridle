@@ -1,6 +1,7 @@
 import { ELITE_DROP, ELITE_KEY_CHANCE, ELITE_REWARD, VAMPIRIC_SHARE } from '../data/enemies';
 import { UPGRADES, type UpgradeId } from '../data/upgrades';
 import { TICK_RATE } from './loop';
+import { SANCTITY_SECONDS } from '../data/corruption';
 import { DROP_CHANCE, INVENTORY_SIZE, rollItem, rollRarity, salvageValue, type Item } from './items';
 import { nextRandom } from './rng';
 import { essenceFor } from './runes';
@@ -47,6 +48,7 @@ export function step(state: GameState, events: CombatEvent[] = []): CombatEvent[
   const m = state.mode;
   if (!(m.kind === 'dungeon' && m.mods.includes('tenebra'))) heal(state, hero, hero.regen / TICK_RATE);
   tickBuffs(state);
+  if (state.hero.sanctity > 0) state.hero.sanctity--;
   tickSkills(state);
   tickMode(state, events);
 
@@ -151,6 +153,11 @@ function hitHero(state: GameState, hero: Stats, raw: number, events: CombatEvent
   const absorbed = Math.min(state.hero.shield, amount);
   state.hero.shield -= absorbed;
   amount -= absorbed;
+  // Santità: un colpo mortale lascia a 1 di vita, poi si ricarica
+  if (hero.rules.has('sanctity') && state.hero.sanctity <= 0 && state.hero.hp - amount <= 0) {
+    amount = Math.max(0, state.hero.hp - 1);
+    state.hero.sanctity = SANCTITY_SECONDS * TICK_RATE;
+  }
   state.hero.hp -= amount;
   if (enemy.elite === 'vampirico') enemy.hp = Math.min(enemy.maxHp, enemy.hp + amount * VAMPIRIC_SHARE);
   events.push({ type: 'hit', target: 'hero', amount, crit: false });

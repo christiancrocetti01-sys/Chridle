@@ -10,7 +10,7 @@ import { RULE_TEXT, SETS, SET_PIECES, UNIQUES } from '../data/uniques';
 import { FUSE_COUNT, FUSE_MAX_RARITY } from '../data/craft';
 import { itemIcon } from './icons';
 import { DOLL_LEFT, DOLL_RIGHT, SILHOUETTE } from './doll';
-import { ITEM_TYPES, TRIGGER_AFFIXES, affixDef, type TriggerDef, type TriggerEffect, RARITIES, SLOTS, STAT_LABELS, TAG_LABELS, isPct, type SlotId, type StatKey } from '../data/items';
+import { ITEM_TYPES, TRIGGER_AFFIXES, affixDef, type TriggerDef, type TriggerEffect, RARITIES, SLOTS, STAT_LABELS, TAG_LABELS, POINT_STATS, isPct, type SlotId, type StatKey } from '../data/items';
 
 export interface GearActions {
   equip(uid: number, slot: SlotId): void;
@@ -30,6 +30,7 @@ const esc = (s: string) => s.replace(/[&<>"]/g, (c) => `&${({ '&': 'amp', '<': '
 
 export function formatStat(stat: StatKey, v: number): string {
   if (isPct(stat)) return `${(v * 100).toFixed(v < 0.1 ? 1 : 0)}%`;
+  if (POINT_STATS.has(stat)) return String(Math.round(v));
   return v < 10 ? v.toFixed(1) : formatNum(v);
 }
 

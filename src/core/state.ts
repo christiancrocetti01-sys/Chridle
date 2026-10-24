@@ -54,6 +54,8 @@ export interface HeroState {
   nextCrit: boolean;
   /** Risorsa delle skill attive: si accumula colpendo. */
   light: number;
+  /** Tick prima che la Santità possa salvare di nuovo da un colpo mortale. */
+  sanctity: number;
 }
 
 /** Modalità in corso: la Campagna resta in pausa mentre si gioca un Dungeon, la Torre o un Raid. */
@@ -106,7 +108,7 @@ export interface GameState {
   ascension: AscensionState;
 }
 
-export const STATE_VERSION = 14;
+export const STATE_VERSION = 15;
 
 export function newGame(now: number, seed = now >>> 0): GameState {
   const upgrades = { forza: 0, corazza: 0, rapidita: 0 };
@@ -116,7 +118,7 @@ export function newGame(now: number, seed = now >>> 0): GameState {
     createdAt: now,
     lastSeen: now,
     rng: seed,
-    hero: { level: 1, xp: 0, hp: heroStats(1, upgrades).maxHp, swing: 0, shield: 0, hits: 0, buffs: [], nextCrit: false, light: 0 },
+    hero: { level: 1, xp: 0, hp: heroStats(1, upgrades).maxHp, swing: 0, shield: 0, hits: 0, buffs: [], nextCrit: false, light: 0, sanctity: 0 },
     gold: 0,
     fragments: 0,
     gear: newGear(),

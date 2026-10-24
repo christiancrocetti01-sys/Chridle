@@ -5,6 +5,9 @@ import { addStarMods } from './constellations';
 import { addViaMods, type ViaState } from './vie';
 import { addPerkMods, type AscensionState } from './ascension';
 import { BLOOD_PACT_MAX } from '../data/vie';
+import {
+  CORRUPTION_MAX, CORRUPTION_THRESHOLD, CORRUPT_DMG, CORRUPT_TANK, ECLIPSE_MULT, PURE_DMG, PURE_TANK,
+} from '../data/corruption';
 import { TOWER_BONUS, TOWER_MILESTONE } from '../data/modes';
 import { emptyMods, gearMods, gearRules, type GearState, type StatMods } from './items';
 import type { HeroState } from './state';
@@ -42,6 +45,10 @@ export interface Stats {
   skillPower: Record<SkillTag, number>;
   /** Riduzione della ricarica delle skill per tag (si somma, al massimo MAX_SKILL_CDR). */
   skillCdr: Record<SkillTag, number>;
+  /** Moltiplicatore di tutte le cure (rigenerazione e rubavita compresi). */
+  healMult: number;
+  /** Purezza/Corruzione netta, da −100 a +100. */
+  corruption: number;
   /** Regole speciali attive (unici e set completi). */
   rules: Set<RuleId>;
 }
@@ -77,6 +84,8 @@ export function heroStats(level: number, upgrades: Record<UpgradeId, number>, mo
     bossMult: 1 + mods.bossDmg,
     skillPower: Object.fromEntries(SKILL_TAGS.map((t) => [t, mods[`${t}Skill`]])) as Record<SkillTag, number>,
     skillCdr: Object.fromEntries(SKILL_TAGS.map((t) => [t, mods[`${t}Cdr`]])) as Record<SkillTag, number>,
+    healMult: 1,
+    corruption: 0,
     rules: new Set(),
   };
 }
@@ -110,6 +119,7 @@ export function stateStats(state: { hero: HeroState; upgrades: Record<UpgradeId,
   s.rules = gearRules(Object.values(state.gear.equipped));
   for (const r of starRules) s.rules.add(r);
   applyKeystones(s);
+  applyCorruption(s, mods.corruption - mods.purity);
   if (s.rules.has('noCrit')) {
     s.critChance = 0;
     s.atk *= NO_CRIT_MULT;
@@ -123,6 +133,24 @@ export function stateStats(state: { hero: HeroState; upgrades: Record<UpgradeId,
   }
   if (s.rules.has('frenzy') && state.hero.hp < s.maxHp * FRENZY_HP) s.attackSpeed *= FRENZY_SPEED;
   return s;
+}
+
+/** Purezza/Corruzione: effetto per punto e regole alle soglie (±50 e ±100). */
+function applyCorruption(s: Stats, raw: number) {
+  const c = Math.max(-CORRUPTION_MAX, Math.min(CORRUPTION_MAX, Math.round(raw)));
+  s.corruption = c;
+  if (!c) return;
+  const dmg = c > 0 ? 1 + CORRUPT_DMG * c : 1 + PURE_DMG * c;
+  const tank = c > 0 ? 1 - CORRUPT_TANK * c : 1 - PURE_TANK * c;
+  const eclipse = c >= CORRUPTION_MAX ? ECLIPSE_MULT : 1;
+  s.atk *= dmg * eclipse;
+  for (const e of ELEMENTS) s.elements[e] *= dmg * eclipse;
+  s.def *= tank;
+  s.healMult *= c >= CORRUPTION_MAX ? 0 : tank;
+  if (c >= CORRUPTION_THRESHOLD) s.rules.add('corruptShadow');
+  if (c >= CORRUPTION_MAX) s.rules.add('eclipse');
+  if (c <= -CORRUPTION_THRESHOLD) s.rules.add('overhealShield');
+  if (c <= -CORRUPTION_MAX) s.rules.add('sanctity');
 }
 
 /** Chiavi di volta delle regioni delle Vie (prima dei moltiplicatori a condizione). */
