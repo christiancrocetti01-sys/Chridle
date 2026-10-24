@@ -23,6 +23,18 @@ export const COLLECTION_BONUS: Record<string, Mods> = {
   torcia: [['firePct', 0.02], ['holyPct', 0.02]],
   astrolabio: [['magicFind', 0.03]],
   coronaNera: [['hpPct', 0.03]],
+  zannaInverno: [['coldPct', 0.03]],
+  catenaFolgore: [['lightningPct', 0.03]],
+  mietitore: [['lifeSteal', 0.002]],
+  baluardo: [['defPct', 0.03]],
+  primoRaggio: [['critDmg', 0.04]],
+  rovi: [['holyPct', 0.03]],
+  viandante: [['goldPct', 0.05]],
+  brina: [['dodge', 0.01]],
+  titano: [['hpPct', 0.03]],
+  lampo: [['speedPct', 0.02]],
+  occhioAbisso: [['shadowPct', 0.03]],
+  aurora: [['regenPct', 0.001]],
 };
 
 /** Premi di completamento (si sommano): frazione della collezione → bonus. */

@@ -1,6 +1,6 @@
 import { ELEMENTS, type Element } from '../data/items';
 import type { UpgradeId } from '../data/upgrades';
-import type { RuleId } from '../data/uniques';
+import { LAST_STAND_DEF, LAST_STAND_HP, LAST_STAND_LEECH, THORNS_AURA_MULT, type RuleId } from '../data/uniques';
 import { addStarMods } from './constellations';
 import { addViaMods, type ViaState } from './vie';
 import { addPerkMods, type AscensionState } from './ascension';
@@ -144,6 +144,11 @@ export function stateStats(state: { hero: HeroState; upgrades: Record<UpgradeId,
     for (const e of ELEMENTS) s.elements[e] *= pact;
   }
   if (s.rules.has('frenzy') && state.hero.hp < s.maxHp * FRENZY_HP) s.attackSpeed *= FRENZY_SPEED;
+  if (s.rules.has('lastStand') && state.hero.hp < s.maxHp * LAST_STAND_HP) {
+    s.def *= LAST_STAND_DEF;
+    s.lifeSteal += LAST_STAND_LEECH;
+  }
+  if (s.rules.has('thornsAura')) s.thorns *= THORNS_AURA_MULT;
   return s;
 }
 

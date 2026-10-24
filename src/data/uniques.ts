@@ -12,7 +12,9 @@ export type RuleId =
   // chiavi di volta delle regioni delle Vie
   | 'oath' | 'twinStrike' | 'dotDouble' | 'spiritHost' | 'blackBlood'
   // Purezza/Corruzione (soglie)
-  | 'corruptShadow' | 'eclipse' | 'sanctity';
+  | 'corruptShadow' | 'eclipse' | 'sanctity'
+  // lotto 5 (unici e set)
+  | 'frostbite' | 'chainLightning' | 'soulHarvest' | 'lastStand' | 'firstStrike' | 'thornsAura' | 'luckyDrops';
 
 export const RULE_TEXT: Record<RuleId, string> = {
   echoFire: 'Le esplosioni di fuoco colpiscono due volte',
@@ -44,6 +46,13 @@ export const RULE_TEXT: Record<RuleId, string> = {
   dotDouble: 'Veleno e sanguinamento fanno il doppio del danno, ma il danno elementale dei colpi si dimezza',
   spiritHost: "Due spiriti stellari in più (ognuno colpisce ogni secondo per il 50% dell'attacco), ma −25% vita",
   blackBlood: 'Tutti i danni +50%, ma la vita massima si dimezza',
+  frostbite: 'Il gelo intorpidisce: il nemico attacca il 30% più lentamente',
+  chainLightning: "Ogni critico scarica un fulmine pari al 100% dell'attacco",
+  soulHarvest: 'Ogni uccisione cura il 20% della vita',
+  lastStand: 'Sotto il 30% della vita: difesa ×2 e +5% rubavita',
+  firstStrike: 'Il primo colpo su ogni nemico fa danno ×4',
+  thornsAura: 'Spine ×3, e feriscono anche quando schivi',
+  luckyDrops: 'Il bottino ha il 15% di probabilità di salire di una rarità',
 };
 
 /** Esplosioni che raddoppiano con ogni regola "eco". */
@@ -84,6 +93,19 @@ export const UNIQUES: UniqueDef[] = [
   { id: 'torcia', name: "Torcia dell'Inquisitore", type: 'reliquia', tags: ['fuoco'], mods: [['fire', 3], ['firePct', 0.15]], rule: 'burningHits' },
   { id: 'astrolabio', name: 'Astrolabio del Custode', type: 'amuleto', tags: ['sacro', 'fulmine'], mods: [['holyPct', 0.15], ['lightningPct', 0.15]], rule: 'starSpirit' },
   { id: 'coronaNera', name: "Corona dell'Eclissi Nera", type: 'elmo', tags: ['ombra'], mods: [['shadow', 3], ['shadowPct', 0.2]], rule: 'bloodPact' },
+  // lotto 5: regole nuove e varianti di quelle esistenti su altri slot
+  { id: 'zannaInverno', name: "Zanna dell'Inverno", type: 'arma', tags: ['gelo'], mods: [['cold', 3], ['coldPct', 0.15]], rule: 'frostbite' },
+  { id: 'catenaFolgore', name: 'Catena della Folgore', type: 'anello', tags: ['fulmine', 'critico'], mods: [['lightning', 1.5], ['crit', 0.03]], rule: 'chainLightning' },
+  { id: 'mietitore', name: 'Falce del Mietitore', type: 'arma', tags: ['ombra', 'rubavita'], mods: [['shadowPct', 0.15], ['lifeSteal', 0.01]], rule: 'soulHarvest' },
+  { id: 'baluardo', name: "Scudo dell'Ultimo Baluardo", type: 'secondaria', tags: ['difesa', 'vita'], mods: [['defPct', 0.2], ['hpPct', 0.08]], rule: 'lastStand' },
+  { id: 'primoRaggio', name: 'Guanti del Primo Raggio', type: 'guanti', tags: ['fisico', 'critico'], mods: [['atkPct', 0.1], ['critDmg', 0.2]], rule: 'firstStrike' },
+  { id: 'rovi', name: 'Corazza dei Rovi Sacri', type: 'armatura', tags: ['difesa', 'sacro'], mods: [['thorns', 3], ['defPct', 0.1]], rule: 'thornsAura' },
+  { id: 'viandante', name: 'Fede del Viandante', type: 'anello', tags: ['fortuna'], mods: [['magicFind', 0.15], ['goldPct', 0.2]], rule: 'luckyDrops' },
+  { id: 'brina', name: 'Manto della Brina Perenne', type: 'mantello', tags: ['gelo', 'difesa'], mods: [['cold', 2], ['dodge', 0.03]], rule: 'echoCold' },
+  { id: 'titano', name: 'Cintura del Titano', type: 'cintura', tags: ['difesa', 'vita'], mods: [['hp', 25], ['hpPct', 0.12]], rule: 'oath' },
+  { id: 'lampo', name: 'Stivali del Lampo', type: 'stivali', tags: ['fulmine', 'velocita'], mods: [['lightningPct', 0.15], ['speedPct', 0.06]], rule: 'echoLightning' },
+  { id: 'occhioAbisso', name: "Occhio dell'Abisso", type: 'amuleto', tags: ['ombra', 'veleno'], mods: [['poison', 2], ['shadowPct', 0.1]], rule: 'dotDouble' },
+  { id: 'aurora', name: "Reliquia dell'Aurora", type: 'reliquia', tags: ['sacro', 'vita'], mods: [['holy', 2], ['regenPct', 0.004]], rule: 'overhealHoly' },
 ];
 
 export interface SetDef {
@@ -147,6 +169,50 @@ export const SETS: SetDef[] = [
     bonus4: { on: 'everyN', n: 3, effect: { kind: 'poison', value: 1.2 } },
     bonus6: { rule: 'endlessPoison', mods: [['bleed', 0.1]] },
   },
+  {
+    id: 'sentinella', name: 'Sentinella del Gelo', tags: ['gelo', 'difesa'],
+    pieces: [
+      { type: 'arma', name: 'Ascia della Sentinella' }, { type: 'elmo', name: 'Elmo della Sentinella' },
+      { type: 'armatura', name: 'Corazza della Sentinella' }, { type: 'stivali', name: 'Schinieri della Sentinella' },
+      { type: 'mantello', name: 'Mantello della Sentinella' }, { type: 'amuleto', name: 'Amuleto della Sentinella' },
+    ],
+    bonus2: [['coldPct', 0.25], ['defPct', 0.1]],
+    bonus4: { on: 'struck', effect: { kind: 'burst', element: 'cold', value: 1.5 } },
+    bonus6: { rule: 'frostbite', mods: [['hpPct', 0.2]] },
+  },
+  {
+    id: 'tempesta', name: 'Tempesta', tags: ['fulmine', 'velocita'],
+    pieces: [
+      { type: 'arma', name: 'Lancia della Tempesta' }, { type: 'elmo', name: 'Corona della Tempesta' },
+      { type: 'guanti', name: 'Bracciali della Tempesta' }, { type: 'stivali', name: 'Calzari della Tempesta' },
+      { type: 'cintura', name: 'Fascia della Tempesta' }, { type: 'anello', name: 'Anello della Tempesta' },
+    ],
+    bonus2: [['lightningPct', 0.25], ['speedPct', 0.05]],
+    bonus4: { on: 'everyN', n: 4, effect: { kind: 'burst', element: 'lightning', value: 1.2 } },
+    bonus6: { rule: 'chainLightning', mods: [['crit', 0.05]] },
+  },
+  {
+    id: 'sangue', name: 'Signore del Sangue', tags: ['rubavita', 'vita'],
+    pieces: [
+      { type: 'arma', name: 'Spadone del Signore del Sangue' }, { type: 'secondaria', name: 'Calice del Signore del Sangue' },
+      { type: 'armatura', name: 'Usbergo del Signore del Sangue' }, { type: 'cintura', name: 'Cinghia del Signore del Sangue' },
+      { type: 'mantello', name: 'Cappa del Signore del Sangue' }, { type: 'reliquia', name: 'Icona del Signore del Sangue' },
+    ],
+    bonus2: [['lifeSteal', 0.015], ['hpPct', 0.1]],
+    bonus4: { on: 'kill', effect: { kind: 'heal', value: 0.08 } },
+    bonus6: { rule: 'soulHarvest', mods: [['atkPct', 0.25]] },
+  },
+  {
+    id: 'pellegrino', name: 'Pellegrino Fortunato', tags: ['fortuna', 'velocita'],
+    pieces: [
+      { type: 'elmo', name: 'Cappuccio del Pellegrino' }, { type: 'guanti', name: 'Guanti del Pellegrino' },
+      { type: 'stivali', name: 'Stivali del Pellegrino' }, { type: 'cintura', name: 'Cintura del Pellegrino' },
+      { type: 'anello', name: 'Fede del Pellegrino' }, { type: 'amuleto', name: 'Medaglione del Pellegrino' },
+    ],
+    bonus2: [['magicFind', 0.2], ['goldPct', 0.25]],
+    bonus4: { on: 'kill', effect: { kind: 'haste', value: 0.2, seconds: 5 } },
+    bonus6: { rule: 'luckyDrops', mods: [['xpPct', 0.3]] },
+  },
 ];
 
 /** Probabilità che un drop sia un unico (da Leggendario in su) o un pezzo di set (da Epico in su). */
@@ -154,3 +220,20 @@ export const UNIQUE_CHANCE = 0.25;
 export const UNIQUE_MIN_RARITY = 4;
 export const SET_CHANCE = 0.08;
 export const SET_MIN_RARITY = 3;
+
+// ── regole del lotto 5 ──
+/** Gelo che intorpidisce: velocità d'attacco del nemico. */
+export const FROSTBITE_SPEED = 0.7;
+/** Fulmine a catena: frazione dell'attacco a ogni critico (danno da fulmine). */
+export const CHAIN_LIGHTNING_ATK = 1;
+/** Raccolto delle anime: vita curata a ogni uccisione. */
+export const SOUL_HARVEST_HEAL = 0.2;
+/** Ultimo baluardo: soglia di vita, moltiplicatore della difesa e rubavita in più. */
+export const LAST_STAND_HP = 0.3;
+export const LAST_STAND_DEF = 2;
+export const LAST_STAND_LEECH = 0.05;
+/** Primo colpo su ogni nemico. */
+export const FIRST_STRIKE_MULT = 4;
+export const THORNS_AURA_MULT = 3;
+/** Bottino fortunato: probabilità di salire di una rarità. */
+export const LUCKY_DROP_CHANCE = 0.15;

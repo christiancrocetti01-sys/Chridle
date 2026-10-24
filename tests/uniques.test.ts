@@ -194,6 +194,76 @@ describe('regole speciali', () => {
   });
 });
 
+describe('regole del lotto 5', () => {
+  const firstHit = (s: GameState) => {
+    s.enemy!.def = 0;
+    s.hero.swing = 0.99;
+    const h = run(s, 1).find((e) => e.type === 'hit');
+    return h?.type === 'hit' ? h.amount : NaN;
+  };
+
+  it('ogni unico e ogni set ha una regola con il suo testo; 6 pezzi di tipi diversi per set', () => {
+    expect(UNIQUES.length).toBe(30);
+    expect(SETS.length).toBe(8);
+    expect(new Set(UNIQUES.map((u) => u.id)).size).toBe(UNIQUES.length);
+    for (const set of SETS) expect(new Set(set.pieces.map((p) => p.type)).size).toBe(6);
+  });
+
+  it('gelo che intorpidisce: il nemico attacca più piano', () => {
+    const swing = (s: GameState) => {
+      s.enemy!.swing = 0;
+      s.hero.swing = -1e9;
+      run(s, 1);
+      return s.enemy!.swing / s.enemy!.attackSpeed;
+    };
+    expect(swing(withRule('frostbite')) / swing(withRule('execute'))).toBeCloseTo(0.7);
+  });
+
+  it('fulmine a catena: un critico toglie in più il 100% dell\'attacco', () => {
+    const s = withRule('chainLightning');
+    s.hero.nextCrit = true;
+    s.enemy!.def = 0;
+    s.hero.swing = 0.99;
+    const before = s.enemy!.hp;
+    const ev = run(s, 1);
+    const h = ev.find((e) => e.type === 'hit')!;
+    const extra = before - s.enemy!.hp - (h.type === 'hit' ? h.amount : 0);
+    expect(extra).toBeGreaterThan(stateStats(s).atk * 0.5);
+  });
+
+  it('raccolto delle anime: uccidere cura', () => {
+    const s = withRule('soulHarvest');
+    s.hero.hp = 1;
+    s.enemy!.hp = 0.1;
+    s.hero.swing = 0.99;
+    run(s, 1);
+    expect(s.hero.hp).toBeGreaterThan(stateStats(s).maxHp * 0.15);
+  });
+
+  it('ultimo baluardo: sotto il 30% della vita difesa doppia', () => {
+    const s = withRule('lastStand');
+    const def = stateStats(s).def;
+    s.hero.hp = 1;
+    expect(stateStats(s).def).toBeCloseTo(def * 2);
+  });
+
+  it('primo raggio: il primo colpo fa ×4, il secondo no', () => {
+    const a = withRule('firstStrike');
+    const b = withRule('firstStrike');
+    b.hero.hits = 1;
+    expect(firstHit(a) / firstHit(b)).toBeCloseTo(4, 0);
+  });
+
+  it('aura di rovi: spine ×3', () => {
+    const thorns = [{ stat: 'thorns' as const, value: 10 }];
+    const s = withRule('thornsAura');
+    s.gear.equipped.armatura!.special!.mods = thorns;
+    const plain = withRule('execute');
+    plain.gear.equipped.arma!.special!.mods = thorns;
+    expect(stateStats(s).thorns).toBeCloseTo(3 * stateStats(plain).thorns);
+  });
+});
+
 describe('salvataggio v6', () => {
   it('migra un v5 aggiungendo il critico garantito', () => {
     const s = newGame(0, 1);

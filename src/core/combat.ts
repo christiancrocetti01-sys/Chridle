@@ -13,6 +13,10 @@ import { castOnCrit, castSkills, gainLight, tickSkills, unlockSkills, type Skill
 import { damageMult, fireTriggers, gearTriggers, heal, tickBuffs, type ActiveTrigger, type ProcEvent } from './triggers';
 import { BURNING_SHARE, DOUBLE_STRIKE_CHANCE, REFLECT_SHARE, SPIRIT_ATK } from '../data/vie';
 import type { GameState } from './state';
+import {
+  CHAIN_LIGHTNING_ATK, FIRST_STRIKE_MULT, FROSTBITE_SPEED, LUCKY_DROP_CHANCE, SOUL_HARVEST_HEAL,
+} from '../data/uniques';
+import { RARITIES } from '../data/items';
 import { activeVie } from './vie';
 import { perkValue } from './ascension';
 import { elementalVs, enemyAtk, resMult, spawnEnemy, tickEnemy, type MechanicEvent } from './enemies';
@@ -110,13 +114,14 @@ export function step(state: GameState, events: CombatEvent[] = []): CombatEvent[
   castSkills(state, hero, events);
   if (enemy.hp <= 0) return kill(state, events);
 
-  enemy.swing += enemy.attackSpeed / TICK_RATE;
+  enemy.swing += (enemy.attackSpeed * (hero.rules.has('frostbite') ? FROSTBITE_SPEED : 1)) / TICK_RATE;
   if (enemy.swing >= 1) {
     enemy.swing -= 1;
     // si tira la schivata solo se serve: senza schivata la sequenza dell'RNG non cambia
     if (hero.dodge > 0 && nextRandom(state) < hero.dodge) {
       events.push({ type: 'dodge' });
       if (hero.rules.has('dodgeCrit')) state.hero.nextCrit = true;
+      if (hero.rules.has('thornsAura')) enemy.hp -= hero.thorns * dmgMult;
       fireTriggers(state, hero, triggers, 'dodge', events);
       if (enemy.hp <= 0) kill(state, events);
       return events;
@@ -134,7 +139,8 @@ function strike(state: GameState, hero: Stats, dmgMult: number, triggers: Active
   const enemy = state.enemy!;
   const crit = (nextRandom(state) < hero.critChance || state.hero.nextCrit) && !hero.rules.has('noCrit');
   state.hero.nextCrit = false;
-  const mult = crit ? hero.critMult : 1;
+  // Primo Raggio: il primo colpo su ogni nemico
+  const mult = (crit ? hero.critMult : 1) * (state.hero.hits === 0 && hero.rules.has('firstStrike') ? FIRST_STRIKE_MULT : 1);
   const physical = mitigate(hero.atk * mult, enemy.def) * resMult(enemy, 'physical') * dmgMult;
   const amount = physical + elementalVs(hero, enemy) * mult * dmgMult;
   enemy.hp -= amount;
@@ -145,6 +151,7 @@ function strike(state: GameState, hero: Stats, dmgMult: number, triggers: Active
   state.hero.hits++;
   gainLight(state);
   if (crit) {
+    if (hero.rules.has('chainLightning')) enemy.hp -= hero.atk * CHAIN_LIGHTNING_ATK * hero.elemMult.lightning * resMult(enemy, 'lightning') * dmgMult;
     fireTriggers(state, hero, triggers, 'crit', events);
     castOnCrit(state, hero, events);
   }
@@ -207,6 +214,7 @@ function onKill(state: GameState, events: CombatEvent[]) {
   state.hero.hits = 0;
   events.push({ type: 'kill', gold, xp, essence, boss });
   fireTriggers(state, hero, gearTriggers(state.gear), 'kill', events);
+  if (hero.rules.has('soulHarvest')) heal(state, hero, hero.maxHp * SOUL_HARVEST_HEAL);
   gainXp(state, xp, events);
   if (!raid) dropLoot(state, stage, boss, !!elite, events);
 
@@ -233,7 +241,11 @@ function onKill(state: GameState, events: CombatEvent[]) {
 function dropLoot(state: GameState, stage: number, boss: boolean, elite: boolean, events: CombatEvent[]) {
   if (!boss && nextRandom(state) >= (elite ? ELITE_DROP : DROP_CHANCE)) return;
   const gear = state.gear;
-  const item = rollItem(state, gear.nextId++, stage, rollRarity(state, boss, stateStats(state).magicFind));
+  const hero = stateStats(state);
+  let rarity = rollRarity(state, boss, hero.magicFind);
+  // Viandante: si tira solo con la regola (la sequenza dell'RNG non cambia)
+  if (hero.rules.has('luckyDrops') && rarity < RARITIES.length - 1 && nextRandom(state) < LUCKY_DROP_CHANCE) rarity++;
+  const item = rollItem(state, gear.nextId++, stage, rarity);
   const salvaged = item.rarity <= gear.autoSalvage || gear.inventory.length >= INVENTORY_SIZE;
   if (salvaged) state.fragments += salvageValue(item);
   else gear.inventory.push(item);
