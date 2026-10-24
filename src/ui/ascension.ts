@@ -1,5 +1,5 @@
 import { canAscend, perkCost, perkLevel, perkValue, scintilleGain } from '../core/ascension';
-import { canRebirth, lootMult, paragonFree, powerMult, rebirthGain, sparkMult } from '../core/endgame';
+import { canRebirth, cycleScintille, lootMult, paragonFree, powerMult, rebirthGain, sparkMult } from '../core/endgame';
 import { PARAGON, REBIRTH_SCINTILLE, paragonCost, type ParagonId } from '../data/endgame';
 import { STAT_LABELS } from '../data/items';
 import { formatStat } from './gear';
@@ -86,7 +86,7 @@ function rebirthBlock(state: GameState, confirm: boolean): string {
         e si riparte da capo. Restano oggetti, rune, Torre, Abisso, Paragon, collezione e Lumi.</div>
       <div class="skill-info">${r.soli ? `Ora: attacco, vita e difesa <b>×${powerMult(r).toFixed(1)}</b> · oro, XP, Essenza e Paragon ×${lootMult(r).toFixed(1)} · Scintille ×${sparkMult(r).toFixed(2)}`
         : '<span class="muted">Ogni Sole: attacco, vita e difesa +100%, oro, XP ed Essenza +50%, Scintille +25%. Per sempre.</span>'}</div>
-      <div class="skill-info muted">Soli = √(Scintille del ciclo / 100), da ${REBIRTH_SCINTILLE} Scintille guadagnate (ora ${formatNum(state.ascension.total)}).</div>
+      <div class="skill-info muted">Soli = √(Scintille del ciclo / 100), da ${REBIRTH_SCINTILLE} Scintille guadagnate (ora ${formatNum(Math.floor(cycleScintille(state)))}${r.soli ? ', senza il bonus dei Soli' : ''}).</div>
     </div>`;
 }
 

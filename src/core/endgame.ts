@@ -71,7 +71,9 @@ export const sparkMult = (r: RebirthState | undefined) => 1 + (r?.soli ?? 0) * S
 
 export const abyssUnlocked = (state: GameState) => state.ascension.count >= ABYSS_ASCENSIONS || state.rebirth.count > 0;
 
-export const rebirthGain = (state: GameState) => soliFor(state.ascension.total);
+/** Scintille del ciclo senza il bonus dei Soli: ogni Rinascita chiede lo stesso progresso reale. */
+export const cycleScintille = (state: GameState) => state.ascension.total / sparkMult(state.rebirth);
+export const rebirthGain = (state: GameState) => soliFor(cycleScintille(state));
 export const canRebirth = (state: GameState) => rebirthGain(state) > 0 && state.mode.kind === 'campaign';
 
 /**

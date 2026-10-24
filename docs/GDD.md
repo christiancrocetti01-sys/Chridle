@@ -188,7 +188,7 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
 - **Fatto (Paragon):** livelli infiniti solo dall'Abisso (costo 100 × (l+1)^1,5), 1 punto per livello su 8 bonus a scelta
   (+2% attacco/vita/difesa/danno critico/elementale, +0,5% velocità, +1% ritrovamento, +3% oro e +2% XP); i punti si
   riprendono gratis. Permanente.
-- **Fatto (Rinascita Solare):** da 400 Scintille guadagnate nel ciclo; Soli = √(Scintille / 100). Azzera Ascensioni, Scintille
+- **Fatto (Rinascita Solare):** da 400 Scintille guadagnate nel ciclo; Soli = √(Scintille / 100), contate senza il bonus dei Soli (dopo il collaudo di 10 giorni: senza, ~70 Rinascite in 240 h). Azzera Ascensioni, Scintille
   e potenziamenti (tranne Quinto Sole e Doppia Via) e riparte da capo. Ogni Sole, per sempre: attacco/vita/difesa +100%,
   oro/XP/Essenza/Paragon +50%, Scintille +25%. Imprese nuove: Abissale, Paragone, Rinato.
 - Numeri grandi: supporto oltre 1e308 (libreria tipo `break_infinity.js`) **rimandato** finché non serve

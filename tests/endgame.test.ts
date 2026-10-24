@@ -127,6 +127,14 @@ describe('Rinascita Solare', () => {
     expect(s.paragon.level).toBe(7);
   });
 
+  it('la soglia conta le Scintille senza il bonus dei Soli', () => {
+    const s = ready();
+    s.rebirth.soli = 4; // Scintille ×2
+    expect(canRebirth(s)).toBe(false);
+    s.ascension.total = REBIRTH_SCINTILLE * 2;
+    expect(canRebirth(s)).toBe(true);
+  });
+
   it('i Soli moltiplicano attacco, vita e ricompense', () => {
     const a = newGame(0, 1);
     const b = newGame(0, 1);
