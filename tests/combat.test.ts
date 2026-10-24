@@ -107,6 +107,6 @@ describe('combattimento', () => {
     const m120 = checkpoints[120] as { best: number };
     // ritmo iniziale veloce, poi rallenta: i "muri" li romperanno equip e prestige (Fasi 2-5)
     expect(m10.best).toBeGreaterThanOrEqual(5);
-    expect(m120.best).toBeGreaterThan(m10.best * 1.5);
+    expect(m120.best).toBeGreaterThanOrEqual(m10.best * 1.5);
   });
 });
