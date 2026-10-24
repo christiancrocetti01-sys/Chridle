@@ -2,6 +2,7 @@ import './style.css';
 import { MAX_TICKS_PER_FRAME, TICK_MS, stepAccumulator } from './core/loop';
 import { loadGame, saveGame, type StorageLike } from './core/save';
 import { buyUpgrade, changeGear, step, type CombatEvent } from './core/combat';
+import { fuseItems, rerollAffix, transferAffix, upgradeAffix } from './core/craft';
 import { equip, salvage, salvageUpTo, unequip } from './core/items';
 import { newGame } from './core/state';
 import { createHud } from './ui/hud';
@@ -30,6 +31,10 @@ function main() {
     salvage: (uid) => (state.fragments += salvage(state.gear, uid)),
     salvageUpTo: (r) => (state.fragments += salvageUpTo(state.gear, r)),
     setAutoSalvage: (r) => (state.gear.autoSalvage = r),
+    reroll: (uid, i) => changeGear(state, () => rerollAffix(state, uid, i)),
+    upgrade: (uid, i) => changeGear(state, () => upgradeAffix(state, uid, i)),
+    transfer: (uid, i, d, j) => changeGear(state, () => transferAffix(state, uid, i, d, j)),
+    fuse: (uids) => fuseItems(state, uids),
   });
 
   let acc = 0;

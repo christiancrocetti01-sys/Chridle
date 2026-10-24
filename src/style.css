@@ -138,6 +138,13 @@ html, body {
 .compare .down { color: #ff6b6b; }
 .actions { margin-top: 10px; }
 .btn:disabled { opacity: 0.45; cursor: default; }
+.btn.sm { padding: 4px 8px; font-size: 0.85em; text-align: left; }
+
+.craft { min-width: 0; margin-top: 12px; padding-top: 8px; border-top: 1px solid #2a2f4a; display: grid; gap: 6px; }
+.craft-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.craft-list li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 8px; align-items: center; }
+.craft-btns { display: flex; flex-wrap: wrap; gap: 4px; }
+.craft-pick select { display: block; width: 100%; margin-top: 4px; background: #0b0e1f; color: var(--text); border: 1px solid #2a2f4a; font: inherit; padding: 4px; }
 
 .salvage-row { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin-top: 10px; font-size: 0.9em; }
 .salvage-row select { margin-left: 6px; background: #0b0e1f; color: var(--text); border: 1px solid #2a2f4a; font: inherit; padding: 4px; }

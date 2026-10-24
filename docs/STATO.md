@@ -3,12 +3,9 @@
 > File di passaggio di consegne tra sessioni. Aggiornato con `/handoff`.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
-**Ultimo aggiornamento:** 2026-10-24 (handoff dopo varietà 3)
-**Fase corrente:** 2 — Equipaggiamento, varietà (punti 1-3 fatti, manca il crafting).
-**Prossimo passo:** Varietà 4 — **crafting con i Frammenti**. Proposta in attesa di risposta dell'utente:
-ritirare un affisso (costo crescente), migliorare il tier, aggiungere un affisso se c'è spazio (o altro, es.
-fondere oggetti). Logica in `src/core/items.ts` (o nuovo `src/core/craft.ts`), costi in `src/data/`, UI nel
-dettaglio oggetto di `src/ui/gear.ts`. Poi Fase 3 (skill e build).
+**Ultimo aggiornamento:** 2026-10-24 (varietà 4 fatta)
+**Fase corrente:** 2 completata (varietà 1-4). **Prossimo passo:** Fase 3 (skill e build) — da pianificare.
+**Da chiedere:** allineare `main` con la varietà 4 (crafting) dopo che l'utente l'ha provata.
 **Grafica:** decisa **minimale** (niente scena, niente asset da scaricare): UI DOM + sagoma SVG.
 
 ## Gioco online
@@ -27,23 +24,27 @@ Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` (fast-forward) quand
   Sanguinamento e veleno = riserve sul nemico consumate nel tempo (`BLEED_RATE`, `POISON_RATE`).
 - Varietà 3 (`src/data/uniques.ts`): 13 regole speciali (`RuleId`), 13 unici, 4 set (bonus 2/4/6).
   Oggetto: `item.special`; regole in `Stats.rules` (da `gearRules`); bonus set in `itemMods`.
-- Salvataggio: **v6** (v4 affissi `mods[]`, v5 scudo/buff/colpi/riserve, v6 `hero.nextCrit`).
+- Varietà 4 (`src/core/craft.ts`, costi in `src/data/craft.ts`, UI nel dettaglio oggetto): ritira affisso,
+  migliora tier (max T5), trasferisci affisso da un donatore (distrutto), fusione 3 uguali → rarità successiva
+  (max Mitico, può uscire un unico/set). Unici e set esclusi. Costo × 1,5 per ogni modifica (`item.crafts`).
+- Salvataggio: **v7** (v4 affissi `mods[]`, v5 scudo/buff/colpi/riserve, v6 `hero.nextCrit`, v7 `item.crafts`).
 
 ## Scelte fatte da Claude (da confermare se l'utente obietta)
 - `triggerChance` per rarità 30/50/75/100% (Epico→Divino).
 - Max 20 buff di velocità insieme (regola "hasteStacks").
 - Anche la rigenerazione conta come "cura in eccesso" → con quella regola lo scudo si riempie a vita piena.
+- Costi crafting: base = valore di smantellamento × ritira 1 / migliora 2×tier / trasferisci 3; fusione =
+  smantellamento della rarità ottenuta. Trasferimento: piatte adattate al livello oggetto, max 1 effetto a scatto.
 - Statistiche piatte degli unici = valore × 2 (come un T3) × crescita del livello oggetto.
 
 ## Test
-- `npm test`: **76 verdi** (7 file), `npm run build` ok (handoff 2026-10-24).
+- `npm test`: **88 verdi** (8 file), `npm run build` ok (handoff 2026-10-24).
 - Simulazione (`tests/combat.test.ts`): 2 h senza equip stage 27, con equip automatico 43. L'equip automatico
   **non valuta** trigger, unici e set: la potenza reale di quelle build non è misurata.
 
 ## Note / problemi noti
 - Un solo nemico (Ghoul) e un solo boss.
 - Progresso offline non calcolato: oltre 50 tick/frame (5 s) il resto viene scartato (Fase 5).
-- I Frammenti non si spendono ancora (arriva il crafting).
 - Verifica visiva: salvataggio di prova iniettato con `page.addInitScript` (il gioco salva alla chiusura e
   sovrascriverebbe un `localStorage.setItem` + reload). `vite preview` va aperto su `/`, non su `/Chridle/`.
 - GitHub Pages: l'ambiente `github-pages` deve consentire il branch `main` (già sistemato).

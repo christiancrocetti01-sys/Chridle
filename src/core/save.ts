@@ -42,6 +42,8 @@ export const migrations: Record<number, Migration> = {
   }),
   // v5 → v6: unici e set (campo opzionale sugli oggetti) e il critico garantito dopo una schivata
   5: (d) => ({ ...d, hero: { ...(d.hero as object), nextCrit: false } }),
+  // v6 → v7: crafting (contatore `crafts` opzionale sugli oggetti, assente = 0): niente da convertire
+  6: (d) => d,
 };
 
 export function serialize(state: GameState): string {

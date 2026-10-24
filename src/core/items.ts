@@ -1,6 +1,6 @@
 import {
   AFFIX_TIERS, FLAT_STATS, ITEM_TYPES, RARITIES, SLOTS, STAT_LABELS, affixDef, affixesFor, triggersFor,
-  type ItemType, type SlotId, type StatKey,
+  type AffixDef, type ItemType, type SlotId, type StatKey, type TriggerDef,
 } from '../data/items';
 import {
   SETS, SET_CHANCE, SET_MIN_RARITY, SET_PIECES, UNIQUES, UNIQUE_CHANCE, UNIQUE_MIN_RARITY, type RuleId,
@@ -25,6 +25,8 @@ export interface Item {
   name: string;
   base: { stat: StatKey; value: number };
   affixes: Affix[];
+  /** Modifiche di crafting già fatte: ognuna alza il costo della successiva. */
+  crafts?: number;
   /** Leggendario unico (con le sue statistiche fisse) o pezzo di un set. */
   special?: { kind: 'unique' | 'set'; id: string; mods: { stat: StatKey; value: number }[] };
 }
@@ -39,7 +41,7 @@ export interface GearState {
   autoSalvage: number;
 }
 
-type Rng = { rng: number };
+export type Rng = { rng: number };
 
 export const INVENTORY_SIZE = 40;
 /** Probabilità di drop da un nemico normale; i boss lasciano sempre un oggetto. */
@@ -57,7 +59,23 @@ function pickWeighted<T extends { weight: number }>(rng: Rng, list: T[]): T {
   return list[list.length - 1];
 }
 
-const pick = <T>(rng: Rng, list: T[]): T => list[Math.floor(nextRandom(rng) * list.length)];
+export const pick = <T>(rng: Rng, list: T[]): T => list[Math.floor(nextRandom(rng) * list.length)];
+
+export const itemGrowth = (ilvl: number) => Math.pow(ILVL_GROWTH, ilvl - 1);
+
+/** Tira tier e valori di un affisso normale; le statistiche piatte crescono con `growth`. */
+export function rollAffix(rng: Rng, a: AffixDef, growth: number): Affix {
+  const t = pickWeighted(rng, AFFIX_TIERS);
+  const roll = 0.85 + 0.3 * nextRandom(rng);
+  const mods = a.mods.map((m) => ({ stat: m.stat, value: m.value * t.mult * roll * (FLAT_STATS.has(m.stat) ? growth : 1) }));
+  return { id: a.id, tier: t.tier, mods };
+}
+
+/** Tira tier e potenza di un effetto a scatto. */
+export function rollTrigger(rng: Rng, a: TriggerDef): Affix {
+  const t = pickWeighted(rng, AFFIX_TIERS);
+  return { id: a.id, tier: t.tier, mods: [], power: t.mult * (0.85 + 0.3 * nextRandom(rng)) };
+}
 
 /** `magicFind` moltiplica il peso di tutte le rarità sopra Comune. */
 export function rollRarity(rng: Rng, boss = false, magicFind = 0): number {
@@ -70,7 +88,7 @@ export function rollRarity(rng: Rng, boss = false, magicFind = 0): number {
 /** Genera un oggetto casuale. Deterministico: dipende solo dallo stato dell'RNG. */
 export function rollItem(rng: Rng, uid: number, ilvl: number, rarity: number, type?: ItemType): Item {
   const r = RARITIES[rarity];
-  const growth = Math.pow(ILVL_GROWTH, ilvl - 1);
+  const growth = itemGrowth(ilvl);
   const special = rollSpecial(rng, rarity, growth, type);
   const def = ITEM_TYPES.find((t) => t.id === (special?.type ?? type)) ?? pick(rng, ITEM_TYPES);
   // piccola variazione (±10%) anche sulla statistica di base
@@ -81,16 +99,11 @@ export function rollItem(rng: Rng, uid: number, ilvl: number, rarity: number, ty
   // da Epico in su, uno degli affissi può essere un effetto a scatto
   const triggers = triggersFor(def.id);
   if (r.triggerChance > 0 && triggers.length && nextRandom(rng) < r.triggerChance) {
-    const a = pick(rng, triggers);
-    const t = pickWeighted(rng, AFFIX_TIERS);
-    affixes.push({ id: a.id, tier: t.tier, mods: [], power: t.mult * (0.85 + 0.3 * nextRandom(rng)) });
+    affixes.push(rollTrigger(rng, pick(rng, triggers)));
   }
   while (affixes.length < r.affixes && pool.length) {
     const a = pool.splice(Math.floor(nextRandom(rng) * pool.length), 1)[0];
-    const t = pickWeighted(rng, AFFIX_TIERS);
-    const roll = 0.85 + 0.3 * nextRandom(rng);
-    const mods = a.mods.map((m) => ({ stat: m.stat, value: m.value * t.mult * roll * (FLAT_STATS.has(m.stat) ? growth : 1) }));
-    affixes.push({ id: a.id, tier: t.tier, mods });
+    affixes.push(rollAffix(rng, a, growth));
   }
 
   const best = affixes.reduce<Affix | null>((b, a) => (!b || a.tier > b.tier ? a : b), null);
