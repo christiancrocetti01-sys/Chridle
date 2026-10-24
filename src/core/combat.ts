@@ -13,7 +13,7 @@ import { perkValue } from './ascension';
 import { elementalVs, enemyAtk, resMult, spawnEnemy, tickEnemy, type MechanicEvent } from './enemies';
 import { onModeDeath, onModeKill, tickMode, type ModeEvent } from './modes';
 import { TOWER_BASE, TOWER_STEP } from '../data/modes';
-import { KILLS_PER_STAGE, mitigate, stateStats, stageEnemy, upgradeCost, xpToNext, type Stats } from './stats';
+import { DOT_DOUBLE, KILLS_PER_STAGE, mitigate, stateStats, stageEnemy, upgradeCost, xpToNext, type Stats } from './stats';
 
 export type CombatEvent =
   | { type: 'hit'; target: 'hero' | 'enemy'; amount: number; crit: boolean }
@@ -66,12 +66,13 @@ export function step(state: GameState, events: CombatEvent[] = []): CombatEvent[
   const poison = enemy.poison > 0.5 ? enemy.poison * POISON_RATE : enemy.poison;
   enemy.bleed -= bleed;
   if (!hero.rules.has('endlessPoison')) enemy.poison -= poison;
-  enemy.hp -= bleed + poison + (hero.poison * dmgMult) / TICK_RATE;
+  enemy.hp -= (bleed + poison + (hero.poison * dmgMult) / TICK_RATE) * (hero.rules.has('dotDouble') ? DOT_DOUBLE : 1);
   if (enemy.hp <= 0) return kill(state, events);
 
-  // Custode Stellare: lo spirito colpisce una volta al secondo
-  if (hero.rules.has('starSpirit') && state.tick % TICK_RATE === 0) {
-    enemy.hp -= hero.atk * SPIRIT_ATK * hero.elemMult.holy * resMult(enemy, 'holy') * dmgMult;
+  // Custode Stellare (e Costellazione Vivente): gli spiriti colpiscono una volta al secondo
+  const spirits = (hero.rules.has('starSpirit') ? 1 : 0) + (hero.rules.has('spiritHost') ? 2 : 0);
+  if (spirits && state.tick % TICK_RATE === 0) {
+    enemy.hp -= spirits * hero.atk * SPIRIT_ATK * hero.elemMult.holy * resMult(enemy, 'holy') * dmgMult;
     if (enemy.hp <= 0) return kill(state, events);
   }
 
@@ -80,6 +81,11 @@ export function step(state: GameState, events: CombatEvent[] = []): CombatEvent[
     state.hero.swing -= 1;
     strike(state, hero, dmgMult, triggers, events);
     if (enemy.hp <= 0) return kill(state, events);
+    // Mille Soli: ogni attacco colpisce due volte
+    if (hero.rules.has('twinStrike')) {
+      strike(state, hero, dmgMult, triggers, events);
+      if (enemy.hp <= 0) return kill(state, events);
+    }
     // Lama dell'Alba: si tira il colpo doppio solo con la regola (la sequenza dell'RNG non cambia)
     if (hero.rules.has('doubleStrike') && nextRandom(state) < DOUBLE_STRIKE_CHANCE) {
       strike(state, hero, dmgMult, triggers, events);

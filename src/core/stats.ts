@@ -105,6 +105,7 @@ export function stateStats(state: { hero: HeroState; upgrades: Record<UpgradeId,
   const s = heroStats(state.hero.level, state.upgrades, mods);
   s.rules = gearRules(Object.values(state.gear.equipped));
   for (const r of starRules) s.rules.add(r);
+  applyKeystones(s);
   if (s.rules.has('noCrit')) {
     s.critChance = 0;
     s.atk *= NO_CRIT_MULT;
@@ -119,6 +120,31 @@ export function stateStats(state: { hero: HeroState; upgrades: Record<UpgradeId,
   if (s.rules.has('frenzy') && state.hero.hp < s.maxHp * FRENZY_HP) s.attackSpeed *= FRENZY_SPEED;
   return s;
 }
+
+/** Chiavi di volta delle regioni delle Vie (prima dei moltiplicatori a condizione). */
+function applyKeystones(s: Stats) {
+  const elem = (k: number) => { for (const e of ELEMENTS) s.elements[e] *= k; };
+  if (s.rules.has('oath')) {
+    s.atk += s.def * OATH_DEF_TO_ATK;
+    s.attackSpeed *= OATH_SPEED;
+  }
+  if (s.rules.has('twinStrike')) s.atk *= TWIN_STRIKE_ATK;
+  if (s.rules.has('dotDouble')) elem(0.5);
+  if (s.rules.has('spiritHost')) s.maxHp *= SPIRIT_HOST_HP;
+  if (s.rules.has('blackBlood')) {
+    s.maxHp *= BLACK_BLOOD_HP;
+    s.atk *= BLACK_BLOOD_DMG;
+    elem(BLACK_BLOOD_DMG);
+  }
+}
+
+export const OATH_DEF_TO_ATK = 0.5;
+export const OATH_SPEED = 0.8;
+export const TWIN_STRIKE_ATK = 0.6;
+export const DOT_DOUBLE = 2;
+export const SPIRIT_HOST_HP = 0.75;
+export const BLACK_BLOOD_HP = 0.5;
+export const BLACK_BLOOD_DMG = 1.5;
 
 /** Riduzione con rendimenti decrescenti: la difesa non annulla mai del tutto il danno. */
 export function mitigate(damage: number, def: number): number {

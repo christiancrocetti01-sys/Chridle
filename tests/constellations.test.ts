@@ -29,13 +29,16 @@ function pathTo(id: string): string[] {
 }
 
 describe('Costellazioni: struttura', () => {
-  it('circa 150 nodi, id unici, collegamenti simmetrici e tutto raggiungibile dal centro', () => {
+  it('circa 250 nodi, id unici, collegamenti simmetrici e tutto raggiungibile dal centro', () => {
     expect(STARS.length).toBeGreaterThanOrEqual(140);
     expect(STAR_BY_ID.size).toBe(STARS.length);
     for (const n of STARS) for (const l of n.links) expect(STAR_BY_ID.get(l)!.links).toContain(n.id);
     for (const n of STARS) if (n.id !== START_ID) expect(pathTo(n.id).at(-1)).toBe(n.id);
-    expect(STARS.filter((n) => n.kind === 'keystone')).toHaveLength(3);
-    expect(STARS.filter((n) => n.kind === 'notable')).toHaveLength(12);
+    // 3 rami (4 notevoli ciascuno) + 5 regioni delle Vie (2 notevoli ciascuna), una chiave di volta per ognuno
+    expect(STARS.filter((n) => n.kind === 'keystone')).toHaveLength(8);
+    expect(STARS.filter((n) => n.kind === 'notable')).toHaveLength(22);
+    // nessuna stella sovrapposta a un'altra
+    for (const a of STARS) for (const b of STARS) if (a !== b) expect(Math.hypot(a.x - b.x, a.y - b.y), `${a.id}/${b.id}`).toBeGreaterThan(20);
   });
 
   it('il generatore è deterministico', () => {
@@ -134,5 +137,36 @@ describe('Costellazioni: chiavi di volta', () => {
     heal(s, st, 110);
     expect(s.hero.hp).toBe(st.maxHp);
     expect(hp - s.enemy!.hp).toBeCloseTo(100 * st.elemMult.holy);
+  });
+});
+
+describe('Costellazioni: chiavi di volta delle Vie', () => {
+  const statsWith = (rule: string) => {
+    const s = hero(2);
+    const base = stateStats(s);
+    s.stars = pathTo(`${rule}-k`).slice(1);
+    s.hero.level = s.stars.length + 1;
+    return { base, now: stateStats(s), s };
+  };
+  it('Giuramento, Mille Soli, Rogo Eterno, Costellazione Vivente, Sangue Nero', () => {
+    const p = statsWith('paladino');
+    expect(p.now.rules.has('oath')).toBe(true);
+    expect(statsWith('lama').now.rules.has('twinStrike')).toBe(true);
+    expect(statsWith('inquisitore').now.rules.has('dotDouble')).toBe(true);
+    expect(statsWith('custode').now.rules.has('spiritHost')).toBe(true);
+    const e = statsWith('eclissiarca');
+    expect(e.now.rules.has('blackBlood')).toBe(true);
+    // Mille Soli: il doppio dei colpi
+    const hits = (s: ReturnType<typeof hero>) => {
+      s.skills.slots = [null, null, null, null];
+      while (!s.enemy) step(s);
+      Object.assign(s.enemy!, { hp: 1e12, maxHp: 1e12, atk: 0 });
+      let n = 0;
+      for (let i = 0; i < 300; i++) n += step(s).filter((x) => x.type === 'hit' && x.target === 'enemy').length;
+      return n;
+    };
+    const lama = statsWith('lama').s;
+    const plain = hero(lama.hero.level);
+    expect(hits(lama)).toBeGreaterThan(hits(plain) * 1.8);
   });
 });

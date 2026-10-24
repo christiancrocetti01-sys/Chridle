@@ -100,6 +100,77 @@ export const BRIDGES: BridgeDef[] = [
   { from: 'luce', to: 'offesa', name: 'Arcano', mods: [['crit', 0.005], ['elemPct', 0.02]] },
 ];
 
+interface ViaRegionDef {
+  /** Id della Via (anche prefisso degli id dei nodi). */
+  id: string;
+  name: string;
+  /** Nodo dei ponti da cui parte la regione, verso l'esterno. */
+  attach: string;
+  spine: Mods[];
+  /** 2 ammassi, a sinistra e a destra della spina. */
+  clusters: ClusterDef[];
+  keystone: { name: string; rule: RuleId };
+}
+
+/** Lotto 2: regioni delle Vie, fuori dall'anello dei ponti (aperte a tutti, a tema con la Via). */
+export const VIA_REGIONS: ViaRegionDef[] = [
+  {
+    id: 'paladino', name: 'Paladino del Sole', attach: 'ponte-offesa-5',
+    spine: [[['defPct', 0.05]], [['hpPct', 0.04]], [['holyPct', 0.05]]],
+    clusters: [
+      { name: 'Scudo del Sole', small: [[['defPct', 0.05]], [['scudoSkill', 0.06]]],
+        notable: { name: 'Bastione Solare', mods: [['defPct', 0.15], ['scudoSkill', 0.15]] } },
+      { name: 'Aura Consacrata', small: [[['holyPct', 0.06]], [['hpPct', 0.04]]],
+        notable: { name: 'Aura del Sole', mods: [['hpPct', 0.1], ['holyPct', 0.15]] } },
+    ],
+    keystone: { name: 'Giuramento', rule: 'oath' },
+  },
+  {
+    id: 'lama', name: "Lama dell'Alba", attach: 'ponte-offesa-2',
+    spine: [[['speedPct', 0.02]], [['crit', 0.01]], [['critDmg', 0.06]]],
+    clusters: [
+      { name: "Filo dell'Alba", small: [[['crit', 0.01]], [['critDmg', 0.08]]],
+        notable: { name: "Filo dell'Alba", mods: [['crit', 0.03], ['critDmg', 0.2]] } },
+      { name: "Vento d'Acciaio", small: [[['speedPct', 0.03]], [['velocitaSkill', 0.06]]],
+        notable: { name: "Vento d'Acciaio", mods: [['speedPct', 0.08], ['velocitaSkill', 0.15]] } },
+    ],
+    keystone: { name: 'Mille Soli', rule: 'twinStrike' },
+  },
+  {
+    id: 'inquisitore', name: 'Inquisitore', attach: 'ponte-luce-5',
+    spine: [[['firePct', 0.05]], [['tempoSkill', 0.05]], [['fire', 1]]],
+    clusters: [
+      { name: 'Fuoco Purificatore', small: [[['firePct', 0.06]], [['fuocoSkill', 0.06]]],
+        notable: { name: 'Fuoco Purificatore', mods: [['firePct', 0.2], ['fuocoSkill', 0.15]] } },
+      { name: 'Cenere', small: [[['tempoSkill', 0.06]], [['tempoCdr', 0.03]]],
+        notable: { name: 'Cenere e Penitenza', mods: [['tempoSkill', 0.2], ['tempoCdr', 0.08]] } },
+    ],
+    keystone: { name: 'Rogo Eterno', rule: 'dotDouble' },
+  },
+  {
+    id: 'custode', name: 'Custode Stellare', attach: 'ponte-difesa-5',
+    spine: [[['lightningPct', 0.05]], [['holyPct', 0.05]], [['sacroCdr', 0.02]]],
+    clusters: [
+      { name: 'Firmamento', small: [[['lightningPct', 0.06]], [['fulmineSkill', 0.06]]],
+        notable: { name: 'Firmamento', mods: [['lightningPct', 0.2], ['fulmineSkill', 0.15]] } },
+      { name: 'Luce Guida', small: [[['curaSkill', 0.06]], [['sacroCdr', 0.03]]],
+        notable: { name: 'Luce Guida', mods: [['curaSkill', 0.15], ['sacroCdr', 0.08]] } },
+    ],
+    keystone: { name: 'Costellazione Vivente', rule: 'spiritHost' },
+  },
+  {
+    id: 'eclissiarca', name: 'Eclissiarca', attach: 'ponte-luce-2',
+    spine: [[['shadowPct', 0.06]], [['atkPct', 0.04]], [['shadow', 1]]],
+    clusters: [
+      { name: 'Patto Oscuro', small: [[['shadowPct', 0.06]], [['ombraSkill', 0.06]]],
+        notable: { name: 'Patto Oscuro', mods: [['shadowPct', 0.25], ['ombraSkill', 0.15]] } },
+      { name: 'Fame del Vuoto', small: [[['lifeSteal', 0.003]], [['atkPct', 0.04]]],
+        notable: { name: 'Fame del Vuoto', mods: [['lifeSteal', 0.008], ['atkPct', 0.1]] } },
+    ],
+    keystone: { name: 'Sangue Nero', rule: 'blackBlood' },
+  },
+];
+
 export const START_ID = 'centro';
 const SPINE = 14;
 const STEP = 60;
@@ -109,12 +180,32 @@ const CLUSTER_OFFSET = 130;
 const RING = 6;
 const RING_R = 50;
 const BRIDGE_NODES = 6;
+const VIA_SPINE = 6;
+const VIA_CLUSTER_AT = [2, 5];
 
 const r2 = (v: number) => Math.round(v * 10) / 10;
 
 /** Costruisce l'albero (posizioni e collegamenti) dai dati. Deterministico. */
 export function buildConstellations(): StarNode[] {
   const nodes = new Map<string, StarNode>();
+  /** Due anelli + notevole attorno a un punto della spina (lato sgn = ±1). */
+  const cluster = (prefix: string, c: ClusterDef, spineId: string, side: number[], sgn: number) => {
+    const spine = nodes.get(spineId)!;
+    const cx = spine.x + side[0] * CLUSTER_OFFSET * sgn;
+    const cy = spine.y + side[1] * CLUSTER_OFFSET * sgn;
+    // anello: il nodo 0 guarda verso la spina, il nodo opposto porta al notevole al centro
+    const base = Math.atan2(spine.y - cy, spine.x - cx);
+    for (let k = 0; k < RING; k++) {
+      const t = base + (2 * Math.PI * k) / RING;
+      add({ id: `${prefix}-${k}`, kind: 'small', name: c.name, mods: c.small[k % c.small.length] },
+        cx + Math.cos(t) * RING_R, cy + Math.sin(t) * RING_R);
+      if (k) link(`${prefix}-${k - 1}`, `${prefix}-${k}`);
+    }
+    link(`${prefix}-${RING - 1}`, `${prefix}-0`);
+    link(spine.id, `${prefix}-0`);
+    add({ id: `${prefix}-n`, kind: 'notable', name: c.notable.name, mods: c.notable.mods, rule: c.notable.rule }, cx, cy);
+    link(`${prefix}-${RING / 2}`, `${prefix}-n`);
+  };
   const add = (n: Omit<StarNode, 'links' | 'x' | 'y'>, x: number, y: number) =>
     nodes.set(n.id, { ...n, x: r2(x), y: r2(y), links: [] });
   const link = (a: string, b: string) => {
@@ -139,24 +230,7 @@ export function buildConstellations(): StarNode[] {
       tip.x + dir[0] * STEP * 1.6, tip.y + dir[1] * STEP * 1.6);
     link(prev, `${b.id}-k`);
 
-    b.clusters.forEach((c, j) => {
-      const spine = nodes.get(`${b.id}-s${CLUSTER_AT[j]}`)!;
-      const sgn = j % 2 ? 1 : -1;
-      const cx = spine.x + side[0] * CLUSTER_OFFSET * sgn;
-      const cy = spine.y + side[1] * CLUSTER_OFFSET * sgn;
-      // anello: il nodo 0 guarda verso la spina, il nodo opposto porta al notevole al centro
-      const base = Math.atan2(spine.y - cy, spine.x - cx);
-      for (let k = 0; k < RING; k++) {
-        const t = base + (2 * Math.PI * k) / RING;
-        add({ id: `${b.id}-c${j}-${k}`, kind: 'small', name: c.name, mods: c.small[k % c.small.length] },
-          cx + Math.cos(t) * RING_R, cy + Math.sin(t) * RING_R);
-        if (k) link(`${b.id}-c${j}-${k - 1}`, `${b.id}-c${j}-${k}`);
-      }
-      link(`${b.id}-c${j}-${RING - 1}`, `${b.id}-c${j}-0`);
-      link(spine.id, `${b.id}-c${j}-0`);
-      add({ id: `${b.id}-c${j}-n`, kind: 'notable', name: c.notable.name, mods: c.notable.mods, rule: c.notable.rule }, cx, cy);
-      link(`${b.id}-c${j}-${RING / 2}`, `${b.id}-c${j}-n`);
-    });
+    b.clusters.forEach((c, j) => cluster(`${b.id}-c${j}`, c, `${b.id}-s${CLUSTER_AT[j]}`, side, j % 2 ? 1 : -1));
   }
 
   // ponti: arco tra le punte di due rami, alla stessa distanza dal centro
@@ -174,6 +248,26 @@ export function buildConstellations(): StarNode[] {
       prev = id;
     }
     link(prev, `${br.to}-s${SPINE}`);
+  }
+
+  // regioni delle Vie: dal nodo di aggancio sui ponti, verso l'esterno
+  for (const v of VIA_REGIONS) {
+    const at = nodes.get(v.attach)!;
+    const a = Math.atan2(at.y, at.x);
+    const dir = [Math.cos(a), Math.sin(a)];
+    const side = [-dir[1], dir[0]];
+    let prev = v.attach;
+    for (let i = 1; i <= VIA_SPINE; i++) {
+      const id = `${v.id}-s${i}`;
+      add({ id, kind: 'small', name: v.name, mods: v.spine[(i - 1) % v.spine.length] }, at.x + dir[0] * STEP * i, at.y + dir[1] * STEP * i);
+      link(prev, id);
+      prev = id;
+    }
+    const tip = nodes.get(prev)!;
+    add({ id: `${v.id}-k`, kind: 'keystone', name: v.keystone.name, mods: [], rule: v.keystone.rule },
+      tip.x + dir[0] * STEP * 1.6, tip.y + dir[1] * STEP * 1.6);
+    link(prev, `${v.id}-k`);
+    v.clusters.forEach((c, j) => cluster(`${v.id}-c${j}`, c, `${v.id}-s${VIA_CLUSTER_AT[j]}`, side, j % 2 ? 1 : -1));
   }
   return [...nodes.values()];
 }

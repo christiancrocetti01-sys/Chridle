@@ -8,7 +8,9 @@ export type RuleId =
   // chiavi di volta delle Costellazioni
   | 'noCrit' | 'freeSkills' | 'overhealHoly'
   // Vie
-  | 'reflect' | 'doubleStrike' | 'burningHits' | 'starSpirit' | 'bloodPact';
+  | 'reflect' | 'doubleStrike' | 'burningHits' | 'starSpirit' | 'bloodPact'
+  // chiavi di volta delle regioni delle Vie
+  | 'oath' | 'twinStrike' | 'dotDouble' | 'spiritHost' | 'blackBlood';
 
 export const RULE_TEXT: Record<RuleId, string> = {
   echoFire: 'Le esplosioni di fuoco colpiscono due volte',
@@ -32,6 +34,11 @@ export const RULE_TEXT: Record<RuleId, string> = {
   burningHits: 'Ogni colpo brucia il nemico per il 25% del danno inflitto (nel tempo)',
   starSpirit: "Uno spirito stellare colpisce ogni secondo per il 50% dell'attacco (sacro)",
   bloodPact: 'Più vita manca, più danni: fino a +100% a vita quasi zero',
+  oath: "Il 50% della difesa si aggiunge all'attacco, ma la velocità d'attacco scende del 20%",
+  twinStrike: 'Ogni attacco colpisce due volte, ma l’attacco scende del 40%',
+  dotDouble: 'Veleno e sanguinamento fanno il doppio del danno, ma il danno elementale dei colpi si dimezza',
+  spiritHost: "Due spiriti stellari in più (ognuno colpisce ogni secondo per il 50% dell'attacco), ma −25% vita",
+  blackBlood: 'Tutti i danni +50%, ma la vita massima si dimezza',
 };
 
 /** Esplosioni che raddoppiano con ogni regola "eco". */
