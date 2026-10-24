@@ -5,9 +5,9 @@
 
 **Ultimo aggiornamento:** 2026-10-24 (contenuti finiti: lotto 5 unici/set + endgame; collaudo 10 giorni ok)
 **Fase corrente:** contenuti **completati** (Fase 7). Prossima: **grafica finale** (decisione utente).
-**Prossimo passo:** far approvare all'utente lotto 5 + endgame e allineare `main`; poi proporre il piano della grafica.
+**Prossimo passo:** proporre il piano della grafica finale.
 Domanda aperta: Rinascite ~30-45 in 10 giorni (prima ogni ~10 h, poi ogni ~4-5 h): va bene il ritmo?
-**Online:** `main` (fa48854) = Lumi; il branch ha in più lotto 5 ed endgame (non ancora su `main`).
+**Online:** `main` = branch: lotto 5 ed endgame pubblicati.
 
 ## Gioco online
 https://christiancrocetti01-sys.github.io/Chridle/ (ogni push su `main` lo ripubblica, ~1 min).
