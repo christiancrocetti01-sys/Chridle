@@ -93,6 +93,9 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
 - **Crafting**: smantella → Frammenti; rerolla un affisso, aggiungi affisso, potenzia +1…+15,
   trasferisci un effetto leggendario (rende utile ogni drop).
 - **Auto-smantellamento** con filtri per rarità/statistiche (fondamentale in un idle).
+- **Deciso (2026-10-24):** tutti i 12 slot e le 7 rarità da subito; drop 1 ogni ~8 nemici, boss sempre
+  (almeno Magico); inventario 40 (pieno → smantella); statistiche piatte +10% per livello oggetto;
+  obiettivo: **varietà "infinita"** di armi, statistiche e sinergie (è il cuore del gioco).
 
 ## 9. Nemici
 - **Famiglie**: Non-morti, Demoni, Bestie corrotte, Culto dell'Eclissi, Creature del Vuoto.

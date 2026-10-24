@@ -5,8 +5,10 @@
 
 **Ultimo aggiornamento:** 2026-10-24
 **Fase corrente:** 2 — Equipaggiamento (primo passo fatto).
-**Prossimo passo:** resto della Fase 2 (GDD §8) puntando su **varietà infinita**: molti più affissi,
-leggendari unici con effetti, set, prime sinergie per tag; poi crafting con i Frammenti.
+**Prossimo passo:** punto 1 della varietà (proposto, da confermare): portare gli affissi da 10 a 40-60
+in `src/data/items.ts`, con **tag** (Sacro, Fuoco, Critico, Sanguinamento…) e restrizioni per tipo di
+oggetto; il generatore (`src/core/items.ts`) li filtra per tipo. Poi: trigger (al critico/uccisione/ogni N
+colpi), leggendari unici, set 2/4/6, crafting con i Frammenti.
 **Grafica:** decisa **minimale** (niente scena, niente asset da scaricare): UI DOM + sagoma SVG.
 
 ## Gioco online
@@ -25,7 +27,7 @@ Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` quando un passo è a
   generatore deterministico + equip/smantellamento (`src/core/items.ts`), drop 1/8 e boss sempre
   (almeno Magico), inventario 40, Frammenti, smantellamento automatico per rarità. UI `src/ui/gear.ts`
   con confronto statistiche. Salvataggio v3. Crescita oggetti `ILVL_GROWTH` = 1.10 (scelta utente).
-- Test: **40 verdi** (5 file).
+- Test: **40 verdi** (5 file), build ok. Ultimo controllo: handoff 2026-10-24.
 
 ## Feedback dell'utente (importante)
 - La vecchia grafica era "AI slop". Ora la direzione è: **grafica minimale**, non serve vedere il
