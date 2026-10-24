@@ -5,7 +5,7 @@
 
 **Ultimo aggiornamento:** 2026-10-24 (varietà 4 fatta)
 **Fase corrente:** 2 completata (varietà 1-4). **Prossimo passo:** Fase 3 (skill e build) — da pianificare.
-**Da chiedere:** allineare `main` con la varietà 4 (crafting) dopo che l'utente l'ha provata.
+**Online:** `main` allineato con la varietà 4.
 **Grafica:** decisa **minimale** (niente scena, niente asset da scaricare): UI DOM + sagoma SVG.
 
 ## Gioco online
