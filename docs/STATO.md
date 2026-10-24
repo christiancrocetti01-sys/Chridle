@@ -3,11 +3,12 @@
 > File di passaggio di consegne tra sessioni. Aggiornato con `/handoff`.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
-**Ultimo aggiornamento:** 2026-10-24 (Collezione e Imprese su `main`; Lumi sul branch, `main` da allineare dopo l'ok)
+**Ultimo aggiornamento:** 2026-10-24 (handoff: Collezione leggendari, Imprese, Lumi; tutto su `main`)
 **Fase corrente:** 7 — contenuti a lotti. Grafica e UI minime fino alla fine (prova da telefono rimandata a dopo).
-**Prossimo passo:** far provare i Lumi e allineare `main`. Poi **altri unici e set** (lotto di dati), poi
-endgame (Abisso, Paragon, Rinascita Solare), poi grafica finale. Proporre il piano prima.
-**Online:** `main` = ef3dad6 (Collezione leggendari, Imprese).
+**Prossimo passo:** chiedere com'è andata la prova dei Lumi. Poi **altri unici e set** (lotto di dati in
+`src/data/uniques.ts`; ogni unico nuovo va anche in `COLLECTION_BONUS` di `src/data/collection.ts`, c'è un test).
+Poi endgame (Abisso, Paragon, Rinascita Solare), poi grafica finale. Proporre il piano prima.
+**Online:** `main` = branch (fa48854): Collezione, Imprese e Lumi pubblicati.
 
 ## Gioco online
 https://christiancrocetti01-sys.github.io/Chridle/ (ogni push su `main` lo ripubblica, ~1 min).
@@ -47,6 +48,7 @@ Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` (fast-forward) quand
 - Muro al boss di zona 50 (scudo + rigenerazione): con Via+Stelle ~4 h fermi (rigenerazione 1%/s): **voluto**, spinge ad ascendere.
 - Collaudo 8 h dopo il bilanciamento: chiavi 5-6,5/h, Raid ~60% vinti, 5-8 Ascensioni, record 62-99
   (Eclissiarca il più veloce, Paladino/Custode i più lenti), 13-14 rune (la prossima 22-36k Essenza).
+- Meta (sessione 2026-10-24): Collezione 5-14/18 unici, ~25 Imprese su 54, Lumo preferito ~Lv 17 in 8 h di collaudo.
 - Domanda aperta: Neutro (Corruzione vicina a 0) senza bonus va bene?
 - Il confronto oggetti ora usa tutte le statistiche (`stateStats`), non solo gli oggetti.
 - Revisione da telefono rimandata a dopo la grafica finale (decisione utente).
