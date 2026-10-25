@@ -3,11 +3,11 @@
 > File di passaggio di consegne tra sessioni. Aggiornato con `/handoff`.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
-**Ultimo aggiornamento:** 2026-10-25 (Fase 8 passo 3)
+**Ultimo aggiornamento:** 2026-10-25 (handoff: Fase 8 passo 3, tutto su `main`)
 **Fase corrente:** **Fase 8 — Tutto automatico** (ROADMAP; decisioni in GDD §16). Grafica finale in pausa.
 **Prossimo passo:** passo 4 — proporre il piano: albero delle Stelle automatico per priorità finché non è completo
 (cfr. `autoStars` in `scripts/collaudo.ts`, che sceglie la stella che alza di più la potenza).
-**Online:** `main` = branch (866ec4d + handoff).
+**Online:** `main` = branch (4d6c77e + handoff).
 
 ## Sessione 2026-10-25 (passo 3)
 - `autoSpend` in `src/core/auto.ts` (ogni secondo in `step` e a fine offline): Essenza, oro (`autoGold`), crafting
@@ -21,6 +21,8 @@
 - Ritmo: a 8 h l'eroe è ~2× più avanti di prima (Scintille ~200-300 contro ~80-160, Torre ~52 contro ~37), per la spesa
   "intelligente" dell'Essenza. Ribilanciare al passo 5 (collaudo 240 h) salvo diversa richiesta.
 - Bonus fisso agli unici nel confronto dell'equip (+20%)?
+- Grafica (richiesta utente 2026-10-25, rete libera per cercare asset): chiesto se farla dopo la Fase 8 (proposto) e
+  che stile: (a) rifinire il "testo puro", (b) illustrazioni (asset liberi o SVG miei), (c) altro. **In attesa di risposta.**
 - Bilanciamento: Neutro (Corruzione ~0) senza bonus va bene? Ritmo Rinascite (~30-45 in 10 giorni) ok?
 
 ## Gioco online
