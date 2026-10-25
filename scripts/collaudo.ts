@@ -11,7 +11,6 @@ import { spawn } from 'node:child_process';
 import { changeGear, step, type CombatEvent } from '../src/core/combat';
 import { newGame, type GameState } from '../src/core/state';
 import { elementalDamage, stateStats, type Stats } from '../src/core/stats';
-import { canTake, pointsLeft, takeStar } from '../src/core/constellations';
 import { chooseSecondVia, chooseVia } from '../src/core/vie';
 import { unlockCost } from '../src/core/runes';
 import { activeVie } from '../src/core/vie';
@@ -21,7 +20,6 @@ import { ascend, canAscend } from '../src/core/ascension';
 import { applyOffline } from '../src/core/offline';
 import { deserialize, serialize } from '../src/core/save';
 import { TICK_RATE } from '../src/core/loop';
-import { STARS } from '../src/data/constellations';
 import { VIA_LEVEL, type ViaId } from '../src/data/vie';
 import { RAID_KEYS, RAID_STAGE } from '../src/data/modes';
 import { UNIQUES } from '../src/data/uniques';
@@ -66,22 +64,6 @@ function power(state: GameState, p: Profile): number {
   // le soglie (±50) hanno regole che la misura non vede: un profilo a tema le cerca
   const theme = p.bias * s.corruption >= 50 ? 1.15 : 1;
   return dps * tank * (1 + 0.3 * p.bias * s.corruption / 100) * theme;
-}
-
-/** Stelle: sceglie sempre quella raggiungibile che alza di più la potenza. */
-function autoStars(state: GameState, p: Profile) {
-  while (pointsLeft(state) > 0) {
-    let best: string | null = null;
-    let bestPow = -1;
-    for (const n of STARS) {
-      if (!canTake(state, n.id)) continue;
-      state.stars.push(n.id);
-      const pow = power(state, p) * (n.kind === 'keystone' ? 0.98 : 1); // chiavi di volta solo se convengono davvero
-      state.stars.pop();
-      if (pow > bestPow) { bestPow = pow; best = n.id; }
-    }
-    if (!best || !takeStar(state, best)) return;
-  }
 }
 
 
@@ -176,7 +158,6 @@ function simulate(p: Profile) {
     if (t % (10 * TICK_RATE) === 0) changeGear(state, () => {
       if (state.hero.level >= VIA_LEVEL && state.vie.main !== p.via) chooseVia(state, p.via);
       if (state.vie.secondUnlocked && state.vie.second !== p.second) chooseSecondVia(state, p.second);
-      autoStars(state, p);
       if (state.mode.kind === 'campaign') {
         // Ascensione quando si è fermi da 15 minuti; prima si spendono le chiavi
         const stuck = t - lastBestTick > 15 * 60 * TICK_RATE;

@@ -240,7 +240,6 @@ button.card:not(:disabled):active { transform: translateY(1px); }
 .star.notable { stroke-width: 3; }
 .star.keystone { stroke-width: 4; stroke: #bdbdbd; }
 .star.reachable { stroke: #9a9a9a; }
-.star.open { stroke: var(--text); fill: var(--surface-2); }
 .star.on, .star.start { fill: var(--accent); stroke: #fff; }
 .star.sel { stroke: #fff; stroke-width: 5; }
 .star-detail { margin-bottom: 4px; }

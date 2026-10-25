@@ -3,11 +3,17 @@
 > File di passaggio di consegne tra sessioni. Aggiornato con `/handoff`.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
-**Ultimo aggiornamento:** 2026-10-25 (handoff: Fase 8 passo 3, tutto su `main`)
+**Ultimo aggiornamento:** 2026-10-25 (Fase 8 passo 4 su branch, `main` al passo 3)
 **Fase corrente:** **Fase 8 — Tutto automatico** (ROADMAP; decisioni in GDD §16). Grafica finale in pausa.
-**Prossimo passo:** passo 4 — proporre il piano: albero delle Stelle automatico per priorità finché non è completo
-(cfr. `autoStars` in `scripts/collaudo.ts`, che sceglie la stella che alza di più la potenza).
-**Online:** `main` = branch (4d6c77e + handoff).
+**Prossimo passo:** passo 5 — UI in sola lettura (resto), guida, collaudo 8 h / 240 h e ribilanciamento. Poi **grafica
+con illustrazioni** (decisione utente: subito dopo aver completato il gioco).
+**Online:** `main` al passo 3; il passo 4 è sul branch in attesa di approvazione.
+
+## Sessione 2026-10-25 (passo 4)
+- `autoStars` in `src/core/auto.ts` (prima voce di `autoSpend`): finché ci sono punti prende la stella collegata che
+  alza di più `gearPower`; notevoli con regola ×1,02, chiavi di volta ×0,98 (quella della propria Via ×1,02).
+- Cambiare Via (prima o seconda) azzera le stelle (`src/core/vie.ts`): l'albero si rifà da solo. Scheda Stelle in sola
+  lettura, niente pallino dei punti, guida aggiornata; il collaudo usa la funzione del core.
 
 ## Sessione 2026-10-25 (passo 3)
 - `autoSpend` in `src/core/auto.ts` (ogni secondo in `step` e a fine offline): Essenza, oro (`autoGold`), crafting
@@ -21,8 +27,8 @@
 - Ritmo: a 8 h l'eroe è ~2× più avanti di prima (Scintille ~200-300 contro ~80-160, Torre ~52 contro ~37), per la spesa
   "intelligente" dell'Essenza. Ribilanciare al passo 5 (collaudo 240 h) salvo diversa richiesta.
 - Bonus fisso agli unici nel confronto dell'equip (+20%)?
-- Grafica (richiesta utente 2026-10-25, rete libera per cercare asset): chiesto se farla dopo la Fase 8 (proposto) e
-  che stile: (a) rifinire il "testo puro", (b) illustrazioni (asset liberi o SVG miei), (c) altro. **In attesa di risposta.**
+- Stelle: tutti i profili prendono sia "critBleed" (notevole) sia "noCrit" (chiave di volta), che si annullano.
+  Escludere le regole incompatibili dal confronto?
 - Bilanciamento: Neutro (Corruzione ~0) senza bonus va bene? Ritmo Rinascite (~30-45 in 10 giorni) ok?
 
 ## Gioco online
@@ -57,7 +63,7 @@ Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` (fast-forward) quand
 - Salvataggio: **v21** (v21 skill fisse + rimborso rune, v20 `abyss`/`paragon`/`rebirth`), prima **v19** (v11 `vie`, v12 nemico + `keys`/`mode`/`tower`, v13 `ascension`, v14 campi opzionali rune, v15 `hero.sanctity`, v16 `codex`, v17 `collection`, v18 `achievements`, v19 `lumi`).
 
 ## Test
-- `npm test`: **215 verdi** (23 file), `npm run build` ok (2026-10-25, dopo il passo 3 della Fase 8).
+- `npm test`: **217 verdi** (23 file), `npm run build` ok (2026-10-25, dopo il passo 4 della Fase 8).
 - Collaudo: `npm run collaudo -- --ore 8 [--seed N] [--profilo id]` (`scripts/collaudo.ts`, un processo per profilo:
   5 Vie + uno con sessioni offline). 8 h: nessun NaN/crash/salvataggio rotto, ~30 s. Rilanciarlo dopo ogni sistema nuovo.
   Attenzione: nelle catene di comandi non fidarsi di `npm test | grep` (esce 0 anche se fallisce).

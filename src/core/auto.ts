@@ -7,6 +7,9 @@ import type { ViaId } from '../data/vie';
 import { buyPerk, perkCost, perkLevel } from './ascension';
 import { buyUpgrade, upgradePrice } from './combat';
 import { autoCraft } from './craft';
+import { gearPower } from './autoequip';
+import { canTake, pointsLeft } from './constellations';
+import { STARS, type StarNode } from '../data/constellations';
 import { paragonFree, spendParagon } from './endgame';
 import { PERKS, type PerkId } from '../data/ascension';
 import type { ParagonId } from '../data/endgame';
@@ -122,8 +125,38 @@ export function autoPerks(state: GameState): number {
   return bought;
 }
 
+/**
+ * Peso di una stella nel confronto: le regole non entrano in `gearPower`. Le notevoli con regola hanno un piccolo
+ * vantaggio; le chiavi di volta (spesso con un costo) si prendono solo se non c'è di meglio, tranne quella della propria Via.
+ */
+function starWeight(state: GameState, n: StarNode): number {
+  if (n.kind === 'keystone') return n.id === `${state.vie.main}-k` ? 1.02 : 0.98;
+  return n.kind === 'notable' && n.rule ? 1.02 : 1;
+}
+
+/** Stelle: finché ci sono punti, prende tra le stelle collegate quella che alza di più la potenza. */
+export function autoStars(state: GameState): number {
+  let taken = 0;
+  while (pointsLeft(state) > 0) {
+    let best: string | null = null;
+    let bestScore = -1;
+    for (const n of STARS) {
+      if (!canTake(state, n.id)) continue;
+      state.stars.push(n.id);
+      const score = gearPower(state) * starWeight(state, n);
+      state.stars.pop();
+      if (score > bestScore) { bestScore = score; best = n.id; }
+    }
+    if (!best) break;
+    state.stars.push(best);
+    taken++;
+  }
+  return taken;
+}
+
 /** Tutte le spese automatiche (ogni secondo in `step` e a fine offline). */
 export function autoSpend(state: GameState) {
+  autoStars(state);
   autoEssence(state);
   autoGold(state);
   autoCraft(state);

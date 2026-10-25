@@ -56,9 +56,11 @@ describe('Collezione leggendari', () => {
     s.hero.level = 300; // uccide in fretta: tanti drop
     s.gear.autoSalvage = 99; // anche gli oggetti smantellati contano
     const ev: CombatEvent[] = [];
-    for (let i = 0; i < 200_000 && !s.collection.length; i++) step(s, ev);
+    // anche un leggendario smantellato subito (non migliora l'equip) entra nella collezione
+    const salvagedNew = () => ev.some((e) => e.type === 'drop' && e.discovered && e.salvaged);
+    for (let i = 0; i < 200_000 && !salvagedNew(); i++) step(s, ev);
     expect(s.collection.length).toBeGreaterThan(0);
-    expect(ev.some((e) => e.type === 'drop' && e.discovered && e.salvaged)).toBe(true);
+    expect(salvagedNew()).toBe(true);
   });
 
   it("resta dopo l'Ascensione", () => {

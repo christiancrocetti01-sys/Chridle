@@ -81,5 +81,5 @@ Manuali restano solo: scelta della Via, quando ascendere/rinascere, modalità (D
 - [x] Equipaggiamento automatico: ogni drop si indossa se alza la potenza, il resto (e il pezzo tolto) → Frammenti; niente inventario
 - [x] 6 skill fisse (Colpo Sacro, Preghiera, Squarcio, Egida, Lama Rapida, Giudizio), elemento = debolezza del nemico; Essenza spesa da sola (livelli skill, 8 rune in piano, Lumo attivo)
 - [x] Crafting automatico (solo tier sull'equipaggiamento indossato, fusione tolta), spese automatiche (oro, Paragon, Ascensione), Lumo attivo automatico, 32 rune inutilizzate tolte
-- [ ] Albero (Stelle) automatico per priorità finché non è completo
+- [x] Albero (Stelle) automatico per priorità finché non è completo
 - [ ] UI in sola lettura, guida, salvataggio v21 con migrazione, collaudo 8 h / 240 h e ribilanciamento

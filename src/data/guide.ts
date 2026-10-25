@@ -45,9 +45,9 @@ export const GUIDE: GuideSection[] = [
   },
   {
     id: 'stelle', title: 'Stelle (Costellazioni)', text: [
-      'Ogni livello dà <b>1 punto</b> da spendere nella mappa delle Stelle, partendo dal centro e prendendo stelle collegate.',
+      'Ogni livello dà <b>1 punto</b>: il gioco prende da solo, partendo dal centro, la stella collegata che rende l\'eroe più forte.',
       'Le stelle piccole danno statistiche, le <b>notevoli</b> (al centro degli anelli) bonus forti, le <b>chiavi di volta</b> cambiano le regole.',
-      'Il respec è gratis: sperimenta.',
+      'Cambiando Via le stelle si restituiscono e l\'albero si rifà da solo.',
     ],
   },
   {

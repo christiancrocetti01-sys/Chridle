@@ -1,16 +1,9 @@
-import { canRefund, canTake, pointsLeft } from '../core/constellations';
 import { emptyMods } from '../core/items';
 import type { GameState } from '../core/state';
 import { STARS, STAR_BY_ID, type StarNode } from '../data/constellations';
 import { STAT_LABELS, type StatKey } from '../data/items';
 import { RULE_TEXT } from '../data/uniques';
 import { formatStat } from './gear';
-
-export interface StarActions {
-  takeStar(id: string): void;
-  refundStar(id: string): void;
-  resetStars(): void;
-}
 
 const RADIUS = { start: 12, small: 8, notable: 14, keystone: 19 } as const;
 const KIND_TEXT = { start: 'Centro', small: 'Stella', notable: 'Stella notevole', keystone: 'Chiave di volta' } as const;
@@ -27,8 +20,8 @@ function nodeText(n: StarNode): string {
   return lines.join('<br>') || '<span class="muted">Punto di partenza</span>';
 }
 
-/** Scheda Stelle: albero SVG con trascinamento e zoom, dettaglio della stella scelta e riepilogo. */
-export function createStarPanel(root: HTMLElement, actions: StarActions) {
+/** Scheda Stelle (sola lettura, le prende il gioco): albero SVG con trascinamento e zoom, dettaglio della stella scelta e riepilogo. */
+export function createStarPanel(root: HTMLElement) {
   const xs = STARS.map((n) => n.x);
   const ys = STARS.map((n) => n.y);
   const full = { x: Math.min(...xs) - PAD, y: Math.min(...ys) - PAD, w: 0, h: 0 };
@@ -46,8 +39,7 @@ export function createStarPanel(root: HTMLElement, actions: StarActions) {
   const circles = STARS.map((n) => `<circle data-n="${n.id}" class="star ${n.kind}" cx="${n.x}" cy="${n.y}" r="${RADIUS[n.kind]}"/>`);
 
   root.innerHTML = `
-    <div class="row"><span><b data-t="points">0</b> punti liberi <span class="muted" data-t="taken"></span></span>
-      <button class="btn sm" data-t="reset">Respec (gratis)</button></div>
+    <div class="row"><span><b data-t="taken">0</b> stelle prese <span class="muted">· le sceglie il gioco, salendo di livello</span></span></div>
     <div class="star-map"><svg data-t="svg" viewBox="${full.x} ${full.y} ${full.w} ${full.h}">
       <g class="star-links">${edges.join('')}</g><g>${circles.join('')}</g></svg>
       <div class="star-zoom"><button class="btn sm" data-z="1">+</button><button class="btn sm" data-z="-1">−</button><button class="btn sm" data-z="0">⤢</button></div>
@@ -57,7 +49,7 @@ export function createStarPanel(root: HTMLElement, actions: StarActions) {
     <div class="skill-info" data-t="summary"></div>`;
   const q = <T extends Element = HTMLElement>(k: string) => root.querySelector<T>(`[data-t="${k}"]`)!;
   const svg = q<SVGSVGElement>('svg');
-  const refs = { points: q('points'), taken: q('taken'), detail: q('detail'), summary: q('summary') };
+  const refs = { taken: q('taken'), detail: q('detail'), summary: q('summary') };
   const nodeEls = new Map([...svg.querySelectorAll<SVGCircleElement>('[data-n]')].map((c) => [c.dataset.n!, c]));
   const edgeEls = [...svg.querySelectorAll<SVGLineElement>('[data-e]')].map((e) => ({ el: e, ids: e.dataset.e!.split('|') }));
 
@@ -137,15 +129,6 @@ export function createStarPanel(root: HTMLElement, actions: StarActions) {
     const z = t.closest<HTMLElement>('[data-z]')?.dataset.z;
     if (z === '0') { view = { ...full }; setView(); }
     else if (z) zoom(z === '1' ? 1.5 : 1 / 1.5);
-    const act = t.closest<HTMLElement>('[data-act]');
-    if (!act) return;
-    if (act.dataset.act === 'take') actions.takeStar(act.dataset.id!);
-    else if (act.dataset.act === 'refund') actions.refundStar(act.dataset.id!);
-    lastKey = '';
-  });
-  q('reset').addEventListener('click', () => {
-    if (window.confirm('Restituire tutte le stelle?')) actions.resetStars();
-    lastKey = '';
   });
 
   return {
@@ -154,14 +137,11 @@ export function createStarPanel(root: HTMLElement, actions: StarActions) {
       if (key === lastKey) return;
       lastKey = key;
       const taken = new Set(state.stars);
-      const left = pointsLeft(state);
-      refs.points.textContent = String(left);
-      refs.taken.textContent = `· ${taken.size} stelle prese`;
+      refs.taken.textContent = String(taken.size);
       for (const [id, el] of nodeEls) {
         const on = taken.has(id) || STAR_BY_ID.get(id)!.kind === 'start';
         el.classList.toggle('on', on);
-        el.classList.toggle('open', !on && canTake(state, id));
-        el.classList.toggle('reachable', !on && left <= 0 && STAR_BY_ID.get(id)!.links.some((l) => taken.has(l) || l === 'centro'));
+        el.classList.toggle('reachable', !on && STAR_BY_ID.get(id)!.links.some((l) => taken.has(l) || l === 'centro'));
         el.classList.toggle('sel', id === selected);
       }
       const lit = (id: string) => taken.has(id) || id === 'centro';
@@ -170,10 +150,7 @@ export function createStarPanel(root: HTMLElement, actions: StarActions) {
       const n = selected ? STAR_BY_ID.get(selected) : undefined;
       refs.detail.hidden = !n;
       if (n) {
-        const btn = taken.has(n.id)
-          ? `<button class="btn sm" data-act="refund" data-id="${n.id}"${canRefund(state, n.id) ? '' : ' disabled title="Staccherebbe altre stelle"'}>Restituisci</button>`
-          : n.kind === 'start' ? ''
-          : `<button class="btn sm" data-act="take" data-id="${n.id}"${canTake(state, n.id) ? '' : ' disabled'}>Prendi</button>`;
+        const btn = taken.has(n.id) ? '<span class="muted">presa</span>' : '';
         refs.detail.innerHTML = `<div class="skill-head"><span><b>${n.name}</b> <span class="muted">${KIND_TEXT[n.kind]}</span></span>${btn}</div>
           <div class="skill-info">${nodeText(n)}</div>`;
       }
@@ -186,7 +163,7 @@ export function createStarPanel(root: HTMLElement, actions: StarActions) {
         if (s.rule) rules.push(`<span class="rule">${RULE_TEXT[s.rule]}</span>`);
       }
       const mods = (Object.keys(m) as StatKey[]).filter((k) => m[k]).map((k) => modText(k, m[k]));
-      refs.summary.innerHTML = [...rules, ...mods].join('<br>') || '<span class="muted">Nessuna stella presa: tocca una stella vicina al centro.</span>';
+      refs.summary.innerHTML = [...rules, ...mods].join('<br>') || '<span class="muted">Nessuna stella presa: arriveranno salendo di livello.</span>';
     },
   };
 }

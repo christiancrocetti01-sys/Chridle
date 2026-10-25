@@ -124,8 +124,8 @@ describe('Dungeon, Torre e Raid', () => {
     expect(enterTower(s)).toBe(true);
     run(s, 300);
     expect(s.tower.best).toBeGreaterThanOrEqual(TOWER_MILESTONE);
-    // senza equipaggiamento (i premi si indossano da soli e le percentuali si sommano)
-    const bare = { ...s, gear: newGear() };
+    // senza equipaggiamento né stelle (si prendono da sole e le percentuali si sommano)
+    const bare = { ...s, gear: newGear(), stars: [] };
     const before = stateStats({ ...bare, tower: { ...s.tower, best: 0 } }).atk;
     expect(stateStats(bare).atk).toBeCloseTo(before * (1 + towerBonus(s.tower.best)));
     expect(s.tower.best).toBeGreaterThanOrEqual(TOWER_KEY_EVERY);

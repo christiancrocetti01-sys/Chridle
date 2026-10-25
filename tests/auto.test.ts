@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { PARAGON_ORDER, PERK_FIRST, autoGold, autoParagon, autoPerks, autoSpend } from '../src/core/auto';
+import { PARAGON_ORDER, PERK_FIRST, autoGold, autoParagon, autoPerks, autoSpend, autoStars } from '../src/core/auto';
+import { gearPower } from '../src/core/autoequip';
+import { canRefund, pointsLeft } from '../src/core/constellations';
+import { chooseVia } from '../src/core/vie';
+import { STAR_BY_ID } from '../src/data/constellations';
 import { perkCost, perkLevel } from '../src/core/ascension';
 import { upgradePrice } from '../src/core/combat';
 import { paragonFree } from '../src/core/endgame';
@@ -70,5 +74,39 @@ describe('offline con le spese automatiche', () => {
     const r = applyOffline(s, 3600)!;
     expect(r.gold).toBeGreaterThan(0);
     expect(s.gold).toBeGreaterThanOrEqual(0);
+  });
+
+  it("le Stelle si spendono tutte, collegate al centro, e alzano la potenza", () => {
+    const s = newGame(0, 1);
+    s.hero.level = 40;
+    const before = gearPower(s);
+    expect(autoStars(s)).toBe(39);
+    expect(pointsLeft(s)).toBe(0);
+    expect(new Set(s.stars).size).toBe(39);
+    // l'albero resta collegato: c'è sempre almeno una foglia restituibile
+    expect(s.stars.every((id) => STAR_BY_ID.has(id))).toBe(true);
+    expect(s.stars.some((id) => canRefund(s, id))).toBe(true);
+    expect(gearPower(s)).toBeGreaterThan(before);
+    // deterministico
+    const t = newGame(0, 1);
+    t.hero.level = 40;
+    autoStars(t);
+    expect(t.stars).toEqual(s.stars);
+    // salendo di livello si aggiunge una stella, le altre restano
+    s.hero.level++;
+    expect(autoStars(s)).toBe(1);
+    expect(s.stars.slice(0, 39)).toEqual(t.stars);
+  });
+
+  it("cambiando Via l'albero si rifà per la nuova Via", () => {
+    const s = newGame(0, 1);
+    s.hero.level = 60;
+    chooseVia(s, 'paladino');
+    autoSpend(s);
+    expect(s.stars).toContain('paladino-s1');
+    chooseVia(s, 'lama');
+    expect(s.stars).toEqual([]);
+    autoSpend(s);
+    expect(pointsLeft(s)).toBe(0);
   });
 });

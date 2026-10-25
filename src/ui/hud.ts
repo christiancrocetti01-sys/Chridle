@@ -1,12 +1,11 @@
 import { upgradePrice, type CombatEvent } from '../core/combat';
-import { pointsLeft } from '../core/constellations';
 import { formatNum } from '../core/format';
 import type { GameState } from '../core/state';
 import { KILLS_PER_STAGE, elementalDamage, stateStats, xpToNext, type Stats } from '../core/stats';
 import { createCombatPanel } from './combat';
 import { createGearPanel } from './gear';
 import { createSkillPanel } from './skills';
-import { createStarPanel, type StarActions } from './stars';
+import { createStarPanel } from './stars';
 import { createViaPanel, type ViaActions } from './vie';
 import { createLumiPanel } from './lumi';
 import { createAscensionPanel, type AscensionActions } from './ascension';
@@ -21,7 +20,7 @@ import { zoneName } from '../data/enemies';
 import { UPGRADES } from '../data/upgrades';
 import { openGuide } from './guide';
 
-export type HudActions = StarActions & ViaActions & WorldActions & AscensionActions;
+export type HudActions = ViaActions & WorldActions & AscensionActions;
 
 export interface Hud {
   update(state: GameState): void;
@@ -170,14 +169,12 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
     if (b) show(prefs.tab, b.dataset.subtab);
   });
 
-  /** Pallini sulle schede: qualcosa da fare (punti liberi, Ascensione pronta…). */
+  /** Pallini sulle schede: qualcosa da fare (Ascensione o Rinascita pronta). */
   let badgeKey = '';
   function badges(state: GameState) {
-    const pts = pointsLeft(state);
     const asc = canAscend(state) && scintilleGain(state) > 0;
     const sun = canRebirth(state);
     const b: Record<string, string> = {
-      build: pts > 0 ? String(pts) : '', stelle: pts > 0 ? String(pts) : '',
       ascension: asc || sun ? '•' : '', ascensione: asc ? '•' : '', rinascita: sun ? '•' : '',
     };
     const k = JSON.stringify(b);
@@ -188,7 +185,7 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
 
   const gear = createGearPanel(el('gear'));
   const skills = createSkillPanel(el('skills'));
-  const stars = createStarPanel(el('stars'), actions);
+  const stars = createStarPanel(el('stars'));
   const combat = createCombatPanel(el('combat'));
   const vie = createViaPanel(el('vie'), actions);
   const lumi = createLumiPanel(el('lumi'));

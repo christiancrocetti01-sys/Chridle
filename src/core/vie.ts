@@ -35,11 +35,12 @@ function refreshSkills(state: GameState) {
   unlockSkills(state.skills, state.hero.level);
 }
 
-/** Sceglie (o cambia, gratis) la Via principale. */
+/** Sceglie (o cambia, gratis) la Via principale. Le Stelle si restituiscono e si riassegnano da sole. */
 export function chooseVia(state: GameState, id: ViaId): boolean {
   if (state.hero.level < VIA_LEVEL || !viaDef(id) || state.vie.main === id) return false;
   if (state.vie.second === id) state.vie.second = state.vie.main;
   state.vie.main = id;
+  state.stars = []; // l'albero si rifà da solo per la nuova Via
   refreshSkills(state);
   return true;
 }
@@ -49,6 +50,7 @@ export function chooseSecondVia(state: GameState, id: ViaId | null): boolean {
   const v = state.vie;
   if (!v.secondUnlocked || !v.main || id === v.main || (id && !viaDef(id))) return false;
   v.second = id;
+  state.stars = [];
   refreshSkills(state);
   return true;
 }

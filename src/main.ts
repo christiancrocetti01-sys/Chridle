@@ -2,7 +2,6 @@ import './style.css';
 import { MAX_TICKS_PER_FRAME, TICK_MS, stepAccumulator } from './core/loop';
 import { loadGame, saveGame, type StorageLike } from './core/save';
 import { changeGear, step, type CombatEvent } from './core/combat';
-import { refundStar, resetStars, takeStar } from './core/constellations';
 import { chooseSecondVia, chooseVia } from './core/vie';
 import { enterAbyss, enterDungeon, enterRaid, enterTower, leaveMode } from './core/modes';
 import { rebirth } from './core/endgame';
@@ -32,9 +31,6 @@ function main() {
   const state = loadGame(storage) ?? newGame(Date.now());
   absorbInventory(state);
   const hud = createHud(document.getElementById('hud')!, {
-    takeStar: (id) => takeStar(state, id),
-    refundStar: (id) => refundStar(state, id),
-    resetStars: () => resetStars(state),
     enterDungeon: () => enterDungeon(state),
     enterTower: () => enterTower(state),
     enterRaid: () => enterRaid(state),
