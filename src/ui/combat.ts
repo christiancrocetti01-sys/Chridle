@@ -9,6 +9,8 @@ import { achievementName } from '../core/achievements';
 import { lumoDef } from '../core/lumi';
 import { flash, toast } from './fx';
 import { SFX } from './sound';
+import { enemyCard, heroArt } from './art';
+import { itemIcon } from './icons';
 
 const MECHANIC_SHORT: Record<Mechanic, string> = { enrage: 'furia', shield: 'scudo', summon: 'evocazioni', regen: 'rigenerazione' };
 import { MAX_LIGHT, skillDef } from '../data/skills';
@@ -19,18 +21,25 @@ const LOG_SIZE = 3;
 export function createCombatPanel(root: HTMLElement) {
   root.innerHTML = `
     <div class="fighter">
-      <div class="row"><span>Guerriero</span><span class="muted" data-c="herohp"></span></div>
-      <div class="bar hp"><div class="fill" data-c="herobar"></div></div>
-      <div class="bar light"><div class="fill" data-c="lightbar"></div></div>
+      <div class="portrait">${heroArt()}</div>
+      <div class="fighter-bars">
+        <div class="row"><span>Guerriero</span><span class="muted" data-c="herohp"></span></div>
+        <div class="bar hp"><div class="fill" data-c="herobar"></div></div>
+        <div class="bar light"><div class="fill" data-c="lightbar"></div></div>
+      </div>
     </div>
-    <div class="fighter">
-      <div class="row"><span data-c="enemy"></span><span class="muted" data-c="enemyhp"></span></div>
-      <div class="bar hp enemy"><div class="fill" data-c="enemybar"></div></div>
+    <div class="fighter foe">
+      <div class="fighter-bars">
+        <div class="row"><span data-c="enemy"></span><span class="muted" data-c="enemyhp"></span></div>
+        <div class="bar hp enemy"><div class="fill" data-c="enemybar"></div></div>
+      </div>
+      <div class="portrait card-mini" data-c="ecard"></div>
     </div>
     <div class="enemy-info muted" data-c="einfo"></div>
     <ul class="log" data-c="log"></ul>`;
   const q = (k: string) => root.querySelector<HTMLElement>(`[data-c="${k}"]`)!;
-  const refs = { herohp: q('herohp'), herobar: q('herobar'), enemy: q('enemy'), enemyhp: q('enemyhp'), enemybar: q('enemybar'), einfo: q('einfo'), lightbar: q('lightbar'), log: q('log') };
+  const refs = { herohp: q('herohp'), herobar: q('herobar'), enemy: q('enemy'), enemyhp: q('enemyhp'), enemybar: q('enemybar'), einfo: q('einfo'), lightbar: q('lightbar'), log: q('log'), ecard: q('ecard') };
+  let cardKey = '';
   const lines: HTMLLIElement[] = [];
 
   function log(text: string, cls = '', color?: string) {
@@ -67,7 +76,7 @@ export function createCombatPanel(root: HTMLElement) {
     else if (e.type === 'key') SFX.key();
     else if (e.type === 'drop' && !e.salvaged && e.item.rarity >= 4) {
       SFX.loot(e.item.rarity);
-      toast(`<span class="rar-${e.item.rarity}" style="color:${RARITIES[e.item.rarity].color}">${e.item.name}</span><br><small>${RARITIES[e.item.rarity].name}</small>`, `loot r${e.item.rarity}`);
+      toast(`<span class="rar-${e.item.rarity}" style="color:${RARITIES[e.item.rarity].color}">${itemIcon(e.item.type, e.item.rarity)}${e.item.name}</span><br><small>${RARITIES[e.item.rarity].name}</small>`, `loot r${e.item.rarity}`);
     }
     if (e.type === 'drop' && e.discovered) toast(`Collezione: <b>${e.item.name}</b><br><small>nuovo unico, bonus permanente</small>`, 'gold');
     else if (e.type === 'mode' && e.ok) toast(e.text, 'gold');
@@ -103,6 +112,12 @@ export function createCombatPanel(root: HTMLElement) {
       refs.lightbar.style.width = `${(state.hero.light / MAX_LIGHT) * 100}%`;
       refs.herobar.style.width = `${(hp / s.maxHp) * 100}%`;
       const e = state.enemy;
+      // la carta si ridisegna solo quando cambia il nemico
+      const ck = e ? `${e.templateId}|${e.boss}|${e.zoneBoss}|${e.elite}` : '';
+      if (ck !== cardKey) {
+        cardKey = ck;
+        refs.ecard.innerHTML = e ? enemyCard(e) : '';
+      }
       refs.enemy.textContent = e ? `${e.boss ? 'BOSS · ' : e.elite ? 'ÉLITE · ' : ''}${e.name}` : '…';
       refs.enemy.classList.toggle('boss', !!e?.boss || !!e?.elite);
       const timer = modeTimer(state);

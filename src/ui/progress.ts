@@ -11,6 +11,8 @@ import { formatStat } from './gear';
 import { trackSteps, trackValue } from '../core/achievements';
 import { ROMAN, TRACKS } from '../data/achievements';
 import { createExpander } from './list';
+import { cardBack, familyCard, uniqueCard, zoneBossCard } from './art';
+import { ZONES, ZONE_STAGES } from '../data/enemies';
 
 type Rows = ReturnType<typeof createExpander>;
 
@@ -20,16 +22,21 @@ export function createProgressPanel(root: HTMLElement) {
   let key = '';
   return {
     update(state: GameState) {
-      const k = JSON.stringify([codexKey(state), state.collection.length, state.achievements.length]);
+      const k = JSON.stringify([codexKey(state), state.collection.length, state.achievements.length, Math.floor(state.stage.best / ZONE_STAGES)]);
       if (k === key) return;
       key = k;
       root.innerHTML = `
         <div data-sub="bestiario">
         <h2 class="section">Bestiario <span class="muted">· +${Math.round(CODEX_DMG * 100)}% danni per grado, per sempre</span></h2>
+        ${gallery((Object.keys(FAMILIES) as Family[]).map((f) => familyCard(f, state.codex[f] > 0)))}
         ${bestiary(state, li)}
+        <h2 class="section">Boss di zona <span class="muted">· svelati raggiungendo la loro zona</span></h2>
+        ${gallery(ZONES.map((_, i) => zoneBossCard(i, maxStage(state) >= (i + 1) * ZONE_STAGES)))}
         </div>
         <div data-sub="collezione">
         <h2 class="section">Collezione leggendari <span class="muted">· ${state.collection.length}/${UNIQUES.length} unici trovati</span></h2>
+        ${gallery(UNIQUES.flatMap((u, i) => (state.collection.includes(u.id) ? [uniqueCard(u, i + 1, true)] : []))
+          .concat(state.collection.length < UNIQUES.length ? [cardBack(`${UNIQUES.length - state.collection.length} da trovare`)] : []))}
         ${collection(state, li)}
         </div>
         <div data-sub="imprese">
@@ -38,6 +45,16 @@ export function createProgressPanel(root: HTMLElement) {
         </div>`;
     },
   };
+}
+
+/** Griglia di carte-tarocco. */
+const gallery = (cards: string[]) => `<div class="tarot-grid">${cards.join('')}</div>`;
+
+/** Stage più lontano mai raggiunto: il record della partita o il gradino più alto delle imprese "stage" (che restano all'Ascensione). */
+function maxStage(state: GameState): number {
+  const track = TRACKS.find((t) => t.id === 'stage');
+  const steps = track ? trackSteps(state.achievements, 'stage') : 0;
+  return Math.max(state.stage.best, steps && track ? track.steps[steps - 1] : 0);
 }
 
 /** Il Bestiario si ridisegna solo a ogni 1% di avanzamento verso il grado successivo. */

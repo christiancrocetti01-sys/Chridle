@@ -6,6 +6,7 @@ import { createCombatPanel } from './combat';
 import { createGearPanel } from './gear';
 import { createSkillPanel } from './skills';
 import { createStarPanel } from './stars';
+import { ensureArtDefs } from './art';
 import { createViaPanel, type ViaActions } from './vie';
 import { createLumiPanel } from './lumi';
 import { createAscensionPanel, type AscensionActions } from './ascension';
@@ -62,6 +63,7 @@ const SUB_CSS = `[data-view] [data-sub]{display:none}` +
   TABS.flatMap((t) => t.subs).map(([id]) => `[data-view="${id}"] [data-sub="${id}"]{display:block}`).join('');
 
 export function createHud(root: HTMLElement, actions: HudActions): Hud {
+  ensureArtDefs();
   const prefs = loadPrefs();
   root.innerHTML = `
     <style>${SUB_CSS}</style>

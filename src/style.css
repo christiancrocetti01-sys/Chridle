@@ -293,6 +293,7 @@ button.card:not(:disabled):active { transform: translateY(1px); }
 .fighter + .fighter { margin-top: 0; }
 .fighter .row { margin-top: 0; font-size: 0.85em; gap: 6px; white-space: nowrap; }
 .fighter .row > span:first-child { overflow: hidden; text-overflow: ellipsis; }
+.fighter .row > .muted { font-size: 0.9em; }
 .combat .log, .combat .enemy-info { grid-column: 1 / -1; }
 
 /* Liste piatte: righe separate da una linea, niente riquadri */
@@ -366,3 +367,23 @@ select { font: inherit; }
 .modal-box.guide { width: min(560px, 100%); max-height: calc(100dvh - 32px); overflow-y: auto; }
 .guide .li-body p { margin: 0; }
 .guide .li-body { gap: 8px; font-size: 0.95em; }
+
+/* Illustrazioni (GDD §15): linee di luce per eroe e oggetti, carte-tarocco in xilografia per nemici e leggendari */
+.lic { overflow: visible; }
+.lic.g0, .lic.g1, .lic.g2, .lic.g3 { filter: drop-shadow(0 0 1px currentColor); }
+.lic.g4 { filter: drop-shadow(0 0 2px currentColor) drop-shadow(0 0 4px currentColor); }
+.lic.g5 { filter: drop-shadow(0 0 2px currentColor) drop-shadow(0 0 6px currentColor); }
+.lic.g6 { filter: drop-shadow(0 0 3px currentColor) drop-shadow(0 0 8px currentColor); animation: divine-icon 2.4s ease-in-out infinite; }
+@keyframes divine-icon { 50% { filter: drop-shadow(0 0 4px currentColor) drop-shadow(0 0 14px currentColor); } }
+.slot-item .icon, .toast .icon { width: 1.35em; height: 1.35em; vertical-align: -0.3em; margin-right: 6px; }
+.fighter { display: flex; align-items: center; gap: 6px; }
+.fighter-bars { flex: 1; min-width: 0; }
+.portrait { flex: none; width: 34px; }
+.portrait .hero-art { display: block; width: 34px; height: 34px; color: #ffd98a; }
+.card-mini .tarot { display: block; width: 34px; }
+.tarot { display: block; width: 100%; height: auto; }
+.tarot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 10px; margin: 8px 0 14px; }
+.tarot-grid .tarot { filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6)); }
+.tarot.back { opacity: 0.55; }
+@media (min-width: 720px) { .portrait, .portrait .hero-art, .card-mini .tarot { width: 56px; } .portrait .hero-art { height: 56px; } }
+@media (prefers-reduced-motion: reduce) { .lic.g6 { animation: none; } }

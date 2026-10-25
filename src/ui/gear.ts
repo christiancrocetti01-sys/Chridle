@@ -152,7 +152,7 @@ export function createGearPanel(root: HTMLElement) {
         const sel = selected?.kind === 'slot' && selected.slot === id ? ' sel' : '';
         return `<button class="slot-row${sel}${it ? '' : ' empty'}" data-act="pick-slot" data-slot="${id}">
           <span class="slot-name">${name}</span><span class="dots"></span>${it
-            ? `<span class="slot-item" style="color:${RARITIES[it.rarity].color}">${itemIcon(it.type)}${itemLabel(it)}</span><span class="slot-lv">${it.ilvl}</span>`
+            ? `<span class="slot-item" style="color:${RARITIES[it.rarity].color}">${itemIcon(it.type, it.rarity)}${itemLabel(it)}</span><span class="slot-lv">${it.ilvl}</span>`
             : '<span class="muted">—</span>'}</button>`;
       }).join('');
       refs.detail.innerHTML = renderDetail(gear);

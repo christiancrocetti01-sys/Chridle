@@ -239,6 +239,9 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
   completato il gioco. Mix di due stili: **tarocchi miniati** (xilografia a tratteggio su carta antica, dettagli in oro,
   cornice con numero romano e nome) per nemici, boss e leggendari; **linee di luce** (tratti luminosi su nero, rosso per
   i nemici) per il guerriero e le icone piccole dell'equipaggiamento. Luce contro Eclissi anche nello stile.
+- **Fatto (2026-10-25):** `src/ui/art/` — `subjects.ts` (geometria a strati fill/shade/ink/line/gold/eye: 11 oggetti,
+  5 famiglie, 10 boss di zona, eroe), `render.ts` (xilografia, linea di luce, carta, dorso), `index.ts` (carte di nemici,
+  famiglie, boss, unici). Icone oggetti/avvisi in luce; ritratti in combattimento; gallerie in Bestiario e Collezione.
 - **Deciso (2026-10-24, UI divisa):** "una cosa per schermata". Header compatto sempre visibile (valute, livello/stage,
   combattimento affiancato, log 3 righe, Abbandona); 5 schede fisse in basso con sotto-schede a pillola:
   Eroe (Oggetti/Potenziamenti/Statistiche), Build (Skill/Rune/Stelle/Via/Lumi), Mondo (Zona/Modalità),
