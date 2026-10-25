@@ -5,7 +5,7 @@ import { enemyAtk, makeElite, resMult, spawnEnemy, tickEnemy } from '../src/core
 import { canRaid, dungeonLevel, enterDungeon, enterRaid, enterTower, leaveMode, towerBonus } from '../src/core/modes';
 import { deserialize, serialize } from '../src/core/save';
 import { newGame, type GameState } from '../src/core/state';
-import { KILLS_PER_STAGE, stateStats } from '../src/core/stats';
+import { KILLS_PER_STAGE, LATE_STAGE, stageEnemy, stateStats } from '../src/core/stats';
 import { ENEMIES, FAMILIES, FURY_AFTER_S, ZONES, ZONE_KEY_EVERY, ZONE_STAGES, zoneName, zoneOf } from '../src/data/enemies';
 import { DUNGEON_WAVES, RAID_KEYS, RAID_STAGE, TOWER_KEY_EVERY, TOWER_MILESTONE } from '../src/data/modes';
 
@@ -195,5 +195,16 @@ describe('Dungeon, Torre e Raid', () => {
     for (let i = 0; i < 3600 * 10 && s.mode.kind === 'dungeon'; i++) step(s, ev);
     expect(s.mode.kind).toBe('campaign');
     expect(ev.some((e) => e.type === 'mode' && !e.ok)).toBe(true);
+  });
+});
+
+describe('crescita dei nemici', () => {
+  it('dallo stage LATE_STAGE vita e attacco crescono più piano, senza salti', () => {
+    const r = (a: number, k: 'hp' | 'atk') => stageEnemy(a + 1)[k] / stageEnemy(a)[k];
+    expect(r(LATE_STAGE - 1, 'hp')).toBeCloseTo(1.2);
+    expect(r(LATE_STAGE, 'hp')).toBeCloseTo(1.15);
+    expect(r(LATE_STAGE, 'atk')).toBeCloseTo(1.1);
+    expect(r(LATE_STAGE + 50, 'hp')).toBeCloseTo(1.15);
+    expect(stageEnemy(100).hp).toBeCloseTo(40 * 1.2 ** 99);
   });
 });

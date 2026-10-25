@@ -214,10 +214,17 @@ export function mitigate(damage: number, def: number): number {
 
 export const KILLS_PER_STAGE = 10;
 
+/** Da questo stage vita, difesa e attacco dei nemici crescono più piano: il muro di fine gioco diventa una salita. */
+export const LATE_STAGE = 150;
+
+/** Crescita a due tratti: `early` fino a LATE_STAGE, poi `late`. */
+const growth = (stage: number, early: number, late: number) =>
+  Math.pow(early, Math.min(stage, LATE_STAGE) - 1) * Math.pow(late, Math.max(0, stage - LATE_STAGE));
+
 /** Nemico base di uno stage: crescita esponenziale morbida. */
 export function stageEnemy(stage: number) {
-  const g = Math.pow(1.2, stage - 1);
-  return { hp: 40 * g, atk: 6 * Math.pow(1.13, stage - 1), def: 2 * g, gold: 3 * Math.pow(1.14, stage - 1), xp: 5 * Math.pow(1.12, stage - 1) };
+  const g = growth(stage, 1.2, 1.15);
+  return { hp: 40 * g, atk: 6 * growth(stage, 1.13, 1.1), def: 2 * g, gold: 3 * Math.pow(1.14, stage - 1), xp: 5 * Math.pow(1.12, stage - 1) };
 }
 
 export function xpToNext(level: number): number {
