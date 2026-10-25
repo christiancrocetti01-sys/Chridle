@@ -77,3 +77,8 @@ function main() {
 }
 
 main();
+
+// gioco installabile come app (PWA): solo nella build pubblicata, non in sviluppo
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}

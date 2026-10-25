@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "collaudo": "vite-node scripts/collaudo.ts --"
+    "collaudo": "vite-node scripts/collaudo.ts --",
+    "icone": "vite-node scripts/icone.ts"
   },
   "devDependencies": {
     "typescript": "~5.9",

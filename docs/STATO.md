@@ -25,6 +25,8 @@ famiglia, 4 boss dei Raid usano quella del boss di zona). Poi la revisione da te
 https://christiancrocetti01-sys.github.io/Chridle/ (ogni push su `main` lo ripubblica, ~1 min).
 Anche su Firebase Hosting (progetto `chridle`, https://chridle.web.app): stesso workflow, passo attivo solo se
 c'è il secret `FIREBASE_SERVICE_ACCOUNT` (JSON dell'account di servizio). Config: `firebase.json`, `.firebaserc`.
+PWA installabile (Android): `public/manifest.webmanifest`, `public/sw.js` (registrato in `main.ts` solo in build;
+cambiando strategia di cache alzare `CACHE`), icone in `public/icons/` rigenerate con `npm run icone`.
 Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` (fast-forward) quando un passo è approvato.
 
 ## Fatto (sintesi, dettagli in GDD "Fatto/Deciso")
