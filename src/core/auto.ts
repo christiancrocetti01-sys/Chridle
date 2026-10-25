@@ -10,6 +10,8 @@ import { autoCraft } from './craft';
 import { gearPower } from './autoequip';
 import { canTake, pointsLeft } from './constellations';
 import { STARS, type StarNode } from '../data/constellations';
+import type { RuleId } from '../data/uniques';
+import { stateStats } from './stats';
 import { paragonFree, spendParagon } from './endgame';
 import { PERKS, type PerkId } from '../data/ascension';
 import type { ParagonId } from '../data/endgame';
@@ -125,11 +127,25 @@ export function autoPerks(state: GameState): number {
   return bought;
 }
 
+/** Regole che si annullano a vicenda (in entrambi i sensi): una stella con una di queste si prende solo per ultima. */
+const CLASH_PAIRS: [RuleId, RuleId[]][] = [
+  ['noCrit', ['critBleed', 'dodgeCrit', 'chainLightning']],
+  ['eclipse', ['overhealShield', 'overhealHoly', 'soulHarvest']],
+];
+const CLASH: Partial<Record<RuleId, RuleId[]>> = {};
+for (const [a, list] of CLASH_PAIRS) {
+  for (const b of list) {
+    (CLASH[a] ??= []).push(b);
+    (CLASH[b] ??= []).push(a);
+  }
+}
+
 /**
  * Peso di una stella nel confronto: le regole non entrano in `gearPower`. Le notevoli con regola hanno un piccolo
  * vantaggio; le chiavi di volta (spesso con un costo) si prendono solo se non c'è di meglio, tranne quella della propria Via.
  */
-function starWeight(state: GameState, n: StarNode): number {
+function starWeight(state: GameState, n: StarNode, rules: Set<RuleId>): number {
+  if (n.rule && CLASH[n.rule]?.some((r) => rules.has(r))) return 0.5; // regola annullata da una già attiva: solo per ultima
   if (n.kind === 'keystone') return n.id === `${state.vie.main}-k` ? 1.02 : 0.98;
   return n.kind === 'notable' && n.rule ? 1.02 : 1;
 }
@@ -138,12 +154,13 @@ function starWeight(state: GameState, n: StarNode): number {
 export function autoStars(state: GameState): number {
   let taken = 0;
   while (pointsLeft(state) > 0) {
+    const rules = stateStats(state).rules;
     let best: string | null = null;
     let bestScore = -1;
     for (const n of STARS) {
       if (!canTake(state, n.id)) continue;
       state.stars.push(n.id);
-      const score = gearPower(state) * starWeight(state, n);
+      const score = gearPower(state) * starWeight(state, n, rules);
       state.stars.pop();
       if (score > bestScore) { bestScore = score; best = n.id; }
     }

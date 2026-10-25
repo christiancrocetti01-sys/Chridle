@@ -109,4 +109,14 @@ describe('offline con le spese automatiche', () => {
     autoSpend(s);
     expect(pointsLeft(s)).toBe(0);
   });
+
+  it('non prende regole annullate da una già attiva (niente critici ↔ critici che sanguinano)', () => {
+    for (const level of [60, 90, 120]) {
+      const s = newGame(0, 1);
+      s.hero.level = level;
+      autoStars(s);
+      expect(s.stars.includes('offesa-k') && s.stars.includes('offesa-c1-n')).toBe(false);
+      expect(s.stars.includes('offesa-k') && s.stars.includes('difesa-c2-n')).toBe(false);
+    }
+  });
 });
