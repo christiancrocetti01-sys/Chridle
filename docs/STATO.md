@@ -3,19 +3,22 @@
 > File di passaggio di consegne tra sessioni. Aggiornato con `/handoff`.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
-**Ultimo aggiornamento:** 2026-10-25 (handoff: Fase 8 completa + illustrazioni, tutto su `main`)
-**Fase corrente:** Fase 8 chiusa. Ora **grafica** (ROADMAP "Dopo la Fase 8"; GDD §15).
-**Prossimo passo:** chiedere all'utente cosa pensa delle illustrazioni sul gioco online; ritoccare i disegni in
-`src/ui/art/subjects.ts` secondo le sue note (eventuali nuovi soggetti: 15 nemici normali hanno ancora la carta della
-famiglia, 4 boss dei Raid usano quella del boss di zona). Poi la revisione da telefono.
-**Online:** `main` = branch (71d468e + handoff).
+**Ultimo aggiornamento:** 2026-10-25 (handoff: pubblicazione su Firebase + PWA installabile)
+**Fase corrente:** Fase 8 chiusa, grafica fatta. Ora **revisione dell'utente** (ROADMAP "Dopo la Fase 8").
+**Prossimo passo:** chiedere all'utente com'è il gioco installato sul telefono Android (https://chridle.web.app) e
+cosa pensa dei disegni; ritoccare `src/ui/art/subjects.ts` secondo le note (15 nemici normali hanno ancora la carta
+della famiglia, 4 boss dei Raid quella del boss di zona). Offline resta al 75% (l'utente ha ritirato la richiesta del 100%).
+**Online:** `main` = branch.
 
-## Sessione 2026-10-25
-- Fase 8 passi 4-5: Stelle automatiche (`autoStars`), scheda Stelle in sola lettura, collaudi 8 h / 240 h, ritocco di
-  fine gioco `LATE_STAGE` (decisioni in GDD §16).
-- Illustrazioni (GDD §15 "Fatto"): `src/ui/art/` (`subjects.ts` disegni a strati, `render.ts` xilografia/luce/carta,
-  `index.ts` carte di gioco). Icone oggetti e avvisi in luce (`src/ui/icons.ts`), ritratti in `src/ui/combat.ts`,
-  gallerie in `src/ui/progress.ts` (boss svelati con `maxStage`: record o imprese "stage"), CSS in fondo a `style.css`.
+## Sessione 2026-10-25 (seconda parte)
+- Deploy GitHub Pages falliva da 3 push (test Collezione in timeout 5 s su CI): timeout 20 s.
+- Firebase Hosting, progetto `chridle`: https://chridle.web.app. Job `firebase` in `.github/workflows/deploy.yml`,
+  separato da Pages, con `firebase-tools@14` (le versioni nuove danno 403 `serviceusage` con l'account adminsdk) e
+  secret `FIREBASE_SERVICE_ACCOUNT` (già messo dall'utente). Config: `firebase.json`, `.firebaserc`.
+- PWA: `public/manifest.webmanifest`, `public/sw.js` (rete prima per la pagina, cache per `assets/`; cambiando
+  strategia alzare `CACHE`), registrato in `main.ts` solo in build. Icone `public/icons/` da `npm run icone`
+  (`scripts/icone.ts`, eroe in luce). Verificato: installabile (Pixel 7 emulato) e avvio offline.
+- Consigliato all'utente: itch.io e r/incremental_games per farsi trovare (non ancora fatto).
 
 ## Domande aperte
 - Bonus fisso agli unici nel confronto dell'equip (+20%)?
@@ -23,10 +26,7 @@ famiglia, 4 boss dei Raid usano quella del boss di zona). Poi la revisione da te
 
 ## Gioco online
 https://christiancrocetti01-sys.github.io/Chridle/ (ogni push su `main` lo ripubblica, ~1 min).
-Anche su Firebase Hosting (progetto `chridle`, https://chridle.web.app): stesso workflow, passo attivo solo se
-c'è il secret `FIREBASE_SERVICE_ACCOUNT` (JSON dell'account di servizio). Config: `firebase.json`, `.firebaserc`.
-PWA installabile (Android): `public/manifest.webmanifest`, `public/sw.js` (registrato in `main.ts` solo in build;
-cambiando strategia di cache alzare `CACHE`), icone in `public/icons/` rigenerate con `npm run icone`.
+Anche su https://chridle.web.app (Firebase, stesso workflow).
 Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` (fast-forward) quando un passo è approvato.
 
 ## Fatto (sintesi, dettagli in GDD "Fatto/Deciso")
@@ -57,8 +57,7 @@ Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` (fast-forward) quand
 - Salvataggio: **v21** (v21 skill fisse + rimborso rune, v20 `abyss`/`paragon`/`rebirth`), prima **v19** (v11 `vie`, v12 nemico + `keys`/`mode`/`tower`, v13 `ascension`, v14 campi opzionali rune, v15 `hero.sanctity`, v16 `codex`, v17 `collection`, v18 `achievements`, v19 `lumi`).
 
 ## Test
-- `npm test`: **219 verdi** (23 file), `npm run build` ok (2026-10-25, handoff). Con un collaudo in corso un test della
-  Collezione può scadere per tempo (core occupati): da solo passa.
+- `npm test`: **219 verdi** (23 file), `npm run build` ok (2026-10-25, handoff). Il test lento della Collezione ha timeout 20 s.
 - Collaudo: `npm run collaudo -- --ore 8 [--seed N] [--profilo id]` (`scripts/collaudo.ts`, un processo per profilo:
   5 Vie + uno con sessioni offline). 8 h: nessun NaN/crash/salvataggio rotto, ~30 s. Rilanciarlo dopo ogni sistema nuovo.
   Attenzione: nelle catene di comandi non fidarsi di `npm test | grep` (esce 0 anche se fallisce).

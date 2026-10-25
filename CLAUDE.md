@@ -34,4 +34,5 @@ Questo file viene caricato automaticamente a ogni sessione: tienilo **breve**.
 - Salvataggio in `src/core/save.ts`: cambi allo stato → alza `STATE_VERSION` e aggiungi una migrazione + test.
 - Asset esterni: verifica licenza e registrali in `docs/CREDITS.md`.
 - Verifica visiva: build + `vite preview` + screenshot Playwright (Chromium in /opt/pw-browsers).
+- Push su `main` → CI pubblica su GitHub Pages e Firebase (chridle.web.app). PWA: `public/` (manifest, `sw.js`, icone da `npm run icone`).
 - Commit piccoli e descrittivi.
