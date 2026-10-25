@@ -235,9 +235,10 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
 - **Deciso (2026-10-24, sera):** la grafica si rifinisce **alla fine**, a gioco finito; fino ad allora stile minimo.
 - **Fatto (Fase 6):** icone SVG minimali degli oggetti, bagliore di Leggendario/Mitico, Divino che pulsa,
   lampi sulle barre, avvisi per livello e bottino raro, suoni sintetizzati WebAudio (spenti di default).
-- **Deciso (2026-10-25): illustrazioni**, subito dopo aver completato il gioco (fine Fase 8). Stile A: sagome B/N
-  di game-icons.net (CC BY 3.0, autori in `docs/CREDITS.md`), colore solo a rarità/vita/elementi; dal Leggendario in su
-  l'icona prende sfumatura e bagliore della rarità (stile C). Si parte da nemici (famiglie, élite, boss) e oggetti.
+- **Deciso (2026-10-25): illustrazioni originali** (SVG disegnati a mano, niente asset esterni), subito dopo aver
+  completato il gioco. Mix di due stili: **tarocchi miniati** (xilografia a tratteggio su carta antica, dettagli in oro,
+  cornice con numero romano e nome) per nemici, boss e leggendari; **linee di luce** (tratti luminosi su nero, rosso per
+  i nemici) per il guerriero e le icone piccole dell'equipaggiamento. Luce contro Eclissi anche nello stile.
 - **Deciso (2026-10-24, UI divisa):** "una cosa per schermata". Header compatto sempre visibile (valute, livello/stage,
   combattimento affiancato, log 3 righe, Abbandona); 5 schede fisse in basso con sotto-schede a pillola:
   Eroe (Oggetti/Potenziamenti/Statistiche), Build (Skill/Rune/Stelle/Via/Lumi), Mondo (Zona/Modalità),

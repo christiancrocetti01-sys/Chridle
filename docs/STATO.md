@@ -6,7 +6,7 @@
 **Ultimo aggiornamento:** 2026-10-25 (Fase 8 passo 4 approvato, su `main`)
 **Fase corrente:** **Fase 8 — Tutto automatico** (ROADMAP; decisioni in GDD §16). Grafica finale in pausa.
 **Prossimo passo:** passo 5 — UI in sola lettura (resto), guida, collaudo 8 h / 240 h e ribilanciamento. Poi **grafica
-con illustrazioni** (GDD §15: sagome game-icons.net B/N, bagliore dal Leggendario; prima nemici e oggetti).
+con illustrazioni** (GDD §15: SVG originali, tarocchi-xilografia per nemici/boss/leggendari + linee di luce per eroe e icone).
 **Online:** `main` = branch.
 
 ## Sessione 2026-10-25 (passo 4)
