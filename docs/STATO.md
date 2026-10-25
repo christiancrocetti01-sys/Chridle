@@ -66,8 +66,10 @@ Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` (fast-forward) quand
 - Collaudo: `npm run collaudo -- --ore 8 [--seed N] [--profilo id]` (`scripts/collaudo.ts`, un processo per profilo:
   5 Vie + uno con sessioni offline). 8 h: nessun NaN/crash/salvataggio rotto, ~30 s. Rilanciarlo dopo ogni sistema nuovo.
   Attenzione: nelle catene di comandi non fidarsi di `npm test | grep` (esce 0 anche se fallisce).
-- Collaudo 10 giorni (`--ore 240`, ~20 min): nessun problema. A 240 h: livello ~125, record 160-175, Abisso 37-47,
-  Paragon ~170-190, Soli 58-92, collezione 30/30 (dalle ~70 h), imprese 56-57/69 (prima della Fase 8: da rifare).
+- Collaudo 10 giorni (`--ore 240`, ~18 min) dopo il passo 4 della Fase 8: nessun problema. A 240 h: livello 133-149,
+  record 154-177, Abisso 50 per tutti (fermo da ~150 h: stage 190, oltre il record), Paragon 214-238, Soli 48-72
+  (24-38 Rinascite), collezione 30/30 dalle ~36-72 h, imprese 57-60/69. Prima della Fase 8: liv ~125, Abisso 37-47,
+  Paragon ~170-190, Soli 58-92.
 
 ## Note / problemi noti
 - Muro al boss di zona 50 (scudo + rigenerazione): con Via+Stelle ~4 h fermi (rigenerazione 1%/s): **voluto**, spinge ad ascendere.
