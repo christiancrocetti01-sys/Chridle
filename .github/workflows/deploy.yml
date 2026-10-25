@@ -1,4 +1,4 @@
-name: Test e deploy su GitHub Pages
+name: Test e deploy (GitHub Pages + Firebase)
 
 on:
   push:
@@ -18,6 +18,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      # chiave dell'account di servizio Firebase (secret del repo): senza, il passo Firebase si salta
+      FIREBASE_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -31,6 +34,13 @@ jobs:
         if: github.event_name != 'pull_request'
         with:
           path: dist
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && env.FIREBASE_KEY != ''
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: chridle
+          channelId: live
 
   deploy:
     if: github.event_name != 'pull_request'
