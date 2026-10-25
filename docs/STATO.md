@@ -3,33 +3,23 @@
 > File di passaggio di consegne tra sessioni. Aggiornato con `/handoff`.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
-**Ultimo aggiornamento:** 2026-10-25 (Fase 8 passo 4 approvato, su `main`)
-**Fase corrente:** **Fase 8 — Tutto automatico** (ROADMAP; decisioni in GDD §16). Grafica finale in pausa.
-**Grafica (2026-10-25):** illustrazioni fatte (GDD §15 "Fatto"), in attesa della revisione dell'utente.
-**Prossimo passo:** passo 5 — UI in sola lettura (resto), guida, collaudo 8 h / 240 h e ribilanciamento. Poi **grafica
-con illustrazioni** (GDD §15: SVG originali, tarocchi-xilografia per nemici/boss/leggendari + linee di luce per eroe e icone).
-**Online:** `main` = branch.
+**Ultimo aggiornamento:** 2026-10-25 (handoff: Fase 8 completa + illustrazioni, tutto su `main`)
+**Fase corrente:** Fase 8 chiusa. Ora **grafica** (ROADMAP "Dopo la Fase 8"; GDD §15).
+**Prossimo passo:** chiedere all'utente cosa pensa delle illustrazioni sul gioco online; ritoccare i disegni in
+`src/ui/art/subjects.ts` secondo le sue note (eventuali nuovi soggetti: 15 nemici normali hanno ancora la carta della
+famiglia, 4 boss dei Raid usano quella del boss di zona). Poi la revisione da telefono.
+**Online:** `main` = branch (71d468e + handoff).
 
-## Sessione 2026-10-25 (passo 4)
-- `autoStars` in `src/core/auto.ts` (prima voce di `autoSpend`): finché ci sono punti prende la stella collegata che
-  alza di più `gearPower`; notevoli con regola ×1,02, chiavi di volta ×0,98 (quella della propria Via ×1,02);
-  regole annullate da una già attiva (`CLASH_PAIRS`: niente critici ↔ regole dei critici, Eclissi ↔ cure) ×0,5.
-- Cambiare Via (prima o seconda) azzera le stelle (`src/core/vie.ts`): l'albero si rifà da solo. Scheda Stelle in sola
-  lettura, niente pallino dei punti, guida aggiornata; il collaudo usa la funzione del core.
-
-## Sessione 2026-10-25 (passo 3)
-- `autoSpend` in `src/core/auto.ts` (ogni secondo in `step` e a fine offline): Essenza, oro (`autoGold`), crafting
-  (`autoCraft` in `src/core/craft.ts`), Paragon (`PARAGON_ORDER`), Ascensione (`PERK_FIRST`, poi il più economico);
-  Lumo attivo con `autoLumo`/`VIA_LUMO`. UI di Potenziamenti, Ascensione, Paragon, Lumi e crafting in sola lettura.
-- Tolti: 32 rune (restano le 8 del piano), Ritira/Trasferisci/Fusione, `setActiveLumo`, `castOnCrit`, buff a tempo
-  delle rune. Nessun cambio al salvataggio (resta v21): i salvataggi v21 avevano già solo le 8 rune.
-- Offline: l'oro si conta dalle uccisioni (il campione lo spende), come l'Essenza.
+## Sessione 2026-10-25
+- Fase 8 passi 4-5: Stelle automatiche (`autoStars`), scheda Stelle in sola lettura, collaudi 8 h / 240 h, ritocco di
+  fine gioco `LATE_STAGE` (decisioni in GDD §16).
+- Illustrazioni (GDD §15 "Fatto"): `src/ui/art/` (`subjects.ts` disegni a strati, `render.ts` xilografia/luce/carta,
+  `index.ts` carte di gioco). Icone oggetti e avvisi in luce (`src/ui/icons.ts`), ritratti in `src/ui/combat.ts`,
+  gallerie in `src/ui/progress.ts` (boss svelati con `maxStage`: record o imprese "stage"), CSS in fondo a `style.css`.
 
 ## Domande aperte
-- Ritmo: a 8 h l'eroe è ~2× più avanti di prima (Scintille ~200-300 contro ~80-160, Torre ~52 contro ~37), per la spesa
-  "intelligente" dell'Essenza. Ribilanciare al passo 5 (collaudo 240 h) salvo diversa richiesta.
 - Bonus fisso agli unici nel confronto dell'equip (+20%)?
-- Bilanciamento: Neutro (Corruzione ~0) senza bonus va bene? Ritmo Rinascite (~30-45 in 10 giorni) ok?
+- Neutro (Corruzione ~0) senza bonus va bene? Abisso quasi fermo dalle ~180 h a 66-67: ammorbidire?
 
 ## Gioco online
 https://christiancrocetti01-sys.github.io/Chridle/ (ogni push su `main` lo ripubblica, ~1 min).
@@ -63,7 +53,8 @@ Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` (fast-forward) quand
 - Salvataggio: **v21** (v21 skill fisse + rimborso rune, v20 `abyss`/`paragon`/`rebirth`), prima **v19** (v11 `vie`, v12 nemico + `keys`/`mode`/`tower`, v13 `ascension`, v14 campi opzionali rune, v15 `hero.sanctity`, v16 `codex`, v17 `collection`, v18 `achievements`, v19 `lumi`).
 
 ## Test
-- `npm test`: **218 verdi** (23 file), `npm run build` ok (2026-10-25, dopo il passo 4 della Fase 8).
+- `npm test`: **219 verdi** (23 file), `npm run build` ok (2026-10-25, handoff). Con un collaudo in corso un test della
+  Collezione può scadere per tempo (core occupati): da solo passa.
 - Collaudo: `npm run collaudo -- --ore 8 [--seed N] [--profilo id]` (`scripts/collaudo.ts`, un processo per profilo:
   5 Vie + uno con sessioni offline). 8 h: nessun NaN/crash/salvataggio rotto, ~30 s. Rilanciarlo dopo ogni sistema nuovo.
   Attenzione: nelle catene di comandi non fidarsi di `npm test | grep` (esce 0 anche se fallisce).
@@ -73,7 +64,6 @@ Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` (fast-forward) quand
 
 ## Note / problemi noti
 - Muro al boss di zona 50 (scudo + rigenerazione): con Via+Stelle ~4 h fermi (rigenerazione 1%/s): **voluto**, spinge ad ascendere.
-- Numeri oltre 1e308 rimandati (servono verso stage ~3800; a 10 giorni il record è ~175).
-- Revisione da telefono rimandata a dopo la grafica finale (decisione utente).
-- Verifica visiva: script in scratchpad (salvataggio con `npx vite-node`, iniettato con `addInitScript`;
+- Numeri oltre 1e308 rimandati (servono verso stage ~3800; a 10 giorni il record è ~220).
+- Verifica visiva: script in scratchpad (non sopravvive alla sessione: ricrearlo) (salvataggio con `npx vite-node`, iniettato con `addInitScript`;
   `vite preview` avviato con `setsid`, non usare `pkill -f`). Un `lastSeen` vecchio apre il riepilogo offline.

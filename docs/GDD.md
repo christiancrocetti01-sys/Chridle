@@ -272,3 +272,9 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
 - Crafting: solo l'aumento di tier sugli oggetti indossati, sempre il più economico (`autoCraft`); tolti Ritira,
   Trasferisci e Fusione. Oro: il Potenziamento più economico. Paragon: a giro Forza, Vigore, Forza, Precisione,
   Vigore, Tempra. Ascensione: prima Doppia Via e Quinto Sole, poi il più economico. Tutto in `autoSpend` (`src/core/auto.ts`).
+- Stelle (`autoStars`, prima voce di `autoSpend`): finché ci sono punti, la stella collegata che alza di più `gearPower`;
+  notevoli con regola ×1,02, chiavi di volta ×0,98 (quella della propria Via ×1,02), regole annullate da una già attiva
+  (`CLASH_PAIRS`: niente critici ↔ regole dei critici, Eclissi ↔ cure) ×0,5. Cambiare Via azzera l'albero.
+- Ritmo (collaudo 240 h, 2026-10-25): inizio veloce lasciato così (decisione utente). Fine gioco: dallo stage
+  `LATE_STAGE` = 150 i nemici crescono ×1,15 (vita/difesa) e ×1,1 (attacco) per stage invece di ×1,2/×1,13
+  (`stageEnemy`, `src/core/stats.ts`): record 10 giorni da ~175 a ~220.
