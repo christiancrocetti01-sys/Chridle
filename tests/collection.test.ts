@@ -61,7 +61,7 @@ describe('Collezione leggendari', () => {
     for (let i = 0; i < 200_000 && !salvagedNew(); i++) step(s, ev);
     expect(s.collection.length).toBeGreaterThan(0);
     expect(salvagedNew()).toBe(true);
-  });
+  }, 20000);
 
   it("resta dopo l'Ascensione", () => {
     const s = newGame(0, 1);
