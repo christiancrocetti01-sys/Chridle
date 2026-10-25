@@ -164,7 +164,7 @@ describe('skill attive', () => {
     const old = newGame(0, 5);
     old.hero.level = 30;
     old.essence = 10;
-    old.runes = { levels: { potenza: 3, eco: 1 }, sockets: { geloEterno: ['potenza', null] } };
+    old.runes = { levels: { potenza: 3, esecuzione: 1 }, sockets: { geloEterno: ['potenza', null] } };
     (old.skills as { slots: (string | null)[] }).slots = ['geloEterno', 'colpoSacro', null, null];
     const s = deserialize(JSON.stringify({ ...old, version: 20 }))!;
     expect(s.essence).toBe(10 + runeRefund(old.runes));

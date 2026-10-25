@@ -1,16 +1,14 @@
 import './style.css';
 import { MAX_TICKS_PER_FRAME, TICK_MS, stepAccumulator } from './core/loop';
 import { loadGame, saveGame, type StorageLike } from './core/save';
-import { buyUpgrade, changeGear, step, type CombatEvent } from './core/combat';
+import { changeGear, step, type CombatEvent } from './core/combat';
 import { refundStar, resetStars, takeStar } from './core/constellations';
 import { chooseSecondVia, chooseVia } from './core/vie';
-import { levelLumo, setActiveLumo } from './core/lumi';
 import { enterAbyss, enterDungeon, enterRaid, enterTower, leaveMode } from './core/modes';
-import { rebirth, resetParagon, spendParagon } from './core/endgame';
-import { ascend, buyPerk } from './core/ascension';
+import { rebirth } from './core/endgame';
+import { ascend } from './core/ascension';
 import { applyOffline } from './core/offline';
 import { showOfflineReport } from './ui/ascension';
-import { fuseItems, rerollAffix, transferAffix, upgradeAffix } from './core/craft';
 import { newGame } from './core/state';
 import { absorbInventory } from './core/autoequip';
 import { createHud } from './ui/hud';
@@ -34,11 +32,6 @@ function main() {
   const state = loadGame(storage) ?? newGame(Date.now());
   absorbInventory(state);
   const hud = createHud(document.getElementById('hud')!, {
-    buy: (id) => buyUpgrade(state, id),
-    reroll: (uid, i) => changeGear(state, () => rerollAffix(state, uid, i)),
-    upgrade: (uid, i) => changeGear(state, () => upgradeAffix(state, uid, i)),
-    transfer: (uid, i, d, j) => changeGear(state, () => transferAffix(state, uid, i, d, j)),
-    fuse: (uids) => fuseItems(state, uids),
     takeStar: (id) => takeStar(state, id),
     refundStar: (id) => refundStar(state, id),
     resetStars: () => resetStars(state),
@@ -47,15 +40,10 @@ function main() {
     enterRaid: () => enterRaid(state),
     enterAbyss: () => enterAbyss(state),
     rebirth: () => rebirth(state),
-    spendParagon: (id) => changeGear(state, () => spendParagon(state, id)),
-    resetParagon: () => changeGear(state, () => (resetParagon(state), true)),
     leaveMode: () => leaveMode(state, []),
     ascend: () => ascend(state),
-    buyPerk: (id) => changeGear(state, () => buyPerk(state, id)),
     chooseVia: (id) => changeGear(state, () => chooseVia(state, id)),
     chooseSecondVia: (id) => changeGear(state, () => chooseSecondVia(state, id)),
-    activateLumo: (id) => changeGear(state, () => setActiveLumo(state, id)),
-    levelLumo: (id) => changeGear(state, () => levelLumo(state, id)),
   });
 
   // progresso offline: all'apertura e al ritorno sulla scheda del browser

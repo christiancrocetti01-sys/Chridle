@@ -2,6 +2,15 @@ import { RUNE_SOCKETS, type RuneId } from '../data/runes';
 import { levelCost, unlockCost, unlockRune, levelRune } from './runes';
 import { levelSkill, skillLevelCost } from './skills';
 import { levelLumo, lumoCost } from './lumi';
+import type { LumoId } from '../data/lumi';
+import type { ViaId } from '../data/vie';
+import { buyPerk, perkCost, perkLevel } from './ascension';
+import { buyUpgrade, upgradePrice } from './combat';
+import { autoCraft } from './craft';
+import { paragonFree, spendParagon } from './endgame';
+import { PERKS, type PerkId } from '../data/ascension';
+import type { ParagonId } from '../data/endgame';
+import { UPGRADES } from '../data/upgrades';
 import type { GameState } from './state';
 
 /** Le 2 rune di ogni skill, in ordine di preferenza. */
@@ -33,10 +42,23 @@ export function autoSocket(state: GameState) {
   state.runes.sockets = sockets;
 }
 
+/** Lumo preferito di ogni Via. */
+export const VIA_LUMO: Record<ViaId, LumoId> = { paladino: 'aureola', lama: 'ombretta', inquisitore: 'fiammella', custode: 'scintilla', eclissiarca: 'ombretta' };
+
+/** Attiva il Lumo preferito della Via; se non c'è (o manca la Via), quello di livello più alto. */
+export function autoLumo(state: GameState) {
+  const lv = state.lumi.levels;
+  const owned = (Object.keys(lv) as LumoId[]).sort((a, b) => lv[b]! - lv[a]!);
+  if (!owned.length) return;
+  const fav = state.vie.main && VIA_LUMO[state.vie.main];
+  state.lumi.active = fav && lv[fav] ? fav : owned[0];
+}
+
 type Buy = { cost: number; buy: () => boolean };
 
 /** Spende l'Essenza: compra sempre la cosa più economica tra livelli delle skill, rune nuove, livelli delle rune e del Lumo attivo. */
 export function autoEssence(state: GameState): number {
+  autoLumo(state);
   let bought = 0;
   for (let n = 0; n < 1000; n++) {
     const options: Buy[] = [];
@@ -59,4 +81,52 @@ export function autoEssence(state: GameState): number {
   }
   autoSocket(state);
   return bought;
+}
+
+/** Oro: compra sempre il Potenziamento più economico. */
+export function autoGold(state: GameState): number {
+  let bought = 0;
+  for (let n = 0; n < 1000; n++) {
+    const cheapest = UPGRADES.map((u) => u.id).sort((a, b) => upgradePrice(state, a) - upgradePrice(state, b))[0];
+    if (!buyUpgrade(state, cheapest)) break;
+    bought++;
+  }
+  return bought;
+}
+
+/** Paragon: i punti vanno a giro in quest'ordine (attacco e vita, ogni tanto danno critico e difesa). */
+export const PARAGON_ORDER: ParagonId[] = ['forza', 'vigore', 'forza', 'precisione', 'vigore', 'tempra'];
+
+export function autoParagon(state: GameState) {
+  const p = state.paragon;
+  while (paragonFree(p) > 0) spendParagon(state, PARAGON_ORDER[(p.level - paragonFree(p)) % PARAGON_ORDER.length]);
+}
+
+/** Ascensione: prima si mettono da parte le Scintille per questi, nell'ordine; poi si compra sempre il più economico. */
+export const PERK_FIRST: PerkId[] = ['secondaVia', 'slot'];
+
+const maxed = (state: GameState, id: PerkId) => {
+  const max = PERKS.find((d) => d.id === id)!.max;
+  return max !== undefined && perkLevel(state.ascension, id) >= max;
+};
+
+export function autoPerks(state: GameState): number {
+  let bought = 0;
+  for (let n = 0; n < 1000; n++) {
+    const first = PERK_FIRST.find((id) => !maxed(state, id));
+    const id = first ?? PERKS.map((d) => d.id).filter((x) => !maxed(state, x))
+      .sort((a, b) => perkCost(state.ascension, a) - perkCost(state.ascension, b))[0];
+    if (!id || !buyPerk(state, id)) break;
+    bought++;
+  }
+  return bought;
+}
+
+/** Tutte le spese automatiche (ogni secondo in `step` e a fine offline). */
+export function autoSpend(state: GameState) {
+  autoEssence(state);
+  autoGold(state);
+  autoCraft(state);
+  autoParagon(state);
+  autoPerks(state);
 }

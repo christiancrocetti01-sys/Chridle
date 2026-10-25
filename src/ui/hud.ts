@@ -4,26 +4,24 @@ import { formatNum } from '../core/format';
 import type { GameState } from '../core/state';
 import { KILLS_PER_STAGE, elementalDamage, stateStats, xpToNext, type Stats } from '../core/stats';
 import { createCombatPanel } from './combat';
-import { createGearPanel, type GearActions } from './gear';
+import { createGearPanel } from './gear';
 import { createSkillPanel } from './skills';
 import { createStarPanel, type StarActions } from './stars';
 import { createViaPanel, type ViaActions } from './vie';
-import { createLumiPanel, type LumiActions } from './lumi';
+import { createLumiPanel } from './lumi';
 import { createAscensionPanel, type AscensionActions } from './ascension';
 import { createWorldPanel, modeTimer, type WorldActions } from './world';
 import { createProgressPanel } from './progress';
 import { canAscend, scintilleGain } from '../core/ascension';
-import { canRebirth, paragonFree } from '../core/endgame';
+import { canRebirth } from '../core/endgame';
 import { DUNGEON_WAVES } from '../data/modes';
 import { ABYSS_WAVES } from '../data/endgame';
 import { soundOn, toggleSound } from './sound';
 import { zoneName } from '../data/enemies';
-import { UPGRADES, type UpgradeId } from '../data/upgrades';
+import { UPGRADES } from '../data/upgrades';
 import { openGuide } from './guide';
 
-export interface HudActions extends GearActions, StarActions, ViaActions, WorldActions, AscensionActions, LumiActions {
-  buy(id: UpgradeId): void;
-}
+export type HudActions = StarActions & ViaActions & WorldActions & AscensionActions;
 
 export interface Hud {
   update(state: GameState): void;
@@ -100,14 +98,14 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
     <div class="pane" data-pane="hero">
       <div data-sub="oggetti"><div data-k="gear"></div></div>
       <div data-sub="potenziamenti">
-        <h2 class="section">Potenziamenti <span class="muted">· con l'oro</span></h2>
+        <h2 class="section">Potenziamenti <span class="muted">· l'oro compra da solo il più economico</span></h2>
         <div class="upgrades">
           ${UPGRADES.map((u) => `
-            <button class="card" data-up="${u.id}">
+            <div class="card" data-up="${u.id}">
               <span class="card-name">${u.name} <span class="muted" data-lv="${u.id}"></span></span>
               <span class="card-desc">${u.description}</span>
               <span class="card-cost" data-cost="${u.id}"></span>
-            </button>`).join('')}
+            </div>`).join('')}
         </div>
       </div>
       <div data-sub="statistiche">
@@ -146,10 +144,6 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
   refs.leave.addEventListener('click', () => actions.leaveMode());
   el('help').addEventListener('click', openGuide);
 
-  root.querySelectorAll<HTMLButtonElement>('[data-up]').forEach((b) =>
-    b.addEventListener('click', () => actions.buy(b.dataset.up as UpgradeId)),
-  );
-
   /** Schede: mostra il pane scelto, ridisegna le sotto-schede e ricorda la scelta. */
   function show(tab: string, sub = prefs.subs[tab]) {
     prefs.tab = tab;
@@ -182,10 +176,9 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
     const pts = pointsLeft(state);
     const asc = canAscend(state) && scintilleGain(state) > 0;
     const sun = canRebirth(state);
-    const par = paragonFree(state.paragon);
     const b: Record<string, string> = {
       build: pts > 0 ? String(pts) : '', stelle: pts > 0 ? String(pts) : '',
-      ascension: asc || sun || par > 0 ? '•' : '', ascensione: asc ? '•' : '', rinascita: sun ? '•' : '', paragon: par > 0 ? String(par) : '',
+      ascension: asc || sun ? '•' : '', ascensione: asc ? '•' : '', rinascita: sun ? '•' : '',
     };
     const k = JSON.stringify(b);
     if (k === badgeKey) return;
@@ -193,12 +186,12 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
     root.querySelectorAll<HTMLElement>('[data-badge]').forEach((x) => (x.textContent = b[x.dataset.badge!] ?? ''));
   }
 
-  const gear = createGearPanel(el('gear'), actions);
+  const gear = createGearPanel(el('gear'));
   const skills = createSkillPanel(el('skills'));
   const stars = createStarPanel(el('stars'), actions);
   const combat = createCombatPanel(el('combat'));
   const vie = createViaPanel(el('vie'), actions);
-  const lumi = createLumiPanel(el('lumi'), actions);
+  const lumi = createLumiPanel(el('lumi'));
   const world = createWorldPanel(el('world'), actions);
   const progress = createProgressPanel(el('progress-panel'));
   const ascension = createAscensionPanel(el('ascension'), actions);
@@ -236,7 +229,6 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
         const price = upgradePrice(state, u.id);
         root.querySelector(`[data-lv="${u.id}"]`)!.textContent = `Lv ${state.upgrades[u.id]}`;
         root.querySelector(`[data-cost="${u.id}"]`)!.textContent = `${formatNum(price)} oro`;
-        root.querySelector<HTMLButtonElement>(`[data-up="${u.id}"]`)!.disabled = state.gold < price;
       }
 
       vie.update(state);

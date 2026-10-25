@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { step, type CombatEvent } from '../src/core/combat';
 import { ascend } from '../src/core/ascension';
-import { checkLumi, levelLumo, lumoCost, newLumi, setActiveLumo } from '../src/core/lumi';
+import { checkLumi, levelLumo, lumoCost, newLumi } from '../src/core/lumi';
+import { autoLumo } from '../src/core/auto';
 import { deserialize, serialize } from '../src/core/save';
 import { STATE_VERSION, newGame, type GameState } from '../src/core/state';
 import { stateStats } from '../src/core/stats';
@@ -38,10 +39,24 @@ describe('Lumi', () => {
     expect(st.maxHp).toBeCloseTo(base.maxHp * (1 + 0.015 * 2 * LUMO_IDLE_SHARE));
   });
 
-  it("livelli con l'Essenza, attivo solo se sbloccato", () => {
+  it("attivo il preferito della Via se sbloccato, altrimenti quello di livello più alto", () => {
+    const s = newGame(0, 1);
+    autoLumo(s);
+    expect(s.lumi.active).toBe(null);
+    s.lumi.levels = { fiammella: 3, brina: 5 };
+    autoLumo(s);
+    expect(s.lumi.active).toBe('brina');
+    s.vie.main = 'paladino';
+    autoLumo(s);
+    expect(s.lumi.active).toBe('brina'); // Aureola non ancora sbloccata
+    s.lumi.levels.aureola = 1;
+    autoLumo(s);
+    expect(s.lumi.active).toBe('aureola');
+  });
+
+  it("livelli con l'Essenza", () => {
     const s = newGame(0, 1);
     s.lumi.levels.fiammella = 1;
-    expect(setActiveLumo(s, 'brina')).toBe(false);
     expect(levelLumo(s, 'fiammella')).toBe(false);
     s.essence = lumoCost(1) + lumoCost(2);
     expect(levelLumo(s, 'fiammella')).toBe(true);

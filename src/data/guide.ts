@@ -17,9 +17,9 @@ export const GUIDE: GuideSection[] = [
   },
   {
     id: 'valute', title: 'Valute', text: [
-      '<b>Oro</b>: dai nemici, per i Potenziamenti (Eroe).',
-      '<b>Essenza</b>: dai nemici, per rune e Lumi.',
-      '<b>Frammenti</b>: smantellando oggetti, per il crafting.',
+      '<b>Oro</b>: dai nemici, compra da solo il Potenziamento più economico (Eroe).',
+      '<b>Essenza</b>: dai nemici, si spende da sola in skill, rune e Lumi.',
+      '<b>Frammenti</b>: dagli oggetti scartati, per il crafting.',
       '<b>Chiavi</b>: dai boss di zona (al record, ogni 20 stage), dalla Torre e a volte dalle élite. Aprono Dungeon e Raid.',
       "<b>Scintille</b> e <b>Soli</b>: dall'Ascensione e dalla Rinascita, per i bonus permanenti.",
     ],
@@ -31,7 +31,7 @@ export const GUIDE: GuideSection[] = [
       'Tocca uno slot per vedere l\'oggetto che indossi.',
       "Da Epico in su un oggetto può avere un effetto a scatto (al critico, ogni N colpi…). I <b>leggendari unici</b> hanno una regola fissa, i <b>set</b> danno bonus a 2, 4 e 6 pezzi.",
       'Gli oggetti che non migliorano nulla si smantellano subito in Frammenti. Gli unici nuovi entrano comunque nella Collezione.',
-      '<b>Crafting</b>: ritira un affisso, migliorane il tier (fino a T5), trasferiscilo da un altro oggetto o fondi 3 oggetti uguali in uno di rarità superiore. Ogni modifica sullo stesso oggetto costa di più.',
+      '<b>Crafting</b> automatico: i Frammenti alzano il tier degli affissi indossati (fino a T5), sempre il più economico. Ogni modifica sullo stesso oggetto costa di più. Unici e set non si modificano.',
     ],
   },
   {
@@ -72,16 +72,16 @@ export const GUIDE: GuideSection[] = [
       '<b>Bestiario</b>: uccidendo una famiglia sali di grado e fai +5% danni contro di lei, per sempre.',
       '<b>Collezione</b>: ogni leggendario unico trovato almeno una volta dà un bonus permanente, più premi al 25/50/100%.',
       '<b>Imprese</b>: traguardi a gradini (uccisioni, stage, livello…), ognuno con un piccolo bonus permanente.',
-      '<b>Lumi</b> (Build › Lumi): spiriti sbloccati dai traguardi. Uno è attivo (bonus pieno + effetto), gli altri danno il 25%. Salgono di livello con l\'Essenza.',
+      '<b>Lumi</b> (Build › Lumi): spiriti sbloccati dai traguardi. È attivo (bonus pieno + effetto) il preferito della tua Via, se l\'hai, altrimenti quello di livello più alto; gli altri danno il 25%. Salgono da soli con l\'Essenza.',
     ],
   },
   {
     id: 'ascensione', title: 'Ascensione, Rinascita, Paragon', text: [
-      "<b>Ascensione</b> (dallo stage 40): ricominci da livello 1 e stage 1 in cambio di <b>Scintille</b>, che comprano potenziamenti permanenti. " +
+      "<b>Ascensione</b> (dallo stage 40): ricominci da livello 1 e stage 1 in cambio di <b>Scintille</b>, che comprano da sole potenziamenti permanenti (prima Doppia Via e Quinto Sole, poi il più economico). " +
         'Tieni oggetti, Frammenti, Essenza, rune, chiavi, Torre e Vie; perdi oro, Potenziamenti e Stelle (i punti tornano salendo).',
       'Più alto è il record, più Scintille: conviene ascendere quando ti blocchi.',
       '<b>Rinascita Solare</b>: azzera anche le Ascensioni in cambio di <b>Soli</b>, moltiplicatori enormi e permanenti.',
-      '<b>Paragon</b>: livelli infiniti dall\'Abisso, 1 punto per livello su bonus a scelta (si riprendono gratis).',
+      '<b>Paragon</b>: livelli infiniti dall\'Abisso, 1 punto per livello, speso da solo a giro su attacco, vita, critico e difesa.',
     ],
   },
   {
@@ -89,7 +89,7 @@ export const GUIDE: GuideSection[] = [
       'A gioco chiuso il guerriero continua (al 75%, di più con «Veglia Eterna»): al rientro trovi il riepilogo.',
       'Il gioco salva da solo nel browser. Il ♪ in alto accende i suoni.',
       'I pallini rossi sulle schede indicano qualcosa da fare (punti liberi, Ascensione pronta…).',
-      'Bloccato? Prova, in ordine: punti nelle Stelle → Potenziamenti → Torre → Ascensione.',
+      'Bloccato? Prova, in ordine: punti nelle Stelle → Torre → Ascensione.',
     ],
   },
 ];

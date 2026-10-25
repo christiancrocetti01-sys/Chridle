@@ -17,8 +17,8 @@ const TAG_ELEMENT: Partial<Record<SkillTag, Element>> = { fuoco: 'fire', gelo: '
 
 /** Effetto, costo e ricarica (con le rune incastonate e le sinergie per tag degli oggetti). */
 const info = (state: GameState, hero: Stats, d: SkillDef) => {
-  const sec = cooldownTicks(state, hero, d) / TICK_RATE;
-  return `${describeEffect(d.effect, skillValue(state, hero, d))} <span class="muted">· ${Math.round(lightCost(state, hero, d))} Luce · ricarica ${+sec.toFixed(1)} s · ${d.tags.map((t) => (TAG_ELEMENT[t] ? elem(TAG_ELEMENT[t]!, SKILL_TAG_LABELS[t]) : SKILL_TAG_LABELS[t])).join(', ')}</span>`;
+  const sec = cooldownTicks(hero, d) / TICK_RATE;
+  return `${describeEffect(d.effect, skillValue(state, hero, d))} <span class="muted">· ${Math.round(lightCost(hero, d))} Luce · ricarica ${+sec.toFixed(1)} s · ${d.tags.map((t) => (TAG_ELEMENT[t] ? elem(TAG_ELEMENT[t]!, SKILL_TAG_LABELS[t]) : SKILL_TAG_LABELS[t])).join(', ')}</span>`;
 };
 
 /** Rune incastonate (in automatico) come testo. */
@@ -84,8 +84,8 @@ export function createSkillPanel(root: HTMLElement) {
         const d = id ? skillDef(id) : undefined;
         if (!bar || !d) return;
         const left = cooldowns[d.id] ?? 0;
-        bar.style.width = `${Math.max(0, 1 - left / cooldownTicks(state, hero, d)) * 100}%`;
-        bar.classList.toggle('ready', left <= 0 && state.hero.light >= lightCost(state, hero, d));
+        bar.style.width = `${Math.max(0, 1 - left / cooldownTicks(hero, d)) * 100}%`;
+        bar.classList.toggle('ready', left <= 0 && state.hero.light >= lightCost(hero, d));
       });
     },
   };

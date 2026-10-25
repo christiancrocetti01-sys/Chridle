@@ -1,21 +1,10 @@
-import {
-  MAX_TIER, canFuse, canReroll, canTransfer, canUpgrade, craftable, fuseCost, fusePartners, rerollCost,
-  transferCost, upgradeCost,
-} from '../core/craft';
+import { craftable } from '../core/craft';
 import { formatNum } from '../core/format';
 import { setCounts, type Affix, type GearState, type Item } from '../core/items';
 import type { GameState } from '../core/state';
 import { RULE_TEXT, SETS, SET_PIECES, UNIQUES } from '../data/uniques';
-import { FUSE_COUNT, FUSE_MAX_RARITY } from '../data/craft';
 import { elem, itemIcon } from './icons';
 import { ITEM_TYPES, TRIGGER_AFFIXES, affixDef, type TriggerDef, type TriggerEffect, RARITIES, SLOTS, STAT_LABELS, TAG_LABELS, POINT_STATS, isPct, type SlotId, type StatKey } from '../data/items';
-
-export interface GearActions {
-  reroll(uid: number, i: number): void;
-  upgrade(uid: number, i: number): void;
-  transfer(uid: number, i: number, donorUid: number, j: number): void;
-  fuse(uids: number[]): void;
-}
 
 type Selection = { kind: 'slot'; slot: SlotId } | null;
 
@@ -103,54 +92,16 @@ function itemDetail(it: Item, equipped: Item[]): string {
     <ul class="affixes">${lines.join('')}</ul>`;
 }
 
-/** Affisso scelto da un donatore per il trasferimento, come "uidDonatore:indice". */
-type Pick = string;
-
-/** Pannello di crafting di un oggetto (indossato o nell'inventario). */
-function craftPanel(state: GameState, it: Item, pick: Pick): string {
+/** Riga di crafting (automatico): quante volte il gioco ha alzato il tier degli affissi. */
+function craftNote(it: Item): string {
   if (!craftable(it)) return '<div class="craft muted">Unici e pezzi di set non si modificano.</div>';
-  const gear = state.gear;
-  const [donorUid, j] = pick.split(':').map(Number);
-  const donor = pick ? gear.inventory.find((x) => x.uid === donorUid) : undefined;
-  const dis = (ok: boolean) => (ok ? '' : ' disabled');
-  const rows = it.affixes.map((a, i) => {
-    const up = a.tier < MAX_TIER
-      ? `<button class="btn sm" data-act="upgrade" data-uid="${it.uid}" data-i="${i}"${dis(canUpgrade(state, it, i))}>T${a.tier + 1} · ${upgradeCost(it, i)}</button>`
-      : '';
-    const tr = donor
-      ? `<button class="btn sm" data-act="transfer" data-uid="${it.uid}" data-i="${i}"${dis(canTransfer(state, it, i, donor, j))}>Sostituisci · ${transferCost(it)}</button>`
-      : '';
-    return `<li><span>${affixText(a)} <span class="muted">T${a.tier}</span></span>
-      <span class="craft-btns"><button class="btn sm" data-act="reroll" data-uid="${it.uid}" data-i="${i}"${dis(canReroll(state, it, i))}>Ritira · ${rerollCost(it)}</button>${up}${tr}</span></li>`;
-  });
-  const donors = gear.inventory.filter((x) => x !== it && x.type === it.type && craftable(x) && x.affixes.length);
-  const options = donors.flatMap((d) => d.affixes.map((a, k) =>
-    `<option value="${d.uid}:${k}"${pick === `${d.uid}:${k}` ? ' selected' : ''}>${esc(d.name)} (${d.ilvl}): ${affixText(a).replace(/<[^>]+>/g, '')} T${a.tier}</option>`));
-  const transfer = options.length
-    ? `<label class="craft-pick">Trasferisci da <select data-g="pick"><option value="">—</option>${options.join('')}</select></label>
-       ${donor ? '<div class="muted">Scegli l’affisso da sostituire: il donatore viene distrutto.</div>' : ''}`
-    : '';
-  let fuse = '';
-  const inInv = gear.inventory.includes(it);
-  if (inInv && it.rarity < FUSE_MAX_RARITY) {
-    const set = [it, ...fusePartners(gear, it).slice(0, FUSE_COUNT - 1)];
-    const next = RARITIES[it.rarity + 1];
-    fuse = set.length === FUSE_COUNT
-      ? `<button class="btn sm" data-act="fuse" data-uids="${set.map((x) => x.uid).join(',')}"${dis(canFuse(state, set))}>Fondi con ${set.slice(1).map((x) => esc(x.name)).join(' e ')} → ${next.name} · ${fuseCost(set)}</button>`
-      : `<span class="muted">Fusione: servono ${FUSE_COUNT} oggetti ${RARITIES[it.rarity].name} di questo tipo (hai ${set.length}).</span>`;
-  }
-  return `<div class="craft">
-    <div class="craft-title">Crafting <span class="muted">· modifiche fatte: ${it.crafts ?? 0} · costi in Frammenti</span></div>
-    ${rows.length ? `<ul class="craft-list">${rows.join('')}</ul>` : ''}
-    ${transfer}
-    ${fuse ? `<div class="craft-fuse">${fuse}</div>` : ''}
-  </div>`;
+  return `<div class="craft muted">Crafting automatico: i Frammenti alzano il tier degli affissi · modifiche fatte: ${it.crafts ?? 0}</div>`;
 }
 
-export function createGearPanel(root: HTMLElement, actions: GearActions) {
+export function createGearPanel(root: HTMLElement) {
   root.innerHTML = `
     <h2 class="section">Equipaggiamento</h2>
-    <p class="muted">Ogni oggetto che cade si indossa da solo se aumenta la potenza; gli altri diventano Frammenti.</p>
+    <p class="muted">Ogni oggetto che cade si indossa da solo se aumenta la potenza; gli altri diventano Frammenti, che alzano da soli il tier degli affissi indossati.</p>
     <div class="slots" data-g="slots"></div>
     <div class="detail" data-g="detail"></div>
     <div class="salvage-row"><span><b data-g="frag">0</b> <span class="muted">Frammenti</span></span></div>`;
@@ -160,40 +111,21 @@ export function createGearPanel(root: HTMLElement, actions: GearActions) {
   let selected: Selection = null;
   let lastKey = '';
   let current: GameState | null = null;
-  let pick: Pick = '';
-
-  root.addEventListener('change', (ev) => {
-    const t = ev.target as HTMLSelectElement;
-    if (t.dataset.g !== 'pick') return;
-    pick = t.value;
-    lastKey = '';
-  });
 
   root.addEventListener('click', (ev) => {
     const t = (ev.target as HTMLElement).closest<HTMLElement>('[data-act]');
     if (!t) return;
-    const { act, uid, slot, i } = t.dataset;
-    const prev = JSON.stringify(selected);
-    if (act === 'reroll') actions.reroll(Number(uid), Number(i));
-    else if (act === 'upgrade') actions.upgrade(Number(uid), Number(i));
-    else if (act === 'transfer') {
-      const [d, j] = pick.split(':').map(Number);
-      actions.transfer(Number(uid), Number(i), d, j);
-      pick = '';
-    } else if (act === 'fuse') {
-      actions.fuse(t.dataset.uids!.split(',').map(Number));
-      selected = null;
-    } else if (act === 'pick-slot') selected = current?.gear.equipped[slot as SlotId] ? { kind: 'slot', slot: slot as SlotId } : null;
-    if (JSON.stringify(selected) !== prev) pick = '';
+    const { act, slot } = t.dataset;
+    if (act === 'pick-slot') selected = current?.gear.equipped[slot as SlotId] ? { kind: 'slot', slot: slot as SlotId } : null;
     lastKey = '';
   });
 
-  function renderDetail(state: GameState, gear: GearState): string {
+  function renderDetail(gear: GearState): string {
     if (selected?.kind === 'slot') {
       const it = gear.equipped[selected.slot];
       if (!it) return '';
       return `${itemDetail(it, Object.values(gear.equipped) as Item[])}
-        ${craftPanel(state, it, pick)}`;
+        ${craftNote(it)}`;
     }
     return '<p class="muted">Tocca un oggetto per vederne i dettagli.</p>';
   }
@@ -207,8 +139,7 @@ export function createGearPanel(root: HTMLElement, actions: GearActions) {
       const key = JSON.stringify([
         SLOTS.map((s) => gear.equipped[s.id]?.uid ?? 0),
         selected,
-        pick,
-        state.fragments,
+        selected && gear.equipped[selected.slot]?.affixes.map((a) => a.tier),
         state.hero.level,
         state.upgrades,
       ]);
@@ -224,7 +155,7 @@ export function createGearPanel(root: HTMLElement, actions: GearActions) {
             ? `<span class="slot-item" style="color:${RARITIES[it.rarity].color}">${itemIcon(it.type)}${itemLabel(it)}</span><span class="slot-lv">${it.ilvl}</span>`
             : '<span class="muted">—</span>'}</button>`;
       }).join('');
-      refs.detail.innerHTML = renderDetail(state, gear);
+      refs.detail.innerHTML = renderDetail(gear);
     },
   };
 }

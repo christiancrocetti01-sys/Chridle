@@ -259,3 +259,9 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
 - Essenza: ogni secondo compra la cosa più economica tra livelli delle skill (+10%, costo 25×1,4^(lv−1)),
   8 rune in piano (2 per skill) e livelli del Lumo attivo. Perk "Quinto Sole" = +5 livelli a tutte le skill.
   Corrotto: le skill di danno costano vita invece di Luce.
+- Rune: solo le 8 del piano (Potenza, Custodia, Esecuzione, Ferita Aperta, Purificazione, Bastione, Pazienza,
+  Persistenza); le altre 32 tolte (2026-10-25). Lumo attivo: il preferito della Via (Paladino Aureola, Lama ed
+  Eclissiarca Ombretta, Inquisitore Fiammella, Custode Scintilla), altrimenti quello di livello più alto.
+- Crafting: solo l'aumento di tier sugli oggetti indossati, sempre il più economico (`autoCraft`); tolti Ritira,
+  Trasferisci e Fusione. Oro: il Potenziamento più economico. Paragon: a giro Forza, Vigore, Forza, Precisione,
+  Vigore, Tempra. Ascensione: prima Doppia Via e Quinto Sole, poi il più economico. Tutto in `autoSpend` (`src/core/auto.ts`).

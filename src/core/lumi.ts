@@ -24,12 +24,6 @@ export function checkLumi(state: GameState): LumoId[] {
   return gained;
 }
 
-export function setActiveLumo(state: GameState, id: LumoId): boolean {
-  if (!state.lumi.levels[id]) return false;
-  state.lumi.active = id;
-  return true;
-}
-
 export function levelLumo(state: GameState, id: LumoId): boolean {
   const lv = state.lumi.levels[id];
   if (!lv || state.essence < lumoCost(lv)) return false;

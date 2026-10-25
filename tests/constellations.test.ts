@@ -117,8 +117,8 @@ describe('Costellazioni: chiavi di volta', () => {
     const s = keystone('luce-k');
     const def = skillDef('colpoSacro')!;
     const st = stateStats(s);
-    expect(lightCost(s, st, def)).toBe(0);
-    expect(cooldownTicks(s, st, def)).toBe(60);
+    expect(lightCost(st, def)).toBe(0);
+    expect(cooldownTicks(st, def)).toBe(60);
     s.skills = newSkills(1);
     while (!s.enemy) step(s);
     s.hero.light = 0;

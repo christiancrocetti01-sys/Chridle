@@ -1,19 +1,16 @@
 import { canAscend, perkCost, perkLevel, perkValue, scintilleGain } from '../core/ascension';
 import { canRebirth, cycleScintille, lootMult, paragonFree, powerMult, rebirthGain, sparkMult } from '../core/endgame';
-import { PARAGON, REBIRTH_SCINTILLE, paragonCost, type ParagonId } from '../data/endgame';
+import { PARAGON, REBIRTH_SCINTILLE, paragonCost } from '../data/endgame';
 import { STAT_LABELS } from '../data/items';
 import { formatStat } from './gear';
 import { formatNum } from '../core/format';
 import type { OfflineReport } from '../core/offline';
 import type { GameState } from '../core/state';
-import { ASCEND_STAGE, PERKS, type PerkDef, type PerkId } from '../data/ascension';
+import { ASCEND_STAGE, PERKS, type PerkDef } from '../data/ascension';
 
 export interface AscensionActions {
   ascend(): void;
-  buyPerk(id: PerkId): void;
   rebirth(): void;
-  spendParagon(id: ParagonId): void;
-  resetParagon(): void;
 }
 
 const perkText = (d: PerkDef, total: number) =>
@@ -34,9 +31,7 @@ export function createAscensionPanel(root: HTMLElement, actions: AscensionAction
     } else if (t.dataset.a === 'rebirth') {
       if (confirmSun) actions.rebirth();
       confirmSun = !confirmSun;
-    } else if (t.dataset.a === 'perk') actions.buyPerk(t.dataset.id as PerkId);
-    else if (t.dataset.a === 'paragon') actions.spendParagon(t.dataset.id as ParagonId);
-    else if (t.dataset.a === 'paragonReset') actions.resetParagon();
+    }
     key = '';
   });
   return {
@@ -58,14 +53,14 @@ export function createAscensionPanel(root: HTMLElement, actions: AscensionAction
             perdendo oro, potenziamenti e Costellazioni (i punti tornano salendo). Restano oggetti, Frammenti, Essenza, rune, chiavi, Torre e Vie.</div>
           <div class="skill-info muted">${state.stage.best >= ASCEND_STAGE ? `Scintille = ((record − 30) / 10)²${sparkMult(state.rebirth) > 1 ? ` × ${sparkMult(state.rebirth).toFixed(2)} (Soli)` : ''}. Record attuale: stage ${state.stage.best}.` : `Si sblocca allo stage ${ASCEND_STAGE} (record attuale ${state.stage.best}).`}</div>
         </div>
-        <h2 class="section">Potenziamenti permanenti</h2>
+        <h2 class="section">Potenziamenti permanenti <span class="muted">· le Scintille si spendono da sole: prima Doppia Via e Quinto Sole, poi il più economico</span></h2>
         <div class="skill-list">${PERKS.map((d) => {
           const lv = perkLevel(a, d.id);
           const maxed = d.max !== undefined && lv >= d.max;
           const cost = perkCost(a, d.id);
           return `<div class="skill-row">
             <div class="skill-head"><span><b>${d.name}</b> <span class="muted">Lv ${lv}${d.max ? `/${d.max}` : ''}</span></span>
-              <button class="btn sm" data-a="perk" data-id="${d.id}"${!maxed && a.scintille >= cost ? '' : ' disabled'}>${maxed ? 'Massimo' : `Compra · ${formatNum(cost)}`}</button></div>
+              <span class="muted">${maxed ? 'Massimo' : `prossimo · ${formatNum(cost)}`}</span></div>
             <div class="skill-info">${lv ? perkText(d, perkValue(a, d.id)) : `<span class="muted">${perkText(d, d.value)} al primo livello</span>`}</div>
           </div>`;
         }).join('')}</div>
@@ -101,13 +96,12 @@ function paragonBlock(state: GameState): string {
     <div class="skill-row">
       <div class="bar"><div class="fill" style="width:${pct.toFixed(1)}%"></div></div>
       <div class="skill-info muted">${formatNum(p.xp)} / ${formatNum(paragonCost(p.level))} esperienza Paragon: si guadagna solo nell'Abisso.
-        I punti si possono riprendere quando vuoi. <button class="btn sm" data-a="paragonReset"${p.level - free ? '' : ' disabled'}>Riprendi i punti</button></div>
+        I punti si spendono da soli, a giro: Forza, Vigore, Forza, Precisione, Vigore, Tempra.</div>
     </div>
     <div class="skill-list">${PARAGON.map((d) => {
       const n = p.points[d.id] ?? 0;
       return `<div class="skill-row"><div class="skill-head"><span><b>${d.name}</b> <span class="muted">${n}</span> ·
-        ${d.mods.map(([k, v]) => `+${formatStat(k, v * Math.max(1, n))} ${STAT_LABELS[k]}`).join(', ')}${n ? '' : ' <span class="muted">per punto</span>'}</span>
-        <button class="btn sm" data-a="paragon" data-id="${d.id}"${free ? '' : ' disabled'}>+1</button></div></div>`;
+        ${d.mods.map(([k, v]) => `+${formatStat(k, v * Math.max(1, n))} ${STAT_LABELS[k]}`).join(', ')}${n ? '' : ' <span class="muted">per punto</span>'}</span></div></div>`;
     }).join('')}</div>`;
 }
 

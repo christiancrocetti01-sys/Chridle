@@ -3,14 +3,14 @@ import { UPGRADES, type UpgradeId } from '../data/upgrades';
 import { discover } from './collection';
 import { checkAchievements } from './achievements';
 import { checkLumi } from './lumi';
-import { autoEssence } from './auto';
+import { autoSpend } from './auto';
 import type { LumoId } from '../data/lumi';
 import { TICK_RATE } from './loop';
 import { SANCTITY_SECONDS } from '../data/corruption';
 import { DROP_CHANCE, rollItem, rollRarity, type Item } from './items';
 import { nextRandom } from './rng';
 import { essenceFor } from './runes';
-import { castOnCrit, castSkills, gainLight, tickSkills, unlockSkills, type SkillEvent } from './skills';
+import { castSkills, gainLight, tickSkills, unlockSkills, type SkillEvent } from './skills';
 import { damageMult, fireTriggers, gearTriggers, heal, tickBuffs, type ActiveTrigger, type ProcEvent } from './triggers';
 import { BURNING_SHARE, DOUBLE_STRIKE_CHANCE, REFLECT_SHARE, SPIRIT_ATK } from '../data/vie';
 import type { GameState } from './state';
@@ -61,7 +61,7 @@ export function step(state: GameState, events: CombatEvent[] = []): CombatEvent[
   if (state.tick % TICK_RATE === 0) {
     for (const id of checkAchievements(state)) events.push({ type: 'achievement', id });
     for (const id of checkLumi(state)) events.push({ type: 'lumo', id });
-    autoEssence(state);
+    autoSpend(state);
   }
   const hero = stateStats(state);
   const m = state.mode;
@@ -156,7 +156,6 @@ function strike(state: GameState, hero: Stats, dmgMult: number, triggers: Active
   if (crit) {
     if (hero.rules.has('chainLightning')) enemy.hp -= hero.atk * CHAIN_LIGHTNING_ATK * hero.elemMult.lightning * resMult(enemy, 'lightning') * dmgMult;
     fireTriggers(state, hero, triggers, 'crit', events);
-    castOnCrit(state, hero, events);
   }
   fireTriggers(state, hero, triggers, 'everyN', events);
 }
@@ -171,7 +170,6 @@ function hitHero(state: GameState, hero: Stats, raw: number, events: CombatEvent
   const enemy = state.enemy!;
   let amount = mitigate(raw, hero.def);
   if (hero.rules.has('reflect')) enemy.hp -= amount * REFLECT_SHARE * damageMult(hero, enemy);
-  for (const b of state.hero.buffs) if (b.reflect) enemy.hp -= amount * b.reflect * damageMult(hero, enemy);
   const absorbed = Math.min(state.hero.shield, amount);
   state.hero.shield -= absorbed;
   amount -= absorbed;
@@ -205,8 +203,7 @@ function onKill(state: GameState, events: CombatEvent[]) {
   const mult = raid ? 20 : zoneBoss ? 10 : boss ? 5 : elite ? ELITE_REWARD : 1;
   const gold = base.gold * mult * hero.goldMult;
   const xp = base.xp * mult * hero.xpMult;
-  const essence = essenceFor(stage, boss) * (elite ? ELITE_REWARD : 1) * (1 + perkValue(state.ascension, 'essenza'))
-    * (1 + (enemy.harvest ?? 0)) * lootMult(state.rebirth);
+  const essence = essenceFor(stage, boss) * (elite ? ELITE_REWARD : 1) * (1 + perkValue(state.ascension, 'essenza')) * lootMult(state.rebirth);
   state.gold += gold;
   state.essence += essence;
   state.totals.gold += gold;

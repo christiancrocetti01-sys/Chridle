@@ -64,10 +64,10 @@ describe('sinergie per tag', () => {
     const s = fighting();
     const def = skillDef('giudizio')!;
     wear(s, 'anello1', [['sacroCdr', 0.1]]);
-    expect(cooldownTicks(s, stateStats(s), def)).toBe(Math.round(def.cooldown * 10 * 0.9));
+    expect(cooldownTicks(stateStats(s), def)).toBe(Math.round(def.cooldown * 10 * 0.9));
     cast(s, 'giudizio');
     expect(s.skills.cooldowns.giudizio).toBe(Math.round(def.cooldown * 10 * 0.9));
     wear(s, 'anello2', [['sacroCdr', 5]]);
-    expect(cooldownTicks(s, stateStats(s), def)).toBe(Math.round(def.cooldown * 10 * (1 - MAX_SKILL_CDR)));
+    expect(cooldownTicks(stateStats(s), def)).toBe(Math.round(def.cooldown * 10 * (1 - MAX_SKILL_CDR)));
   });
 });

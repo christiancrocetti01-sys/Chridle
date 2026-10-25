@@ -38,10 +38,6 @@ export interface EnemyState {
   /** Danno ancora da infliggere con sanguinamento e veleno (si consuma nel tempo). */
   bleed: number;
   poison: number;
-  /** Skill già lanciate contro questo nemico (runa Alba). */
-  dawn?: string[];
-  /** Essenza in più se muore per una skill con la runa Raccolto. */
-  harvest?: number;
 }
 
 export interface HeroState {
@@ -54,7 +50,7 @@ export interface HeroState {
   /** Colpi messi a segno sul nemico corrente (per gli effetti "ogni N colpi"). */
   hits: number;
   /** Effetti temporanei: uno per affisso a scatto, si rinnova quando riscatta. */
-  buffs: { key: string; speedPct: number; ticks: number; dodge?: number; defPct?: number; reflect?: number }[];
+  buffs: { key: string; speedPct: number; ticks: number }[];
   /** Il prossimo colpo è un critico garantito (regola "dodgeCrit"). */
   nextCrit: boolean;
   /** Risorsa delle skill attive: si accumula colpendo. */

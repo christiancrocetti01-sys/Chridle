@@ -97,8 +97,9 @@ html, body {
   cursor: pointer;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
-.card:not(:disabled):hover { border-color: var(--accent); background: var(--surface-2); }
-.card:not(:disabled):active { transform: translateY(1px); }
+div.card { cursor: default; }
+button.card:not(:disabled):hover { border-color: var(--accent); background: var(--surface-2); }
+button.card:not(:disabled):active { transform: translateY(1px); }
 .card:disabled { opacity: 0.45; cursor: default; }
 .card-name { font-weight: 600; }
 .card-desc { font-size: 0.85em; color: var(--muted); }
@@ -164,10 +165,6 @@ html, body {
 .btn.sm { padding: 4px 8px; font-size: 0.85em; text-align: left; }
 
 .craft { min-width: 0; margin-top: 12px; padding-top: 8px; border-top: 1px solid var(--line); display: grid; gap: 6px; }
-.craft-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
-.craft-list li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 8px; align-items: center; }
-.craft-btns { display: flex; flex-wrap: wrap; gap: 4px; }
-.craft-pick select { display: block; width: 100%; margin-top: 4px; background: var(--surface); color: var(--text); border: 1px solid var(--line); font: inherit; padding: 4px; }
 
 .gear-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; }
 .gear-head .section { flex: 1; }
@@ -192,7 +189,6 @@ html, body {
 .log .down { color: #ff6b6b; }
 
 .set-title { margin-top: 6px; color: #3ecf8e; }
-.craft-title { margin-top: 6px; font-weight: 600; }
 .affixes.set .set-on { color: #3ecf8e; }
 .affixes.unique { color: #e6b85c; }
 
@@ -304,7 +300,7 @@ html, body {
 .skill-list { gap: 0; }
 .skill-list > .skill-row, .upgrades > .card { border: none; border-bottom: 1px solid var(--line); background: transparent; padding: 10px 2px; }
 .upgrades { gap: 0; grid-template-columns: 1fr; }
-.card:not(:disabled):hover { background: transparent; }
+button.card:not(:disabled):hover { background: transparent; }
 
 /* Righe che si aprono al tocco (src/ui/list.ts) */
 .li { border-bottom: 1px solid var(--line); }

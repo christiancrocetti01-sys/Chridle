@@ -69,8 +69,8 @@ describe('Purezza e Corruzione', () => {
     s.skills = newSkills(60);
     const hero = stateStats(s);
     expect(hero.rules.has('corruptShadow')).toBe(true);
-    expect(lightCost(s, hero, def)).toBe(0);
-    expect(lightCost(s, stateStats(withCorruption(10)), def)).toBeGreaterThan(0);
+    expect(lightCost(hero, def)).toBe(0);
+    expect(lightCost(stateStats(withCorruption(10)), def)).toBeGreaterThan(0);
     while (!s.enemy) step(s);
     s.enemy!.hp = s.enemy!.maxHp = 1e15;
     s.skills.slots = [def.id, null, null, null];

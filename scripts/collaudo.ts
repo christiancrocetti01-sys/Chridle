@@ -1,6 +1,6 @@
 /**
  * Collaudo massivo: un "giocatore automatico" gioca ore simulate con tutti i sistemi
- * (equip, crafting e fusione, potenziamenti, Vie, Stelle, skill, rune, Dungeon/Torre/Raid/Abisso,
+ * (Vie, Stelle, Dungeon/Torre/Raid/Abisso,
  * Ascensioni, Rinascite, Paragon, Purezza/Corruzione, offline, salvataggio) e controlla che lo stato resti sano.
  *
  *   npm run collaudo                       tutti i profili in parallelo, 8 ore
@@ -8,33 +8,23 @@
  *   npm run collaudo -- --profilo lama     un solo profilo (stampa anche le tappe)
  */
 import { spawn } from 'node:child_process';
-import { buyUpgrade, changeGear, step, upgradePrice, type CombatEvent } from '../src/core/combat';
+import { changeGear, step, type CombatEvent } from '../src/core/combat';
 import { newGame, type GameState } from '../src/core/state';
-import { equip, salvageUpTo, type Item } from '../src/core/items';
-import { craftable, fuseItems, fusePartners, canFuse, upgradeAffix, canUpgrade, MAX_TIER } from '../src/core/craft';
 import { elementalDamage, stateStats, type Stats } from '../src/core/stats';
 import { canTake, pointsLeft, takeStar } from '../src/core/constellations';
 import { chooseSecondVia, chooseVia } from '../src/core/vie';
-import { canSocket, levelCost, levelRune, socketRune, unlockCost, unlockRune, isDamageSkill } from '../src/core/runes';
-import { setSlot, unlockedSkills } from '../src/core/skills';
+import { unlockCost } from '../src/core/runes';
 import { activeVie } from '../src/core/vie';
 import { canRaid, enterAbyss, enterDungeon, enterRaid, enterTower } from '../src/core/modes';
-import { abyssUnlocked, canRebirth, paragonFree, rebirth, spendParagon } from '../src/core/endgame';
-import type { ParagonId } from '../src/data/endgame';
-import { ascend, buyPerk, canAscend, perkCost, perkLevel, PERKS } from '../src/core/ascension';
+import { abyssUnlocked, canRebirth, rebirth } from '../src/core/endgame';
+import { ascend, canAscend } from '../src/core/ascension';
 import { applyOffline } from '../src/core/offline';
 import { deserialize, serialize } from '../src/core/save';
 import { TICK_RATE } from '../src/core/loop';
-import { SLOTS } from '../src/data/items';
-import { UPGRADES } from '../src/data/upgrades';
 import { STARS } from '../src/data/constellations';
-import { RUNES, RUNE_SOCKETS, type RuneId } from '../src/data/runes';
 import { VIA_LEVEL, type ViaId } from '../src/data/vie';
 import { RAID_KEYS, RAID_STAGE } from '../src/data/modes';
-import type { PerkId } from '../src/data/ascension';
 import { UNIQUES } from '../src/data/uniques';
-import { levelLumo, lumoCost, setActiveLumo } from '../src/core/lumi';
-import type { LumoId } from '../src/data/lumi';
 
 interface Profile {
   id: string;
@@ -42,20 +32,17 @@ interface Profile {
   second: ViaId;
   /** >0 premia la Corruzione, <0 la Purezza nella scelta di oggetti e stelle. */
   bias: number;
-  /** Priorità dei potenziamenti dell'Ascensione. */
-  perks: PerkId[];
   /** Simula sessioni: ogni 2 h di gioco, 2 h offline. */
   offline?: boolean;
 }
 
-const PERKS_BASE: PerkId[] = ['secondaVia', 'slot', 'fiamma', 'balzo', 'essenza', 'sapienza', 'oro', 'fortuna', 'veglia'];
 const PROFILES: Profile[] = [
-  { id: 'paladino', via: 'paladino', second: 'custode', bias: -1, perks: PERKS_BASE },
-  { id: 'lama', via: 'lama', second: 'inquisitore', bias: 0, perks: PERKS_BASE },
-  { id: 'inquisitore', via: 'inquisitore', second: 'lama', bias: 0, perks: ['fiamma', 'secondaVia', 'balzo', 'slot', 'essenza', 'sapienza', 'oro', 'fortuna', 'veglia'] },
-  { id: 'custode', via: 'custode', second: 'paladino', bias: -1, perks: PERKS_BASE },
-  { id: 'eclissiarca', via: 'eclissiarca', second: 'lama', bias: 1, perks: PERKS_BASE },
-  { id: 'offline', via: 'lama', second: 'paladino', bias: 0, perks: ['veglia', ...PERKS_BASE], offline: true },
+  { id: 'paladino', via: 'paladino', second: 'custode', bias: -1 },
+  { id: 'lama', via: 'lama', second: 'inquisitore', bias: 0 },
+  { id: 'inquisitore', via: 'inquisitore', second: 'lama', bias: 0 },
+  { id: 'custode', via: 'custode', second: 'paladino', bias: -1 },
+  { id: 'eclissiarca', via: 'eclissiarca', second: 'lama', bias: 1 },
+  { id: 'offline', via: 'lama', second: 'paladino', bias: 0, offline: true },
 ];
 
 // ---------------------------------------------------------------- argomenti
@@ -81,60 +68,6 @@ function power(state: GameState, p: Profile): number {
   return dps * tank * (1 + 0.3 * p.bias * s.corruption / 100) * theme;
 }
 
-function autoBuy(state: GameState) {
-  for (;;) {
-    const cheapest = UPGRADES.map((u) => u.id).sort((a, b) => upgradePrice(state, a) - upgradePrice(state, b))[0];
-    if (!buyUpgrade(state, cheapest)) return;
-  }
-}
-
-function autoEquip(state: GameState, p: Profile) {
-  for (const item of state.gear.inventory.slice()) {
-    for (const slot of SLOTS.filter((x) => x.type === item.type)) {
-      const before = power(state, p);
-      const old = state.gear.equipped[slot.id];
-      equip(state.gear, item.uid, slot.id);
-      if (power(state, p) > before * 1.0001) break;
-      if (old) equip(state.gear, old.uid, slot.id);
-      else { state.gear.inventory.push(item); delete state.gear.equipped[slot.id]; }
-    }
-  }
-}
-
-/** Fonde terne di oggetti uguali (prima di smantellare), poi alza i tier degli affissi indossati. */
-function autoCraft(state: GameState, p: Profile, stats: Counters) {
-  for (let again = true; again;) {
-    again = false;
-    for (const it of state.gear.inventory) {
-      if (!craftable(it)) continue;
-      const group = [it, ...fusePartners(state.gear, it).slice(0, 2)];
-      if (group.length === 3 && canFuse(state, group) && fuseItems(state, group.map((x) => x.uid))) {
-        stats.fusions++;
-        again = true;
-        break;
-      }
-    }
-  }
-  autoEquip(state, p);
-  state.fragments += salvageUpTo(state.gear, 99);
-  // affissi: il più economico per primo, finché bastano i Frammenti
-  for (let n = 0; n < 50; n++) {
-    let best: { it: Item; i: number; cost: number } | null = null;
-    for (const it of Object.values(state.gear.equipped)) {
-      if (!it || !craftable(it)) continue;
-      it.affixes.forEach((a, i) => {
-        if (a.tier >= MAX_TIER || !canUpgrade(state, it, i)) return;
-        const cost = a.tier * ((it.crafts ?? 0) + 1);
-        if (!best || cost < best.cost) best = { it, i, cost };
-      });
-    }
-    if (!best) break;
-    const b = best as { it: Item; i: number };
-    if (!upgradeAffix(state, b.it.uid, b.i)) break;
-    stats.crafts++;
-  }
-}
-
 /** Stelle: sceglie sempre quella raggiungibile che alza di più la potenza. */
 function autoStars(state: GameState, p: Profile) {
   while (pointsLeft(state) > 0) {
@@ -152,38 +85,6 @@ function autoStars(state: GameState, p: Profile) {
 }
 
 
-/** Lumo preferito per Via (se non è sbloccato, quello di livello più alto). */
-const VIA_LUMO: Record<ViaId, LumoId> = { paladino: 'aureola', lama: 'ombretta', inquisitore: 'fiammella', custode: 'scintilla', eclissiarca: 'ombretta' };
-
-/** Lumi: si sceglie il preferito della Via (i livelli li compra il gioco con l'Essenza). */
-function autoLumi(state: GameState, via: ViaId) {
-  const lv = state.lumi.levels;
-  const owned = (Object.keys(lv) as LumoId[]).sort((a, b) => lv[b]! - lv[a]!);
-  if (!owned.length) return;
-  const want = lv[VIA_LUMO[via]] ? VIA_LUMO[via] : owned[0];
-  if (state.lumi.active !== want) setActiveLumo(state, want);
-}
-
-
-/** Paragon: attacco e vita a turno, ogni quarto punto in danno critico. */
-const PARAGON_ORDER: ParagonId[] = ['forza', 'vigore', 'forza', 'precisione', 'vigore', 'tempra'];
-function autoParagon(state: GameState) {
-  while (paragonFree(state.paragon) > 0) spendParagon(state, PARAGON_ORDER[state.paragon.level % PARAGON_ORDER.length]);
-}
-
-function autoPerks(state: GameState, p: Profile) {
-  for (let bought = true; bought;) {
-    bought = false;
-    // il primo della lista che si può comprare (le priorità alte vengono prese appena possibile)
-    for (const id of p.perks) {
-      const def = PERKS.find((x) => x.id === id)!;
-      if (def.max !== undefined && perkLevel(state.ascension, id) >= def.max) continue;
-      if (perkCost(state.ascension, id) > state.ascension.scintille) break;
-      if (buyPerk(state, id)) { bought = true; break; }
-    }
-  }
-}
-
 // ---------------------------------------------------------------- controlli
 
 interface Counters {
@@ -193,7 +94,8 @@ interface Counters {
   /** Esiti dei Raid persi (morte o tempo) e Corruzione massima raggiunta. */
   raidLoss: Record<string, number>; maxCorr: number; minCorr: number;
   dungeons: [number, number]; towers: [number, number]; raids: [number, number]; abyss: number;
-  ascensions: number; rebirths: number; rebirthAt: number[]; fusions: number; crafts: number; runesUnlocked: number; runeLevels: number; lumiLevels: number;
+  ascensions: number; rebirths: number; rebirthAt: number[]; /** Affissi alzati sugli oggetti indossati a fine collaudo. */
+  crafts: number;
   essenceGained: number; offlineHours: number; saveChecks: number;
 }
 
@@ -228,7 +130,7 @@ function simulate(p: Profile) {
   const state = newGame(0, SEED * 1000 + PROFILES.indexOf(p) + 1);
   const c: Counters = {
     kills: 0, deaths: 0, keysGained: 0, keysOffline: 0, keySrc: {}, raidLoss: {}, maxCorr: 0, minCorr: 0, dungeons: [0, 0], towers: [0, 0], raids: [0, 0], abyss: 0,
-    ascensions: 0, rebirths: 0, rebirthAt: [], fusions: 0, crafts: 0, runesUnlocked: 0, runeLevels: 0, lumiLevels: 0, essenceGained: 0, offlineHours: 0, saveChecks: 0,
+    ascensions: 0, rebirths: 0, rebirthAt: [], crafts: 0, essenceGained: 0, offlineHours: 0, saveChecks: 0,
   };
   const checkpoints: Checkpoint[] = [];
   const ascendAt: number[] = [];
@@ -274,11 +176,7 @@ function simulate(p: Profile) {
     if (t % (10 * TICK_RATE) === 0) changeGear(state, () => {
       if (state.hero.level >= VIA_LEVEL && state.vie.main !== p.via) chooseVia(state, p.via);
       if (state.vie.secondUnlocked && state.vie.second !== p.second) chooseSecondVia(state, p.second);
-      autoBuy(state);
-      autoCraft(state, p, c);
       autoStars(state, p);
-      autoLumi(state, p.via);
-      autoParagon(state);
       if (state.mode.kind === 'campaign') {
         // Ascensione quando si è fermi da 15 minuti; prima si spendono le chiavi
         const stuck = t - lastBestTick > 15 * 60 * TICK_RATE;
@@ -290,7 +188,6 @@ function simulate(p: Profile) {
           rebirth(state);
           c.rebirths++;
           c.rebirthAt.push(+(t / ticksPerHour).toFixed(1));
-          autoPerks(state, p);
           lastBest = state.stage.best;
           lastBestTick = t;
         }
@@ -298,7 +195,6 @@ function simulate(p: Profile) {
           ascend(state);
           c.ascensions++;
           ascendAt.push(+(t / ticksPerHour).toFixed(2));
-          autoPerks(state, p);
           lastBest = state.stage.best;
           lastBestTick = t;
         }
@@ -335,6 +231,7 @@ function simulate(p: Profile) {
     }
   }
   const s = stateStats(state);
+  c.crafts = Object.values(state.gear.equipped).reduce((n, it) => n + (it?.crafts ?? 0), 0);
   return {
     profile: p.id, hours: HOURS, seconds: +((Date.now() - t0) / 1000).toFixed(1), issues: [...issues],
     counters: c, ascendAt, checkpoints,
@@ -367,7 +264,7 @@ function report(results: Result[]) {
     console.log(`  chiavi: ${c.keysGained} in gioco (${fmt(c.keysGained / online)}/h) + ${c.keysOffline} offline (${c.offlineHours} h)  ·  fonti ${JSON.stringify(c.keySrc)}`);
     console.log(`  dungeon ${c.dungeons[0]}✓/${c.dungeons[1]}✗  torre ${c.towers[0]}✓/${c.towers[1]}✗  raid ${c.raids[0]}✓/${c.raids[1]}✗ ${JSON.stringify(c.raidLoss)}  ·  corruzione ${c.minCorr}…${c.maxCorr}`);
     console.log(`  rinascite ${c.rebirths} a ${c.rebirthAt.join(', ') || '—'} h  ·  discese nell'Abisso ${c.abyss}`);
-    console.log(`  ascensioni ${c.ascensions} a ${r.ascendAt.length > 20 ? `${r.ascendAt.slice(0, 10).join(', ')} … ${r.ascendAt.slice(-3).join(', ')}` : r.ascendAt.join(', ') || '—'} h  ·  fusioni ${c.fusions}  affissi alzati ${c.crafts}  rune ${JSON.stringify(r.end.runes.levels)}`);
+    console.log(`  ascensioni ${c.ascensions} a ${r.ascendAt.length > 20 ? `${r.ascendAt.slice(0, 10).join(', ')} … ${r.ascendAt.slice(-3).join(', ')}` : r.ascendAt.join(', ') || '—'} h  ·  affissi alzati ${c.crafts}  rune ${JSON.stringify(r.end.runes.levels)}`);
     console.log(`  fine: Vie ${r.end.vie.join('+')}, stelle ${r.end.stars}, corruzione ${r.end.corruption}, regole ${r.end.rules.join(' ') || '—'}`);
     console.log(`  skill ${r.end.skills.join(', ')}  ·  perk ${JSON.stringify(r.end.perks)}`);
     console.log(`  codex ${JSON.stringify(r.end.codex)}  ·  collezione ${r.end.collection}/${UNIQUES.length}  ·  imprese ${r.end.achievements}`);
