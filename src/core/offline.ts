@@ -1,23 +1,11 @@
-import { ELITE_CHANCE, ELITE_FROM_STAGE, ELITE_KEY_CHANCE, type Family } from '../data/enemies';
-import { discover } from './collection';
-import { takeItem } from './autoequip';
-import { checkAchievements } from './achievements';
-import { checkLumi } from './lumi';
-import { autoSpend } from './auto';
 import { offlineEfficiency } from './ascension';
-import { gainXp, step, type CombatEvent } from './combat';
-import { rollItem, rollRarity, salvageValue } from './items';
+import { step, type CombatEvent } from './combat';
 import { TICK_RATE } from './loop';
 import { leaveMode } from './modes';
 import type { GameState } from './state';
-import { KILLS_PER_STAGE, stateStats } from './stats';
 
 /** Sotto questa assenza non si calcola niente (ci pensa il ciclo normale). */
 export const OFFLINE_MIN_S = 60;
-/** Tick simulati per stimare il ritmo (5 minuti di gioco). */
-export const SAMPLE_TICKS = 3000;
-/** Oggetti veri generati al massimo: il resto del bottino diventa Frammenti. */
-export const OFFLINE_MAX_ITEMS = 30;
 
 export interface OfflineReport {
   seconds: number;
@@ -30,80 +18,71 @@ export interface OfflineReport {
   keys: number;
   levels: number;
   items: number;
+  deaths: number;
+  stageFrom: number;
+  stageTo: number;
+}
+
+/** Una simulazione offline in corso: si porta avanti a blocchi con `runOffline`. */
+export interface OfflineRun {
+  report: OfflineReport;
+  /** Tick di gioco da simulare (tempo passato × efficienza) e già simulati. */
+  total: number;
+  done: number;
+  lastSeen0: number;
+  level0: number;
 }
 
 /**
- * Progresso offline senza limite di tempo, analitico: si simulano 5 minuti sullo stage attuale senza
- * avanzare (lo stage "sicuro"), si misura il ritmo e lo si moltiplica per il tempo passato × efficienza.
+ * Progresso offline senza limite di tempo, simulato tick per tick come a gioco aperto: si avanza di stage,
+ * si muore e si torna indietro, si sale di livello e si riprova. Il tempo simulato è quello passato × efficienza.
  */
-export function applyOffline(state: GameState, seconds: number): OfflineReport | null {
+export function startOffline(state: GameState, seconds: number): OfflineRun | null {
   if (seconds < OFFLINE_MIN_S) return null;
-  // una modalità lasciata a metà si chiude: offline si farma la Campagna
+  // una modalità lasciata a metà si chiude: offline si gioca la Campagna
   leaveMode(state, []);
-  const eff = offlineEfficiency(state.ascension);
-  const sim: GameState = structuredClone(state);
-  sim.stage.auto = false;
-  sim.stage.kills = Math.min(sim.stage.kills, KILLS_PER_STAGE - 1);
-  const ev: CombatEvent[] = [];
-  const before = { kills: sim.totals.kills };
-  let gold = 0;
-  let xp = 0;
-  let essence = 0;
-  let drops = 0;
-  for (let i = 0; i < SAMPLE_TICKS; i++) {
-    const n = ev.length;
-    step(sim, ev);
-    // il campione non deve salire di livello o di stage: si conta l'esperienza e si annulla il resto
-    for (let j = n; j < ev.length; j++) {
-      const e = ev[j];
-      if (e.type === 'kill') { gold += e.gold; xp += e.xp; essence += e.essence; }
-      if (e.type === 'drop') drops++;
-    }
-    sim.stage.auto = false;
-  }
-  const factor = (seconds * TICK_RATE * eff) / SAMPLE_TICKS;
-  const kills = Math.floor((sim.totals.kills - before.kills) * factor);
-  const report: OfflineReport = {
-    seconds, efficiency: eff, kills,
-    // dalle uccisioni: nel campione oro ed Essenza si spendono da soli
-    gold: gold * factor,
-    xp: xp * factor,
-    essence: essence * factor,
-    fragments: 0,
-    keys: state.stage.current >= ELITE_FROM_STAGE ? Math.floor(kills * ELITE_CHANCE * ELITE_KEY_CHANCE) : 0,
-    levels: 0,
-    items: 0,
+  const efficiency = offlineEfficiency(state.ascension);
+  return {
+    report: {
+      seconds, efficiency, kills: 0, gold: 0, xp: 0, essence: 0, fragments: 0, keys: 0, levels: 0, items: 0,
+      deaths: 0, stageFrom: state.stage.current, stageTo: state.stage.current,
+    },
+    total: Math.floor(seconds * TICK_RATE * efficiency),
+    done: 0,
+    lastSeen0: state.lastSeen,
+    level0: state.hero.level,
   };
-  state.rng = sim.rng;
-  state.gold += report.gold;
-  state.totals.gold += report.gold;
-  state.essence += report.essence;
-  state.keys += report.keys;
-  state.totals.kills += kills;
-  // Codex: le uccisioni del campione per famiglia, allo stesso ritmo
-  for (const f of Object.keys(state.codex) as Family[]) state.codex[f] += Math.floor((sim.codex[f] - state.codex[f]) * factor);
-
-  // bottino: i primi oggetti veri (filtro e inventario come al solito), il resto in Frammenti alla loro media
-  const totalDrops = Math.round(drops * factor);
-  const real = Math.min(totalDrops, OFFLINE_MAX_ITEMS);
-  const frag0 = state.fragments;
-  const mf = stateStats(state).magicFind;
-  let value = 0;
-  for (let i = 0; i < real; i++) {
-    const item = rollItem(state, state.gear.nextId++, state.stage.current, rollRarity(state, false, mf));
-    value += salvageValue(item);
-    discover(state, item);
-    if (takeItem(state, item)) report.items++;
-  }
-  if (real) state.fragments += (value / real) * (totalDrops - real);
-  report.fragments = state.fragments - frag0;
-
-  const lv = state.hero.level;
-  gainXp(state, report.xp, []);
-  report.levels = state.hero.level - lv;
-  checkAchievements(state);
-  checkLumi(state);
-  autoSpend(state);
-  return report;
 }
 
+/** Simula fino a `ticks` tick; true quando la simulazione è finita. */
+export function runOffline(state: GameState, run: OfflineRun, ticks: number): boolean {
+  const r = run.report;
+  const end = Math.min(run.total, run.done + ticks);
+  const ev: CombatEvent[] = [];
+  for (; run.done < end; run.done++) {
+    ev.length = 0;
+    const frag = state.fragments;
+    step(state, ev);
+    // i Frammenti si spendono da soli nel craft: si contano solo i guadagni
+    if (state.fragments > frag) r.fragments += state.fragments - frag;
+    for (const e of ev) {
+      if (e.type === 'kill') { r.kills++; r.gold += e.gold; r.xp += e.xp; r.essence += e.essence; }
+      else if (e.type === 'drop' && e.slot) r.items++;
+      else if (e.type === 'death') r.deaths++;
+      else if (e.type === 'key') r.keys++;
+    }
+  }
+  // il tempo già simulato si considera "visto": un salvataggio a metà non lo farebbe contare due volte
+  state.lastSeen = run.lastSeen0 + (run.done / (TICK_RATE * r.efficiency)) * 1000;
+  r.stageTo = state.stage.current;
+  r.levels = state.hero.level - run.level0;
+  return run.done >= run.total;
+}
+
+/** Tutto in una volta (test e collaudo); il gioco usa `startOffline`/`runOffline` a blocchi. */
+export function applyOffline(state: GameState, seconds: number): OfflineReport | null {
+  const run = startOffline(state, seconds);
+  if (!run) return null;
+  runOffline(state, run, run.total);
+  return run.report;
+}

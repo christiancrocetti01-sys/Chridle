@@ -198,10 +198,14 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
 
 ## 13. Progresso offline
 - Sì, **senza limite di tempo**.
-- Calcolo analitico (non simulazione tick per tick): stima uccisioni/ora sullo stage migliore "sicuro".
+- ~~Calcolo analitico~~ → **simulazione vera tick per tick** (decisione utente 2026-10-26, nessun tetto: il
+  caricamento può durare, ~13k tick/s su PC).
 - Al rientro: schermata riepilogo soddisfacente (oro, XP, oggetti, livelli guadagnati).
 - **Fatto (Fase 5, approvato 2026-10-24):** 5 minuti simulati sullo stage attuale senza avanzare, poi ritmo × tempo ×
   efficienza (75%, +5% per livello di "Veglia Eterna", max 100%); max 30 oggetti veri, il resto in Frammenti.
+- **Fatto (2026-10-26):** si simula tempo × efficienza con `step` come a gioco aperto (avanza, cade e torna indietro,
+  sale di livello e riprova). `startOffline`/`runOffline` a blocchi da 40 ms in `main.ts` con barra di avanzamento;
+  `lastSeen` avanza col tempo simulato, così un salvataggio a metà calcolo riprende da lì. Riepilogo con stage e cadute.
 
 ## 14. Meta e collezione
 - **Codex/Bestiario**: uccidere N nemici di un tipo dà bonus permanenti contro quella famiglia.

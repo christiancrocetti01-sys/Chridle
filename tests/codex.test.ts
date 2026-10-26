@@ -49,7 +49,7 @@ describe('Codex/Bestiario', () => {
     const s = newGame(0, 3);
     for (let i = 0; i < 2000; i++) step(s);
     const before = { ...s.codex };
-    const r = applyOffline(s, 3600)!;
+    const r = applyOffline(s, 1200)!;
     const gained = Object.keys(s.codex).reduce((sum, f) => sum + s.codex[f as keyof typeof s.codex] - before[f as keyof typeof before], 0);
     expect(gained).toBeGreaterThan(0);
     expect(gained).toBeLessThanOrEqual(r.kills);

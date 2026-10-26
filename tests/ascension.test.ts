@@ -3,7 +3,7 @@ import { skillLevel } from '../src/core/skills';
 import { ascend, buyPerk, canAscend, offlineEfficiency, perkCost, startStage } from '../src/core/ascension';
 import { step } from '../src/core/combat';
 import { enterTower } from '../src/core/modes';
-import { applyOffline } from '../src/core/offline';
+import { applyOffline, runOffline, startOffline } from '../src/core/offline';
 import { deserialize, serialize } from '../src/core/save';
 import { newGame } from '../src/core/state';
 import { stateStats } from '../src/core/stats';
@@ -72,32 +72,54 @@ describe('Ascensione', () => {
   });
 });
 
-describe('progresso offline', () => {
-  it('niente sotto il minuto; poi oro, esperienza, Essenza e bottino proporzionali al tempo', () => {
+describe('progresso offline', { timeout: 20_000 }, () => {
+  it('niente sotto il minuto; poi oro, esperienza, Essenza e bottino simulati davvero', () => {
     const s = newGame(0, 3);
     for (let i = 0; i < 600; i++) step(s);
     expect(applyOffline(s, 30)).toBeNull();
     const a = structuredClone(s);
-    const b = structuredClone(s);
-    const r1 = applyOffline(a, 3600)!;
-    const r8 = applyOffline(b, 8 * 3600)!;
+    const r1 = applyOffline(a, 1200)!;
     expect(r1.gold).toBeGreaterThan(0);
     expect(r1.xp).toBeGreaterThan(0);
     expect(r1.essence).toBeGreaterThan(0);
     expect(r1.kills).toBeGreaterThan(100);
-    expect(r8.gold / r1.gold).toBeCloseTo(8, 0);
     expect(r1.levels).toBeGreaterThan(0);
     expect(a.hero.level).toBe(s.hero.level + r1.levels);
-    expect(r8.items).toBeLessThanOrEqual(30);
     expect(r1.efficiency).toBe(0.75);
-    // offline non si avanza di stage
-    expect(b.stage.current).toBe(s.stage.current);
+    // 15 minuti di gioco: lo stesso risultato di 9000 tick a gioco aperto
+    const b = structuredClone(s);
+    for (let i = 0; i < 9000; i++) step(b);
+    expect(a.stage.current).toBe(b.stage.current);
+    expect(a.totals.kills).toBe(b.totals.kills);
+  });
+
+  it('offline si avanza di stage, e se si cade si torna indietro', () => {
+    const s = newGame(0, 3);
+    const r = applyOffline(s, 1200)!;
+    expect(r.stageFrom).toBe(1);
+    expect(r.stageTo).toBe(s.stage.current);
+    expect(r.stageTo).toBeGreaterThan(3);
+    // un eroe che non regge lo stage cade e scende di uno
+    const w = newGame(0, 3);
+    w.stage.current = w.stage.best = 60;
+    const rw = applyOffline(w, 600)!;
+    expect(rw.deaths).toBeGreaterThan(0);
+    expect(w.stage.current).toBeLessThan(60);
+  });
+
+  it('il tempo simulato a blocchi vale come visto: un salvataggio a metà non lo ripete', () => {
+    const s = newGame(0, 3);
+    const run = startOffline(s, 600)!;
+    expect(runOffline(s, run, run.total / 2)).toBe(false);
+    expect(s.lastSeen).toBeCloseTo(300 * 1000, -1);
+    expect(runOffline(s, run, run.total)).toBe(true);
+    expect(s.lastSeen).toBeCloseTo(600 * 1000, -1);
   });
 
   it('una modalità lasciata a metà si chiude', () => {
     const s = newGame(0, 3);
     enterTower(s);
-    applyOffline(s, 3600);
+    applyOffline(s, 120);
     expect(s.mode.kind).toBe('campaign');
   });
 });

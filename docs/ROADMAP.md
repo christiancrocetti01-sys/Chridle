@@ -87,5 +87,6 @@ Manuali restano solo: scelta della Via, quando ascendere/rinascere, modalità (D
 ## Dopo la Fase 8 — Grafica (decisione utente, 2026-10-25; GDD §15)
 - [x] Illustrazioni originali: carte-tarocco in xilografia (famiglie, boss di zona, unici) e linee di luce (oggetti, eroe)
 - [x] Pubblicazione: Firebase Hosting (chridle.web.app) e app installabile (PWA)
+- [x] Offline simulato davvero: avanza di stage, se cade torna indietro (richiesta utente 2026-10-26)
 - [ ] Revisione dell'utente sul gioco online e ritocchi ai disegni
 - [ ] Revisione da telefono (rimandata a dopo la grafica)

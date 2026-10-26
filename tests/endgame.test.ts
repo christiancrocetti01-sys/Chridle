@@ -70,7 +70,7 @@ describe('Abisso', () => {
     run(s, 200);
     expect(s.mode.kind).toBe('campaign');
     enterAbyss(s);
-    applyOffline(s, 3600);
+    applyOffline(s, 120);
     expect(s.mode.kind).toBe('campaign');
   });
 });

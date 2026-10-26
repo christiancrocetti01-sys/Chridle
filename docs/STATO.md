@@ -3,11 +3,15 @@
 > File di passaggio di consegne tra sessioni. Aggiornato con `/handoff`.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
-**Ultimo aggiornamento:** 2026-10-25 (handoff: pubblicazione su Firebase + PWA installabile)
+**Ultimo aggiornamento:** 2026-10-26 (offline simulato davvero)
 **Fase corrente:** Fase 8 chiusa, grafica fatta. Ora **revisione dell'utente** (ROADMAP "Dopo la Fase 8").
 **Prossimo passo:** chiedere all'utente com'è il gioco installato sul telefono Android (https://chridle.web.app) e
 cosa pensa dei disegni; ritoccare `src/ui/art/subjects.ts` secondo le note (15 nemici normali hanno ancora la carta
 della famiglia, 4 boss dei Raid quella del boss di zona). Offline resta al 75% (l'utente ha ritirato la richiesta del 100%).
+
+## Sessione 2026-10-26
+- Offline = simulazione vera senza tetto (`src/core/offline.ts`, barra in `showOfflineProgress`): 8 h ≈ 10 s su PC.
+  Salvataggio su Firebase: per ora no (resta `localStorage`).
 **Online:** `main` = branch.
 
 ## Sessione 2026-10-25 (seconda parte)

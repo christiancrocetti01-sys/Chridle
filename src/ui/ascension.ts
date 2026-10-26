@@ -111,12 +111,33 @@ const duration = (s: number) => {
   return h ? `${h} h ${m} min` : `${m} min`;
 };
 
+/** Calcolo offline in corso: restituisce l'aggiornamento (frazione fatta, null = chiudi). */
+export function showOfflineProgress(): (done: number | null, r: OfflineReport) => void {
+  const box = document.createElement('div');
+  box.className = 'modal';
+  box.innerHTML = `<div class="modal-box">
+    <h2 class="title sm">Bentornato</h2>
+    <p class="muted">Il guerriero ha combattuto mentre eri via…</p>
+    <div class="bar"><div class="fill"></div></div>
+    <p class="muted offline-now"></p></div>`;
+  document.body.append(box);
+  const fill = box.querySelector<HTMLElement>('.fill')!;
+  const now = box.querySelector<HTMLElement>('.offline-now')!;
+  return (done, r) => {
+    if (done === null) return box.remove();
+    fill.style.width = `${(done * 100).toFixed(1)}%`;
+    now.textContent = `${Math.floor(done * 100)}% · stage ${r.stageTo} · ${formatNum(r.kills)} nemici`;
+  };
+}
+
 /** Riepilogo del progresso offline al rientro. */
 export function showOfflineReport(r: OfflineReport) {
   const box = document.createElement('div');
   box.className = 'modal';
   const rows: [string, string][] = [
+    ['Stage', r.stageTo === r.stageFrom ? String(r.stageTo) : `${r.stageFrom} → <b>${r.stageTo}</b>`],
     ['Nemici sconfitti', formatNum(r.kills)],
+    ...(r.deaths ? [['Cadute', String(r.deaths)] as [string, string]] : []),
     ['Oro', `+${formatNum(r.gold)}`],
     ['Esperienza', `+${formatNum(r.xp)}${r.levels ? ` · <b>+${r.levels} livelli</b>` : ''}`],
     ['Essenza', `+${formatNum(r.essence)}`],

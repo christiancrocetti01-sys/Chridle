@@ -86,7 +86,7 @@ export const GUIDE: GuideSection[] = [
   },
   {
     id: 'offline', title: 'Offline e consigli', text: [
-      'A gioco chiuso il guerriero continua (al 75%, di più con «Veglia Eterna»): al rientro trovi il riepilogo.',
+      'A gioco chiuso il guerriero continua (al 75% del tempo, di più con «Veglia Eterna»): avanza di stage, se cade torna indietro e poi riprova. Al rientro il gioco lo calcola (dopo tanto tempo ci vuole un po\') e trovi il riepilogo.',
       'Il gioco salva da solo nel browser. Il ♪ in alto accende i suoni.',
       'I pallini rossi sulle schede indicano qualcosa da fare (punti liberi, Ascensione pronta…).',
       'Bloccato? Prova, in ordine: punti nelle Stelle → Torre → Ascensione.',

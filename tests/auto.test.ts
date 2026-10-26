@@ -67,11 +67,11 @@ describe('spese automatiche', () => {
 });
 
 describe('offline con le spese automatiche', () => {
-  it("l'oro offline si conta dalle uccisioni: mai negativo anche se il campione lo spende", async () => {
+  it("l'oro offline si conta dalle uccisioni: mai negativo anche se le spese automatiche lo usano", async () => {
     const { applyOffline } = await import('../src/core/offline');
     const s = newGame(0, 3);
     s.gold = 0;
-    const r = applyOffline(s, 3600)!;
+    const r = applyOffline(s, 600)!;
     expect(r.gold).toBeGreaterThan(0);
     expect(s.gold).toBeGreaterThanOrEqual(0);
   });

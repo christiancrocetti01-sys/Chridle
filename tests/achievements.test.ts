@@ -51,7 +51,7 @@ describe('Imprese', () => {
   it('offline le controlla', () => {
     const s = newGame(0, 3);
     for (let i = 0; i < 300; i++) step(s);
-    applyOffline(s, 8 * 3600);
+    applyOffline(s, 1200);
     expect(trackSteps(s.achievements, 'uccisioni')).toBeGreaterThan(0);
   });
 
