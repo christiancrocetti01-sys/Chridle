@@ -1,6 +1,6 @@
 ---
 name: handoff
-description: Prepara il passaggio di consegne prima di un /clear. Usare quando l'utente scrive /handoff, dice che il contesto è pieno, o vuole chiudere la sessione.
+description: Passaggio di consegne completo (Claude lo fa comunque da solo a fine di ogni modifica, vedi CLAUDE.md). Usare quando l'utente scrive /handoff, dice che il contesto è pieno, o vuole chiudere la sessione.
 ---
 
 Prepara tutto perché una nuova sessione possa ripartire **senza** questa conversazione.

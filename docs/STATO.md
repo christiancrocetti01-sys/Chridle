@@ -1,18 +1,14 @@
 # Stato del progetto
 
-> File di passaggio di consegne tra sessioni. Aggiornato con `/handoff`.
+> File di passaggio di consegne tra sessioni. Aggiornato da Claude a fine di ogni modifica.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
 **Ultimo aggiornamento:** 2026-10-26 (offline simulato davvero)
 **Fase corrente:** Fase 8 chiusa, grafica fatta. Ora **revisione dell'utente** (ROADMAP "Dopo la Fase 8").
-**Prossimo passo:** chiedere all'utente com'è il gioco installato sul telefono Android (https://chridle.web.app) e
-cosa pensa dei disegni; ritoccare `src/ui/art/subjects.ts` secondo le note (15 nemici normali hanno ancora la carta
-della famiglia, 4 boss dei Raid quella del boss di zona). Offline resta al 75% (l'utente ha ritirato la richiesta del 100%).
-
-## Sessione 2026-10-26
-- Offline = simulazione vera senza tetto (`src/core/offline.ts`, barra in `showOfflineProgress`): 8 h ≈ 10 s su PC.
-  Salvataggio su Firebase: per ora no (resta `localStorage`).
-**Online:** `main` = branch.
+**Prossimo passo:** chiedere all'utente se portare su `main` l'offline simulato (è solo sul branch) e provarlo dal
+telefono (tempo di calcolo dopo una notte). Poi revisione disegni: `src/ui/art/subjects.ts` (15 nemici normali con la carta
+della famiglia, 4 boss dei Raid con quella del boss di zona). Offline resta al 75% (l'utente ha ritirato il 100%).
+**Online:** `main` è indietro di un commit (offline simulato) rispetto al branch.
 
 ## Sessione 2026-10-25 (seconda parte)
 - Deploy GitHub Pages falliva da 3 push (test Collezione in timeout 5 s su CI): timeout 20 s.

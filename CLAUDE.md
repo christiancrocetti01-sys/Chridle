@@ -16,8 +16,10 @@ Questo file viene caricato automaticamente a ogni sessione: tienilo **breve**.
 - Grafica minimale: il valore del gioco è in oggetti, statistiche e sinergie. Niente sprite a griglia di caratteri.
 - Domande di design (bilanciamento, gusto, scelte grafiche) → chiedi, non inventare.
 - Dopo ogni task: test (`npm test`) + verifica nel browser se tocca la UI, poi commit.
-- A fine task aggiorna `docs/STATO.md` (breve) e spunta la ROADMAP.
-- Il contesto si avvicina a ~200k token → esegui la skill `/handoff`, poi l'utente fa `/clear` e `/riprendi`.
+- **A fine di ogni modifica fai da solo il passaggio di consegne** (passi 1-4 della skill `handoff`: STATO.md,
+  ROADMAP, CLAUDE.md se serve, esito test) nello stesso commit, e pusha. STATO.md deve essere sempre pronto per un `/clear`:
+  l'utente non deve più chiedere `/handoff`.
+- Il contesto si avvicina a ~200k token → avvisa l'utente di fare `/clear` e `/riprendi`.
 
 ## Risparmio token
 - Risposte concise, niente riassunti di ciò che è già nel diff.
