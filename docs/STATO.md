@@ -5,10 +5,9 @@
 
 **Ultimo aggiornamento:** 2026-10-26 (offline simulato davvero)
 **Fase corrente:** Fase 8 chiusa, grafica fatta. Ora **revisione dell'utente** (ROADMAP "Dopo la Fase 8").
-**Prossimo passo:** chiedere all'utente se portare su `main` l'offline simulato (è solo sul branch) e provarlo dal
-telefono (tempo di calcolo dopo una notte). Poi revisione disegni: `src/ui/art/subjects.ts` (15 nemici normali con la carta
+**Prossimo passo:** chiedere all'utente com'è l'offline simulato dal telefono (tempo di calcolo dopo una notte). Poi revisione disegni: `src/ui/art/subjects.ts` (15 nemici normali con la carta
 della famiglia, 4 boss dei Raid con quella del boss di zona). Offline resta al 75% (l'utente ha ritirato il 100%).
-**Online:** `main` è indietro di un commit (offline simulato) rispetto al branch.
+**Online:** `main` = branch (offline simulato pubblicato 2026-10-26).
 
 ## Sessione 2026-10-25 (seconda parte)
 - Deploy GitHub Pages falliva da 3 push (test Collezione in timeout 5 s su CI): timeout 20 s.
