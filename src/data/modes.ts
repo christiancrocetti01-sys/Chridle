@@ -37,6 +37,8 @@ export const TOWER_MILESTONE = 5;
 export const TOWER_BONUS = 0.03;
 /** Ogni TOWER_KEY_EVERY piani di record: una chiave. */
 export const TOWER_KEY_EVERY = 10;
+/** Si riparte questi piani sotto il record (non da capo: niente esperienza facile ai piani bassi). */
+export const TOWER_BACK = 5;
 /** Essenza per piano superato (× numero del piano). */
 export const TOWER_ESSENCE = 2;
 

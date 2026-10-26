@@ -1,9 +1,9 @@
-import { abyssStage, abyssStart, dungeonLevel, dungeonReward, towerBonus, towerMilestones } from '../core/modes';
+import { abyssStage, abyssStart, dungeonLevel, dungeonReward, towerBonus, towerMilestones, towerStart } from '../core/modes';
 import { abyssUnlocked } from '../core/endgame';
 import { ABYSS_ASCENSIONS, ABYSS_ATK, ABYSS_GUARDIAN_XP, ABYSS_HP, ABYSS_WAVES } from '../data/endgame';
 import type { GameState } from '../core/state';
 import { FAMILIES, MECHANIC_TEXT, ZONE_KEY_EVERY, ZONE_STAGES, zoneName, zoneOf, type DamageType, type Family } from '../data/enemies';
-import { DUNGEON_MODS, DUNGEON_WAVES, RAID_KEYS, RAID_SECONDS, RAID_LEVEL_OFFSET, RAID_STAGE, TOWER_MILESTONE, TOWER_SECONDS } from '../data/modes';
+import { DUNGEON_MODS, DUNGEON_WAVES, RAID_KEYS, RAID_SECONDS, RAID_LEVEL_OFFSET, RAID_STAGE, TOWER_BACK, TOWER_MILESTONE, TOWER_SECONDS } from '../data/modes';
 import { TICK_RATE } from '../core/loop';
 import { elem } from './icons';
 
@@ -76,7 +76,8 @@ export function createWorldPanel(root: HTMLElement, actions: WorldActions) {
           <div class="skill-head"><span>Bonus permanente: <b>+${Math.round(towerBonus(state.tower.best) * 100)}%</b> attacco e vita</span>
             <button class="btn sm" data-w="enterTower"${inMode ? ' disabled' : ''}>Sali</button></div>
           <div class="skill-info">Un nemico per piano, ${TOWER_SECONDS} s per batterlo. Ogni ${TOWER_MILESTONE} piani di record: +3% attacco e vita per sempre
-            (prossimo traguardo: piano ${(towerMilestones(state.tower.best) + 1) * TOWER_MILESTONE}). Gratis, Essenza a ogni piano.</div>
+            (prossimo traguardo: piano ${(towerMilestones(state.tower.best) + 1) * TOWER_MILESTONE}). Gratis, Essenza a ogni piano.
+            Si riparte ${TOWER_BACK} piani sotto il record (piano ${towerStart(state.tower.best)}).</div>
         </div>
         <h2 class="section">Raid</h2>
         <div class="skill-row${state.stage.best >= RAID_STAGE ? '' : ' locked'}">

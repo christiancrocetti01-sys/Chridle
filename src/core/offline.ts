@@ -41,7 +41,7 @@ export function startOffline(state: GameState, seconds: number): OfflineRun | nu
   if (seconds < OFFLINE_MIN_S) return null;
   // una modalità lasciata a metà si chiude: offline si gioca la Campagna
   leaveMode(state, []);
-  const efficiency = offlineEfficiency(state.ascension);
+  const efficiency = offlineEfficiency();
   return {
     report: {
       seconds, efficiency, kills: 0, gold: 0, xp: 0, essence: 0, fragments: 0, keys: 0, levels: 0, items: 0,

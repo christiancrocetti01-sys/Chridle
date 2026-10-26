@@ -107,8 +107,10 @@ export function autoParagon(state: GameState) {
   while (paragonFree(p) > 0) spendParagon(state, PARAGON_ORDER[(p.level - paragonFree(p)) % PARAGON_ORDER.length]);
 }
 
-/** Ascensione: prima si mettono da parte le Scintille per questi, nell'ordine; poi si compra sempre il più economico. */
-export const PERK_FIRST: PerkId[] = ['secondaVia', 'slot'];
+/** Ascensione: prima si mettono da parte le Scintille per questi, nell'ordine (pochi e subito utili). */
+export const PERK_FIRST: PerkId[] = ['secondaVia'];
+/** Poi si compra sempre il più economico; il costo di questi conta diviso per il peso (si prendono prima, senza bloccare gli altri). */
+export const PERK_WEIGHT: Partial<Record<PerkId, number>> = { slot: 3 };
 
 const maxed = (state: GameState, id: PerkId) => {
   const max = PERKS.find((d) => d.id === id)!.max;
@@ -117,10 +119,10 @@ const maxed = (state: GameState, id: PerkId) => {
 
 export function autoPerks(state: GameState): number {
   let bought = 0;
+  const weighted = (id: PerkId) => perkCost(state.ascension, id) / (PERK_WEIGHT[id] ?? 1);
   for (let n = 0; n < 1000; n++) {
     const first = PERK_FIRST.find((id) => !maxed(state, id));
-    const id = first ?? PERKS.map((d) => d.id).filter((x) => !maxed(state, x))
-      .sort((a, b) => perkCost(state.ascension, a) - perkCost(state.ascension, b))[0];
+    const id = first ?? PERKS.map((d) => d.id).filter((x) => !maxed(state, x)).sort((a, b) => weighted(a) - weighted(b))[0];
     if (!id || !buyPerk(state, id)) break;
     bought++;
   }

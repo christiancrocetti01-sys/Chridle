@@ -125,7 +125,7 @@ export interface GameState {
   rebirth: RebirthState;
 }
 
-export const STATE_VERSION = 21;
+export const STATE_VERSION = 22;
 
 export function newGame(now: number, seed = now >>> 0): GameState {
   const upgrades = { forza: 0, corazza: 0, rapidita: 0 };

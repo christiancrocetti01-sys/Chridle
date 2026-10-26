@@ -14,7 +14,7 @@ export interface AscensionActions {
 }
 
 const perkText = (d: PerkDef, total: number) =>
-  d.text.replace('{v}', d.id === 'veglia' ? String(Math.round((0.75 + total) * 100)) : d.id === 'balzo' || d.id === 'slot' ? String(total) : String(Math.round(total * 100)));
+  d.text.replace('{v}', d.id === 'balzo' || d.id === 'slot' ? String(total) : String(Math.round(total * 100)));
 
 /** Scheda Ascensione: Scintille, pulsante per ascendere e potenziamenti permanenti. */
 export function createAscensionPanel(root: HTMLElement, actions: AscensionActions) {
@@ -147,7 +147,7 @@ export function showOfflineReport(r: OfflineReport) {
   ];
   box.innerHTML = `<div class="modal-box">
     <h2 class="title sm">Bentornato</h2>
-    <p class="muted">Sei stato via ${duration(r.seconds)}. Il guerriero ha combattuto senza sosta (efficienza ${Math.round(r.efficiency * 100)}%).</p>
+    <p class="muted">Sei stato via ${duration(r.seconds)}. Il guerriero ha combattuto senza sosta.</p>
     <dl class="stats">${rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>
     <button class="card modal-ok">Riprendi</button></div>`;
   box.addEventListener('click', (ev) => {

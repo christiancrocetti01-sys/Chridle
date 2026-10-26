@@ -2,7 +2,7 @@ import { RARITIES, type SlotId } from '../data/items';
 import { takeItem } from './autoequip';
 import {
   DUNGEON_ESSENCE, DUNGEON_FRAGMENTS, DUNGEON_WAVES, DUNGEON_LEVEL_OFFSET, DUNGEON_MODS, DUNGEON_MODS_COUNT, RAID_BOSSES, RAID_DIVINE,
-  RAID_KEYS, RAID_LEVEL_OFFSET, RAID_MIN_RARITY, RAID_MYTHIC, RAID_SECONDS, RAID_STAGE, TOWER_BONUS, TOWER_ESSENCE, TOWER_KEY_EVERY, TOWER_MILESTONE, TOWER_SECONDS,
+  RAID_KEYS, RAID_LEVEL_OFFSET, RAID_MIN_RARITY, RAID_MYTHIC, RAID_SECONDS, RAID_STAGE, TOWER_BACK, TOWER_BONUS, TOWER_ESSENCE, TOWER_KEY_EVERY, TOWER_MILESTONE, TOWER_SECONDS,
   type DungeonModId,
 } from '../data/modes';
 import { discover } from './collection';
@@ -50,9 +50,12 @@ export function enterDungeon(state: GameState): boolean {
   return true;
 }
 
+/** Piano da cui si riparte entrando nella Torre. */
+export const towerStart = (best: number) => Math.max(1, best + 1 - TOWER_BACK);
+
 export function enterTower(state: GameState): boolean {
   if (state.mode.kind !== 'campaign') return false;
-  switchTo(state, { kind: 'tower', floor: 1, ticksLeft: TOWER_SECONDS * TICK_RATE });
+  switchTo(state, { kind: 'tower', floor: towerStart(state.tower.best), ticksLeft: TOWER_SECONDS * TICK_RATE });
   return true;
 }
 

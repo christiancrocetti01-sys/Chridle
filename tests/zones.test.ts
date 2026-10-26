@@ -2,7 +2,7 @@ import { newGear } from '../src/core/items';
 import { describe, expect, it } from 'vitest';
 import { rewardStage, step, type CombatEvent } from '../src/core/combat';
 import { enemyAtk, makeElite, resMult, spawnEnemy, tickEnemy } from '../src/core/enemies';
-import { canRaid, dungeonLevel, enterDungeon, enterRaid, enterTower, leaveMode, towerBonus } from '../src/core/modes';
+import { canRaid, dungeonLevel, enterDungeon, enterRaid, enterTower, leaveMode, towerBonus, towerStart } from '../src/core/modes';
 import { deserialize, serialize } from '../src/core/save';
 import { newGame, type GameState } from '../src/core/state';
 import { KILLS_PER_STAGE, LATE_STAGE, stageEnemy, stateStats } from '../src/core/stats';
@@ -137,6 +137,12 @@ describe('Dungeon, Torre e Raid', () => {
     const ev = run(w, 400);
     expect(ev.some((e) => e.type === 'mode' && !e.ok)).toBe(true);
     expect(w.mode.kind).toBe('campaign');
+    // si riparte vicino al record, non da capo
+    w.tower.best = 23;
+    enterTower(w);
+    expect(w.mode.kind === 'tower' && w.mode.floor).toBe(towerStart(23));
+    expect(towerStart(23)).toBe(19);
+    expect(towerStart(2)).toBe(1);
   });
 
   it('Raid: serve lo stage richiesto e 3 chiavi, poi bottino Leggendario o meglio', () => {

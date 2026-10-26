@@ -37,7 +37,7 @@ describe('spese automatiche', () => {
     expect(s.paragon.points.forza).toBe(want.forza + 1);
   });
 
-  it("le Scintille vanno prima a Doppia Via e Quinto Sole, poi al potenziamento più economico", () => {
+  it("le Scintille vanno prima a Doppia Via, poi al potenziamento più economico (Quinto Sole pesa meno)", () => {
     const s = newGame(0, 1);
     s.ascension.scintille = 4; // Doppia Via costa 5: si aspetta
     expect(autoPerks(s)).toBe(0);
@@ -45,8 +45,14 @@ describe('spese automatiche', () => {
     autoPerks(s);
     expect(perkLevel(s.ascension, 'secondaVia')).toBe(1);
     expect(s.vie.secondUnlocked).toBe(true);
+    // niente accumulo per Quinto Sole II (50): le Scintille si spendono subito
+    s.ascension.scintille = 20;
+    autoPerks(s);
+    expect(perkLevel(s.ascension, 'fiamma')).toBeGreaterThan(0);
+    expect(s.ascension.scintille).toBeLessThan(3);
     s.ascension.scintille = 1e6;
     autoPerks(s);
+    expect(perkLevel(s.ascension, 'slot')).toBe(2);
     for (const id of PERK_FIRST) expect(perkLevel(s.ascension, id)).toBe(PERKS.find((d) => d.id === id)!.max);
     const open = PERKS.filter((d) => d.max === undefined || perkLevel(s.ascension, d.id) < d.max);
     expect(s.ascension.scintille).toBeLessThan(Math.min(...open.map((d) => perkCost(s.ascension, d.id))));

@@ -62,7 +62,7 @@ export const GUIDE: GuideSection[] = [
     id: 'mondo', title: 'Modalità', text: [
       'Durante una modalità la Campagna è in pausa; puoi abbandonare quando vuoi.',
       '<b>Dungeon</b> (1 chiave): 8 nemici e un boss con modificatori casuali. Premio: Frammenti, Essenza e un pezzo di set.',
-      '<b>Torre dell\'Alba</b> (gratis): un nemico per piano, 30 s ciascuno. Ogni 5 piani di record +3% attacco e vita per sempre.',
+      '<b>Torre dell\'Alba</b> (gratis): un nemico per piano, 30 s ciascuno; si riparte 5 piani sotto il record. Ogni 5 piani di record +3% attacco e vita per sempre.',
       '<b>Raid</b> (dallo stage 50, 3 chiavi): boss in 3 fasi in 120 s. Premio: un Leggendario garantito, a volte Mitico o Divino.',
       "<b>Abisso</b> (dopo 3 Ascensioni): profondità infinite. Dà esperienza <b>Paragon</b>.",
     ],
@@ -86,7 +86,7 @@ export const GUIDE: GuideSection[] = [
   },
   {
     id: 'offline', title: 'Offline e consigli', text: [
-      'A gioco chiuso il guerriero continua (al 75% del tempo, di più con «Veglia Eterna»): avanza di stage, se cade torna indietro e poi riprova. Al rientro il gioco lo calcola (dopo tanto tempo ci vuole un po\') e trovi il riepilogo.',
+      'A gioco chiuso il guerriero continua (come a gioco aperto): avanza di stage, se cade torna indietro e poi riprova. Al rientro il gioco lo calcola (dopo tanto tempo ci vuole un po\') e trovi il riepilogo.',
       'Il gioco salva da solo nel browser. Il ♪ in alto accende i suoni.',
       'I pallini rossi sulle schede indicano qualcosa da fare (punti liberi, Ascensione pronta…).',
       'Bloccato? Prova, in ordine: punti nelle Stelle → Torre → Ascensione.',

@@ -4,7 +4,8 @@ import { levelCost, newRunes, type RuneState } from './runes';
 import { RUNE_UNLOCK_BASE, RUNE_UNLOCK_GROWTH } from '../data/runes';
 import { newSkills } from './skills';
 import { newVie } from './vie';
-import { newAscension } from './ascension';
+import { newAscension, type AscensionState } from './ascension';
+import { VEGLIA_REFUND } from '../data/ascension';
 import { newCodex } from './codex';
 import { collectFrom } from './collection';
 import { checkAchievements } from './achievements';
@@ -108,6 +109,12 @@ export const migrations: Record<number, Migration> = {
     const hero = d.hero as { level: number };
     const runes = d.runes as RuneState;
     return { ...d, essence: (d.essence as number) + runeRefund(runes), runes: newRunes(), skills: newSkills(hero.level) };
+  },
+  // v21 → v22: offline al 100%, Veglia Eterna tolta: le Scintille spese tornano
+  21: (d) => {
+    const a = d.ascension as AscensionState;
+    const { veglia, ...perks } = a.perks as Record<string, number>;
+    return { ...d, ascension: { ...a, perks, scintille: a.scintille + VEGLIA_REFUND(veglia ?? 0) } };
   },
 };
 

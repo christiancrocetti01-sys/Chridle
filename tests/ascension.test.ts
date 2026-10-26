@@ -56,10 +56,19 @@ describe('Ascensione', () => {
     expect(buyPerk(s, 'secondaVia')).toBe(false); // massimo 1
     buyPerk(s, 'balzo');
     expect(startStage(s.ascension)).toBe(6);
-    buyPerk(s, 'veglia');
-    expect(offlineEfficiency(s.ascension)).toBeCloseTo(0.8);
+    expect(offlineEfficiency()).toBe(1);
     s.ascension.scintille = 0;
     expect(buyPerk(s, 'oro')).toBe(false);
+  });
+
+  it('migrazione v21 → v22: Veglia Eterna tolta, Scintille rimborsate', () => {
+    const old = newGame(0, 1);
+    old.ascension.scintille = 3;
+    (old.ascension.perks as Record<string, number>).veglia = 3;
+    old.ascension.perks.oro = 2;
+    const s = deserialize(JSON.stringify({ ...old, version: 21 }))!;
+    expect(s.ascension.scintille).toBe(3 + 2 + 4 + 8);
+    expect(s.ascension.perks).toEqual({ oro: 2 });
   });
 
   it('non si ascende durante una modalità; il salvataggio conserva tutto', () => {
@@ -78,14 +87,14 @@ describe('progresso offline', { timeout: 20_000 }, () => {
     for (let i = 0; i < 600; i++) step(s);
     expect(applyOffline(s, 30)).toBeNull();
     const a = structuredClone(s);
-    const r1 = applyOffline(a, 1200)!;
+    const r1 = applyOffline(a, 900)!;
     expect(r1.gold).toBeGreaterThan(0);
     expect(r1.xp).toBeGreaterThan(0);
     expect(r1.essence).toBeGreaterThan(0);
     expect(r1.kills).toBeGreaterThan(100);
     expect(r1.levels).toBeGreaterThan(0);
     expect(a.hero.level).toBe(s.hero.level + r1.levels);
-    expect(r1.efficiency).toBe(0.75);
+    expect(r1.efficiency).toBe(1);
     // 15 minuti di gioco: lo stesso risultato di 9000 tick a gioco aperto
     const b = structuredClone(s);
     for (let i = 0; i < 9000; i++) step(b);

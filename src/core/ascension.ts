@@ -1,4 +1,4 @@
-import { ASCEND_STAGE, OFFLINE_BASE, PERKS, perkDef, scintilleFor, type PerkId } from '../data/ascension';
+import { ASCEND_STAGE, OFFLINE_EFFICIENCY, PERKS, perkDef, scintilleFor, type PerkId } from '../data/ascension';
 import type { StatMods } from './items';
 import { unlockSkills } from './skills';
 import type { GameState } from './state';
@@ -23,7 +23,7 @@ export const perkCost = (a: AscensionState, id: PerkId) => {
   const d = perkDef(id)!;
   return Math.ceil(d.cost * Math.pow(d.growth, perkLevel(a, id)));
 };
-export const offlineEfficiency = (a: AscensionState | undefined) => Math.min(1, OFFLINE_BASE + perkValue(a, 'veglia'));
+export const offlineEfficiency = () => OFFLINE_EFFICIENCY;
 export const startStage = (a: AscensionState | undefined) => 1 + perkValue(a, 'balzo');
 
 /** Statistiche dei potenziamenti dell'Ascensione. */
