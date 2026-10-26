@@ -186,7 +186,8 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
 - **Fatto (Fase 5, approvato 2026-10-24):** Ascensione dallo stage 40, valuta **Scintille** (non "Stelle": il nome
   è già delle Costellazioni) = ((record − 30) / 10)²; 9 potenziamenti permanenti in `src/data/ascension.ts`.
   Si azzerano livello, oro, potenziamenti, stage e Costellazioni; restano oggetti, valute, rune, Torre, Vie.
-  Offline 75% approvato.
+  ~~Offline 75%~~ → **100%**, Veglia Eterna tolta, Scintille rimborsate (decisione utente 2026-10-26, v22).
+  Torre: si riparte `TOWER_BACK` = 5 piani sotto il record (decisione utente 2026-10-26).
 - **Fatto (Paragon):** livelli infiniti solo dall'Abisso (costo 100 × (l+1)^1,5), 1 punto per livello su 8 bonus a scelta
   (+2% attacco/vita/difesa/danno critico/elementale, +0,5% velocità, +1% ritrovamento, +3% oro e +2% XP); i punti si
   riprendono gratis. Permanente.
@@ -206,6 +207,7 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
 - **Fatto (2026-10-26):** si simula tempo × efficienza con `step` come a gioco aperto (avanza, cade e torna indietro,
   sale di livello e riprova). `startOffline`/`runOffline` a blocchi da 40 ms in `main.ts` con barra di avanzamento;
   `lastSeen` avanza col tempo simulato, così un salvataggio a metà calcolo riprende da lì. Riepilogo con stage e cadute.
+- **Deciso (2026-10-26):** efficienza **100%** (`OFFLINE_EFFICIENCY`), niente potenziamento per l'offline.
 
 ## 14. Meta e collezione
 - **Codex/Bestiario**: uccidere N nemici di un tipo dà bonus permanenti contro quella famiglia.

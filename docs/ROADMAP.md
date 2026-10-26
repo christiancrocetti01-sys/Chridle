@@ -89,4 +89,9 @@ Manuali restano solo: scelta della Via, quando ascendere/rinascere, modalità (D
 - [x] Pubblicazione: Firebase Hosting (chridle.web.app) e app installabile (PWA)
 - [x] Offline simulato davvero: avanza di stage, se cade torna indietro (richiesta utente 2026-10-26)
 - [ ] Revisione dell'utente sul gioco online e ritocchi ai disegni
+  - [x] Offline 100%, Torre riparte 5 piani sotto il record, Scintille sempre nel più economico (2026-10-26)
+  - [x] Collaudo 24 h (2026-10-26)
+  - [ ] Stelle compatte con effetti forti più spesso (proposta in STATO.md, attende conferma)
+  - [ ] Chiavi accumulate: Dungeon più veloci (proposta in STATO.md, attende scelta)
+  - [ ] Più progressione e contenuti (proposte in STATO.md)
 - [ ] Revisione da telefono (rimandata a dopo la grafica)

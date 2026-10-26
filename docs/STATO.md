@@ -3,30 +3,33 @@
 > File di passaggio di consegne tra sessioni. Aggiornato da Claude a fine di ogni modifica.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
-**Ultimo aggiornamento:** 2026-10-26 (offline simulato davvero)
+**Ultimo aggiornamento:** 2026-10-26 (revisione utente: offline 100%, Torre, Scintille, collaudo 24 h)
 **Fase corrente:** Fase 8 chiusa, grafica fatta. Ora **revisione dell'utente** (ROADMAP "Dopo la Fase 8").
-**Prossimo passo:** chiedere all'utente com'è l'offline simulato dal telefono (tempo di calcolo dopo una notte). Poi revisione disegni: `src/ui/art/subjects.ts` (15 nemici normali con la carta
-della famiglia, 4 boss dei Raid con quella del boss di zona). Offline resta al 75% (l'utente ha ritirato il 100%).
-**Online:** `main` = branch (offline simulato pubblicato 2026-10-26).
+**Prossimo passo:** l'utente deve scegliere su Stelle e Chiavi (proposte sotto), poi un passo alla volta.
+**Online:** `main` è indietro: gli ultimi commit sono solo sul branch (offline 100% ecc. non ancora pubblicati).
 
-## Sessione 2026-10-25 (seconda parte)
-- Deploy GitHub Pages falliva da 3 push (test Collezione in timeout 5 s su CI): timeout 20 s.
-- Firebase Hosting, progetto `chridle`: https://chridle.web.app. Job `firebase` in `.github/workflows/deploy.yml`,
-  separato da Pages, con `firebase-tools@14` (le versioni nuove danno 403 `serviceusage` con l'account adminsdk) e
-  secret `FIREBASE_SERVICE_ACCOUNT` (già messo dall'utente). Config: `firebase.json`, `.firebaserc`.
-- PWA: `public/manifest.webmanifest`, `public/sw.js` (rete prima per la pagina, cache per `assets/`; cambiando
-  strategia alzare `CACHE`), registrato in `main.ts` solo in build. Icone `public/icons/` da `npm run icone`
-  (`scripts/icone.ts`, eroe in luce). Verificato: installabile (Pixel 7 emulato) e avvio offline.
-- Consigliato all'utente: itch.io e r/incremental_games per farsi trovare (non ancora fatto).
+## Sessione 2026-10-26 (revisione utente)
+- Offline **100%** (`OFFLINE_EFFICIENCY`), tolta Veglia Eterna; migrazione **v22** rimborsa le Scintille (`VEGLIA_REFUND`).
+- Torre: si riparte `TOWER_BACK` = 5 piani sotto il record (`towerStart` in `src/core/modes.ts`).
+- Scintille (`autoPerks`): sempre il potenziamento più economico, nessuna priorità (l'utente non vuole Doppia Via/Quinto Sole prima).
+- Collaudo 24 h (6 profili): nessun problema. Livello 89-95, record 112-125 (fermo ~100-120 dalle 9 h), 19-23 Ascensioni
+  (~1/h), 2 Rinascite (~12 h e ~21 h), Torre 62-65, Abisso 28-29, Paragon ~25, collezione 17-24/30, imprese 42-46/69.
+  Chiavi 7,5-8,4/h (~190/giorno). Essenza ferma a 10-30k: dopo le 8 rune non c'è niente che valga la spesa.
+- Proposte in attesa di conferma:
+  - **Stelle compatte**: anelli 6→2 nodi, spina 14→7, ponti 6→3, regioni Vie 6→3 (valori raddoppiati) → ~120 nodi, una
+    notevole/chiave di volta ogni ~4 punti invece di ~8; punti oltre l'albero pieno = +1% attacco/vita; poi notevoli nuove con regole forti.
+  - **Chiavi**: A) Spedizione (spendi 10/tutte le chiavi, ricompense subito, solo al livello di un Dungeon già vinto);
+    B) Dungeon automatici (anche offline); C) Dungeon a più chiavi (×N premi, nemici più forti). Consigliata A.
+  - **Contenuti**: pozzo per l'Essenza (rune oltre il livello, rune nuove), zone/boss oltre lo stage 100, unici/set lotto 6,
+    traguardi della Torre ogni 25 piani, boss e bottino propri dei Raid, nuovi potenziamenti d'Ascensione, più imprese e Lumi.
+
+## Pubblicazione
+- Firebase (`firebase.json`, job `firebase` in `.github/workflows/deploy.yml`, `firebase-tools@14`) e GitHub Pages.
+  PWA: `public/sw.js` (cambiando strategia alzare `CACHE`), icone da `npm run icone`.
 
 ## Domande aperte
 - Bonus fisso agli unici nel confronto dell'equip (+20%)?
 - Neutro (Corruzione ~0) senza bonus va bene? Abisso quasi fermo dalle ~180 h a 66-67: ammorbidire?
-
-## Gioco online
-https://christiancrocetti01-sys.github.io/Chridle/ (ogni push su `main` lo ripubblica, ~1 min).
-Anche su https://chridle.web.app (Firebase, stesso workflow).
-Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` (fast-forward) quando un passo è approvato.
 
 ## Fatto (sintesi, dettagli in GDD "Fatto/Deciso")
 - Fasi 0-2: motore 10 tick/s, salvataggio versionato, combattimento, oggetti/affissi/trigger/unici/set/crafting.
@@ -53,10 +56,10 @@ Si lavora su `claude/epic-allen-10jgj5` e si allinea `main` (fast-forward) quand
 - Lotto 5: 30 unici, 8 set, 7 regole nuove (`src/data/uniques.ts`, costanti in fondo; logica in `combat.ts`/`stats.ts`).
 - Endgame: `src/data/endgame.ts`, `src/core/endgame.ts` (Paragon, Rinascita), Abisso in `src/core/modes.ts`/`enemies.ts`;
   UI: Abisso in scheda Mondo, Rinascita e Paragon in scheda Ascensione. Imprese Abissale/Paragone/Rinato.
-- Salvataggio: **v21** (v21 skill fisse + rimborso rune, v20 `abyss`/`paragon`/`rebirth`), prima **v19** (v11 `vie`, v12 nemico + `keys`/`mode`/`tower`, v13 `ascension`, v14 campi opzionali rune, v15 `hero.sanctity`, v16 `codex`, v17 `collection`, v18 `achievements`, v19 `lumi`).
+- Salvataggio: **v22** (v22 Veglia Eterna tolta, v21 skill fisse + rimborso rune, v20 `abyss`/`paragon`/`rebirth`), prima **v19** (v11 `vie`, v12 nemico + `keys`/`mode`/`tower`, v13 `ascension`, v14 campi opzionali rune, v15 `hero.sanctity`, v16 `codex`, v17 `collection`, v18 `achievements`, v19 `lumi`).
 
 ## Test
-- `npm test`: **219 verdi** (23 file), `npm run build` ok (2026-10-25, handoff). Il test lento della Collezione ha timeout 20 s.
+- `npm test`: **222 verdi** (23 file), `npm run build` ok (2026-10-26). Il test lento della Collezione ha timeout 20 s.
 - Collaudo: `npm run collaudo -- --ore 8 [--seed N] [--profilo id]` (`scripts/collaudo.ts`, un processo per profilo:
   5 Vie + uno con sessioni offline). 8 h: nessun NaN/crash/salvataggio rotto, ~30 s. Rilanciarlo dopo ogni sistema nuovo.
   Attenzione: nelle catene di comandi non fidarsi di `npm test | grep` (esce 0 anche se fallisce).
