@@ -77,7 +77,7 @@ export const GUIDE: GuideSection[] = [
   },
   {
     id: 'ascensione', title: 'Ascensione, Rinascita, Paragon', text: [
-      "<b>Ascensione</b> (dallo stage 40): ricominci da livello 1 e stage 1 in cambio di <b>Scintille</b>, che comprano da sole potenziamenti permanenti (prima Doppia Via e Quinto Sole, poi il più economico). " +
+      "<b>Ascensione</b> (dallo stage 40): ricominci da livello 1 e stage 1 in cambio di <b>Scintille</b>, che comprano da sole potenziamenti permanenti (sempre il più economico). " +
         'Tieni oggetti, Frammenti, Essenza, rune, chiavi, Torre e Vie; perdi oro, Potenziamenti e Stelle (i punti tornano salendo).',
       'Più alto è il record, più Scintille: conviene ascendere quando ti blocchi.',
       '<b>Rinascita Solare</b>: azzera anche le Ascensioni in cambio di <b>Soli</b>, moltiplicatori enormi e permanenti.',

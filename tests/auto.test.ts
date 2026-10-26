@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { PARAGON_ORDER, PERK_FIRST, autoGold, autoParagon, autoPerks, autoSpend, autoStars } from '../src/core/auto';
+import { PARAGON_ORDER, autoGold, autoParagon, autoPerks, autoSpend, autoStars } from '../src/core/auto';
 import { gearPower } from '../src/core/autoequip';
 import { canRefund, pointsLeft } from '../src/core/constellations';
 import { chooseVia } from '../src/core/vie';
@@ -37,27 +37,19 @@ describe('spese automatiche', () => {
     expect(s.paragon.points.forza).toBe(want.forza + 1);
   });
 
-  it("le Scintille vanno prima a Doppia Via, poi al potenziamento più economico (Quinto Sole pesa meno)", () => {
+  it('le Scintille comprano sempre il potenziamento più economico', () => {
     const s = newGame(0, 1);
-    s.ascension.scintille = 4; // Doppia Via costa 5: si aspetta
-    expect(autoPerks(s)).toBe(0);
-    s.ascension.scintille = 5;
-    autoPerks(s);
-    expect(perkLevel(s.ascension, 'secondaVia')).toBe(1);
-    expect(s.vie.secondUnlocked).toBe(true);
-    // niente accumulo per Quinto Sole II (50): le Scintille si spendono subito
-    s.ascension.scintille = 20;
-    autoPerks(s);
-    expect(perkLevel(s.ascension, 'fiamma')).toBeGreaterThan(0);
-    expect(s.ascension.scintille).toBeLessThan(3);
+    s.ascension.scintille = 1; // costa 1: si compra subito, niente accumulo
+    expect(autoPerks(s)).toBe(1);
+    expect(s.ascension.scintille).toBe(0);
     s.ascension.scintille = 1e6;
     autoPerks(s);
-    expect(perkLevel(s.ascension, 'slot')).toBe(2);
-    for (const id of PERK_FIRST) expect(perkLevel(s.ascension, id)).toBe(PERKS.find((d) => d.id === id)!.max);
     const open = PERKS.filter((d) => d.max === undefined || perkLevel(s.ascension, d.id) < d.max);
     expect(s.ascension.scintille).toBeLessThan(Math.min(...open.map((d) => perkCost(s.ascension, d.id))));
+    expect(perkLevel(s.ascension, 'secondaVia')).toBe(1);
+    expect(s.vie.secondUnlocked).toBe(true);
+    expect(perkLevel(s.ascension, 'slot')).toBe(2);
     expect(perkLevel(s.ascension, 'fiamma')).toBeGreaterThan(5);
-    expect(perkLevel(s.ascension, 'balzo')).toBeGreaterThan(0);
   });
 
   it('autoSpend non lascia niente da spendere e non rompe lo stato', () => {
