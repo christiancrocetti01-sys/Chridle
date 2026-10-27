@@ -2,7 +2,7 @@ import { TICK_RATE } from '../core/loop';
 import { formatNum } from '../core/format';
 import { levelCost, runeValue, socketsOf, unlockCost } from '../core/runes';
 import { RUNE_PLAN, wantedRunes } from '../core/auto';
-import { cooldownTicks, lightCost, skillLevel, skillLevelCost, skillValue } from '../core/skills';
+import { cooldownTicks, lightCost, skillLevel, skillLevelCost, skillTags, skillValue } from '../core/skills';
 import { stateStats, type Stats } from '../core/stats';
 import { runeDef } from '../data/runes';
 import type { GameState } from '../core/state';
@@ -17,8 +17,8 @@ const TAG_ELEMENT: Partial<Record<SkillTag, Element>> = { fuoco: 'fire', gelo: '
 
 /** Effetto, costo e ricarica (con le rune incastonate e le sinergie per tag degli oggetti). */
 const info = (state: GameState, hero: Stats, d: SkillDef) => {
-  const sec = cooldownTicks(hero, d) / TICK_RATE;
-  return `${describeEffect(d.effect, skillValue(state, hero, d))} <span class="muted">· ${Math.round(lightCost(hero, d))} Luce · ricarica ${+sec.toFixed(1)} s · ${d.tags.map((t) => (TAG_ELEMENT[t] ? elem(TAG_ELEMENT[t]!, SKILL_TAG_LABELS[t]) : SKILL_TAG_LABELS[t])).join(', ')}</span>`;
+  const sec = cooldownTicks(hero, d, state) / TICK_RATE;
+  return `${describeEffect(d.effect, skillValue(state, hero, d))} <span class="muted">· ${Math.round(lightCost(hero, d))} Luce · ricarica ${+sec.toFixed(1)} s · ${skillTags(state, hero, d).map((t) => (TAG_ELEMENT[t] ? elem(TAG_ELEMENT[t]!, SKILL_TAG_LABELS[t]) : SKILL_TAG_LABELS[t])).join(', ')}</span>`;
 };
 
 /** Rune incastonate (in automatico) come testo. */
@@ -84,7 +84,7 @@ export function createSkillPanel(root: HTMLElement) {
         const d = id ? skillDef(id) : undefined;
         if (!bar || !d) return;
         const left = cooldowns[d.id] ?? 0;
-        bar.style.width = `${Math.max(0, 1 - left / cooldownTicks(hero, d)) * 100}%`;
+        bar.style.width = `${Math.max(0, 1 - left / cooldownTicks(hero, d, state)) * 100}%`;
         bar.classList.toggle('ready', left <= 0 && state.hero.light >= lightCost(hero, d));
       });
     },

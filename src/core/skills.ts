@@ -1,6 +1,6 @@
 import {
   HEAL_BELOW, LIGHT_PER_HIT, LIGHT_PER_SECOND, MAX_LIGHT, SHIELD_BELOW, SKILLS, SKILL_LEVEL_BASE, SKILL_LEVEL_BONUS, SKILL_LEVEL_GROWTH,
-  skillDef, type SkillDef,
+  skillDef, type SkillDef, type SkillTag,
 } from '../data/skills';
 import { ELEMENTS, type Element } from '../data/items';
 import { TICK_RATE } from './loop';
@@ -83,20 +83,31 @@ export function tickSkills(state: GameState, hero: Stats) {
   for (const id in cd) if (cd[id] > 0) cd[id]--;
 }
 
+/** Tag dell'elemento: le esplosioni delle skill prendono anche il tag dell'elemento con cui colpiscono. */
+const ELEMENT_TAG: Record<Element, SkillTag> = { fire: 'fuoco', cold: 'gelo', lightning: 'fulmine', holy: 'sacro', shadow: 'ombra' };
+
+/** Tag della skill in questo momento: i suoi più quello dell'elemento scelto (esplosioni, con un nemico davanti). */
+export function skillTags(state: GameState | undefined, hero: Stats, def: SkillDef): SkillTag[] {
+  if (def.effect.kind !== 'burst' || !state?.enemy) return def.tags;
+  const t = ELEMENT_TAG[bestElement(state, hero)];
+  return def.tags.includes(t) ? def.tags : [...def.tags, t];
+}
+
 /** Sinergie per tag: i bonus degli oggetti per ogni tag della skill si sommano. */
-export const tagPower = (hero: Stats, def: SkillDef) => def.tags.reduce((sum, t) => sum + hero.skillPower[t], 0);
-export const tagCdr = (hero: Stats, def: SkillDef) => Math.min(MAX_SKILL_CDR, def.tags.reduce((sum, t) => sum + hero.skillCdr[t], 0));
+export const tagPower = (hero: Stats, def: SkillDef, state?: GameState) => skillTags(state, hero, def).reduce((sum, t) => sum + hero.skillPower[t], 0);
+export const tagCdr = (hero: Stats, def: SkillDef, state?: GameState) =>
+  Math.min(MAX_SKILL_CDR, skillTags(state, hero, def).reduce((sum, t) => sum + hero.skillCdr[t], 0));
 
 /** Valore dell'effetto con la runa Potenza e le sinergie per tag (senza i bonus a condizione: Ombra, Esecuzione). */
 export const skillValue = (state: GameState, hero: Stats, def: SkillDef) =>
-  def.effect.value * (1 + SKILL_LEVEL_BONUS * (skillLevel(state, def.id) - 1)) * (1 + skillRune(state, def.id, 'potenza')) * (1 + tagPower(hero, def));
+  def.effect.value * (1 + SKILL_LEVEL_BONUS * (skillLevel(state, def.id) - 1)) * (1 + skillRune(state, def.id, 'potenza')) * (1 + tagPower(hero, def, state));
 
 /** Costo in Luce e ricarica (in tick) con la riduzione ricarica per tag e "freeSkills". */
 export const lightCost = (hero: Stats, def: SkillDef) => (hero.rules.has('freeSkills') || paidInBlood(hero, def) ? 0 : def.light);
 /** Corrotto: le skill di danno si pagano con la vita invece che con la Luce. */
 const paidInBlood = (hero: Stats, def: SkillDef) => hero.rules.has('corruptShadow') && isDamageSkill(def);
-export const cooldownTicks = (hero: Stats, def: SkillDef) =>
-  Math.round(def.cooldown * TICK_RATE * (1 - tagCdr(hero, def))
+export const cooldownTicks = (hero: Stats, def: SkillDef, state?: GameState) =>
+  Math.round(def.cooldown * TICK_RATE * (1 - tagCdr(hero, def, state))
     * (hero.rules.has('freeSkills') ? FREE_SKILLS_CD : 1));
 
 /** Chiave di volta "freeSkills": moltiplicatore della ricarica. */
@@ -149,7 +160,7 @@ function castSkill(state: GameState, hero: Stats, def: SkillDef, events: { push(
     state.hero.hp = Math.max(1, state.hero.hp - def.light * CORRUPT_HP_PER_LIGHT * hero.maxHp);
   }
   state.hero.light -= lightCost(hero, def);
-  state.skills.cooldowns[def.id] = cooldownTicks(hero, def);
+  state.skills.cooldowns[def.id] = cooldownTicks(hero, def, state);
   events.push({ type: 'skill', id: def.id, name: def.name, amount });
   if (hero.rules.has('ceaselessLight')) gainLight(state, CEASELESS_LIGHT);
   // Eco delle Skill: si tira solo con la regola (la sequenza dell'RNG non cambia)

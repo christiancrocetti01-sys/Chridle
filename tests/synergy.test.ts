@@ -36,6 +36,22 @@ function cast(s: GameState, skill: string): number {
 }
 
 describe('sinergie per tag', () => {
+  it("le esplosioni delle skill prendono il tag dell'elemento con cui colpiscono (Fuoco, Gelo…)", () => {
+    const s = fighting();
+    wear(s, 'anello1', [['firePct', 2]]); // il fuoco diventa l'elemento migliore
+    const hero = stateStats(s);
+    const def = skillDef('colpoSacro')!;
+    const base = skillValue(s, hero, def);
+    const cd = cooldownTicks(hero, def, s);
+    wear(s, 'anello2', [['fuocoSkill', 0.5], ['fuocoCdr', 0.2]]);
+    const hero2 = stateStats(s);
+    expect(skillValue(s, hero2, def)).toBeCloseTo(base * 1.5);
+    expect(cooldownTicks(hero2, def, s)).toBeLessThan(cd);
+    // senza un nemico (scheda Skill a riposo) restano i tag propri
+    s.enemy = null;
+    expect(skillValue(s, hero2, def)).toBeCloseTo(skillValue(s, hero, def));
+  });
+
   it('ogni tag ha un affisso di effetto e uno di ricarica', () => {
     for (const t of SKILL_TAGS) {
       for (const k of [`${t}Skill`, `${t}Cdr`] as StatKey[]) {
