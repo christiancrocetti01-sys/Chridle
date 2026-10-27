@@ -69,9 +69,9 @@ export const RULE_TEXT: Record<RuleId, string> = {
   lastPrayer: 'Sotto il 20% della vita la Preghiera si lancia da sola (ogni 20 s)',
   armorBreak: 'Ogni critico toglie il 10% della difesa del nemico (fino a −50%)',
   skillEcho: 'Le skill hanno il 20% di probabilità di lanciarsi due volte',
-  judgeHammer: 'Contro i boss ogni colpo fa +1% di danno in più del precedente (fino a +300%)',
+  judgeHammer: 'Contro i boss ogni colpo fa +0,5% di danno in più del precedente (fino a +150%)',
   ceaselessLight: 'Ogni skill lanciata restituisce 25 Luce',
-  coldBlood: 'A vita piena: +40% danni',
+  coldBlood: 'A vita piena: +20% danni',
   supernova: 'Le skill di danno aspettano la Luce piena e fanno ×3, ma la Luce sale a metà velocità',
   livingFortress: 'Niente più schivata, ma ogni colpo subito è ridotto del 40%',
   timeStop: "Ogni 30 s il nemico si blocca per 3 s, ma −30% velocità d'attacco",
@@ -274,10 +274,10 @@ export const LAST_PRAYER_SECONDS = 20;
 export const ARMOR_BREAK_STEP = 0.1;
 export const ARMOR_BREAK_MAX = 0.5;
 export const SKILL_ECHO_CHANCE = 0.2;
-export const JUDGE_HAMMER_STEP = 0.01;
-export const JUDGE_HAMMER_MAX = 3;
+export const JUDGE_HAMMER_STEP = 0.005;
+export const JUDGE_HAMMER_MAX = 1.5;
 export const CEASELESS_LIGHT = 25;
-export const COLD_BLOOD_MULT = 1.4;
+export const COLD_BLOOD_MULT = 1.2;
 export const SUPERNOVA_MULT = 3;
 export const SUPERNOVA_LIGHT = 0.5;
 export const LIVING_FORTRESS_TAKEN = 0.6;

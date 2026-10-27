@@ -115,8 +115,8 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
   max +30%), Sole Nascente (ogni 10 s colpo ×5), Gelo Profondo (gelo 10% congela 1 s), Fiamme Vive (bruciature passano al
   nemico dopo), Contrattacco (schivata → colpo subito), Vampiro di Luce (rubavita in eccesso → scudo), Ultima Preghiera
   (sotto 20% vita Preghiera da sola, ogni 20 s), Colpo Spezzante (critico −10% difesa nemica, max −50%), Eco delle Skill
-  (20% doppio lancio), Martello del Giudizio (boss: +1% per colpo, fino a +300%), Luce Incessante (skill → +25% Luce),
-  Sangue Freddo (vita piena +40% danni); 3 chiavi di volta: Supernova (Luce piena skill ×3, Luce a metà velocità),
+  (20% doppio lancio), Martello del Giudizio (boss: +0,5% per colpo, fino a +150%), Luce Incessante (skill → +25% Luce),
+  Sangue Freddo (vita piena +20% danni); 3 chiavi di volta: Supernova (Luce piena skill ×3, Luce a metà velocità),
   Fortezza Vivente (niente schivata, colpi subiti −40%), Tempo Fermo (ogni 30 s nemico fermo 3 s, −30% vel. att.).
   **Fatto (2026-10-27):** `BEYOND` in `src/data/constellations.ts` (3 regioni dal centro dei ponti, spina di 11, notevoli
   a lato dei nodi dispari, 51 stelle), regole in `combat.ts`/`skills.ts`/`stats.ts`, costanti in fondo a `src/data/uniques.ts`.
