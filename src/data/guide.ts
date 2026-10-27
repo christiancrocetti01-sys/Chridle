@@ -38,7 +38,7 @@ export const GUIDE: GuideSection[] = [
     id: 'skill', title: 'Skill e rune', text: [
       'Colpendo accumuli <b>Luce</b> (max 100); le skill la spendono e partono da sole.',
       '6 skill fisse, sbloccate salendo di livello: Colpo Sacro (1), Preghiera (5), Squarcio (12), Egida (20), Lama Rapida (30), Giudizio (45). Cure e scudi aspettano il momento giusto (vita bassa).',
-      'Le esplosioni usano da sole l\'elemento a cui il nemico è più debole.',
+      'Le esplosioni usano da sole l\'elemento a cui il nemico è più debole, e ne prendono anche il tag (Fuoco, Gelo, Fulmine, Ombra o Sacro).',
       'Tutto automatico: l\'<b>Essenza</b> compra sempre la cosa più economica tra livelli delle skill (+10% ciascuno), <b>rune</b> (2 per skill, scelte e incastonate da sole) e livelli del Lumo attivo.',
       'I tag (Sacro, Fuoco, Nel tempo…) contano: alcuni affissi potenziano tutte le skill con un certo tag.',
     ],
@@ -63,7 +63,7 @@ export const GUIDE: GuideSection[] = [
       'Durante una modalità la Campagna è in pausa; puoi abbandonare quando vuoi.',
       '<b>Dungeon</b> (1 chiave): 8 nemici e un boss con modificatori casuali. Premio: Frammenti, Essenza e un pezzo di set.',
       '<b>Torre dell\'Alba</b> (gratis): un nemico per piano, 30 s ciascuno; si riparte 5 piani sotto il record. Ogni 5 piani di record +3% attacco e vita per sempre.',
-      '<b>Raid</b> (dallo stage 50, 3 chiavi): boss in 3 fasi in 120 s. Premio: un Leggendario garantito, a volte Mitico o Divino.',
+      '<b>Raid</b> (dallo stage 50, 3 chiavi): boss in 3 fasi in 120 s. Premio: un Leggendario garantito, a volte Mitico o Divino; un quarto delle volte è l\'unico proprio di quel boss, che non cade altrove.',
       "<b>Abisso</b> (dopo 3 Ascensioni): profondità infinite. Dà esperienza <b>Paragon</b>.",
     ],
   },
@@ -72,7 +72,7 @@ export const GUIDE: GuideSection[] = [
       '<b>Bestiario</b>: uccidendo una famiglia sali di grado e fai +5% danni contro di lei, per sempre.',
       '<b>Collezione</b>: ogni leggendario unico trovato almeno una volta dà un bonus permanente, più premi al 25/50/100%.',
       '<b>Imprese</b>: traguardi a gradini (uccisioni, stage, livello…), ognuno con un piccolo bonus permanente.',
-      '<b>Lumi</b> (Build › Lumi): spiriti sbloccati dai traguardi. È attivo (bonus pieno + effetto) il preferito della tua Via, se l\'hai, altrimenti quello di livello più alto; gli altri danno il 25%. Salgono da soli con l\'Essenza.',
+      '<b>Lumi</b> (Build › Lumi): spiriti sbloccati dai traguardi. È attivo (bonus pieno + effetto) il preferito della tua Via, se l\'hai, altrimenti quello di livello più alto; gli altri danno il 25%. L\'Essenza fa salire da solo il Lumo attivo.',
     ],
   },
   {

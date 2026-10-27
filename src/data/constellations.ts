@@ -51,7 +51,7 @@ export const BRANCHES: BranchDef[] = [
     spine: [[['atkPct', 0.04]], [['crit', 0.01]], [['critDmg', 0.06]], [['speedPct', 0.02]]],
     clusters: [
       { name: 'Brace', small: [[['firePct', 0.06]], [['fuocoSkill', 0.05]]],
-        notable: { name: 'Cuore di Brace', mods: [['firePct', 0.15], ['fuocoSkill', 0.15]] } },
+        notable: { name: 'Anima di Brace', mods: [['firePct', 0.15], ['fuocoSkill', 0.15]] } },
       { name: 'Lama nel Buio', small: [[['crit', 0.01]], [['critDmg', 0.08]]],
         notable: { name: 'Ferita Profonda', mods: [['crit', 0.02]], rule: 'critBleed' } },
       { name: 'Tempesta', small: [[['lightningPct', 0.06]], [['fulmineSkill', 0.05]]],
