@@ -49,7 +49,7 @@ Si sceglie una Via a un certo livello; con l'endgame si sblocca una seconda Via 
   delle Vie, Vie (Eclissiarca +30, Paladino −30). Per punto: Corruzione +1% danni, −0,5% difesa e cure; Purezza
   −0,5% danni, +1% difesa e cure. Soglie: +50 skill d'Ombra pagate con la vita (0,1% vita per Luce), −50 cure in
   eccesso → scudo, +100 Eclissi (danni ×2, niente cure), −100 Santità (salva da un colpo mortale ogni 30 s).
-  Neutro: nessun bonus (scelta mia, da confermare). Riga in scheda Eroe sopra le Vie. Tag e affissi Ombra approvati.
+  Neutro: **Equilibrio** (revisione 2026-10-27) +15% danni, difesa e cure a 0, cala fino a sparire a ±50 (`equilibrium`). Riga in scheda Eroe sopra le Vie. Tag e affissi Ombra approvati.
 
 ## 4. Statistiche
 Molte statistiche, raggruppate in schede per non sommergere la UI.
@@ -161,6 +161,10 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
 - **Fatto (zone 11-20, delega dell'utente, 2026-10-27):** stage 101-200 con 10 zone e boss nuovi (Necropoli Sommersa →
   Il Sole Spento), stesso ordine delle famiglie e stesso numero di meccaniche della zona 100 stage prima, combinazioni
   diverse; carte in `BOSS_ART`. Dallo stage 201 si ricomincia col numero romano.
+- **Fatto (Segni dei cicli, revisione 2026-10-27):** dal ciclo II ogni zona ha **Segni** fissi presi dai modificatori
+  dei Dungeon (1 nel II, 2 nel III, 3 dal IV; deterministici per zona e ciclo, `zoneSigns`); «Prescelti» = 30% di élite.
+  Premi (oro, XP, Essenza) ×(1 + somma di 0,25 + premio del modificatore) (`signReward`). Il boss di zona prende una
+  meccanica che non ha (`bossMechanics`). Visibili nella carta Campagna (Mondo) e sotto il nemico.
 
 ## 10. Modalità di gioco
 | Modalità | Descrizione | Ricompensa principale |
@@ -193,6 +197,8 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
   vincendo quel Raid (`RAID_UNIQUE_CHANCE` = 25%) e mai altrove: Maglio del Colosso (Martello del Giudizio), Scaglia
   d'Ossidiana (Fortezza Vivente), Grembo del Vuoto (Tempo Fermo), Catene del Titano (Respiro della Battaglia): le chiavi
   di volta su un oggetto. Contano nella Collezione (45 unici).
+- **Revisione 2026-10-27:** Dungeon al record − 1 (`DUNGEON_LEVEL_OFFSET`, prima − 3: mai persi). Raid al record − 5
+  ma mai sopra lo stage dove si combatte (`raidLevel`: dopo un record fortunato o un rientro scadevano spesso).
 
 ## 11. Valute ed economia
 - **Oro**: base, per potenziamenti e acquisti.
@@ -221,6 +227,7 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
 - **Fatto (Rinascita Solare):** da 400 Scintille guadagnate nel ciclo; Soli = √(Scintille / 100), contate senza il bonus dei Soli (dopo il collaudo di 10 giorni: senza, ~70 Rinascite in 240 h). Azzera Ascensioni, Scintille
   e potenziamenti (tranne Quinto Sole e Doppia Via) e riparte da capo. Ogni Sole, per sempre: attacco/vita/difesa +100%,
   oro/XP/Essenza/Paragon +50%, Scintille +25%. Imprese nuove: Abissale, Paragone, Rinato.
+  **Revisione 2026-10-27:** la soglia sale del 15% a ogni Rinascita fatta (`rebirthThreshold`): prima nel finale una ogni 4-5 h.
 - Numeri grandi: supporto oltre 1e308 (libreria tipo `break_infinity.js`) **rimandato** finché non serve
   (stage ~3800); formattazione 1.2K, 3.4M… fino a Dc, poi notazione.
 
@@ -263,6 +270,11 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
   Sezione nella scheda Eroe. Collaudo: Lumo preferito ~Lv 17 in 8 h, rune invariate (13-14), Ascensioni 6-9.
   **Lumi del fine gioco (2026-10-27):** Mezzaluna (10 gradi del Bestiario, preferita dell'Eclissiarca), Pallido
   (Abisso 5), Stellina (Paragon 50), Solicello (prima Rinascita): 10 Lumi.
+- **Collezione Ascesa** (seconda caccia, revisione 2026-10-27): un unico già in collezione può cadere **Asceso ✦**
+  (statistiche fisse ×2,5, almeno Mitico) dai Guardiani dell'Abisso dalla profondità 20 (10% a Guardiano, tra gli
+  unici già trovati) e dall'unico proprio di un Raid di livello 150+. `state.ascended` (salvataggio v25): ogni Asceso
+  ridà il bonus di collezione ×2, premi al 25/50/100% (+10/+15/+25% attacco e vita, poi danno ai boss e ritrovamento).
+  Sezione nel Codex › Collezione da metà collezione.
 
 ## 15. Direzione artistica
 - **Deciso (2026-10-24): grafica minimale.** Non si vede il personaggio combattere: il gioco è
@@ -309,18 +321,20 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
 - Manuali restano solo: scelta della Via, quando ascendere/rinascere, modalità (Dungeon/Torre/Raid/Abisso).
   Il resto (equip, smantellamento, skill, rune, crafting, spese permanenti, albero) lo fa il gioco.
 - Equip: ogni drop si indossa nello slot dove alza di più `gearPower` (danni × resistenza), altrimenti → Frammenti;
-  niente inventario. Le regole degli unici non entrano nel confronto (bonus fisso agli unici: proposto, non deciso).
+  niente inventario. Ogni regola nuova dell'equipaggiamento (unici, set completi; non quelle già date da stelle e Vie)
+  vale +20% nel confronto (`equipPower`, `RULE_WEIGHT`; revisione 2026-10-27).
 - Skill: 6 fisse (Colpo Sacro 1, Preghiera 5, Squarcio 12, Egida 20, Lama Rapida 30, Giudizio 45), priorità fissa
   (difese → velocità → danno); le esplosioni usano l'elemento più debole del nemico. Niente skill delle Vie.
 - Essenza: ogni secondo compra la cosa più economica tra livelli delle skill (+10%, costo 25×1,4^(lv−1)),
-  8 rune in piano (2 per skill) e livelli del Lumo attivo. Perk "Quinto Sole" = +5 livelli a tutte le skill.
+  8 rune in piano (2 per skill) e livelli dei Lumi (gli inattivi col costo diviso per la loro parte, 25%: salgono
+  ~4-5 livelli sotto l'attivo; revisione 2026-10-27). Perk "Quinto Sole" = +5 livelli a tutte le skill.
   Corrotto: le skill di danno costano vita invece di Luce.
 - Rune: solo le 8 del piano (Potenza, Custodia, Esecuzione, Ferita Aperta, Purificazione, Bastione, Pazienza,
   Persistenza); le altre 32 tolte (2026-10-25). Lumo attivo: il preferito della Via (Paladino Aureola, Lama ed
   Eclissiarca Ombretta, Inquisitore Fiammella, Custode Scintilla), altrimenti quello di livello più alto.
 - Crafting: solo l'aumento di tier sugli oggetti indossati, sempre il più economico (`autoCraft`); tolti Ritira,
-  Trasferisci e Fusione. Oro: il Potenziamento più economico. Paragon: a giro Forza, Vigore, Forza, Precisione,
-  Vigore, Tempra. Ascensione: sempre il più economico (decisione utente 2026-10-26). Tutto in `autoSpend` (`src/core/auto.ts`).
+  Trasferisci e Fusione. Oro: il Potenziamento più economico. Paragon: a giro con un ordine per Via (`VIA_PARAGON`,
+  tutti e 8 i bonus; Inquisitore e Custode partono da Elementi), senza Via Forza, Vigore, Forza, Precisione, Vigore, Tempra. Ascensione: sempre il più economico (decisione utente 2026-10-26). Tutto in `autoSpend` (`src/core/auto.ts`).
 - Stelle (`autoStars`, prima voce di `autoSpend`): finché ci sono punti, il percorso (una stella collegata o la strada
   fino a una notevole/chiave di volta entro `STAR_LOOKAHEAD` = 6) che alza di più `gearPower` per punto (2026-10-27);
   notevoli con regola ×1,06, chiavi di volta ×0,98 (quella della propria Via ×1,06), regole annullate da una già attiva
