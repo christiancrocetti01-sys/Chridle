@@ -20,8 +20,9 @@
   sezione Dungeon di `src/ui/world.ts`, avviso in `main.ts`): chiavi → premi di un Dungeon senza modificatori, dopo il primo
   Dungeon vinto; nel collaudo si usa con ≥ 13 chiavi. Torre: Mitico ogni 25 piani (`TOWER_GRAND_EVERY`). Imprese: Predone V,
   Scalatore V-VI. Nessun cambio al salvataggio. Pozzo dell'Essenza scartato: skill e rune sono già pozzi infiniti.
-- Contenuti ancora proposti: zone/boss oltre lo stage 100 (ora ciclano con numeri romani; servono carte nuove),
-  unici/set lotto 6, bottino proprio dei Raid, nuovi potenziamenti d'Ascensione, più Lumi.
+- Contenuti (2026-10-27, «finisci tutti i punti»): fatto **zone 11-20** (stage 101-200, 10 boss nuovi con carte in
+  `BOSS_ART`; dopo lo stage 200 si ricomincia col numero romano). Da fare: unici/set lotto 6, bottino dei Raid,
+  potenziamenti d'Ascensione, più Lumi; poi revisione completa + report HTML.
 
 ## Pubblicazione
 - Firebase (`firebase.json`, job `firebase` in `.github/workflows/deploy.yml`, `firebase-tools@14`) e GitHub Pages.

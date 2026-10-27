@@ -115,9 +115,30 @@ export const ZONES: ZoneDef[] = [
     lore: 'Il calore dell’abisso è l’ultimo ricordo distorto del Sole.' },
   { name: "Cuore dell'Eclissi", family: 'vuoto', boss: boss('eclissi', "Avatar dell'Eclissi", 'vuoto'), mechanics: ['enrage', 'shield', 'regen'],
     lore: 'Il Sole è qui, prigioniero. Batte ancora, debole.' },
+  // Oltre il Cuore (stage 101-200): il viaggio continua dove il Sole è stato portato via.
+  { name: 'Necropoli Sommersa', family: 'nonmorti', boss: boss('reginaAnnegata', 'Regina Annegata', 'nonmorti'), mechanics: ['summon'],
+    lore: 'Una città intera è scesa sotto le acque nere per non vedere l’Eclissi.' },
+  { name: 'Tana del Grande Verme', family: 'bestie', boss: boss('verme', 'Verme delle Profondità', 'bestie'), mechanics: ['shield'],
+    lore: 'La terra trema a ogni suo respiro. Ha inghiottito tre villaggi e un fiume.' },
+  { name: 'Biblioteca Proibita', family: 'culto', boss: boss('archivista', 'Archivista dei Nomi', 'culto'), mechanics: ['enrage'],
+    lore: 'Qui il Culto custodisce i nomi cancellati dei paladini, uno per pagina.' },
+  { name: 'Campi di Cenere', family: 'demoni', boss: boss('cavaliereCenere', 'Cavaliere di Cenere', 'demoni'), mechanics: ['regen'],
+    lore: 'Erano campi di grano. Il vento solleva ancora la cenere in forma di spighe.' },
+  { name: 'Mare di Stelle Spente', family: 'vuoto', boss: boss('tessitrice', 'Tessitrice del Nulla', 'vuoto'), mechanics: ['summon', 'enrage'],
+    lore: 'Ogni stella spenta è un nodo nella sua tela.' },
+  { name: 'Campo della Battaglia Eterna', family: 'nonmorti', boss: boss('generale', 'Generale Senza Volto', 'nonmorti'), mechanics: ['shield', 'enrage'],
+    lore: 'La guerra contro l’Eclissi non è mai finita: i caduti combattono ancora.' },
+  { name: 'Nido delle Arpie', family: 'bestie', boss: boss('arpia', 'Regina delle Arpie', 'bestie'), mechanics: ['summon', 'shield'],
+    lore: 'Sulle guglie spezzate il vento porta le loro grida per leghe.' },
+  { name: 'Osservatorio Oscurato', family: 'culto', boss: boss('astrologo', 'Astrologo Cieco', 'culto'), mechanics: ['regen', 'enrage'],
+    lore: 'Ha calcolato il giorno dell’Eclissi. Poi si è cavato gli occhi per non vederlo.' },
+  { name: 'Trono di Brace', family: 'demoni', boss: boss('principe', 'Principe dei Demoni', 'demoni'), mechanics: ['shield', 'regen'],
+    lore: 'Siede dove un tempo sedeva il re degli uomini, e porta la sua corona fusa.' },
+  { name: 'Il Sole Spento', family: 'vuoto', boss: boss('ombraSole', 'Ombra del Sole', 'vuoto'), mechanics: ['enrage', 'shield', 'summon'],
+    lore: 'Il Sole è libero, ma la sua ombra è rimasta. E ha imparato a odiarlo.' },
 ];
 
-/** Zona dello stage (dopo l'ultima si ricomincia, "Eclissi II", "III"…). */
+/** Zona dello stage (dopo l'ultima, lo stage 200, si ricomincia: "Cimitero dei Caduti II", "III"…). */
 export function zoneOf(stage: number): { zone: ZoneDef; index: number; cycle: number; zoneBoss: boolean } {
   const i = Math.floor((stage - 1) / ZONE_STAGES);
   return { zone: ZONES[i % ZONES.length], index: i, cycle: Math.floor(i / ZONES.length) + 1, zoneBoss: stage % ZONE_STAGES === 0 };

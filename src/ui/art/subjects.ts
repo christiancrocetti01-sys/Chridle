@@ -259,6 +259,119 @@ export const BOSS_ART: Record<string, Subject> = {
     L('line', 'M6 38L94 62M6 62L94 38'),
     L('eye', 'M44 45C44 39 52 39 52 45C52 39 60 39 60 45C60 53 52 57 52 62C52 57 44 53 44 45Z'),
   ],
+  // regina incoronata con i capelli sciolti nell'acqua nera
+  reginaAnnegata: [
+    L('fill', 'M30 40C18 52 26 66 16 80C12 88 20 94 14 100H86C80 94 88 88 84 80C74 66 82 52 70 40Z'),
+    L('shade', 'M50 40H70C82 52 74 66 84 80C88 88 80 94 86 100H50Z'),
+    L('fill', 'M50 22C61 22 66 31 66 42C66 54 60 62 50 62C40 62 34 54 34 42C34 31 39 22 50 22Z'),
+    L('shade', 'M56 23C62 26 66 33 66 42C66 54 60 62 52 62C58 54 59 36 56 23Z'),
+    L('gold', 'M35 26L37 12L43 20L50 8L57 20L63 12L65 26Z'),
+    L('line', 'M45 54C48 56 52 56 55 54M24 70C30 66 34 74 40 70M60 74C66 70 70 78 76 74M20 86C28 82 34 90 42 86M58 90C66 86 72 94 80 90'),
+    L('ink', 'M0 92C16 86 26 98 50 92C74 86 84 98 100 92V100H0Z'),
+    L('eye', 'M41 41h6v2.5h-6zM53 41h6v2.5h-6z'),
+  ],
+  // verme ad anelli che emerge con la bocca di zanne
+  verme: [
+    L('fill', 'M28 100C26 80 30 64 40 52C30 42 30 24 42 14C54 4 76 8 82 24C88 40 78 54 64 56C58 68 58 84 62 100Z'),
+    L('shade', 'M64 56C58 68 58 84 62 100H46C44 84 46 68 54 56Z'),
+    L('line', 'M30 88C38 90 52 90 60 88M31 76C40 78 52 78 59 76M35 64C42 66 52 66 58 64'),
+    L('ink', circle(62, 30, 15)),
+    L('fill', 'M52 20L56 26L50 25ZM62 15L64 22L58 20ZM72 19L70 26L66 21ZM76 30L70 32L72 26ZM72 41L66 37L72 35ZM62 45L60 38L66 40ZM52 40L56 34L58 40ZM48 30L54 28L52 34Z'),
+    L('eye', circle(62, 30, 3)),
+    L('ink', 'M0 96C20 90 80 90 100 96V100H0Z'),
+  ],
+  // libro aperto con l'occhio e la candela
+  archivista: [
+    L('fill', 'M6 46C22 40 38 42 50 50C62 42 78 40 94 46V90C78 84 62 86 50 94C38 86 22 84 6 90Z'),
+    L('shade', 'M50 50C62 42 78 40 94 46V90C78 84 62 86 50 94Z'),
+    L('line', 'M50 50V94M14 56C24 53 34 54 42 58M14 64C24 61 34 62 42 66M14 72C24 69 34 70 42 74M14 80C24 77 34 78 42 82'),
+    L('eye', 'M58 66C64 58 80 58 86 66C80 74 64 74 58 66Z'),
+    L('ink', circle(72, 66, 3.4)),
+    L('fill', 'M22 20H30V42H22Z'),
+    L('gold', 'M26 4C30 10 32 14 26 18C20 14 22 10 26 4Z'),
+    L('line', 'M26 18V20M18 42H34'),
+  ],
+  // cavaliere coperto di cenere con lo stendardo bruciato
+  cavaliereCenere: [
+    L('ink', 'M70 4H74V98H70Z'),
+    L('fill', 'M74 6H94L88 16L94 26H74Z'),
+    L('line', 'M78 12L86 20M80 22L84 18'),
+    L('fill', 'M30 18C30 10 38 6 46 6C54 6 62 10 62 18V44H30Z'),
+    L('shade', 'M46 6C54 6 62 10 62 18V44H46Z'),
+    L('ink', 'M34 24H58V29H34Z'),
+    L('line', 'M46 6V22M46 31V44'),
+    L('gold', 'M44 6C42 0 50 0 48 6Z'),
+    L('fill', 'M18 98C18 66 28 50 46 48C64 50 72 66 72 98Z'),
+    L('shade', 'M46 48C64 50 72 66 72 98H52C54 76 52 60 46 48Z'),
+    L('line', 'M30 64L40 74L30 84M62 64L52 74L62 84'),
+    L('line', 'M8 40l2 4M14 30l-2 4M84 48l2 4M12 60l2 3M90 70l-2 3'),
+    L('eye', 'M39 25h4v2.5h-4zM49 25h4v2.5h-4z'),
+  ],
+  // ragnatela tra le stelle spente con l'occhio al centro
+  tessitrice: [
+    L('line', 'M50 0V100M0 50H100M8 8L92 92M92 8L8 92'),
+    L('line', 'M50 18L72 28L82 50L72 72L50 82L28 72L18 50L28 28Z'),
+    L('line', 'M50 6L81 19L94 50L81 81L50 94L19 81L6 50L19 19Z'),
+    L('fill', 'M50 32C62 32 68 40 68 50C68 60 62 68 50 68C38 68 32 60 32 50C32 40 38 32 50 32Z'),
+    L('shade', 'M50 32C62 32 68 40 68 50C68 60 62 68 50 68Z'),
+    L('fill', 'M34 42L20 34L12 40M34 50L16 50L8 58M66 42L80 34L88 40M66 50L84 50L92 58M38 62L28 74L28 86M62 62L72 74L72 86'),
+    L('eye', 'M42 46C46 42 54 42 58 46C54 50 46 50 42 46Z'),
+    L('ink', circle(50, 46, 2)),
+    L('gold', `${circle(14, 14, 2.6)}${circle(86, 86, 2.6)}${circle(88, 16, 2)}${circle(12, 84, 2)}`),
+  ],
+  // elmo vuoto senza volto davanti agli stendardi incrociati
+  generale: [
+    L('line', 'M10 10L60 96M90 10L40 96'),
+    L('fill', 'M10 10L28 10L24 22L30 30L14 34ZM90 10L72 10L76 22L70 30L86 34Z'),
+    L('fill', 'M28 90C28 46 36 22 50 20C64 22 72 46 72 90Z'),
+    L('shade', 'M50 20C64 22 72 46 72 90H54C56 60 56 36 50 20Z'),
+    L('ink', 'M38 44C38 36 44 32 50 32C56 32 62 36 62 44V64C58 70 42 70 38 64Z'),
+    L('line', 'M50 20V32M30 76H70M32 84H68'),
+    L('gold', 'M44 20C44 10 50 2 50 2C50 2 56 10 56 20Z'),
+    L('eye', 'M43 48h5v2h-5zM52 48h5v2h-5z'),
+  ],
+  // arpia con le ali aperte e gli artigli
+  arpia: [
+    L('fill', 'M46 40L4 16C10 36 2 52 10 66L28 56L46 62ZM54 40L96 16C90 36 98 52 90 66L72 56L54 62Z'),
+    L('line', 'M44 44L12 26M44 50L8 44M44 56L12 60M56 44L88 26M56 50L92 44M56 56L88 60'),
+    L('fill', 'M50 18C58 18 62 24 62 32C62 38 58 42 56 44L62 76H38L44 44C42 42 38 38 38 32C38 24 42 18 50 18Z'),
+    L('shade', 'M50 18C58 18 62 24 62 32C62 38 58 42 56 44L62 76H50Z'),
+    L('line', 'M42 52H58M41 60H59M40 68H60'),
+    L('ink', 'M38 14C42 8 58 8 62 14L60 22C56 18 44 18 40 22Z'),
+    L('line', 'M40 76L36 92M36 92L30 96M36 92L36 98M36 92L42 96M60 76L64 92M64 92L58 96M64 92L64 98M64 92L70 96'),
+    L('eye', 'M43 30L48 32L44 34ZM57 30L52 32L56 34Z'),
+  ],
+  // astrologo bendato col cannocchiale e la luna
+  astrologo: [
+    L('gold', 'M74 6C84 6 92 14 92 24C92 34 84 42 74 42C80 36 82 30 82 24C82 18 80 12 74 6Z'),
+    L('gold', `${circle(14, 10, 2)}${circle(28, 22, 1.6)}${circle(58, 8, 1.8)}${circle(8, 32, 1.4)}`),
+    L('fill', 'M50 30C60 30 64 38 64 46C64 52 62 56 60 58L80 98H20L40 58C38 56 36 52 36 46C36 38 40 30 50 30Z'),
+    L('shade', 'M50 30C60 30 64 38 64 46C64 52 62 56 60 58L80 98H50Z'),
+    L('ink', 'M36 42H64V48H36Z'),
+    L('line', 'M50 62V98M44 66L34 98M56 66L66 98'),
+    L('fill', 'M56 70L86 50L90 56L60 76Z'),
+    L('ink', 'M84 48L92 44L96 52L90 56Z'),
+    L('line', 'M40 20L50 30L60 20'),
+  ],
+  // principe cornuto con la corona fusa, tra le fiamme
+  principe: [
+    L('ink', 'M6 100C10 82 4 74 14 60C16 72 22 74 22 66C30 78 26 88 30 100ZM70 100C74 88 70 78 78 66C78 74 84 72 86 60C96 74 90 82 94 100Z'),
+    L('fill', 'M36 30C26 26 20 16 22 4C27 14 34 18 42 20ZM64 30C74 26 80 16 78 4C73 14 66 18 58 20Z'),
+    L('fill', 'M50 20C62 20 68 30 68 42C68 52 62 58 58 60L74 98H26L42 60C38 58 32 52 32 42C32 30 38 20 50 20Z'),
+    L('shade', 'M50 20C62 20 68 30 68 42C68 52 62 58 58 60L74 98H50Z'),
+    L('gold', 'M34 30L36 20L42 26L50 16L58 26L64 20L66 30C60 34 40 34 34 30Z'),
+    L('line', 'M38 34C40 38 42 42 41 46M62 34C60 38 58 42 59 46M42 52C46 55 54 55 58 52'),
+    L('line', 'M50 64V98M42 70L36 98M58 70L64 98'),
+    L('eye', 'M40 40L47 42L41 45ZM60 40L53 42L59 45Z'),
+  ],
+  // ombra nera che stringe il sole liberato
+  ombraSole: [
+    L('gold', 'M50 4C60 4 68 12 68 22C68 32 60 40 50 40C40 40 32 32 32 22C32 12 40 4 50 4Z'),
+    L('line', 'M50 44V48M26 22H22M78 22H74M33 5L30 2M67 5L70 2M33 39L30 42M67 39L70 42'),
+    L('ink', 'M50 46C64 46 72 56 74 70L96 64C90 76 84 82 76 84L80 100H20L24 84C16 82 10 76 4 64L26 70C28 56 36 46 50 46Z'),
+    L('ink', 'M26 70L14 44L22 46L18 30L30 40L32 30C34 34 34 40 32 44M74 70L86 44L78 46L82 30L70 40L68 30C66 34 66 40 68 44'),
+    L('eye', 'M40 60L47 62L41 65ZM60 60L53 62L59 65Z'),
+  ],
 };
 
 /** Il guerriero della Luce: elmo, spada alzata e alone (solo in linea di luce). */

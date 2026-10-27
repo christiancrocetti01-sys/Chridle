@@ -6,6 +6,7 @@ import { canExpedition, canRaid, dungeonLevel, enterDungeon, expedition, enterRa
 import { deserialize, serialize } from '../src/core/save';
 import { newGame, type GameState } from '../src/core/state';
 import { KILLS_PER_STAGE, LATE_STAGE, stageEnemy, stateStats } from '../src/core/stats';
+import { BOSS_ART } from '../src/ui/art/subjects';
 import { ENEMIES, FAMILIES, FURY_AFTER_S, ZONES, ZONE_KEY_EVERY, ZONE_STAGES, zoneName, zoneOf } from '../src/data/enemies';
 import { DUNGEON_ESSENCE, DUNGEON_FRAGMENTS, DUNGEON_WAVES, RAID_KEYS, TOWER_GRAND_EVERY, RAID_STAGE, TOWER_KEY_EVERY, TOWER_MILESTONE } from '../src/data/modes';
 
@@ -24,7 +25,14 @@ function god(s: GameState) {
 }
 
 describe('zone e famiglie', () => {
-  it('10 zone da 10 stage, poi si ricomincia con un numero romano', () => {
+  it('20 zone da 10 stage, poi si ricomincia con un numero romano', () => {
+    expect(ZONES).toHaveLength(20);
+    expect(zoneName(101)).toBe('Necropoli Sommersa');
+    expect(zoneName(201)).toBe(`${ZONES[0].name} II`);
+    // le famiglie ruotano sempre nello stesso ordine (la Torre ne dipende)
+    ZONES.forEach((z, i) => expect(z.family).toBe(ZONES[i % 5].family));
+    expect(new Set(ZONES.map((z) => z.boss.id)).size).toBe(20);
+    for (const z of ZONES) expect(BOSS_ART[z.boss.id], z.boss.id).toBeDefined();
     expect(zoneOf(1).zone).toBe(ZONES[0]);
     expect(zoneOf(10)).toMatchObject({ zoneBoss: true, index: 0 });
     expect(zoneOf(11).zone).toBe(ZONES[1]);
