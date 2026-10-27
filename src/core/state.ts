@@ -102,7 +102,8 @@ export interface GameState {
   enemy: EnemyState | null;
   /** Tick mancanti prima che compaia il prossimo nemico. */
   respawn: number;
-  totals: { kills: number; deaths: number; gold: number; dungeons: number; raids: number };
+  /** `ascensions`: Ascensioni fatte in tutto (non si azzerano con la Rinascita). */
+  totals: { kills: number; deaths: number; gold: number; dungeons: number; raids: number; ascensions: number };
   /** Chiavi dei Dungeon (anche per i Raid). */
   keys: number;
   mode: Mode;
@@ -125,7 +126,7 @@ export interface GameState {
   rebirth: RebirthState;
 }
 
-export const STATE_VERSION = 22;
+export const STATE_VERSION = 23;
 
 export function newGame(now: number, seed = now >>> 0): GameState {
   const upgrades = { forza: 0, corazza: 0, rapidita: 0 };
@@ -148,7 +149,7 @@ export function newGame(now: number, seed = now >>> 0): GameState {
     stage: { current: 1, best: 1, kills: 0, auto: true },
     enemy: null,
     respawn: 0,
-    totals: { kills: 0, deaths: 0, gold: 0, dungeons: 0, raids: 0 },
+    totals: { kills: 0, deaths: 0, gold: 0, dungeons: 0, raids: 0, ascensions: 0 },
     keys: 0,
     mode: { kind: 'campaign' },
     tower: { best: 0 },

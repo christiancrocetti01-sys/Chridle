@@ -9,7 +9,7 @@ import { buyUpgrade, upgradePrice } from './combat';
 import { autoCraft } from './craft';
 import { gearPower } from './autoequip';
 import { canTake, pointsLeft } from './constellations';
-import { STARS, type StarNode } from '../data/constellations';
+import { START_ID, STARS, STAR_BY_ID, type StarNode } from '../data/constellations';
 import type { RuleId } from '../data/uniques';
 import { stateStats } from './stats';
 import { paragonFree, spendParagon } from './endgame';
@@ -138,28 +138,54 @@ for (const [a, list] of CLASH_PAIRS) {
 }
 
 /**
- * Peso di una stella nel confronto: le regole non entrano in `gearPower`. Le notevoli con regola hanno un piccolo
- * vantaggio; le chiavi di volta (spesso con un costo) si prendono solo se non c'è di meglio, tranne quella della propria Via.
+ * Peso di una stella nel confronto: le regole non entrano in `gearPower`. Le notevoli con regola valgono come +6% di
+ * potenza (si va a cercarle); le chiavi di volta (spesso con un costo) si prendono solo se non c'è di meglio, tranne quella della propria Via.
  */
 function starWeight(state: GameState, n: StarNode, rules: Set<RuleId>): number {
   if (n.rule && CLASH[n.rule]?.some((r) => rules.has(r))) return 0.5; // regola annullata da una già attiva: solo per ultima
-  if (n.kind === 'keystone') return n.id === `${state.vie.main}-k` ? 1.02 : 0.98;
-  return n.kind === 'notable' && n.rule ? 1.02 : 1;
+  if (n.kind === 'keystone') return n.id === `${state.vie.main}-k` ? 1.06 : 0.98;
+  return n.kind === 'notable' && n.rule ? 1.06 : 1;
 }
 
-/** Stelle: finché ci sono punti, prende tra le stelle collegate quella che alza di più la potenza. */
+/** Fin dove si guarda avanti per raggiungere una notevole o una chiave di volta. */
+export const STAR_LOOKAHEAD = 6; // dalla spina alla notevole di un ammasso: 4 stelle dell'anello + la notevole
+
+/**
+ * Stelle: finché ci sono punti, sceglie il percorso (una stella collegata, o la strada fino a una notevole o chiave di
+ * volta entro `STAR_LOOKAHEAD` passi) che alza di più la potenza per punto speso, e ne prende la prima stella.
+ */
 export function autoStars(state: GameState): number {
   let taken = 0;
   while (pointsLeft(state) > 0) {
     const rules = stateStats(state).rules;
+    const base = gearPower(state);
+    const tree = new Set(state.stars);
+    // ricerca in ampiezza tra le stelle libere a partire da quelle collegate all'albero
+    const parent = new Map<string, string | null>();
+    let ring = STARS.filter((n) => canTake(state, n.id)).map((n) => n.id);
+    for (const id of ring) parent.set(id, null);
+    for (let d = 1; d < STAR_LOOKAHEAD; d++) {
+      const next: string[] = [];
+      for (const id of ring) {
+        for (const l of STAR_BY_ID.get(id)!.links) {
+          if (l === START_ID || tree.has(l) || parent.has(l)) continue;
+          parent.set(l, id);
+          next.push(l);
+        }
+      }
+      ring = next;
+    }
     let best: string | null = null;
-    let bestScore = -1;
-    for (const n of STARS) {
-      if (!canTake(state, n.id)) continue;
-      state.stars.push(n.id);
-      const score = gearPower(state) * starWeight(state, n, rules);
-      state.stars.pop();
-      if (score > bestScore) { bestScore = score; best = n.id; }
+    let bestScore = -Infinity;
+    for (const [id, from] of parent) {
+      const n = STAR_BY_ID.get(id)!;
+      if (from !== null && n.kind === 'small') continue;
+      const path = [id];
+      for (let p = from; p !== null; p = parent.get(p)!) path.unshift(p);
+      state.stars.push(...path);
+      const score = (gearPower(state) * starWeight(state, n, rules) / base - 1) / path.length;
+      state.stars.length -= path.length;
+      if (score > bestScore) { bestScore = score; best = path[0]; }
     }
     if (!best) break;
     state.stars.push(best);

@@ -3,10 +3,11 @@
 > File di passaggio di consegne tra sessioni. Aggiornato da Claude a fine di ogni modifica.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
-**Ultimo aggiornamento:** 2026-10-26 (revisione utente: offline 100%, Torre, Scintille, collaudo 24 h)
+**Ultimo aggiornamento:** 2026-10-27 (Stelle passo 1: punti da Torre/Ascensioni, scelta che guarda avanti)
 **Fase corrente:** Fase 8 chiusa, grafica fatta. Ora **revisione dell'utente** (ROADMAP "Dopo la Fase 8").
-**Prossimo passo:** l'utente deve scegliere su Stelle e Chiavi (proposte sotto), poi un passo alla volta.
-**Online:** `main` = branch (offline 100%, Torre, Scintille pubblicati 2026-10-27).
+**Prossimo passo:** Stelle passo 2: regione «Oltre» (~60 stelle, una notevole ogni 3) con 15 notevoli e 3 chiavi di volta
+  con regole nuove: elenco proposto all'utente, attende conferma. Poi Chiavi (A/B/C da scegliere) e contenuti.
+**Online:** `main` è indietro di Stelle passo 1 (solo sul branch, da pubblicare dopo l'ok).
 
 ## Sessione 2026-10-26 (revisione utente)
 - Offline **100%** (`OFFLINE_EFFICIENCY`), tolta Veglia Eterna; migrazione **v22** rimborsa le Scintille (`VEGLIA_REFUND`).
@@ -15,9 +16,10 @@
 - Collaudo 24 h (6 profili): nessun problema. Livello 89-95, record 112-125 (fermo ~100-120 dalle 9 h), 19-23 Ascensioni
   (~1/h), 2 Rinascite (~12 h e ~21 h), Torre 62-65, Abisso 28-29, Paragon ~25, collezione 17-24/30, imprese 42-46/69.
   Chiavi 7,5-8,4/h (~190/giorno). Essenza ferma a 10-30k: dopo le 8 rune non c'è niente che valga la spesa.
+- Stelle: l'utente **non** vuole compattarle ma più contenuto. Passo 1 fatto: punti extra 1 ogni 10 piani di Torre
+  (`STAR_POINTS_TOWER_EVERY`) e 1 ogni 2 Ascensioni in tutto (`STAR_POINTS_ASC_EVERY`, `totals.ascensions`, salvataggio **v23**);
+  `autoStars` valuta percorsi fino a `STAR_LOOKAHEAD` = 6 verso notevoli/chiavi di volta (regola = +6% potenza).
 - Proposte in attesa di conferma:
-  - **Stelle compatte**: anelli 6→2 nodi, spina 14→7, ponti 6→3, regioni Vie 6→3 (valori raddoppiati) → ~120 nodi, una
-    notevole/chiave di volta ogni ~4 punti invece di ~8; punti oltre l'albero pieno = +1% attacco/vita; poi notevoli nuove con regole forti.
   - **Chiavi**: A) Spedizione (spendi 10/tutte le chiavi, ricompense subito, solo al livello di un Dungeon già vinto);
     B) Dungeon automatici (anche offline); C) Dungeon a più chiavi (×N premi, nemici più forti). Consigliata A.
   - **Contenuti**: pozzo per l'Essenza (rune oltre il livello, rune nuove), zone/boss oltre lo stage 100, unici/set lotto 6,
@@ -56,10 +58,10 @@
 - Lotto 5: 30 unici, 8 set, 7 regole nuove (`src/data/uniques.ts`, costanti in fondo; logica in `combat.ts`/`stats.ts`).
 - Endgame: `src/data/endgame.ts`, `src/core/endgame.ts` (Paragon, Rinascita), Abisso in `src/core/modes.ts`/`enemies.ts`;
   UI: Abisso in scheda Mondo, Rinascita e Paragon in scheda Ascensione. Imprese Abissale/Paragone/Rinato.
-- Salvataggio: **v22** (v22 Veglia Eterna tolta, v21 skill fisse + rimborso rune, v20 `abyss`/`paragon`/`rebirth`), prima **v19** (v11 `vie`, v12 nemico + `keys`/`mode`/`tower`, v13 `ascension`, v14 campi opzionali rune, v15 `hero.sanctity`, v16 `codex`, v17 `collection`, v18 `achievements`, v19 `lumi`).
+- Salvataggio: **v23** (v23 `totals.ascensions`, v22 Veglia Eterna tolta, v21 skill fisse + rimborso rune, v20 `abyss`/`paragon`/`rebirth`), prima **v19** (v11 `vie`, v12 nemico + `keys`/`mode`/`tower`, v13 `ascension`, v14 campi opzionali rune, v15 `hero.sanctity`, v16 `codex`, v17 `collection`, v18 `achievements`, v19 `lumi`).
 
 ## Test
-- `npm test`: **222 verdi** (23 file), `npm run build` ok (2026-10-26). Il test lento della Collezione ha timeout 20 s.
+- `npm test`: **225 verdi** (23 file), `npm run build` ok, collaudo 8 h ok (2026-10-27). Il test lento della Collezione ha timeout 20 s.
 - Collaudo: `npm run collaudo -- --ore 8 [--seed N] [--profilo id]` (`scripts/collaudo.ts`, un processo per profilo:
   5 Vie + uno con sessioni offline). 8 h: nessun NaN/crash/salvataggio rotto, ~30 s. Rilanciarlo dopo ogni sistema nuovo.
   Attenzione: nelle catene di comandi non fidarsi di `npm test | grep` (esce 0 anche se fallisce).

@@ -172,6 +172,10 @@ export const VIA_REGIONS: ViaRegionDef[] = [
 ];
 
 export const START_ID = 'centro';
+/** Punti stella in più oltre a quelli del livello (decisione utente 2026-10-27): 1 ogni N piani di record della Torre… */
+export const STAR_POINTS_TOWER_EVERY = 10;
+/** …e 1 ogni N Ascensioni fatte in tutto (non si azzerano con la Rinascita). */
+export const STAR_POINTS_ASC_EVERY = 2;
 const SPINE = 14;
 const STEP = 60;
 /** Posizioni lungo la spina dove si attaccano gli ammassi. */

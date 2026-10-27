@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { step } from '../src/core/combat';
-import { canRefund, canTake, pointsLeft, refundStar, resetStars, takeStar } from '../src/core/constellations';
+import { bonusStarPoints, canRefund, canTake, pointsLeft, starPoints, refundStar, resetStars, takeStar } from '../src/core/constellations';
 import { deserialize, serialize } from '../src/core/save';
 import { castSkills, cooldownTicks, lightCost, newSkills } from '../src/core/skills';
 import { STATE_VERSION, newGame } from '../src/core/state';
@@ -54,6 +54,13 @@ describe('Costellazioni: punti e collegamenti', () => {
     expect(takeStar(s, 'offesa-s1')).toBe(true);
     expect(takeStar(s, 'offesa-s2')).toBe(true);
     expect(takeStar(s, 'difesa-s1')).toBe(false); // punti finiti
+  });
+
+  it('punti in più dalla Torre (1 ogni 10 piani) e dalle Ascensioni (1 ogni 2)', () => {
+    const s = { ...hero(3), tower: { best: 25 }, totals: { ascensions: 5 } };
+    expect(bonusStarPoints(s)).toBe(2 + 2);
+    expect(starPoints(s)).toBe(2 + 4);
+    expect(pointsLeft(s)).toBe(6);
   });
 
   it('si restituisce solo una stella che non spezza l’albero; il respec è gratis', () => {

@@ -116,6 +116,11 @@ export const migrations: Record<number, Migration> = {
     const { veglia, ...perks } = a.perks as Record<string, number>;
     return { ...d, ascension: { ...a, perks, scintille: a.scintille + VEGLIA_REFUND(veglia ?? 0) } };
   },
+  // v22 → v23: Ascensioni fatte in tutto (punti stella); quelle prima delle Rinascite non si conoscono
+  22: (d) => {
+    const a = d.ascension as AscensionState;
+    return { ...d, totals: { ...(d.totals as GameState['totals']), ascensions: a.count } };
+  },
 };
 
 /** Essenza spesa per sbloccare e potenziare le rune. */

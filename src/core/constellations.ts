@@ -1,13 +1,16 @@
-import { START_ID, STAR_BY_ID, type StarNode } from '../data/constellations';
+import { START_ID, STAR_BY_ID, STAR_POINTS_ASC_EVERY, STAR_POINTS_TOWER_EVERY, type StarNode } from '../data/constellations';
 import type { RuleId } from '../data/uniques';
 import type { StatMods } from './items';
 
-/** Ciò che serve dello stato: livello dell'eroe e stelle prese. */
-type StarState = { hero: { level: number }; stars: string[] };
+/** Ciò che serve dello stato: livello dell'eroe, stelle prese e (facoltativi) Torre e Ascensioni fatte. */
+type StarState = { hero: { level: number }; stars: string[]; tower?: { best: number }; totals?: { ascensions?: number } };
 
-/** 1 punto per livello (il livello 1 parte da zero). */
-export const starPoints = (level: number) => Math.max(0, level - 1);
-export const pointsLeft = (s: StarState) => starPoints(s.hero.level) - s.stars.length;
+/** Punti dalla Torre e dalle Ascensioni (permanenti). */
+export const bonusStarPoints = (s: StarState) =>
+  Math.floor((s.tower?.best ?? 0) / STAR_POINTS_TOWER_EVERY) + Math.floor((s.totals?.ascensions ?? 0) / STAR_POINTS_ASC_EVERY);
+/** 1 punto per livello (il livello 1 parte da zero) più quelli di Torre e Ascensioni. */
+export const starPoints = (s: StarState) => Math.max(0, s.hero.level - 1) + bonusStarPoints(s);
+export const pointsLeft = (s: StarState) => starPoints(s) - s.stars.length;
 
 const linkedToTree = (taken: Set<string>, n: StarNode) => n.links.some((l) => l === START_ID || taken.has(l));
 

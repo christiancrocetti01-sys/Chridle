@@ -60,6 +60,7 @@ export function ascend(state: GameState): number {
   const gain = scintilleGain(state);
   const a = state.ascension;
   a.count++;
+  state.totals.ascensions++;
   a.scintille += gain;
   a.total += gain;
   restartRun(state);

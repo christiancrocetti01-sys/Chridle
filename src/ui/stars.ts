@@ -1,4 +1,5 @@
 import { emptyMods } from '../core/items';
+import { bonusStarPoints, starPoints } from '../core/constellations';
 import type { GameState } from '../core/state';
 import { STARS, STAR_BY_ID, type StarNode } from '../data/constellations';
 import { STAT_LABELS, type StatKey } from '../data/items';
@@ -39,7 +40,7 @@ export function createStarPanel(root: HTMLElement) {
   const circles = STARS.map((n) => `<circle data-n="${n.id}" class="star ${n.kind}" cx="${n.x}" cy="${n.y}" r="${RADIUS[n.kind]}"/>`);
 
   root.innerHTML = `
-    <div class="row"><span><b data-t="taken">0</b> stelle prese <span class="muted">· le sceglie il gioco, salendo di livello</span></span></div>
+    <div class="row"><span><b data-t="taken">0</b> stelle prese <span class="muted" data-t="bonus"></span></span></div>
     <div class="star-map"><svg data-t="svg" viewBox="${full.x} ${full.y} ${full.w} ${full.h}">
       <g class="star-links">${edges.join('')}</g><g>${circles.join('')}</g></svg>
       <div class="star-zoom"><button class="btn sm" data-z="1">+</button><button class="btn sm" data-z="-1">−</button><button class="btn sm" data-z="0">⤢</button></div>
@@ -49,7 +50,7 @@ export function createStarPanel(root: HTMLElement) {
     <div class="skill-info" data-t="summary"></div>`;
   const q = <T extends Element = HTMLElement>(k: string) => root.querySelector<T>(`[data-t="${k}"]`)!;
   const svg = q<SVGSVGElement>('svg');
-  const refs = { taken: q('taken'), detail: q('detail'), summary: q('summary') };
+  const refs = { taken: q('taken'), bonus: q('bonus'), detail: q('detail'), summary: q('summary') };
   const nodeEls = new Map([...svg.querySelectorAll<SVGCircleElement>('[data-n]')].map((c) => [c.dataset.n!, c]));
   const edgeEls = [...svg.querySelectorAll<SVGLineElement>('[data-e]')].map((e) => ({ el: e, ids: e.dataset.e!.split('|') }));
 
@@ -133,11 +134,12 @@ export function createStarPanel(root: HTMLElement) {
 
   return {
     update(state: GameState) {
-      const key = JSON.stringify([state.stars, state.hero.level, selected]);
+      const key = JSON.stringify([state.stars, starPoints(state), selected]);
       if (key === lastKey) return;
       lastKey = key;
       const taken = new Set(state.stars);
       refs.taken.textContent = String(taken.size);
+      refs.bonus.textContent = `· le sceglie il gioco: 1 punto per livello, +${bonusStarPoints(state)} da Torre e Ascensioni`;
       for (const [id, el] of nodeEls) {
         const on = taken.has(id) || STAR_BY_ID.get(id)!.kind === 'start';
         el.classList.toggle('on', on);

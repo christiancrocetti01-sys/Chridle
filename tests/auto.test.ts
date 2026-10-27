@@ -8,6 +8,8 @@ import { perkCost, perkLevel } from '../src/core/ascension';
 import { upgradePrice } from '../src/core/combat';
 import { paragonFree } from '../src/core/endgame';
 import { newGame } from '../src/core/state';
+import { ascend } from '../src/core/ascension';
+import { deserialize } from '../src/core/save';
 import { PERKS } from '../src/data/ascension';
 import { UPGRADES } from '../src/data/upgrades';
 
@@ -94,6 +96,28 @@ describe('offline con le spese automatiche', () => {
     s.hero.level++;
     expect(autoStars(s)).toBe(1);
     expect(s.stars.slice(0, 39)).toEqual(t.stars);
+  });
+
+  it('guarda avanti: va verso le notevoli invece di sparpagliarsi', () => {
+    const notables = (level: number) => {
+      const s = newGame(0, 1);
+      s.hero.level = level;
+      autoStars(s);
+      return s.stars.map((id) => STAR_BY_ID.get(id)!).filter((n) => n.kind === 'notable');
+    };
+    expect(notables(12).length).toBeGreaterThan(0);
+    expect(notables(40).filter((n) => n.rule).length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("le Ascensioni (anche dopo la Rinascita) danno punti stella", () => {
+    const s = newGame(0, 1);
+    s.stage.best = 60;
+    ascend(s);
+    s.stage.best = 60;
+    ascend(s);
+    expect(s.totals.ascensions).toBe(2);
+    expect(pointsLeft(s)).toBe(1);
+    expect(deserialize(JSON.stringify({ ...s, version: 22, totals: { ...s.totals, ascensions: undefined } }))!.totals.ascensions).toBe(s.ascension.count);
   });
 
   it("cambiando Via l'albero si rifà per la nuova Via", () => {

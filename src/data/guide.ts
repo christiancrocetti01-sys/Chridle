@@ -45,7 +45,7 @@ export const GUIDE: GuideSection[] = [
   },
   {
     id: 'stelle', title: 'Stelle (Costellazioni)', text: [
-      'Ogni livello dà <b>1 punto</b>: il gioco prende da solo, partendo dal centro, la stella collegata che rende l\'eroe più forte.',
+      'Ogni livello dà <b>1 punto</b>, e altri arrivano dalla Torre (1 ogni 10 piani di record) e dalle Ascensioni (1 ogni 2, per sempre). Il gioco prende da solo la stella che rende l\'eroe più forte, e punta alle notevoli e alle chiavi di volta vicine.',
       'Le stelle piccole danno statistiche, le <b>notevoli</b> (al centro degli anelli) bonus forti, le <b>chiavi di volta</b> cambiano le regole.',
       'Cambiando Via le stelle si restituiscono e l\'albero si rifà da solo.',
     ],
