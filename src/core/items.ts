@@ -28,7 +28,7 @@ export interface Item {
   /** Modifiche di crafting già fatte: ognuna alza il costo della successiva. */
   crafts?: number;
   /** Leggendario unico (con le sue statistiche fisse) o pezzo di un set. */
-  special?: { kind: 'unique' | 'set'; id: string; mods: { stat: StatKey; value: number }[] };
+  special?: { kind: 'unique' | 'set'; id: string; mods: { stat: StatKey; value: number }[]; ascended?: boolean };
 }
 
 export type StatMods = Record<StatKey, number>;

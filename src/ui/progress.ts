@@ -4,7 +4,9 @@ import { codexTier } from '../core/codex';
 import { CODEX_DMG, CODEX_TIERS, CODEX_TIER_NAMES } from '../data/codex';
 import { formatNum } from '../core/format';
 import { reachedMilestones } from '../core/collection';
-import { COLLECTION_BONUS, COLLECTION_MILESTONES } from '../data/collection';
+import {
+  ASCENDED_BONUS_MULT, ASCENDED_DEPTH, ASCENDED_MILESTONES, ASCENDED_MULT, ASCENDED_RAID_LEVEL, COLLECTION_BONUS, COLLECTION_MILESTONES,
+} from '../data/collection';
 import { STAT_LABELS, type StatKey } from '../data/items';
 import { UNIQUES } from '../data/uniques';
 import { formatStat } from './gear';
@@ -22,7 +24,7 @@ export function createProgressPanel(root: HTMLElement) {
   let key = '';
   return {
     update(state: GameState) {
-      const k = JSON.stringify([codexKey(state), state.collection.length, state.achievements.length, Math.floor(state.stage.best / ZONE_STAGES)]);
+      const k = JSON.stringify([codexKey(state), state.collection.length, state.ascended.length, state.achievements.length, Math.floor(state.stage.best / ZONE_STAGES)]);
       if (k === key) return;
       key = k;
       root.innerHTML = `
@@ -38,6 +40,7 @@ export function createProgressPanel(root: HTMLElement) {
         ${gallery(UNIQUES.flatMap((u, i) => (state.collection.includes(u.id) ? [uniqueCard(u, i + 1, true)] : []))
           .concat(state.collection.length < UNIQUES.length ? [cardBack(`${UNIQUES.length - state.collection.length} da trovare`)] : []))}
         ${collection(state, li)}
+        ${state.collection.length >= UNIQUES.length / 2 || state.ascended.length ? ascendedCollection(state, li) : ''}
         </div>
         <div data-sub="imprese">
         <h2 class="section">Imprese <span class="muted">· ${state.achievements.length}/${TRACKS.reduce((s, t) => s + t.steps.length, 0)} completate</span></h2>
@@ -92,6 +95,21 @@ function collection(state: GameState, li: Rows): string {
   const rest = missing.length ? li.row('co:mancanti', `<span class="muted">${missing.length} da trovare</span>`, '',
     missing.map((u) => `<div class="muted">??? · ${modsText(COLLECTION_BONUS[u.id] ?? [])}</div>`).join(''), 'dim') : '';
   return prizes + rows + rest;
+}
+
+/** Collezione Ascesa: la seconda caccia, aperta da metà collezione. */
+function ascendedCollection(state: GameState, li: Rows): string {
+  const reached = reachedMilestones(state.ascended, ASCENDED_MILESTONES);
+  const label = (m: (typeof ASCENDED_MILESTONES)[number]) => `${Math.round(m.frac * 100)}% (${Math.ceil(m.frac * UNIQUES.length)} Ascesi)`;
+  const next = ASCENDED_MILESTONES.find((m) => !reached.includes(m));
+  const head = `<h2 class="section">Collezione Ascesa <span class="muted">· ${state.ascended.length}/${UNIQUES.length} unici Ascesi</span></h2>
+    <p class="muted small">Un unico già trovato può cadere Asceso ✦ (statistiche fisse ×${ASCENDED_MULT}, almeno Mitico): dai Guardiani dell'Abisso
+    dalla profondità ${ASCENDED_DEPTH} e dai Raid di livello ${ASCENDED_RAID_LEVEL}+. Ognuno ridà il suo bonus di collezione ×${ASCENDED_BONUS_MULT}.</p>`;
+  const prizes = li.row('ca:premi', '<b>Premi della Collezione Ascesa</b>', next ? `prossimo: ${label(next)}` : 'tutti',
+    ASCENDED_MILESTONES.map((m) => `<div${reached.includes(m) ? '' : ' class="muted"'}>${label(m)}: ${modsText(m.mods)}${reached.includes(m) ? ' ✓' : ''}</div>`).join(''));
+  const rows = UNIQUES.filter((u) => state.ascended.includes(u.id))
+    .map((u) => li.row(`ca:${u.id}`, `<b>${u.name} ✦</b>`, '', modsText((COLLECTION_BONUS[u.id] ?? []).map(([k, v]) => [k, v * ASCENDED_BONUS_MULT])))).join('');
+  return head + prizes + rows;
 }
 
 /** Imprese: una riga per traccia con gradino e avanzamento; bonus e prossimo traguardo al tocco. */

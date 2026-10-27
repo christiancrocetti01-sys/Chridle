@@ -220,7 +220,7 @@ function simulate(p: Profile) {
     counters: c, ascendAt, checkpoints,
     end: {
       vie: activeVie(state.vie), stars: state.stars.length, corruption: s.corruption, rules: [...s.rules],
-      skills: state.skills.slots.map((id) => `${id}:${state.skills.levels[id!] ?? 1}`), runes: state.runes, perks: state.ascension.perks, codex: state.codex, collection: state.collection.length, achievements: state.achievements.length, lumi: state.lumi,
+      skills: state.skills.slots.map((id) => `${id}:${state.skills.levels[id!] ?? 1}`), runes: state.runes, perks: state.ascension.perks, codex: state.codex, collection: state.collection.length, ascended: state.ascended.length, achievements: state.achievements.length, lumi: state.lumi,
       gear: Object.values(state.gear.equipped).map((it) => `${it!.rarity}:${it!.special?.id ?? it!.type}`),
     },
   };
@@ -250,7 +250,7 @@ function report(results: Result[]) {
     console.log(`  ascensioni ${c.ascensions} a ${r.ascendAt.length > 20 ? `${r.ascendAt.slice(0, 10).join(', ')} … ${r.ascendAt.slice(-3).join(', ')}` : r.ascendAt.join(', ') || '—'} h  ·  affissi alzati ${c.crafts}  rune ${JSON.stringify(r.end.runes.levels)}`);
     console.log(`  fine: Vie ${r.end.vie.join('+')}, stelle ${r.end.stars}, corruzione ${r.end.corruption}, regole ${r.end.rules.join(' ') || '—'}`);
     console.log(`  skill ${r.end.skills.join(', ')}  ·  perk ${JSON.stringify(r.end.perks)}`);
-    console.log(`  codex ${JSON.stringify(r.end.codex)}  ·  collezione ${r.end.collection}/${UNIQUES.length}  ·  imprese ${r.end.achievements}`);
+    console.log(`  codex ${JSON.stringify(r.end.codex)}  ·  collezione ${r.end.collection}/${UNIQUES.length} (Ascesa ${r.end.ascended})  ·  imprese ${r.end.achievements}`);
     console.log(`  lumi ${JSON.stringify(r.end.lumi.levels)} attivo ${r.end.lumi.active ?? '—'} `);
   }
   const bad = results.filter((r) => r.issues.length);

@@ -6,7 +6,8 @@ import {
   TOWER_KEY_EVERY, TOWER_MILESTONE, TOWER_SECONDS, TOWER_STEP,
   type DungeonModId,
 } from '../data/modes';
-import { discover } from './collection';
+import { ascendItem, discover } from './collection';
+import { ASCENDED_DEPTH, ASCENDED_GUARDIAN_CHANCE, ASCENDED_RAID_LEVEL, ASCENDED_RARITY } from '../data/collection';
 import { rollItem, rollRarity, type Item } from './items';
 import { TICK_RATE } from './loop';
 import { nextRandom } from './rng';
@@ -177,6 +178,13 @@ export function onModeKill(state: GameState, events: Events): boolean {
       m.wave++;
       return true;
     }
+    // seconda caccia: dai Guardiani profondi, un unico già in collezione nella sua forma Ascesa
+    const known = UNIQUES.filter((u) => !u.raid && state.collection.includes(u.id));
+    if (m.depth >= ASCENDED_DEPTH && known.length && nextRandom(state) < ASCENDED_GUARDIAN_CHANCE) {
+      const u = known[Math.floor(nextRandom(state) * known.length)];
+      giveItem(state, ascendItem(rollItem(state, state.gear.nextId++, abyssStage(m.depth), ASCENDED_RARITY, undefined, false, u.id)), events);
+      events.push({ type: 'mode', text: `Il Guardiano lascia un unico Asceso: ${u.name}`, ok: true });
+    }
     if (m.depth > state.abyss.best) {
       state.abyss.best = m.depth;
       events.push({ type: 'mode', text: `Abisso: profondità ${m.depth} conquistata (nuovo record)`, ok: true });
@@ -190,7 +198,12 @@ export function onModeKill(state: GameState, events: Events): boolean {
     const rarity = r < RAID_DIVINE ? 6 : r < RAID_DIVINE + RAID_MYTHIC ? 5 : RAID_MIN_RARITY;
     const own = UNIQUES.find((u) => u.raid === m.name);
     const uid = state.gear.nextId++;
-    giveItem(state, own && nextRandom(state) < RAID_UNIQUE_CHANCE ? rollItem(state, uid, m.level, rarity, undefined, false, own.id) : rollItem(state, uid, m.level, rarity), events);
+    if (own && nextRandom(state) < RAID_UNIQUE_CHANCE) {
+      // già in collezione e Raid abbastanza alto: cade Asceso
+      const asc = state.collection.includes(own.id) && m.level >= ASCENDED_RAID_LEVEL;
+      const item = rollItem(state, uid, m.level, asc ? Math.max(rarity, ASCENDED_RARITY) : rarity, undefined, false, own.id);
+      giveItem(state, asc ? ascendItem(item) : item, events);
+    } else giveItem(state, rollItem(state, uid, m.level, rarity), events);
     state.totals.raids++;
     leaveMode(state, events, `Raid vinto! Bottino ${RARITIES[rarity].name}`, true);
     return false;

@@ -1,12 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import { step, type CombatEvent } from '../src/core/combat';
-import { addCollectionMods, discover, reachedMilestones } from '../src/core/collection';
+import { addCollectionMods, ascendItem, discover, reachedMilestones } from '../src/core/collection';
 import { ascend } from '../src/core/ascension';
+import { onModeKill } from '../src/core/modes';
 import { emptyMods, rollItem, type Item } from '../src/core/items';
 import { deserialize, serialize } from '../src/core/save';
 import { STATE_VERSION, newGame, type GameState } from '../src/core/state';
 import { stateStats } from '../src/core/stats';
-import { COLLECTION_BONUS, COLLECTION_MILESTONES } from '../src/data/collection';
+import {
+  ASCENDED_BONUS_MULT, ASCENDED_DEPTH, ASCENDED_MILESTONES, ASCENDED_MULT, COLLECTION_BONUS, COLLECTION_MILESTONES,
+} from '../src/data/collection';
+import { ABYSS_WAVES } from '../src/data/endgame';
 import { UNIQUES } from '../src/data/uniques';
 
 /** Un unico qualunque: si tira finché non esce. */
@@ -80,5 +84,50 @@ describe('Collezione leggendari', () => {
     const back = deserialize(serialize({ ...old, version: 16 } as GameState))!;
     expect(back.version).toBe(STATE_VERSION);
     expect(back.collection).toEqual([u.special!.id]);
+  });
+});
+
+describe('Collezione Ascesa', () => {
+  it('un unico Asceso ha le statistiche fisse ×2,5 ed entra in entrambe le collezioni', () => {
+    const s = newGame(0, 1);
+    const plain = rollItem({ rng: 3 }, 1, 50, 5, undefined, false, 'boia');
+    const asc = ascendItem(rollItem({ rng: 3 }, 2, 50, 5, undefined, false, 'boia'));
+    expect(asc.special!.ascended).toBe(true);
+    expect(asc.special!.mods[0].value).toBeCloseTo(plain.special!.mods[0].value * ASCENDED_MULT);
+    expect(discover(s, asc)).toBe(true);
+    expect(s.collection).toEqual(['boia']);
+    expect(s.ascended).toEqual(['boia']);
+    expect(discover(s, asc)).toBe(false);
+  });
+
+  it('dà di nuovo il bonus di collezione, moltiplicato, e i suoi premi', () => {
+    const m = emptyMods();
+    addCollectionMods(['boia'], m, ['boia']);
+    expect(m.bossDmg).toBeCloseTo(COLLECTION_BONUS.boia[0][1] * (1 + ASCENDED_BONUS_MULT));
+    const all = UNIQUES.map((u) => u.id);
+    expect(reachedMilestones(all, ASCENDED_MILESTONES)).toHaveLength(ASCENDED_MILESTONES.length);
+  });
+
+  it('i Guardiani profondi dell’Abisso lasciano a volte un unico Asceso tra quelli già trovati', () => {
+    let found = 0;
+    for (let seed = 1; seed <= 100; seed++) {
+      const s = newGame(0, seed);
+      s.collection = ['boia'];
+      s.mode = { kind: 'abyss', depth: ASCENDED_DEPTH, wave: ABYSS_WAVES };
+      const ev: CombatEvent[] = [];
+      onModeKill(s, ev as never);
+      const d = ev.find((e) => e.type === 'drop' && e.item.special?.ascended);
+      if (d) { found++; expect(s.ascended).toEqual(['boia']); }
+    }
+    expect(found).toBeGreaterThan(2);
+    expect(found).toBeLessThan(25);
+  });
+
+  it('migrazione v24 → v25: collezione Ascesa vuota', () => {
+    const old = JSON.parse(serialize(newGame(0, 1)));
+    delete old.ascended;
+    const s = deserialize(JSON.stringify({ ...old, version: 24 }))!;
+    expect(s.version).toBe(STATE_VERSION);
+    expect(s.ascended).toEqual([]);
   });
 });

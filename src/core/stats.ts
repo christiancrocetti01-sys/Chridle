@@ -112,10 +112,10 @@ export function elementalDamage(s: Stats): number {
 }
 
 /** Statistiche dell'eroe con l'equipaggiamento indossato. */
-export function stateStats(state: { hero: HeroState; upgrades: Record<UpgradeId, number>; gear: GearState; stars?: string[]; vie?: ViaState; tower?: { best: number }; ascension?: AscensionState; codex?: CodexState; collection?: CollectionState; achievements?: AchievementState; lumi?: LumiState; paragon?: ParagonState; rebirth?: RebirthState }): Stats {
+export function stateStats(state: { hero: HeroState; upgrades: Record<UpgradeId, number>; gear: GearState; stars?: string[]; vie?: ViaState; tower?: { best: number }; ascension?: AscensionState; codex?: CodexState; collection?: CollectionState; ascended?: CollectionState; achievements?: AchievementState; lumi?: LumiState; paragon?: ParagonState; rebirth?: RebirthState }): Stats {
   const mods = gearMods(state.gear);
   addPerkMods(state.ascension, mods);
-  addCollectionMods(state.collection, mods);
+  addCollectionMods(state.collection, mods, state.ascended);
   addAchievementMods(state.achievements, mods);
   addLumiMods(state.lumi, mods);
   addParagonMods(state.paragon, mods);

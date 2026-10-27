@@ -127,6 +127,8 @@ export const migrations: Record<number, Migration> = {
     hero: { ...(d.hero as object), sunrise: 0, prayer: 0, embers: 0 },
     enemy: d.enemy ? { ...(d.enemy as object), frozen: 0, broken: 0 } : null,
   }),
+  // v24 → v25: Collezione Ascesa (seconda caccia agli unici)
+  24: (d) => ({ ...d, ascended: [] }),
 };
 
 /** Essenza spesa per sbloccare e potenziare le rune. */
@@ -163,7 +165,7 @@ export function deserialize(raw: string, migs = migrations, target = STATE_VERSI
 
 function isGameState(d: Record<string, unknown>): d is Record<string, unknown> & GameState {
   const numbers = ['tick', 'createdAt', 'lastSeen', 'rng', 'gold', 'fragments', 'essence', 'respawn', 'keys'].every((k) => typeof d[k] === 'number');
-  const objects = ['hero', 'upgrades', 'stage', 'totals', 'gear', 'skills', 'runes', 'stars', 'vie', 'mode', 'tower', 'ascension', 'collection', 'achievements', 'lumi', 'abyss', 'paragon', 'rebirth'].every((k) => d[k] && typeof d[k] === 'object');
+  const objects = ['hero', 'upgrades', 'stage', 'totals', 'gear', 'skills', 'runes', 'stars', 'vie', 'mode', 'tower', 'ascension', 'collection', 'ascended', 'achievements', 'lumi', 'abyss', 'paragon', 'rebirth'].every((k) => d[k] && typeof d[k] === 'object');
   return numbers && objects;
 }
 
