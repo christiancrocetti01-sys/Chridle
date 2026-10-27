@@ -14,7 +14,7 @@ import { addParagonMods, lootMult, powerMult, type ParagonState, type RebirthSta
 import type { Family } from '../data/enemies';
 import { BLOOD_PACT_MAX } from '../data/vie';
 import {
-  CORRUPTION_MAX, CORRUPTION_THRESHOLD, CORRUPT_DMG, CORRUPT_TANK, ECLIPSE_MULT, PURE_DMG, PURE_TANK,
+  CORRUPTION_MAX, CORRUPTION_THRESHOLD, CORRUPT_DMG, CORRUPT_TANK, ECLIPSE_MULT, PURE_DMG, PURE_TANK, equilibrium,
 } from '../data/corruption';
 import { TOWER_BONUS, TOWER_MILESTONE } from '../data/modes';
 import { emptyMods, gearMods, gearRules, type GearState, type StatMods } from './items';
@@ -179,9 +179,9 @@ export function stateStats(state: { hero: HeroState; upgrades: Record<UpgradeId,
 function applyCorruption(s: Stats, raw: number) {
   const c = Math.max(-CORRUPTION_MAX, Math.min(CORRUPTION_MAX, Math.round(raw)));
   s.corruption = c;
-  if (!c) return;
-  const dmg = c > 0 ? 1 + CORRUPT_DMG * c : 1 + PURE_DMG * c;
-  const tank = c > 0 ? 1 - CORRUPT_TANK * c : 1 - PURE_TANK * c;
+  const eq = 1 + equilibrium(c);
+  const dmg = (c > 0 ? 1 + CORRUPT_DMG * c : 1 + PURE_DMG * c) * eq;
+  const tank = (c > 0 ? 1 - CORRUPT_TANK * c : 1 - PURE_TANK * c) * eq;
   const eclipse = c >= CORRUPTION_MAX ? ECLIPSE_MULT : 1;
   s.atk *= dmg * eclipse;
   for (const e of ELEMENTS) s.elements[e] *= dmg * eclipse;

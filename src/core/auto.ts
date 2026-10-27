@@ -2,7 +2,7 @@ import { RUNE_SOCKETS, type RuneId } from '../data/runes';
 import { levelCost, unlockCost, unlockRune, levelRune } from './runes';
 import { levelSkill, skillLevelCost } from './skills';
 import { levelLumo, lumoCost } from './lumi';
-import type { LumoId } from '../data/lumi';
+import { LUMO_IDLE_SHARE, type LumoId } from '../data/lumi';
 import type { ViaId } from '../data/vie';
 import { buyPerk, perkCost, perkLevel } from './ascension';
 import { buyUpgrade, upgradePrice } from './combat';
@@ -59,9 +59,13 @@ export function autoLumo(state: GameState) {
   state.lumi.active = fav && lv[fav] ? fav : owned[0];
 }
 
-type Buy = { cost: number; buy: () => boolean };
+/** `weight` (se c'è) è il costo usato nel confronto al posto di `cost`. */
+type Buy = { cost: number; weight?: number; buy: () => boolean };
 
-/** Spende l'Essenza: compra sempre la cosa più economica tra livelli delle skill, rune nuove, livelli delle rune e del Lumo attivo. */
+/**
+ * Spende l'Essenza: compra sempre la cosa più economica tra livelli delle skill, rune nuove, livelli delle rune e dei Lumi.
+ * I Lumi non attivi danno solo `LUMO_IDLE_SHARE` del bonus: nel confronto il loro costo si divide per quella parte.
+ */
 export function autoEssence(state: GameState): number {
   autoLumo(state);
   let bought = 0;
@@ -77,10 +81,11 @@ export function autoEssence(state: GameState): number {
       const level = state.runes.levels[r];
       if (level) options.push({ cost: levelCost(level), buy: () => levelRune(state, r) });
     }
-    const lumo = state.lumi.active;
-    const lumoLv = lumo && state.lumi.levels[lumo];
-    if (lumo && lumoLv) options.push({ cost: lumoCost(lumoLv), buy: () => levelLumo(state, lumo) });
-    const cheapest = options.sort((a, b) => a.cost - b.cost)[0];
+    for (const [id, lv] of Object.entries(state.lumi.levels) as [LumoId, number][]) {
+      const price = lumoCost(lv);
+      options.push({ cost: price, weight: id === state.lumi.active ? price : price / LUMO_IDLE_SHARE, buy: () => levelLumo(state, id) });
+    }
+    const cheapest = options.sort((a, b) => (a.weight ?? a.cost) - (b.weight ?? b.cost))[0];
     if (!cheapest || cheapest.cost > state.essence || !cheapest.buy()) break;
     bought++;
   }
@@ -99,12 +104,22 @@ export function autoGold(state: GameState): number {
   return bought;
 }
 
-/** Paragon: i punti vanno a giro in quest'ordine (attacco e vita, ogni tanto danno critico e difesa). */
+/** Paragon senza Via: i punti vanno a giro in quest'ordine (attacco e vita, ogni tanto danno critico e difesa). */
 export const PARAGON_ORDER: ParagonId[] = ['forza', 'vigore', 'forza', 'precisione', 'vigore', 'tempra'];
+
+/** Ordine del Paragon per Via: tutti e 8 i bonus, con quelli della Via più spesso. */
+export const VIA_PARAGON: Record<ViaId, ParagonId[]> = {
+  paladino: ['forza', 'vigore', 'tempra', 'forza', 'vigore', 'precisione', 'tempra', 'celerita', 'elementi', 'ricchezza', 'fortuna'],
+  lama: ['forza', 'precisione', 'celerita', 'forza', 'vigore', 'precisione', 'tempra', 'celerita', 'elementi', 'ricchezza', 'fortuna'],
+  inquisitore: ['elementi', 'forza', 'vigore', 'elementi', 'precisione', 'tempra', 'elementi', 'celerita', 'vigore', 'ricchezza', 'fortuna'],
+  custode: ['elementi', 'vigore', 'forza', 'elementi', 'tempra', 'precisione', 'elementi', 'celerita', 'vigore', 'ricchezza', 'fortuna'],
+  eclissiarca: ['forza', 'precisione', 'vigore', 'forza', 'elementi', 'celerita', 'precisione', 'tempra', 'forza', 'ricchezza', 'fortuna'],
+};
 
 export function autoParagon(state: GameState) {
   const p = state.paragon;
-  while (paragonFree(p) > 0) spendParagon(state, PARAGON_ORDER[(p.level - paragonFree(p)) % PARAGON_ORDER.length]);
+  const order = (state.vie.main && VIA_PARAGON[state.vie.main]) || PARAGON_ORDER;
+  while (paragonFree(p) > 0) spendParagon(state, order[(p.level - paragonFree(p)) % order.length]);
 }
 
 /** Ascensione: come per l'oro, si compra sempre il potenziamento più economico. */

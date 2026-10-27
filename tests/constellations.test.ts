@@ -144,7 +144,7 @@ describe('Costellazioni: chiavi di volta', () => {
     s.enemy!.family = 'bestie'; // nessuna resistenza al sacro
     heal(s, st, 110);
     expect(s.hero.hp).toBe(st.maxHp);
-    expect(hp - s.enemy!.hp).toBeCloseTo(100 * st.elemMult.holy);
+    expect(hp - s.enemy!.hp).toBeCloseTo((110 * st.healMult - 10) * st.elemMult.holy);
   });
 });
 

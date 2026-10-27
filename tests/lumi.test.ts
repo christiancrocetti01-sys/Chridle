@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { step, type CombatEvent } from '../src/core/combat';
 import { ascend } from '../src/core/ascension';
 import { checkLumi, levelLumo, lumoCost, newLumi } from '../src/core/lumi';
-import { autoLumo } from '../src/core/auto';
+import { autoEssence, autoLumo } from '../src/core/auto';
 import { deserialize, serialize } from '../src/core/save';
 import { STATE_VERSION, newGame, type GameState } from '../src/core/state';
 import { stateStats } from '../src/core/stats';
@@ -77,6 +77,20 @@ describe('Lumi', () => {
     expect(s.lumi.levels.fiammella).toBe(3);
     expect(s.essence).toBe(0);
     expect(lumoCost(3)).toBeGreaterThan(lumoCost(2));
+  });
+
+  it("l'Essenza fa salire anche i Lumi non attivi, a un quarto del valore", () => {
+    const s = newGame(0, 1);
+    s.lumi = { levels: { fiammella: 1, brina: 1 }, active: 'fiammella' };
+    s.skills.slots = [null, null, null, null, null, null];
+    s.essence = 1e5;
+    autoEssence(s);
+    const a = s.lumi.levels.fiammella!, b = s.lumi.levels.brina!;
+    expect(b).toBeGreaterThan(1);
+    expect(a).toBeGreaterThan(b);
+    // costo pesato: l'inattivo costa ~4 volte, cioè ~log(4)/log(1,35) ≈ 4-5 livelli in meno
+    expect(a - b).toBeGreaterThanOrEqual(3);
+    expect(a - b).toBeLessThanOrEqual(6);
   });
 
   it("restano dopo l'Ascensione", () => {

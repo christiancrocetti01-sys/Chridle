@@ -6,7 +6,7 @@ import { STATE_VERSION, newGame, type GameState } from '../src/core/state';
 import { stateStats } from '../src/core/stats';
 import { heal } from '../src/core/triggers';
 import { chooseVia } from '../src/core/vie';
-import { CORRUPTION_THRESHOLD, SANCTITY_SECONDS, corruptionState } from '../src/data/corruption';
+import { CORRUPTION_THRESHOLD, EQUILIBRIUM, SANCTITY_SECONDS, corruptionState, equilibrium } from '../src/data/corruption';
 import { SKILLS } from '../src/data/skills';
 
 /** Indossa un amuleto finto con questa Corruzione (positiva) o Purezza (negativa). */
@@ -22,25 +22,29 @@ function withCorruption(c: number, level = 30): GameState {
 }
 
 describe('Purezza e Corruzione', () => {
-  it('neutro: nessun effetto', () => {
+  it('neutro: Equilibrio pieno a 0, cala verso le soglie', () => {
     const s = stateStats(newGame(0));
     expect(s.corruption).toBe(0);
-    expect(s.healMult).toBe(1);
+    expect(s.healMult).toBeCloseTo(1 + EQUILIBRIUM);
     expect(corruptionState(0)).toBe('neutro');
+    expect(equilibrium(25)).toBeCloseTo(EQUILIBRIUM / 2);
+    expect(equilibrium(-CORRUPTION_THRESHOLD)).toBe(0);
+    expect(equilibrium(100)).toBe(0);
   });
 
   it('ogni punto: Corruzione +1% danni −0,5% difesa e cure; Purezza l\'opposto', () => {
-    const base = stateStats(withCorruption(0.0001));
+    const base = stateStats(withCorruption(0.0001)); // Equilibrio pieno: lo si toglie dal confronto
+    const eq = (1 + equilibrium(40)) / (1 + EQUILIBRIUM);
     const c = stateStats(withCorruption(40));
     expect(c.corruption).toBe(40);
-    expect(c.atk).toBeCloseTo(base.atk * 1.4);
-    expect(c.def).toBeCloseTo(base.def * 0.8);
-    expect(c.healMult).toBeCloseTo(0.8);
+    expect(c.atk).toBeCloseTo(base.atk * 1.4 * eq);
+    expect(c.def).toBeCloseTo(base.def * 0.8 * eq);
+    expect(c.healMult).toBeCloseTo(0.8 * (1 + equilibrium(40)));
     const p = stateStats(withCorruption(-40));
     expect(p.corruption).toBe(-40);
-    expect(p.atk).toBeCloseTo(base.atk * 0.8);
-    expect(p.def).toBeCloseTo(base.def * 1.4);
-    expect(p.healMult).toBeCloseTo(1.4);
+    expect(p.atk).toBeCloseTo(base.atk * 0.8 * eq);
+    expect(p.def).toBeCloseTo(base.def * 1.4 * eq);
+    expect(p.healMult).toBeCloseTo(1.4 * (1 + equilibrium(40)));
     expect(stateStats(withCorruption(500)).corruption).toBe(100); // limite ±100
   });
 
@@ -49,7 +53,7 @@ describe('Purezza e Corruzione', () => {
     const hero = stateStats(s);
     s.hero.hp = 1;
     heal(s, hero, 10);
-    expect(s.hero.hp).toBeCloseTo(15);
+    expect(s.hero.hp).toBeCloseTo(1 + 10 * 1.4 * (1 + equilibrium(40)));
   });
 
   it('le Vie spostano il valore: Eclissiarca verso Corrotto, Paladino verso Puro', () => {
@@ -99,7 +103,7 @@ describe('Purezza e Corruzione', () => {
     const s = withCorruption(100);
     const hero = stateStats(s);
     expect(hero.rules.has('eclipse')).toBe(true);
-    expect(hero.atk).toBeCloseTo(base.atk * 2 * 2);
+    expect(hero.atk).toBeCloseTo(base.atk / (1 + EQUILIBRIUM) * 2 * 2);
     s.hero.hp = 1;
     heal(s, hero, 100);
     expect(s.hero.hp).toBe(1);

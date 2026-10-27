@@ -55,7 +55,7 @@ export const GUIDE: GuideSection[] = [
       'Al <b>livello 10</b> scegli una Via (Eroe › Via): Paladino, Lama dell\'Alba, Inquisitore, Custode Stellare o Eclissiarca.',
       'Ogni Via dà statistiche, una regola speciale e una regione delle Stelle. Cambiarla è gratis.',
       "Con il potenziamento d'Ascensione «Doppia Via» ne aggiungi una seconda.",
-      '<b>Purezza e Corruzione</b>: alcuni oggetti e Vie spostano l\'ago. Corruzione = più danni, meno difesa e cure; Purezza = il contrario. Agli estremi si sbloccano effetti speciali.',
+      '<b>Purezza e Corruzione</b>: alcuni oggetti e Vie spostano l\'ago. Corruzione = più danni, meno difesa e cure; Purezza = il contrario. Agli estremi si sbloccano effetti speciali; chi resta Neutro ha l\'<b>Equilibrio</b> (fino a +15% danni, difesa e cure, pieno a 0).',
     ],
   },
   {

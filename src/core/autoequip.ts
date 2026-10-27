@@ -1,7 +1,10 @@
 import { SLOTS, type SlotId } from '../data/items';
-import { equip, salvageUpTo, type Item } from './items';
+import type { RuleId } from '../data/uniques';
+import { addStarMods } from './constellations';
+import { emptyMods, equip, gearRules, salvageUpTo, type Item } from './items';
 import type { GameState } from './state';
 import { elementalDamage, stateStats } from './stats';
+import { addViaMods } from './vie';
 
 /** Potenza indicativa del guerriero: danni al secondo × resistenza. Serve solo a confrontare due equipaggiamenti. */
 export function gearPower(state: GameState): number {
@@ -11,14 +14,32 @@ export function gearPower(state: GameState): number {
   return dps * s.maxHp * (1 + s.def / 50) * (1 + s.lifeSteal * 10) / (1 - Math.min(0.9, s.dodge));
 }
 
+/** Ogni regola speciale portata dall'equipaggiamento (unici e set completi) vale come +20% di potenza nel confronto. */
+export const RULE_WEIGHT = 0.2;
+
+/** Regole già date da stelle e Vie: un oggetto con la stessa regola non aggiunge nulla. */
+const ownRules = (state: GameState): Set<RuleId> => {
+  const rules = addStarMods(state.stars, emptyMods());
+  for (const r of addViaMods(state.vie, emptyMods())) rules.add(r);
+  return rules;
+};
+
+/** Potenza usata per scegliere l'equipaggiamento: `gearPower` più il peso delle regole nuove dell'equipaggiamento. */
+export function equipPower(state: GameState, own = ownRules(state)): number {
+  let n = 0;
+  for (const r of gearRules(Object.values(state.gear.equipped))) if (!own.has(r)) n++;
+  return gearPower(state) * (1 + RULE_WEIGHT * n);
+}
+
 /**
  * Equip automatico: indossa ogni oggetto dell'inventario che aumenta la potenza, finché non migliora più.
- * Restituisce quanti cambi ha fatto. Le regole speciali degli unici non entrano nel conto.
+ * Restituisce quanti cambi ha fatto. Le regole speciali nuove contano +20% ciascuna (`RULE_WEIGHT`).
  */
 export function equipBest(state: GameState): number {
   const gear = state.gear;
+  const own = ownRules(state);
   let changes = 0;
-  let power = gearPower(state);
+  let power = equipPower(state, own);
   for (let again = true; again;) {
     again = false;
     for (const item of gear.inventory.slice().sort((a, b) => b.rarity - a.rarity || b.ilvl - a.ilvl)) {
@@ -26,7 +47,7 @@ export function equipBest(state: GameState): number {
       for (const slot of SLOTS.filter((x) => x.type === item.type)) {
         const old = gear.equipped[slot.id];
         equip(gear, item.uid, slot.id);
-        const p = gearPower(state);
+        const p = equipPower(state, own);
         if (p > power * (1 + 1e-9)) {
           power = p;
           changes++;
@@ -49,13 +70,14 @@ export function equipBest(state: GameState): number {
 export function takeItem(state: GameState, item: Item): SlotId | undefined {
   const gear = state.gear;
   const hp0 = stateStats(state).maxHp;
-  let power = gearPower(state);
+  const own = ownRules(state);
+  let power = equipPower(state, own);
   let best: SlotId | undefined;
   gear.inventory.push(item);
   for (const slot of SLOTS.filter((x) => x.type === item.type)) {
     const old = gear.equipped[slot.id];
     equip(gear, item.uid, slot.id);
-    const p = gearPower(state);
+    const p = equipPower(state, own);
     if (p > power * (1 + 1e-9)) { power = p; best = slot.id; }
     // si rimette com'era: si sceglie lo slot migliore alla fine
     if (old) equip(gear, old.uid, slot.id);

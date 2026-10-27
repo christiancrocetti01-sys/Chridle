@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { absorbInventory, equipBest, gearPower, takeItem } from '../src/core/autoequip';
+import { RULE_WEIGHT, absorbInventory, equipBest, equipPower, gearPower, takeItem } from '../src/core/autoequip';
 import { rollItem, salvageValue } from '../src/core/items';
 import { newGame } from '../src/core/state';
 
@@ -31,6 +31,29 @@ describe('equip automatico', () => {
   it('con l\'inventario vuoto non fa nulla', () => {
     const s = newGame(0, 1);
     expect(equipBest(s)).toBe(0);
+  });
+});
+
+describe('regole degli unici nel confronto', () => {
+  it('ogni regola nuova vale +20%, ma non se una Via la dà già', () => {
+    const s = newGame(0, 3);
+    s.gear.equipped.secondaria = rollItem(rng(3), 950, 20, 4, undefined, false, 'albaGemella');
+    expect(equipPower(s)).toBeCloseTo(gearPower(s) * (1 + RULE_WEIGHT));
+    s.vie.main = 'lama'; // la Lama dell'Alba ha già «doubleStrike»
+    expect(equipPower(s)).toBeCloseTo(gearPower(s));
+  });
+
+  it('un unico un po\' più debole si indossa lo stesso per la sua regola', () => {
+    const s = newGame(0, 3);
+    const plain = rollItem(rng(4), 960, 20, 4, 'secondaria');
+    s.gear.equipped.secondaria = plain;
+    const unique = rollItem(rng(5), 961, 20, 4, undefined, false, 'albaGemella');
+    const pPlain = gearPower(s);
+    s.gear.equipped.secondaria = unique;
+    const pUnique = gearPower(s);
+    s.gear.equipped.secondaria = plain;
+    if (pUnique * (1 + RULE_WEIGHT) > pPlain) expect(takeItem(s, unique)).toBe('secondaria');
+    else expect(takeItem(s, unique)).toBeUndefined();
   });
 });
 

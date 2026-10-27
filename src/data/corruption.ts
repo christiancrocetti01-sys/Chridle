@@ -8,6 +8,9 @@ export const PURE_DMG = 0.005;
 export const PURE_TANK = 0.01;
 /** Soglia delle regole "Corrotto" (skill di danno pagate con la vita) e "Puro" (cure in eccesso → scudo). */
 export const CORRUPTION_THRESHOLD = 50;
+/** Equilibrio (Neutro): danni, difesa e cure +15% a 0, il bonus cala fino a sparire alle soglie (±50). */
+export const EQUILIBRIUM = 0.15;
+export const equilibrium = (c: number) => Math.max(0, EQUILIBRIUM * (1 - Math.abs(c) / CORRUPTION_THRESHOLD));
 /** Corrotto: vita spesa per punto di Luce (frazione della vita massima). */
 export const CORRUPT_HP_PER_LIGHT = 0.001;
 /** Eclissi (+100): danni ×2, niente cure. */

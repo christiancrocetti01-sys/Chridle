@@ -1,7 +1,7 @@
 import type { GameState } from '../core/state';
 import { stateStats } from '../core/stats';
 import {
-  CORRUPTION_NAMES, CORRUPTION_THRESHOLD, CORRUPT_DMG, CORRUPT_TANK, PURE_DMG, PURE_TANK, corruptionState,
+  CORRUPTION_NAMES, CORRUPTION_THRESHOLD, CORRUPT_DMG, CORRUPT_TANK, PURE_DMG, PURE_TANK, corruptionState, equilibrium,
 } from '../data/corruption';
 import { STAT_LABELS } from '../data/items';
 import { RULE_TEXT } from '../data/uniques';
@@ -28,7 +28,9 @@ function corruptionLine(c: number): string {
   const tank = c > 0 ? -CORRUPT_TANK * c : -PURE_TANK * c;
   const rules = (c >= CORRUPTION_THRESHOLD ? ['corruptShadow', ...(st === 'eclissi' ? ['eclipse'] : [])]
     : c <= -CORRUPTION_THRESHOLD ? ['overhealShield', ...(st === 'santo' ? ['sanctity'] : [])] : []) as (keyof typeof RULE_TEXT)[];
-  const effect = c ? ` · ${pct(dmg)} danni, ${pct(tank)} difesa e cure` : '';
+  const eq = equilibrium(c);
+  const effect = (c ? ` · ${pct(dmg)} danni, ${pct(tank)} difesa e cure` : '')
+    + (eq > 0.005 ? `<br><span class="rule">Equilibrio: ${pct(eq)} danni, difesa e cure (massimo a 0, sparisce a ±${CORRUPTION_THRESHOLD})</span>` : '');
   return `<p class="corruption">Purezza/Corruzione: <b>${c > 0 ? '+' : ''}${c}</b> · ${CORRUPTION_NAMES[st]}${effect}`
     + `${rules.map((r) => `<br><span class="rule">${RULE_TEXT[r]}</span>`).join('')}`
     + `<br><span class="muted">Regole a ±${CORRUPTION_THRESHOLD} e ±100.</span></p>`;

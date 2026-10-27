@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { PARAGON_ORDER, autoGold, autoParagon, autoPerks, autoSpend, autoStars } from '../src/core/auto';
+import { PARAGON_ORDER, VIA_PARAGON, autoGold, autoParagon, autoPerks, autoSpend, autoStars } from '../src/core/auto';
 import { gearPower } from '../src/core/autoequip';
 import { canRefund, pointsLeft } from '../src/core/constellations';
 import { chooseVia } from '../src/core/vie';
@@ -37,6 +37,16 @@ describe('spese automatiche', () => {
     s.paragon.level = 13; // il punto nuovo continua il giro
     autoParagon(s);
     expect(s.paragon.points.forza).toBe(want.forza + 1);
+  });
+
+  it('con una Via il Paragon segue il suo ordine e usa tutti e 8 i bonus', () => {
+    const s = newGame(0, 1);
+    s.vie.main = 'inquisitore';
+    s.paragon.level = VIA_PARAGON.inquisitore.length;
+    autoParagon(s);
+    expect(Object.keys(s.paragon.points)).toHaveLength(8);
+    expect(s.paragon.points.elementi).toBe(3);
+    for (const order of Object.values(VIA_PARAGON)) expect(new Set(order).size).toBe(8);
   });
 
   it('le Scintille comprano sempre il potenziamento più economico', () => {
