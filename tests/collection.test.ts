@@ -110,7 +110,7 @@ describe('Collezione Ascesa', () => {
 
   it('i Guardiani profondi dell’Abisso lasciano a volte un unico Asceso tra quelli già trovati', () => {
     let found = 0;
-    for (let seed = 1; seed <= 100; seed++) {
+    for (let seed = 1; seed <= 400; seed++) {
       const s = newGame(0, seed);
       s.collection = ['boia'];
       s.mode = { kind: 'abyss', depth: ASCENDED_DEPTH, wave: ABYSS_WAVES };

@@ -64,8 +64,8 @@ export const COLLECTION_MILESTONES: { frac: number; mods: Mods }[] = [
 export const ASCENDED_MULT = 2.5;
 export const ASCENDED_RARITY = 5;
 /** I Guardiani dell'Abisso da questa profondità possono lasciare un unico Asceso (tra quelli già in collezione). */
-export const ASCENDED_DEPTH = 20;
-export const ASCENDED_GUARDIAN_CHANCE = 0.1;
+export const ASCENDED_DEPTH = 25;
+export const ASCENDED_GUARDIAN_CHANCE = 0.025;
 /** L'unico proprio di un Raid già in collezione cade Asceso se il Raid è almeno a questo livello. */
 export const ASCENDED_RAID_LEVEL = 150;
 /** Ogni unico Asceso trovato dà di nuovo il bonus della collezione, moltiplicato. */

@@ -65,7 +65,7 @@ export const GUIDE: GuideSection[] = [
       '<b>Dungeon</b> (1 chiave): 8 nemici e un boss con modificatori casuali. Premio: Frammenti, Essenza e un pezzo di set.',
       '<b>Torre dell\'Alba</b> (gratis): un nemico per piano, 30 s ciascuno; si riparte 5 piani sotto il record. Ogni 5 piani di record +3% attacco e vita per sempre.',
       '<b>Raid</b> (dallo stage 50, 3 chiavi): boss in 3 fasi in 120 s. Premio: un Leggendario garantito, a volte Mitico o Divino; un quarto delle volte è l\'unico proprio di quel boss, che non cade altrove.',
-      '<b>Unici Ascesi</b> (fine gioco): un unico già in collezione può cadere Asceso ✦, con statistiche fisse ×2,5, dai Guardiani dell\'Abisso (profondità 20+) e dai Raid di livello 150+. Riempiono la Collezione Ascesa.',
+      '<b>Unici Ascesi</b> (fine gioco): un unico già in collezione può cadere Asceso ✦, con statistiche fisse ×2,5, dai Guardiani dell\'Abisso (profondità 25+) e dai Raid di livello 150+. Riempiono la Collezione Ascesa.',
       "<b>Abisso</b> (dopo 3 Ascensioni): profondità infinite. Dà esperienza <b>Paragon</b>.",
     ],
   },

@@ -225,13 +225,13 @@ describe('Dungeon, Torre e Raid', () => {
     expect(e.maxHp).toBeCloseTo(plain * 1.5 * (e.elite ? 2 : 1), -2);
   });
 
-  it('Raid: al record − 5, ma mai sopra lo stage attuale', () => {
+  it('Raid: 5 sotto il record o sotto lo stage attuale, se più basso', () => {
     const s = newGame(0, 1);
     s.stage.best = 120;
     s.stage.current = 120;
     expect(raidLevel(s)).toBe(115);
     s.stage.current = 100;
-    expect(raidLevel(s)).toBe(100);
+    expect(raidLevel(s)).toBe(95);
   });
 
   it('Raid: ogni boss ha il suo unico, che cade solo lì', () => {

@@ -198,7 +198,7 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
   d'Ossidiana (Fortezza Vivente), Grembo del Vuoto (Tempo Fermo), Catene del Titano (Respiro della Battaglia): le chiavi
   di volta su un oggetto. Contano nella Collezione (45 unici).
 - **Revisione 2026-10-27:** Dungeon al record − 1 (`DUNGEON_LEVEL_OFFSET`, prima − 3: mai persi). Raid al record − 5
-  ma mai sopra lo stage dove si combatte (`raidLevel`: dopo un record fortunato o un rientro scadevano spesso).
+  o sotto lo stage dove si combatte, se più basso (`raidLevel`: dopo un record fortunato o un rientro scadevano spesso).
 
 ## 11. Valute ed economia
 - **Oro**: base, per potenziamenti e acquisti.
@@ -271,7 +271,7 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
   **Lumi del fine gioco (2026-10-27):** Mezzaluna (10 gradi del Bestiario, preferita dell'Eclissiarca), Pallido
   (Abisso 5), Stellina (Paragon 50), Solicello (prima Rinascita): 10 Lumi.
 - **Collezione Ascesa** (seconda caccia, revisione 2026-10-27): un unico già in collezione può cadere **Asceso ✦**
-  (statistiche fisse ×2,5, almeno Mitico) dai Guardiani dell'Abisso dalla profondità 20 (10% a Guardiano, tra gli
+  (statistiche fisse ×2,5, almeno Mitico) dai Guardiani dell'Abisso dalla profondità 25 (2,5% a Guardiano, tra gli
   unici già trovati) e dall'unico proprio di un Raid di livello 150+. `state.ascended` (salvataggio v25): ogni Asceso
   ridà il bonus di collezione ×2, premi al 25/50/100% (+10/+15/+25% attacco e vita, poi danno ai boss e ritrovamento).
   Sezione nel Codex › Collezione da metà collezione.

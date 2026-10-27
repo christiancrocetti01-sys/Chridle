@@ -105,7 +105,7 @@ function checkSave(state: GameState, where: string) {
 interface Checkpoint {
   h: number; level: number; stage: number; best: number; asc: number; scint: number; tower: number;
   keys: number; runes: number; essence: number; nextRune: number; corruption: number; power: number; deaths: number;
-  abyss: number; paragon: number; soli: number; collection: number; achievements: number;
+  abyss: number; paragon: number; soli: number; collection: number; ascended: number; achievements: number;
 }
 
 function simulate(p: Profile) {
@@ -202,7 +202,7 @@ function simulate(p: Profile) {
         runes: Object.keys(state.runes.levels).length, essence: Math.round(state.essence), nextRune: unlockCost(state),
         corruption: s.corruption, power: power(state, p), deaths: c.deaths,
         abyss: state.abyss.best, paragon: state.paragon.level, soli: state.rebirth.soli,
-        collection: state.collection.length, achievements: state.achievements.length,
+        collection: state.collection.length, ascended: state.ascended.length, achievements: state.achievements.length,
       });
       if (ONLY) console.log(JSON.stringify(checkpoints.at(-1)));
       // sessioni: dopo ogni 2 h di gioco, 2 h offline
@@ -237,11 +237,11 @@ function report(results: Result[]) {
     const c = r.counters;
     console.log(`\n=== ${r.profile} (${r.hours} h simulate in ${r.seconds} s) ${r.issues.length ? '❌' : '✅'}`);
     for (const i of r.issues) console.log('  !', i);
-    console.log('    h  liv stage best asc scint torre abisso parag soli coll impr chiavi rune essenza/prossima corr morti');
+    console.log('    h  liv stage best asc scint torre abisso parag soli coll asc. impr chiavi rune essenza/prossima corr morti');
     // nei collaudi lunghi una riga ogni 12 h
     const every = r.hours > 48 ? 12 : 1;
     for (const k of r.checkpoints.filter((x) => x.h % every === 0)) {
-      console.log(`  ${String(k.h).padStart(3)} ${String(k.level).padStart(4)} ${String(k.stage).padStart(5)} ${String(k.best).padStart(4)} ${String(k.asc).padStart(3)} ${String(k.scint).padStart(5)} ${String(k.tower).padStart(5)} ${String(k.abyss).padStart(6)} ${String(k.paragon).padStart(5)} ${String(k.soli).padStart(4)} ${String(k.collection).padStart(4)} ${String(k.achievements).padStart(4)} ${String(k.keys).padStart(6)} ${String(k.runes).padStart(4)}  ${fmt(k.essence)}/${fmt(k.nextRune)} ${String(k.corruption).padStart(4)} ${String(k.deaths).padStart(5)}`);
+      console.log(`  ${String(k.h).padStart(3)} ${String(k.level).padStart(4)} ${String(k.stage).padStart(5)} ${String(k.best).padStart(4)} ${String(k.asc).padStart(3)} ${String(k.scint).padStart(5)} ${String(k.tower).padStart(5)} ${String(k.abyss).padStart(6)} ${String(k.paragon).padStart(5)} ${String(k.soli).padStart(4)} ${String(k.collection).padStart(4)} ${String(k.ascended).padStart(4)} ${String(k.achievements).padStart(4)} ${String(k.keys).padStart(6)} ${String(k.runes).padStart(4)}  ${fmt(k.essence)}/${fmt(k.nextRune)} ${String(k.corruption).padStart(4)} ${String(k.deaths).padStart(5)}`);
     }
     const online = r.hours;
     console.log(`  chiavi: ${c.keysGained} in gioco (${fmt(c.keysGained / online)}/h) + ${c.keysOffline} offline (${c.offlineHours} h)  ·  fonti ${JSON.stringify(c.keySrc)}`);
