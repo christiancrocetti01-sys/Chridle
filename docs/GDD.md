@@ -213,6 +213,8 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
   Si azzerano livello, oro, potenziamenti, stage e Costellazioni; restano oggetti, valute, rune, Torre, Vie.
   ~~Offline 75%~~ → **100%**, Veglia Eterna tolta, Scintille rimborsate (decisione utente 2026-10-26, v22).
   Torre: si riparte `TOWER_BACK` = 5 piani sotto il record (decisione utente 2026-10-26).
+  **Potenziamenti nuovi (2026-10-27):** Tempra dell’Aurora (+20% difesa/lv), Giudizio del Sole (+10% danni ai boss/lv),
+  Prisma Solare (+10% elementali/lv), tutti infiniti; Chiaviere dell’Alba (+2 chiavi a ogni Ascensione, max 10 livelli).
 - **Fatto (Paragon):** livelli infiniti solo dall'Abisso (costo 100 × (l+1)^1,5), 1 punto per livello su 8 bonus a scelta
   (+2% attacco/vita/difesa/danno critico/elementale, +0,5% velocità, +1% ritrovamento, +3% oro e +2% XP); i punti si
   riprendono gratis. Permanente.

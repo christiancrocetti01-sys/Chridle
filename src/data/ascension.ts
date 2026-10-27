@@ -4,7 +4,8 @@ export const ASCEND_STAGE = 40;
 /** Scintille ottenute ascendendo con questo stage record. */
 export const scintilleFor = (best: number) => (best < ASCEND_STAGE ? 0 : Math.floor(Math.pow((best - 30) / 10, 2)));
 
-export type PerkId = 'fiamma' | 'oro' | 'sapienza' | 'essenza' | 'fortuna' | 'balzo' | 'slot' | 'secondaVia';
+export type PerkId = 'fiamma' | 'oro' | 'sapienza' | 'essenza' | 'fortuna' | 'balzo' | 'slot' | 'secondaVia'
+  | 'tempra' | 'giudizio' | 'prisma' | 'chiavi';
 
 export interface PerkDef {
   id: PerkId;
@@ -28,6 +29,11 @@ export const PERKS: PerkDef[] = [
   { id: 'balzo', name: 'Balzo Solare', text: 'si riparte dallo stage {v}+1', value: 5, cost: 3, growth: 1.6, max: 20 },
   { id: 'slot', name: 'Quinto Sole', text: '+{v} livelli a tutte le skill', value: 5, cost: 10, growth: 5, max: 2 },
   { id: 'secondaVia', name: 'Doppia Via', text: 'sblocca la seconda Via (ibrido)', value: 1, cost: 5, growth: 1, max: 1 },
+  // 2026-10-27: altri pozzi infiniti e le chiavi per la Spedizione
+  { id: 'tempra', name: 'Tempra dell’Aurora', text: '+{v}% difesa', value: 0.2, cost: 2, growth: 1.5 },
+  { id: 'giudizio', name: 'Giudizio del Sole', text: '+{v}% danni ai boss', value: 0.1, cost: 2, growth: 1.5 },
+  { id: 'prisma', name: 'Prisma Solare', text: '+{v}% danni elementali', value: 0.1, cost: 2, growth: 1.5 },
+  { id: 'chiavi', name: 'Chiaviere dell’Alba', text: '+{v} chiavi a ogni Ascensione', value: 2, cost: 3, growth: 1.6, max: 10 },
 ];
 
 export const perkDef = (id: string) => PERKS.find((p) => p.id === id);

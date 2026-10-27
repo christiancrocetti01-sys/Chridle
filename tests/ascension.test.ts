@@ -61,6 +61,20 @@ describe('Ascensione', () => {
     expect(buyPerk(s, 'oro')).toBe(false);
   });
 
+  it('potenziamenti del 2026-10-27: difesa, danni ai boss, elementali e chiavi a ogni Ascensione', () => {
+    const s = newGame(0, 3);
+    s.ascension.scintille = 1000;
+    const before = stateStats(s);
+    for (const id of ['tempra', 'giudizio', 'prisma', 'chiavi'] as const) expect(buyPerk(s, id)).toBe(true);
+    const after = stateStats(s);
+    expect(after.def).toBeGreaterThan(before.def);
+    expect(after.bossMult).toBeCloseTo(before.bossMult + 0.1);
+    s.stage.best = ASCEND_STAGE;
+    const keys = s.keys;
+    ascend(s);
+    expect(s.keys).toBe(keys + 2);
+  });
+
   it('migrazione v21 → v22: Veglia Eterna tolta, Scintille rimborsate', () => {
     const old = newGame(0, 1);
     old.ascension.scintille = 3;

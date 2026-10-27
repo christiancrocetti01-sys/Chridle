@@ -35,6 +35,9 @@ export function addPerkMods(a: AscensionState | undefined, m: StatMods) {
   m.goldPct += perkValue(a, 'oro');
   m.xpPct += perkValue(a, 'sapienza');
   m.magicFind += perkValue(a, 'fortuna');
+  m.defPct += perkValue(a, 'tempra');
+  m.bossDmg += perkValue(a, 'giudizio');
+  m.elemPct += perkValue(a, 'prisma');
 }
 
 export const canAscend = (state: GameState) => state.stage.best >= ASCEND_STAGE && state.mode.kind === 'campaign';
@@ -63,6 +66,7 @@ export function ascend(state: GameState): number {
   state.totals.ascensions++;
   a.scintille += gain;
   a.total += gain;
+  state.keys += perkValue(a, 'chiavi');
   restartRun(state);
   return gain;
 }

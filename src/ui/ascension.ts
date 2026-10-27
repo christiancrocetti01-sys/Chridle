@@ -14,7 +14,7 @@ export interface AscensionActions {
 }
 
 const perkText = (d: PerkDef, total: number) =>
-  d.text.replace('{v}', d.id === 'balzo' || d.id === 'slot' ? String(total) : String(Math.round(total * 100)));
+  d.text.replace('{v}', d.id === 'balzo' || d.id === 'slot' || d.id === 'chiavi' ? String(total) : String(Math.round(total * 100)));
 
 /** Scheda Ascensione: Scintille, pulsante per ascendere e potenziamenti permanenti. */
 export function createAscensionPanel(root: HTMLElement, actions: AscensionActions) {
