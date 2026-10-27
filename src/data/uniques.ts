@@ -60,7 +60,7 @@ export const RULE_TEXT: Record<RuleId, string> = {
   chainBolt: "Ogni 5° colpo scarica un fulmine pari al 150% dell'attacco",
   battleBreath: 'Ogni uccisione ricarica subito la skill più lontana dall’essere pronta',
   blazingShield: 'Quando lo scudo si rompe esplode: danno di fuoco pari al 30% della vita massima',
-  reaper: 'Ogni uccisione dà +10% danni per 5 s (fino a +50%)',
+  reaper: 'Ogni uccisione dà +10% danni per 5 s (fino a +30%)',
   sunrise: 'Ogni 10 s il colpo successivo fa danno ×5',
   deepFreeze: 'Con danno da gelo, ogni colpo ha il 10% di probabilità di congelare il nemico per 1 s',
   livingFlames: 'Il veleno e le bruciature rimasti passano al nemico successivo',
@@ -69,7 +69,7 @@ export const RULE_TEXT: Record<RuleId, string> = {
   lastPrayer: 'Sotto il 20% della vita la Preghiera si lancia da sola (ogni 20 s)',
   armorBreak: 'Ogni critico toglie il 10% della difesa del nemico (fino a −50%)',
   skillEcho: 'Le skill hanno il 20% di probabilità di lanciarsi due volte',
-  judgeHammer: 'Contro i boss ogni colpo fa +1% di danno in più del precedente (fino a +500%)',
+  judgeHammer: 'Contro i boss ogni colpo fa +1% di danno in più del precedente (fino a +300%)',
   ceaselessLight: 'Ogni skill lanciata restituisce 25 Luce',
   coldBlood: 'A vita piena: +40% danni',
   supernova: 'Le skill di danno aspettano la Luce piena e fanno ×3, ma la Luce sale a metà velocità',
@@ -263,7 +263,7 @@ export const CHAIN_BOLT_EVERY = 5;
 export const CHAIN_BOLT_ATK = 1.5;
 export const BLAZING_SHIELD_HP = 0.3;
 export const REAPER_STEP = 0.1;
-export const REAPER_MAX = 0.5;
+export const REAPER_MAX = 0.3;
 export const REAPER_SECONDS = 5;
 export const SUNRISE_SECONDS = 10;
 export const SUNRISE_MULT = 5;
@@ -275,7 +275,7 @@ export const ARMOR_BREAK_STEP = 0.1;
 export const ARMOR_BREAK_MAX = 0.5;
 export const SKILL_ECHO_CHANCE = 0.2;
 export const JUDGE_HAMMER_STEP = 0.01;
-export const JUDGE_HAMMER_MAX = 5;
+export const JUDGE_HAMMER_MAX = 3;
 export const CEASELESS_LIGHT = 25;
 export const COLD_BLOOD_MULT = 1.4;
 export const SUPERNOVA_MULT = 3;

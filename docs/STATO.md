@@ -16,7 +16,7 @@
   (~1/h), 2 Rinascite (~12 h e ~21 h), Torre 62-65, Abisso 28-29, Paragon ~25, collezione 17-24/30, imprese 42-46/69.
   Chiavi 7,5-8,4/h (~190/giorno). Essenza ferma a 10-30k: dopo le 8 rune non c'è niente che valga la spesa.
 - Stelle: l'utente **non** vuole compattarle ma più contenuto. Passo 1 fatto: punti extra 1 ogni 10 piani di Torre
-  (`STAR_POINTS_TOWER_EVERY`) e 1 ogni 2 Ascensioni in tutto (`STAR_POINTS_ASC_EVERY`, `totals.ascensions`, salvataggio **v23**);
+  (`STAR_POINTS_TOWER_EVERY`) e 1 ogni 3 Ascensioni in tutto (`STAR_POINTS_ASC_EVERY`, `totals.ascensions`, salvataggio **v23**);
   `autoStars` valuta percorsi fino a `STAR_LOOKAHEAD` = 6 verso notevoli/chiavi di volta (regola = +6% potenza).
   Passo 2 fatto: regione «Oltre» (`BEYOND`, 51 stelle, 18 regole nuove, dettagli GDD §7), salvataggio **v24**, test in
   `tests/beyond.test.ts`. Collaudo 8 h: a 8 h Torre 56-62 (prima 46-51), Abisso 25-29 (prima 16-19), livello 77-86 (prima 58-73);

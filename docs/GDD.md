@@ -108,14 +108,14 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
   critici, +80% ai colpi; Martirio: cura in eccesso → danno sacro; Luce Perpetua: skill gratis, ricarica ×2).
   1 punto per livello, respec gratuito, si restituisce una stella solo se non stacca le altre.
   Espansione a lotti in Fase 7 (regioni delle Vie).
-- **Deciso (utente, 2026-10-27):** niente compattazione, più contenuto. Punti extra: 1 ogni 10 piani di Torre, 1 ogni 2
+- **Deciso (utente, 2026-10-27):** niente compattazione, più contenuto. Punti extra: 1 ogni 10 piani di Torre, 1 ogni 3
   Ascensioni in tutto. Scelta automatica che guarda avanti verso notevoli/chiavi di volta. Regione **«Oltre»** (~60 stelle,
   una notevole ogni 3) con 15 notevoli: Catena di Luce (ogni 5° colpo fulmine 150% att.), Respiro della Battaglia
   (uccisione → ricarica la skill più lontana), Scudo Ardente (scudo rotto esplode), Mietitore (uccisione +10% danni 5 s,
-  max 5), Sole Nascente (ogni 10 s colpo ×5), Gelo Profondo (gelo 10% congela 1 s), Fiamme Vive (bruciature passano al
+  max +30%), Sole Nascente (ogni 10 s colpo ×5), Gelo Profondo (gelo 10% congela 1 s), Fiamme Vive (bruciature passano al
   nemico dopo), Contrattacco (schivata → colpo subito), Vampiro di Luce (rubavita in eccesso → scudo), Ultima Preghiera
   (sotto 20% vita Preghiera da sola, ogni 20 s), Colpo Spezzante (critico −10% difesa nemica, max −50%), Eco delle Skill
-  (20% doppio lancio), Martello del Giudizio (boss: +1% per colpo, cumulativo), Luce Incessante (skill → +25% Luce),
+  (20% doppio lancio), Martello del Giudizio (boss: +1% per colpo, fino a +300%), Luce Incessante (skill → +25% Luce),
   Sangue Freddo (vita piena +40% danni); 3 chiavi di volta: Supernova (Luce piena skill ×3, Luce a metà velocità),
   Fortezza Vivente (niente schivata, colpi subiti −40%), Tempo Fermo (ogni 30 s nemico fermo 3 s, −30% vel. att.).
   **Fatto (2026-10-27):** `BEYOND` in `src/data/constellations.ts` (3 regioni dal centro dei ponti, spina di 11, notevoli

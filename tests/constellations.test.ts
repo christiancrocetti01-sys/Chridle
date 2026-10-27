@@ -57,8 +57,8 @@ describe('Costellazioni: punti e collegamenti', () => {
     expect(takeStar(s, 'difesa-s1')).toBe(false); // punti finiti
   });
 
-  it('punti in più dalla Torre (1 ogni 10 piani) e dalle Ascensioni (1 ogni 2)', () => {
-    const s = { ...hero(3), tower: { best: 25 }, totals: { ascensions: 5 } };
+  it('punti in più dalla Torre (1 ogni 10 piani) e dalle Ascensioni (1 ogni 3)', () => {
+    const s = { ...hero(3), tower: { best: 25 }, totals: { ascensions: 6 } };
     expect(bonusStarPoints(s)).toBe(2 + 2);
     expect(starPoints(s)).toBe(2 + 4);
     expect(pointsLeft(s)).toBe(6);

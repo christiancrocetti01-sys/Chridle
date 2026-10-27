@@ -112,10 +112,11 @@ describe('offline con le spese automatiche', () => {
   it("le Ascensioni (anche dopo la Rinascita) danno punti stella", () => {
     const s = newGame(0, 1);
     s.stage.best = 60;
-    ascend(s);
-    s.stage.best = 60;
-    ascend(s);
-    expect(s.totals.ascensions).toBe(2);
+    for (let i = 0; i < 3; i++) {
+      s.stage.best = 60;
+      ascend(s);
+    }
+    expect(s.totals.ascensions).toBe(3);
     expect(pointsLeft(s)).toBe(1);
     expect(deserialize(JSON.stringify({ ...s, version: 22, totals: { ...s.totals, ascensions: undefined } }))!.totals.ascensions).toBe(s.ascension.count);
   });
