@@ -80,10 +80,7 @@
 - Collaudo: `npm run collaudo -- --ore 8 [--seed N] [--profilo id]` (`scripts/collaudo.ts`, un processo per profilo:
   5 Vie + uno con sessioni offline). 8 h: nessun NaN/crash/salvataggio rotto, ~30 s. Rilanciarlo dopo ogni sistema nuovo.
   Attenzione: nelle catene di comandi non fidarsi di `npm test | grep` (esce 0 anche se fallisce).
-- Collaudo 10 giorni del 2026-10-27 (~30-47 min, con tutti i contenuti, prima della correzione dei tag): nessun problema.
-  Record 271-370, Torre 158-183, Abisso 91-108 (non si ferma più), Paragon 242-313, Soli 64-124, Rinascite 32-54,
-  Collezione 45/45, imprese 62-66/72. Collaudo 24 h dopo la correzione dei tag: invariato (Torre 73-88, Abisso 35-43).
-- Collaudo 10 giorni precedente (25/10, prima di «Oltre»): record 212-228, Abisso 66-67 fermo dalle ~180 h, Torre 120-124.
+- Collaudo 10 giorni: ~35 min per profilo (offline ~60), lanciarlo in background.
 
 ## Note / problemi noti
 - Muro al boss di zona 50 (scudo + rigenerazione): con Via+Stelle ~4 h fermi (rigenerazione 1%/s): **voluto**, spinge ad ascendere.
