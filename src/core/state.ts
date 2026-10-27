@@ -38,6 +38,10 @@ export interface EnemyState {
   /** Danno ancora da infliggere con sanguinamento e veleno (si consuma nel tempo). */
   bleed: number;
   poison: number;
+  /** Tick in cui il nemico resta fermo (Gelo Profondo, Tempo Fermo). */
+  frozen: number;
+  /** Difesa tolta dai critici (Colpo Spezzante), 0..1. */
+  broken: number;
 }
 
 export interface HeroState {
@@ -50,13 +54,19 @@ export interface HeroState {
   /** Colpi messi a segno sul nemico corrente (per gli effetti "ogni N colpi"). */
   hits: number;
   /** Effetti temporanei: uno per affisso a scatto, si rinnova quando riscatta. */
-  buffs: { key: string; speedPct: number; ticks: number }[];
+  buffs: { key: string; speedPct: number; ticks: number; dmgPct?: number }[];
   /** Il prossimo colpo è un critico garantito (regola "dodgeCrit"). */
   nextCrit: boolean;
   /** Risorsa delle skill attive: si accumula colpendo. */
   light: number;
   /** Tick prima che la Santità possa salvare di nuovo da un colpo mortale. */
   sanctity: number;
+  /** Tick verso il prossimo colpo ×5 (Sole Nascente). */
+  sunrise: number;
+  /** Tick prima che l'Ultima Preghiera possa scattare di nuovo. */
+  prayer: number;
+  /** Veleno rimasto dal nemico ucciso, per il prossimo (Fiamme Vive). */
+  embers: number;
 }
 
 /** Modalità in corso: la Campagna resta in pausa mentre si gioca un Dungeon, la Torre o un Raid. */
@@ -126,7 +136,7 @@ export interface GameState {
   rebirth: RebirthState;
 }
 
-export const STATE_VERSION = 23;
+export const STATE_VERSION = 24;
 
 export function newGame(now: number, seed = now >>> 0): GameState {
   const upgrades = { forza: 0, corazza: 0, rapidita: 0 };
@@ -136,7 +146,7 @@ export function newGame(now: number, seed = now >>> 0): GameState {
     createdAt: now,
     lastSeen: now,
     rng: seed,
-    hero: { level: 1, xp: 0, hp: heroStats(1, upgrades).maxHp, swing: 0, shield: 0, hits: 0, buffs: [], nextCrit: false, light: 0, sanctity: 0 },
+    hero: { level: 1, xp: 0, hp: heroStats(1, upgrades).maxHp, swing: 0, shield: 0, hits: 0, buffs: [], nextCrit: false, light: 0, sanctity: 0, sunrise: 0, prayer: 0, embers: 0 },
     gold: 0,
     fragments: 0,
     gear: newGear(),

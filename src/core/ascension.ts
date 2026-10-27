@@ -73,7 +73,7 @@ export const scintilleGain = (state: GameState) => Math.floor(scintilleFor(state
 /** Riparte da livello 1 e dallo stage iniziale (Ascensione e Rinascita). */
 export function restartRun(state: GameState) {
   const start = startStage(state.ascension);
-  state.hero = { level: 1, xp: 0, hp: 0, swing: 0, shield: 0, hits: 0, buffs: [], nextCrit: false, light: 0, sanctity: 0 };
+  state.hero = { level: 1, xp: 0, hp: 0, swing: 0, shield: 0, hits: 0, buffs: [], nextCrit: false, light: 0, sanctity: 0, sunrise: 0, prayer: 0, embers: 0 };
   state.gold = 0;
   state.upgrades = { forza: 0, corazza: 0, rapidita: 0 };
   state.stage = { current: start, best: start, kills: 0, auto: true };

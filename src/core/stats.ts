@@ -1,6 +1,8 @@
 import { ELEMENTS, type Element } from '../data/items';
 import type { UpgradeId } from '../data/upgrades';
-import { LAST_STAND_DEF, LAST_STAND_HP, LAST_STAND_LEECH, THORNS_AURA_MULT, type RuleId } from '../data/uniques';
+import {
+  COLD_BLOOD_MULT, LAST_STAND_DEF, LAST_STAND_HP, LAST_STAND_LEECH, THORNS_AURA_MULT, TIME_STOP_SPEED, type RuleId,
+} from '../data/uniques';
 import { addStarMods } from './constellations';
 import { addViaMods, type ViaState } from './vie';
 import { addPerkMods, type AscensionState } from './ascension';
@@ -161,6 +163,15 @@ export function stateStats(state: { hero: HeroState; upgrades: Record<UpgradeId,
     s.lifeSteal += LAST_STAND_LEECH;
   }
   if (s.rules.has('thornsAura')) s.thorns *= THORNS_AURA_MULT;
+  // regione «Oltre»: Mietitore (buff a tempo), Sangue Freddo, Fortezza Vivente, Tempo Fermo
+  let dmg = 1 + state.hero.buffs.reduce((sum, b) => sum + (b.dmgPct ?? 0), 0);
+  if (s.rules.has('coldBlood') && state.hero.hp >= s.maxHp * 0.999) dmg *= COLD_BLOOD_MULT;
+  if (dmg !== 1) {
+    s.atk *= dmg;
+    for (const e of ELEMENTS) s.elements[e] *= dmg;
+  }
+  if (s.rules.has('livingFortress')) s.dodge = 0;
+  if (s.rules.has('timeStop')) s.attackSpeed *= TIME_STOP_SPEED;
   return s;
 }
 

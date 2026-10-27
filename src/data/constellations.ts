@@ -171,6 +171,58 @@ export const VIA_REGIONS: ViaRegionDef[] = [
   },
 ];
 
+interface BeyondDef {
+  /** Prefisso degli id dei nodi. */
+  id: string;
+  name: string;
+  /** Ponte da cui parte (tra i suoi nodi centrali), verso l'esterno. */
+  bridge: string;
+  spine: Mods[];
+  /** 5 notevoli lungo la spina, alternate a sinistra e a destra. */
+  notables: { name: string; mods: Mods; rule: RuleId }[];
+  keystone: { name: string; rule: RuleId };
+}
+
+/** Regione «Oltre» (decisione utente 2026-10-27): spine corte con una notevole ogni 2 stelle, regole che cambiano il gioco. */
+export const BEYOND: BeyondDef[] = [
+  {
+    id: 'oltre-crociato', name: 'Oltre del Crociato', bridge: 'offesa',
+    spine: [[['atkPct', 0.05]], [['hpPct', 0.05]], [['bossDmg', 0.04]]],
+    notables: [
+      { name: 'Mietitore', mods: [['atkPct', 0.08]], rule: 'reaper' },
+      { name: 'Sole Nascente', mods: [['critDmg', 0.15]], rule: 'sunrise' },
+      { name: 'Colpo Spezzante', mods: [['crit', 0.02]], rule: 'armorBreak' },
+      { name: 'Martello del Giudizio', mods: [['bossDmg', 0.1]], rule: 'judgeHammer' },
+      { name: 'Sangue Freddo', mods: [['hpPct', 0.08]], rule: 'coldBlood' },
+    ],
+    keystone: { name: 'Tempo Fermo', rule: 'timeStop' },
+  },
+  {
+    id: 'oltre-paladino', name: 'Oltre del Paladino', bridge: 'difesa',
+    spine: [[['hpPct', 0.05]], [['defPct', 0.05]], [['holyPct', 0.05]]],
+    notables: [
+      { name: 'Scudo Ardente', mods: [['scudoSkill', 0.15]], rule: 'blazingShield' },
+      { name: 'Vampiro di Luce', mods: [['lifeSteal', 0.005]], rule: 'lightVampire' },
+      { name: 'Contrattacco', mods: [['dodge', 0.02]], rule: 'riposte' },
+      { name: 'Ultima Preghiera', mods: [['curaSkill', 0.15]], rule: 'lastPrayer' },
+      { name: 'Gelo Profondo', mods: [['coldPct', 0.15]], rule: 'deepFreeze' },
+    ],
+    keystone: { name: 'Fortezza Vivente', rule: 'livingFortress' },
+  },
+  {
+    id: 'oltre-arcano', name: "Oltre dell'Arcano", bridge: 'luce',
+    spine: [[['elemPct', 0.04]], [['crit', 0.01]], [['lightningPct', 0.05]]],
+    notables: [
+      { name: 'Catena di Luce', mods: [['lightningPct', 0.15]], rule: 'chainBolt' },
+      { name: 'Fiamme Vive', mods: [['firePct', 0.15]], rule: 'livingFlames' },
+      { name: 'Eco delle Skill', mods: [['sacroSkill', 0.1]], rule: 'skillEcho' },
+      { name: 'Luce Incessante', mods: [['sacroCdr', 0.05]], rule: 'ceaselessLight' },
+      { name: 'Respiro della Battaglia', mods: [['speedPct', 0.04]], rule: 'battleBreath' },
+    ],
+    keystone: { name: 'Supernova', rule: 'supernova' },
+  },
+];
+
 export const START_ID = 'centro';
 /** Punti stella in più oltre a quelli del livello (decisione utente 2026-10-27): 1 ogni N piani di record della Torre… */
 export const STAR_POINTS_TOWER_EVERY = 10;
@@ -186,6 +238,8 @@ const RING_R = 50;
 const BRIDGE_NODES = 6;
 const VIA_SPINE = 6;
 const VIA_CLUSTER_AT = [2, 5];
+const BEYOND_SPINE = 11;
+const BEYOND_SIDE = 75;
 
 const r2 = (v: number) => Math.round(v * 10) / 10;
 
@@ -272,6 +326,35 @@ export function buildConstellations(): StarNode[] {
       tip.x + dir[0] * STEP * 1.6, tip.y + dir[1] * STEP * 1.6);
     link(prev, `${v.id}-k`);
     v.clusters.forEach((c, j) => cluster(`${v.id}-c${j}`, c, `${v.id}-s${VIA_CLUSTER_AT[j]}`, side, j % 2 ? 1 : -1));
+  }
+
+  // regione «Oltre»: dal centro di ogni ponte (tra i nodi 3 e 4) verso l'esterno, notevoli a lato della spina
+  for (const o of BEYOND) {
+    const a3 = nodes.get(`ponte-${o.bridge}-3`)!;
+    const a4 = nodes.get(`ponte-${o.bridge}-4`)!;
+    const a = Math.atan2(a3.y + a4.y, a3.x + a4.x);
+    const dir = [Math.cos(a), Math.sin(a)];
+    const side = [-dir[1], dir[0]];
+    let prev = '';
+    for (let i = 1; i <= BEYOND_SPINE; i++) {
+      const id = `${o.id}-s${i}`;
+      const r = R + STEP * i;
+      add({ id, kind: 'small', name: o.name, mods: o.spine[(i - 1) % o.spine.length] }, dir[0] * r, dir[1] * r);
+      if (prev) link(prev, id);
+      else { link(a3.id, id); link(a4.id, id); }
+      prev = id;
+    }
+    o.notables.forEach((n, k) => {
+      const at = nodes.get(`${o.id}-s${2 * k + 1}`)!;
+      const sgn = k % 2 ? 1 : -1;
+      add({ id: `${o.id}-n${k}`, kind: 'notable', name: n.name, mods: n.mods, rule: n.rule },
+        at.x + side[0] * BEYOND_SIDE * sgn, at.y + side[1] * BEYOND_SIDE * sgn);
+      link(at.id, `${o.id}-n${k}`);
+    });
+    const tip = nodes.get(prev)!;
+    add({ id: `${o.id}-k`, kind: 'keystone', name: o.keystone.name, mods: [], rule: o.keystone.rule },
+      tip.x + dir[0] * STEP * 1.6, tip.y + dir[1] * STEP * 1.6);
+    link(prev, `${o.id}-k`);
   }
   return [...nodes.values()];
 }

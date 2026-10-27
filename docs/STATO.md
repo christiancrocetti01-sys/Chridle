@@ -3,11 +3,10 @@
 > File di passaggio di consegne tra sessioni. Aggiornato da Claude a fine di ogni modifica.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
-**Ultimo aggiornamento:** 2026-10-27 (Stelle passo 1: punti da Torre/Ascensioni, scelta che guarda avanti)
+**Ultimo aggiornamento:** 2026-10-27 (Stelle passo 2: regione «Oltre» con 15 notevoli e 3 chiavi di volta)
 **Fase corrente:** Fase 8 chiusa, grafica fatta. Ora **revisione dell'utente** (ROADMAP "Dopo la Fase 8").
-**Prossimo passo:** Stelle passo 2: regione «Oltre» (~60 stelle, una notevole ogni 3) con 15 notevoli e 3 chiavi di volta
-  con regole nuove: elenco **approvato** dall'utente (vedi sotto). Poi Chiavi (A/B/C da scegliere) e contenuti.
-**Online:** `main` = branch (Stelle passo 1 pubblicato 2026-10-27).
+**Prossimo passo:** esito collaudo 24 h dopo «Oltre» (in corso) e ok dell'utente per pubblicare; poi Chiavi (A/B/C) e contenuti.
+**Online:** `main` è indietro di Stelle passo 2 (solo sul branch).
 
 ## Sessione 2026-10-26 (revisione utente)
 - Offline **100%** (`OFFLINE_EFFICIENCY`), tolta Veglia Eterna; migrazione **v22** rimborsa le Scintille (`VEGLIA_REFUND`).
@@ -19,6 +18,9 @@
 - Stelle: l'utente **non** vuole compattarle ma più contenuto. Passo 1 fatto: punti extra 1 ogni 10 piani di Torre
   (`STAR_POINTS_TOWER_EVERY`) e 1 ogni 2 Ascensioni in tutto (`STAR_POINTS_ASC_EVERY`, `totals.ascensions`, salvataggio **v23**);
   `autoStars` valuta percorsi fino a `STAR_LOOKAHEAD` = 6 verso notevoli/chiavi di volta (regola = +6% potenza).
+  Passo 2 fatto: regione «Oltre» (`BEYOND`, 51 stelle, 18 regole nuove, dettagli GDD §7), salvataggio **v24**, test in
+  `tests/beyond.test.ts`. Collaudo 8 h: a 8 h Torre 56-62 (prima 46-51), Abisso 25-29 (prima 16-19), livello 77-86 (prima 58-73);
+  tutti i profili prendono le notevoli di Crociato e Arcano.
 - Proposte in attesa di conferma:
   - **Chiavi**: A) Spedizione (spendi 10/tutte le chiavi, ricompense subito, solo al livello di un Dungeon già vinto);
     B) Dungeon automatici (anche offline); C) Dungeon a più chiavi (×N premi, nemici più forti). Consigliata A.
@@ -58,10 +60,10 @@
 - Lotto 5: 30 unici, 8 set, 7 regole nuove (`src/data/uniques.ts`, costanti in fondo; logica in `combat.ts`/`stats.ts`).
 - Endgame: `src/data/endgame.ts`, `src/core/endgame.ts` (Paragon, Rinascita), Abisso in `src/core/modes.ts`/`enemies.ts`;
   UI: Abisso in scheda Mondo, Rinascita e Paragon in scheda Ascensione. Imprese Abissale/Paragone/Rinato.
-- Salvataggio: **v23** (v23 `totals.ascensions`, v22 Veglia Eterna tolta, v21 skill fisse + rimborso rune, v20 `abyss`/`paragon`/`rebirth`), prima **v19** (v11 `vie`, v12 nemico + `keys`/`mode`/`tower`, v13 `ascension`, v14 campi opzionali rune, v15 `hero.sanctity`, v16 `codex`, v17 `collection`, v18 `achievements`, v19 `lumi`).
+- Salvataggio: **v24** (v24 «Oltre», v23 `totals.ascensions`, v22 Veglia Eterna tolta, v21 skill fisse + rimborso rune, v20 `abyss`/`paragon`/`rebirth`), prima **v19** (v11 `vie`, v12 nemico + `keys`/`mode`/`tower`, v13 `ascension`, v14 campi opzionali rune, v15 `hero.sanctity`, v16 `codex`, v17 `collection`, v18 `achievements`, v19 `lumi`).
 
 ## Test
-- `npm test`: **225 verdi** (23 file), `npm run build` ok, collaudo 8 h ok (2026-10-27). Il test lento della Collezione ha timeout 20 s.
+- `npm test`: **240 verdi** (24 file), `npm run build` ok, collaudo 8 h ok (2026-10-27). Il test lento della Collezione ha timeout 20 s.
 - Collaudo: `npm run collaudo -- --ore 8 [--seed N] [--profilo id]` (`scripts/collaudo.ts`, un processo per profilo:
   5 Vie + uno con sessioni offline). 8 h: nessun NaN/crash/salvataggio rotto, ~30 s. Rilanciarlo dopo ogni sistema nuovo.
   Attenzione: nelle catene di comandi non fidarsi di `npm test | grep` (esce 0 anche se fallisce).

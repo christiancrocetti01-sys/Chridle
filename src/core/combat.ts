@@ -10,13 +10,17 @@ import { SANCTITY_SECONDS } from '../data/corruption';
 import { DROP_CHANCE, rollItem, rollRarity, type Item } from './items';
 import { nextRandom } from './rng';
 import { essenceFor } from './runes';
-import { castSkills, gainLight, tickSkills, unlockSkills, type SkillEvent } from './skills';
-import { damageMult, fireTriggers, gearTriggers, heal, tickBuffs, type ActiveTrigger, type ProcEvent } from './triggers';
+import { castFree, castSkills, gainLight, lightRate, tickSkills, unlockSkills, type SkillEvent } from './skills';
+import { damageMult, everyN, fireTriggers, gearTriggers, heal, tickBuffs, type ActiveTrigger, type ProcEvent } from './triggers';
 import { BURNING_SHARE, DOUBLE_STRIKE_CHANCE, REFLECT_SHARE, SPIRIT_ATK } from '../data/vie';
 import type { GameState } from './state';
 import {
-  CHAIN_LIGHTNING_ATK, FIRST_STRIKE_MULT, FROSTBITE_SPEED, LUCKY_DROP_CHANCE, SOUL_HARVEST_HEAL,
+  ARMOR_BREAK_MAX, ARMOR_BREAK_STEP, BLAZING_SHIELD_HP, CHAIN_BOLT_ATK, CHAIN_BOLT_EVERY, CHAIN_LIGHTNING_ATK, DEEP_FREEZE_CHANCE,
+  DEEP_FREEZE_SECONDS, FIRST_STRIKE_MULT, FROSTBITE_SPEED, JUDGE_HAMMER_MAX, JUDGE_HAMMER_STEP, LAST_PRAYER_HP, LAST_PRAYER_SECONDS,
+  LIVING_FORTRESS_TAKEN, LUCKY_DROP_CHANCE, REAPER_MAX, REAPER_SECONDS, REAPER_STEP, SOUL_HARVEST_HEAL, SUNRISE_MULT, SUNRISE_SECONDS,
+  TIME_STOP_EVERY_S, TIME_STOP_SECONDS,
 } from '../data/uniques';
+import { LIGHT_PER_HIT } from '../data/skills';
 import { RARITIES, type SlotId } from '../data/items';
 import { takeItem } from './autoequip';
 import { perkValue } from './ascension';
@@ -68,12 +72,19 @@ export function step(state: GameState, events: CombatEvent[] = []): CombatEvent[
   if (!(m.kind === 'dungeon' && m.mods.includes('tenebra'))) heal(state, hero, hero.regen / TICK_RATE);
   tickBuffs(state);
   if (state.hero.sanctity > 0) state.hero.sanctity--;
-  tickSkills(state);
+  if (state.hero.prayer > 0) state.hero.prayer--;
+  if (hero.rules.has('sunrise') && state.hero.sunrise < SUNRISE_SECONDS * TICK_RATE) state.hero.sunrise++;
+  tickSkills(state, hero);
   tickMode(state, events);
 
   if (!state.enemy) {
     if (state.respawn > 0) state.respawn--;
-    else state.enemy = spawnEnemy(state);
+    else {
+      state.enemy = spawnEnemy(state);
+      // Fiamme Vive: il veleno rimasto passa al nuovo nemico
+      state.enemy.poison += state.hero.embers;
+      state.hero.embers = 0;
+    }
     return events;
   }
   const enemy = state.enemy;
@@ -97,6 +108,17 @@ export function step(state: GameState, events: CombatEvent[] = []): CombatEvent[
     if (enemy.hp <= 0) return kill(state, events);
   }
 
+  // Ultima Preghiera: sotto il 20% della vita la Preghiera si lancia da sola
+  if (hero.rules.has('lastPrayer') && state.hero.prayer <= 0 && state.hero.hp < hero.maxHp * LAST_PRAYER_HP
+    && state.skills.slots.includes('preghiera') && castFree(state, hero, 'preghiera', events)) {
+    state.hero.prayer = LAST_PRAYER_SECONDS * TICK_RATE;
+    if (enemy.hp <= 0) return kill(state, events);
+  }
+  // Tempo Fermo: ogni 30 s il nemico si blocca
+  if (hero.rules.has('timeStop') && state.tick % (TIME_STOP_EVERY_S * TICK_RATE) === 0) {
+    enemy.frozen = Math.max(enemy.frozen, TIME_STOP_SECONDS * TICK_RATE);
+  }
+
   state.hero.swing += hero.attackSpeed / TICK_RATE;
   if (state.hero.swing >= 1) {
     state.hero.swing -= 1;
@@ -117,6 +139,11 @@ export function step(state: GameState, events: CombatEvent[] = []): CombatEvent[
   castSkills(state, hero, events);
   if (enemy.hp <= 0) return kill(state, events);
 
+  // congelato (Gelo Profondo, Tempo Fermo): il nemico non attacca
+  if (enemy.frozen > 0) {
+    enemy.frozen--;
+    return events;
+  }
   enemy.swing += (enemy.attackSpeed * (hero.rules.has('frostbite') ? FROSTBITE_SPEED : 1)) / TICK_RATE;
   if (enemy.swing >= 1) {
     enemy.swing -= 1;
@@ -126,6 +153,7 @@ export function step(state: GameState, events: CombatEvent[] = []): CombatEvent[
       if (hero.rules.has('dodgeCrit')) state.hero.nextCrit = true;
       if (hero.rules.has('thornsAura')) enemy.hp -= hero.thorns * dmgMult;
       fireTriggers(state, hero, triggers, 'dodge', events);
+      if (hero.rules.has('riposte') && enemy.hp > 0) strike(state, hero, dmgMult, triggers, events);
       if (enemy.hp <= 0) kill(state, events);
       return events;
     }
@@ -143,18 +171,42 @@ function strike(state: GameState, hero: Stats, dmgMult: number, triggers: Active
   const crit = (nextRandom(state) < hero.critChance || state.hero.nextCrit) && !hero.rules.has('noCrit');
   state.hero.nextCrit = false;
   // Primo Raggio: il primo colpo su ogni nemico
-  const mult = (crit ? hero.critMult : 1) * (state.hero.hits === 0 && hero.rules.has('firstStrike') ? FIRST_STRIKE_MULT : 1);
-  const physical = mitigate(hero.atk * mult, enemy.def) * resMult(enemy, 'physical') * dmgMult;
+  let mult = (crit ? hero.critMult : 1) * (state.hero.hits === 0 && hero.rules.has('firstStrike') ? FIRST_STRIKE_MULT : 1);
+  // Sole Nascente: ogni 10 s un colpo ×5; Martello del Giudizio: contro i boss il danno sale a ogni colpo
+  if (hero.rules.has('sunrise') && state.hero.sunrise >= SUNRISE_SECONDS * TICK_RATE) {
+    mult *= SUNRISE_MULT;
+    state.hero.sunrise = 0;
+  }
+  if (enemy.boss && hero.rules.has('judgeHammer')) mult *= 1 + Math.min(JUDGE_HAMMER_MAX, JUDGE_HAMMER_STEP * state.hero.hits);
+  // Colpo Spezzante: i critici tolgono difesa al nemico
+  const physical = mitigate(hero.atk * mult, enemy.def * (1 - enemy.broken)) * resMult(enemy, 'physical') * dmgMult;
   const amount = physical + elementalVs(hero, enemy) * mult * dmgMult;
   enemy.hp -= amount;
   enemy.bleed += physical * hero.bleed + (crit && hero.rules.has('critBleed') ? amount : 0);
   if (hero.rules.has('burningHits')) enemy.poison += amount * BURNING_SHARE;
-  if (hero.lifeSteal > 0) heal(state, hero, amount * hero.lifeSteal);
+  if (hero.lifeSteal > 0) {
+    const before = state.hero.hp;
+    heal(state, hero, amount * hero.lifeSteal);
+    // Vampiro di Luce: il rubavita in eccesso diventa scudo (se le cure in eccesso non lo fanno già)
+    const excess = amount * hero.lifeSteal * hero.healMult - (state.hero.hp - before);
+    if (hero.rules.has('lightVampire') && !hero.rules.has('overhealShield') && excess > 0) {
+      state.hero.shield = Math.min(hero.maxHp, state.hero.shield + excess);
+    }
+  }
   events.push({ type: 'hit', target: 'enemy', amount, crit });
   state.hero.hits++;
-  gainLight(state);
+  gainLight(state, LIGHT_PER_HIT * lightRate(hero));
+  // Gelo Profondo: si tira solo con la regola e con danno da gelo (la sequenza dell'RNG non cambia)
+  if (hero.rules.has('deepFreeze') && hero.elements.cold > 0 && nextRandom(state) < DEEP_FREEZE_CHANCE) {
+    enemy.frozen = Math.max(enemy.frozen, DEEP_FREEZE_SECONDS * TICK_RATE);
+  }
+  // Catena di Luce: ogni 5° colpo un fulmine
+  if (hero.rules.has('chainBolt') && state.hero.hits % everyN(hero, CHAIN_BOLT_EVERY) === 0) {
+    enemy.hp -= hero.atk * CHAIN_BOLT_ATK * hero.elemMult.lightning * resMult(enemy, 'lightning') * dmgMult;
+  }
   if (crit) {
     if (hero.rules.has('chainLightning')) enemy.hp -= hero.atk * CHAIN_LIGHTNING_ATK * hero.elemMult.lightning * resMult(enemy, 'lightning') * dmgMult;
+    if (hero.rules.has('armorBreak')) enemy.broken = Math.min(ARMOR_BREAK_MAX, enemy.broken + ARMOR_BREAK_STEP);
     fireTriggers(state, hero, triggers, 'crit', events);
   }
   fireTriggers(state, hero, triggers, 'everyN', events);
@@ -168,8 +220,12 @@ function kill(state: GameState, events: CombatEvent[]): CombatEvent[] {
 /** L'eroe subisce un colpo (difesa, riflesso, scudo, vampirismo). Restituisce true se muore. */
 function hitHero(state: GameState, hero: Stats, raw: number, events: CombatEvent[]): boolean {
   const enemy = state.enemy!;
-  let amount = mitigate(raw, hero.def);
+  let amount = mitigate(raw, hero.def) * (hero.rules.has('livingFortress') ? LIVING_FORTRESS_TAKEN : 1);
   if (hero.rules.has('reflect')) enemy.hp -= amount * REFLECT_SHARE * damageMult(hero, enemy);
+  // Scudo Ardente: lo scudo che si rompe esplode
+  if (hero.rules.has('blazingShield') && state.hero.shield > 0 && state.hero.shield <= amount) {
+    enemy.hp -= hero.maxHp * BLAZING_SHIELD_HP * hero.elemMult.fire * resMult(enemy, 'fire') * damageMult(hero, enemy);
+  }
   const absorbed = Math.min(state.hero.shield, amount);
   state.hero.shield -= absorbed;
   amount -= absorbed;
@@ -209,6 +265,7 @@ function onKill(state: GameState, events: CombatEvent[]) {
   state.totals.gold += gold;
   state.totals.kills++;
   state.codex[enemy.family]++;
+  if (hero.rules.has('livingFlames')) state.hero.embers = enemy.poison;
   state.enemy = null;
   state.respawn = RESPAWN_TICKS;
   state.hero.swing = 0;
@@ -216,6 +273,19 @@ function onKill(state: GameState, events: CombatEvent[]) {
   events.push({ type: 'kill', gold, xp, essence, boss });
   fireTriggers(state, hero, gearTriggers(state.gear), 'kill', events);
   if (hero.rules.has('soulHarvest')) heal(state, hero, hero.maxHp * SOUL_HARVEST_HEAL);
+  if (hero.rules.has('reaper')) {
+    const b = state.hero.buffs.find((x) => x.key === 'reaper');
+    if (b) {
+      b.dmgPct = Math.min(REAPER_MAX, (b.dmgPct ?? 0) + REAPER_STEP);
+      b.ticks = REAPER_SECONDS * TICK_RATE;
+    } else state.hero.buffs.push({ key: 'reaper', speedPct: 0, dmgPct: REAPER_STEP, ticks: REAPER_SECONDS * TICK_RATE });
+  }
+  // Respiro della Battaglia: la skill più lontana dall'essere pronta si ricarica
+  if (hero.rules.has('battleBreath')) {
+    const cd = state.skills.cooldowns;
+    const id = state.skills.slots.filter((x): x is string => !!x && cd[x] > 0).sort((a, b) => cd[b] - cd[a])[0];
+    if (id) cd[id] = 0;
+  }
   gainXp(state, xp, events);
   if (!raid) dropLoot(state, stage, boss, !!elite, events);
 
@@ -284,6 +354,7 @@ function onDeath(state: GameState, events: CombatEvent[]) {
   state.hero.buffs = [];
   state.hero.nextCrit = false;
   state.hero.light = 0;
+  state.hero.embers = 0;
   state.hero.hp = stateStats(state).maxHp;
   state.hero.swing = 0;
   if (inMode) {

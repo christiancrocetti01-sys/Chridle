@@ -29,14 +29,15 @@ function pathTo(id: string): string[] {
 }
 
 describe('Costellazioni: struttura', () => {
-  it('circa 250 nodi, id unici, collegamenti simmetrici e tutto raggiungibile dal centro', () => {
+  it('circa 300 nodi, id unici, collegamenti simmetrici e tutto raggiungibile dal centro', () => {
     expect(STARS.length).toBeGreaterThanOrEqual(140);
     expect(STAR_BY_ID.size).toBe(STARS.length);
     for (const n of STARS) for (const l of n.links) expect(STAR_BY_ID.get(l)!.links).toContain(n.id);
     for (const n of STARS) if (n.id !== START_ID) expect(pathTo(n.id).at(-1)).toBe(n.id);
-    // 3 rami (4 notevoli ciascuno) + 5 regioni delle Vie (2 notevoli ciascuna), una chiave di volta per ognuno
-    expect(STARS.filter((n) => n.kind === 'keystone')).toHaveLength(8);
-    expect(STARS.filter((n) => n.kind === 'notable')).toHaveLength(22);
+    // 3 rami (4 notevoli ciascuno) + 5 regioni delle Vie (2 ciascuna) + 3 regioni «Oltre» (5 ciascuna), una chiave di volta per ognuno
+    expect(STARS.filter((n) => n.kind === 'keystone')).toHaveLength(11);
+    expect(STARS.filter((n) => n.kind === 'notable')).toHaveLength(37);
+    expect(STARS.filter((n) => n.id.startsWith('oltre-'))).toHaveLength(51);
     // nessuna stella sovrapposta a un'altra
     for (const a of STARS) for (const b of STARS) if (a !== b) expect(Math.hypot(a.x - b.x, a.y - b.y), `${a.id}/${b.id}`).toBeGreaterThan(20);
   });

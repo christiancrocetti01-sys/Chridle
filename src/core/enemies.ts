@@ -43,6 +43,8 @@ function build(t: EnemyTemplate, stage: number, extra: Partial<EnemyState> = {})
     swing: 0,
     bleed: 0,
     poison: 0,
+    frozen: 0,
+    broken: 0,
     ...extra,
   };
 }

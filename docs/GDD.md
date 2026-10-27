@@ -108,6 +108,19 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
   critici, +80% ai colpi; Martirio: cura in eccesso → danno sacro; Luce Perpetua: skill gratis, ricarica ×2).
   1 punto per livello, respec gratuito, si restituisce una stella solo se non stacca le altre.
   Espansione a lotti in Fase 7 (regioni delle Vie).
+- **Deciso (utente, 2026-10-27):** niente compattazione, più contenuto. Punti extra: 1 ogni 10 piani di Torre, 1 ogni 2
+  Ascensioni in tutto. Scelta automatica che guarda avanti verso notevoli/chiavi di volta. Regione **«Oltre»** (~60 stelle,
+  una notevole ogni 3) con 15 notevoli: Catena di Luce (ogni 5° colpo fulmine 150% att.), Respiro della Battaglia
+  (uccisione → ricarica la skill più lontana), Scudo Ardente (scudo rotto esplode), Mietitore (uccisione +10% danni 5 s,
+  max 5), Sole Nascente (ogni 10 s colpo ×5), Gelo Profondo (gelo 10% congela 1 s), Fiamme Vive (bruciature passano al
+  nemico dopo), Contrattacco (schivata → colpo subito), Vampiro di Luce (rubavita in eccesso → scudo), Ultima Preghiera
+  (sotto 20% vita Preghiera da sola, ogni 20 s), Colpo Spezzante (critico −10% difesa nemica, max −50%), Eco delle Skill
+  (20% doppio lancio), Martello del Giudizio (boss: +1% per colpo, cumulativo), Luce Incessante (skill → +25% Luce),
+  Sangue Freddo (vita piena +40% danni); 3 chiavi di volta: Supernova (Luce piena skill ×3, Luce a metà velocità),
+  Fortezza Vivente (niente schivata, colpi subiti −40%), Tempo Fermo (ogni 30 s nemico fermo 3 s, −30% vel. att.).
+  **Fatto (2026-10-27):** `BEYOND` in `src/data/constellations.ts` (3 regioni dal centro dei ponti, spina di 11, notevoli
+  a lato dei nodi dispari, 51 stelle), regole in `combat.ts`/`skills.ts`/`stats.ts`, costanti in fondo a `src/data/uniques.ts`.
+  Luce Incessante = +25 Luce fissa; Supernova: le skill di danno aspettano la Luce piena. Salvataggio v24.
 
 ## 8. Equipaggiamento
 - **Slot**: arma principale, mano secondaria (scudo/tomo/seconda arma), elmo, armatura, guanti, stivali,
@@ -278,9 +291,10 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
 - Crafting: solo l'aumento di tier sugli oggetti indossati, sempre il più economico (`autoCraft`); tolti Ritira,
   Trasferisci e Fusione. Oro: il Potenziamento più economico. Paragon: a giro Forza, Vigore, Forza, Precisione,
   Vigore, Tempra. Ascensione: sempre il più economico (decisione utente 2026-10-26). Tutto in `autoSpend` (`src/core/auto.ts`).
-- Stelle (`autoStars`, prima voce di `autoSpend`): finché ci sono punti, la stella collegata che alza di più `gearPower`;
-  notevoli con regola ×1,02, chiavi di volta ×0,98 (quella della propria Via ×1,02), regole annullate da una già attiva
-  (`CLASH_PAIRS`: niente critici ↔ regole dei critici, Eclissi ↔ cure) ×0,5. Cambiare Via azzera l'albero.
+- Stelle (`autoStars`, prima voce di `autoSpend`): finché ci sono punti, il percorso (una stella collegata o la strada
+  fino a una notevole/chiave di volta entro `STAR_LOOKAHEAD` = 6) che alza di più `gearPower` per punto (2026-10-27);
+  notevoli con regola ×1,06, chiavi di volta ×0,98 (quella della propria Via ×1,06), regole annullate da una già attiva
+  (`CLASH_PAIRS`: niente critici ↔ regole dei critici, Eclissi ↔ cure, Fortezza Vivente ↔ schivata) ×0,5. Cambiare Via azzera l'albero.
 - Ritmo (collaudo 240 h, 2026-10-25): inizio veloce lasciato così (decisione utente). Fine gioco: dallo stage
   `LATE_STAGE` = 150 i nemici crescono ×1,15 (vita/difesa) e ×1,1 (attacco) per stage invece di ×1,2/×1,13
   (`stageEnemy`, `src/core/stats.ts`): record 10 giorni da ~175 a ~220.

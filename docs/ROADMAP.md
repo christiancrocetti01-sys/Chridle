@@ -92,7 +92,7 @@ Manuali restano solo: scelta della Via, quando ascendere/rinascere, modalità (D
   - [x] Offline 100%, Torre riparte 5 piani sotto il record, Scintille sempre nel più economico (2026-10-26)
   - [x] Collaudo 24 h (2026-10-26)
   - [x] Stelle passo 1: punti da Torre e Ascensioni, scelta automatica verso le notevoli (2026-10-27)
-  - [ ] Stelle passo 2: regione «Oltre» con 15 notevoli e 3 chiavi di volta nuove
+  - [x] Stelle passo 2: regione «Oltre» con 15 notevoli e 3 chiavi di volta nuove (2026-10-27)
   - [ ] Chiavi accumulate: Dungeon più veloci (proposta in STATO.md, attende scelta)
   - [ ] Più progressione e contenuti (proposte in STATO.md)
 - [ ] Revisione da telefono (rimandata a dopo la grafica)

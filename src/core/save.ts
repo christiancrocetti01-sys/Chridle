@@ -121,6 +121,12 @@ export const migrations: Record<number, Migration> = {
     const a = d.ascension as AscensionState;
     return { ...d, totals: { ...(d.totals as GameState['totals']), ascensions: a.count } };
   },
+  // v23 → v24: regione «Oltre» delle Stelle (contatori dell'eroe e stati del nemico)
+  23: (d) => ({
+    ...d,
+    hero: { ...(d.hero as object), sunrise: 0, prayer: 0, embers: 0 },
+    enemy: d.enemy ? { ...(d.enemy as object), frozen: 0, broken: 0 } : null,
+  }),
 };
 
 /** Essenza spesa per sbloccare e potenziare le rune. */

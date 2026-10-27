@@ -12,6 +12,8 @@ import { isDamageSkill, skillRune } from './runes';
 import { applyEffect, heal } from './triggers';
 import { CORRUPT_HP_PER_LIGHT } from '../data/corruption';
 import { perkValue } from './ascension';
+import { CEASELESS_LIGHT, SKILL_ECHO_CHANCE, SUPERNOVA_LIGHT, SUPERNOVA_MULT } from '../data/uniques';
+import { nextRandom } from './rng';
 
 export interface SkillState {
   /** Skill sbloccate, nell'ordine di priorità di lancio (sempre quello di SKILLS). */
@@ -71,9 +73,12 @@ export function gainLight(state: GameState, amount = LIGHT_PER_HIT) {
   state.hero.light = Math.min(MAX_LIGHT, state.hero.light + amount);
 }
 
+/** Supernova: la Luce sale a metà velocità. */
+export const lightRate = (hero: Stats) => (hero.rules.has('supernova') ? SUPERNOVA_LIGHT : 1);
+
 /** Ogni tick: scendono le ricariche e, se c'è un nemico, sale la Luce. */
-export function tickSkills(state: GameState) {
-  if (state.enemy) gainLight(state, LIGHT_PER_SECOND / TICK_RATE);
+export function tickSkills(state: GameState, hero: Stats) {
+  if (state.enemy) gainLight(state, (LIGHT_PER_SECOND / TICK_RATE) * lightRate(hero));
   const cd = state.skills.cooldowns;
   for (const id in cd) if (cd[id] > 0) cd[id]--;
 }
@@ -108,6 +113,8 @@ export function worthCasting(state: GameState, hero: Stats, def: SkillDef): bool
   if (e.kind === 'heal') return state.hero.hp < hero.maxHp * HEAL_BELOW;
   if (e.kind === 'shield') return state.hero.shield < hero.maxHp * SHIELD_BELOW;
   if (e.kind === 'haste') return !state.hero.buffs.some((b) => b.key === `skill:${def.id}`);
+  // Supernova: le skill di danno aspettano la Luce piena
+  if (hero.rules.has('supernova') && isDamageSkill(def)) return state.hero.light >= MAX_LIGHT;
   return true;
 }
 
@@ -123,6 +130,7 @@ function perform(state: GameState, hero: Stats, def: SkillDef): number | null {
   if (!damage) value *= 1 + r('custodia');
   if (damage && enemy && (enemy.bleed > 0 || enemy.poison > 0)) value *= 1 + r('feritaAperta');
   if (damage) value *= 1 + r('pazienza') * def.cooldown;
+  if (damage && hero.rules.has('supernova')) value *= SUPERNOVA_MULT;
   const lasting = 1 + r('persistenza');
   if (effect.kind === 'haste') effect = { ...effect, seconds: effect.seconds * lasting };
   const amount = applyEffect(state, hero, effect, value, `skill:${def.id}`);
@@ -142,6 +150,18 @@ function castSkill(state: GameState, hero: Stats, def: SkillDef, events: { push(
   }
   state.hero.light -= lightCost(hero, def);
   state.skills.cooldowns[def.id] = cooldownTicks(hero, def);
+  events.push({ type: 'skill', id: def.id, name: def.name, amount });
+  if (hero.rules.has('ceaselessLight')) gainLight(state, CEASELESS_LIGHT);
+  // Eco delle Skill: si tira solo con la regola (la sequenza dell'RNG non cambia)
+  if (hero.rules.has('skillEcho') && nextRandom(state) < SKILL_ECHO_CHANCE) castFree(state, hero, def.id, events);
+  return true;
+}
+
+/** Lancia una skill gratis, senza ricarica né Luce (Eco delle Skill, Ultima Preghiera). */
+export function castFree(state: GameState, hero: Stats, id: string, events: { push(e: SkillEvent): void }): boolean {
+  const def = skillDef(id);
+  const amount = def && perform(state, hero, def);
+  if (!def || amount === null || amount === undefined) return false;
   events.push({ type: 'skill', id: def.id, name: def.name, amount });
   return true;
 }

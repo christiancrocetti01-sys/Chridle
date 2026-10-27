@@ -126,8 +126,9 @@ export function autoPerks(state: GameState): number {
 
 /** Regole che si annullano a vicenda (in entrambi i sensi): una stella con una di queste si prende solo per ultima. */
 const CLASH_PAIRS: [RuleId, RuleId[]][] = [
-  ['noCrit', ['critBleed', 'dodgeCrit', 'chainLightning']],
-  ['eclipse', ['overhealShield', 'overhealHoly', 'soulHarvest']],
+  ['noCrit', ['critBleed', 'dodgeCrit', 'chainLightning', 'armorBreak']],
+  ['eclipse', ['overhealShield', 'overhealHoly', 'soulHarvest', 'lightVampire', 'lastPrayer']],
+  ['livingFortress', ['dodgeCrit', 'riposte']],
 ];
 const CLASH: Partial<Record<RuleId, RuleId[]>> = {};
 for (const [a, list] of CLASH_PAIRS) {
