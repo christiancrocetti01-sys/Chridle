@@ -6,8 +6,8 @@
 **Ultimo aggiornamento:** 2026-10-27 (Stelle passo 1: punti da Torre/Ascensioni, scelta che guarda avanti)
 **Fase corrente:** Fase 8 chiusa, grafica fatta. Ora **revisione dell'utente** (ROADMAP "Dopo la Fase 8").
 **Prossimo passo:** Stelle passo 2: regione «Oltre» (~60 stelle, una notevole ogni 3) con 15 notevoli e 3 chiavi di volta
-  con regole nuove: elenco proposto all'utente, attende conferma. Poi Chiavi (A/B/C da scegliere) e contenuti.
-**Online:** `main` è indietro di Stelle passo 1 (solo sul branch, da pubblicare dopo l'ok).
+  con regole nuove: elenco **approvato** dall'utente (vedi sotto). Poi Chiavi (A/B/C da scegliere) e contenuti.
+**Online:** `main` = branch (Stelle passo 1 pubblicato 2026-10-27).
 
 ## Sessione 2026-10-26 (revisione utente)
 - Offline **100%** (`OFFLINE_EFFICIENCY`), tolta Veglia Eterna; migrazione **v22** rimborsa le Scintille (`VEGLIA_REFUND`).
