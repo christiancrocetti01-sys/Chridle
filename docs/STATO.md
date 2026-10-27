@@ -3,11 +3,20 @@
 > File di passaggio di consegne tra sessioni. Aggiornato da Claude a fine di ogni modifica.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
-**Ultimo aggiornamento:** 2026-10-27 (restyling UI «Breviario di Luce», ramo `claude/epic-allen-10jgj5`)
+**Ultimo aggiornamento:** 2026-10-27 (10 punti del report applicati, ramo `claude/epic-allen-10jgj5` → `main`)
 **Fase corrente:** Fase 8 chiusa, grafica fatta. Ora **revisione dell'utente** (ROADMAP "Dopo la Fase 8").
-**Prossimo passo:** l'utente prova online il restyling «Breviario di Luce» completo (passo 2 fatto: Mondo e Rituali
-  compatti). Restano i 10 punti «Da decidere» del report `docs/report/revisione-2026-10-27.html`.
-**Online:** `main` = tutto, restyling compreso (passi 1 e 2, 2026-10-27).
+**Prossimo passo:** l'utente prova online i 10 punti del report applicati (delega: «bilanciato e longevo»).
+  Aperti: Dungeon ancora mai persi anche al record − 1; Raid scaduti nel profilo offline del collaudo (16%).
+**Online:** `main` = tutto, restyling e 10 punti compresi (2026-10-27).
+
+## 10 punti del report applicati (2026-10-27, dettagli in GDD)
+- Equip: regola nuova = +20% (`equipPower`, `src/core/autoequip.ts`). Lumi inattivi salgono con l'Essenza (costo ÷25%).
+  Paragon per Via (`VIA_PARAGON` in `auto.ts`). Neutro: Equilibrio fino a +15% (`equilibrium`, `src/data/corruption.ts`).
+- Rinascita: soglia +15% a Rinascita (`rebirthThreshold`). Dungeon al record − 1. Raid 5 sotto min(record, stage) (`raidLevel`).
+- Segni dei cicli dallo stage 201 (`zoneSigns`, `signReward`, `bossMechanics` in `src/data/enemies.ts`).
+- Collezione Ascesa: unici Ascesi ✦ ×2,5 da Guardiani Abisso 25+ (2,5%) e Raid 150+ (`src/data/collection.ts`, v25).
+- Collaudo 240 h dopo: Torre 169-198, Abisso 96-114, Paragon 265-360, Rinascite 21-27 (offline 40), Ascesa 24-30/45,
+  collezione 45/45. Ritmo +~5% sul collaudo precedente: lasciato così (più contenuti da inseguire).
 
 ## Revisione utente 2026-10-26/27
 - Fatto e online prima di oggi: offline 100%, Torre −5 piani, punti stella, regione «Oltre» (freni chiesti dall'utente),
@@ -35,11 +44,8 @@
 - Firebase (`firebase.json`, job `firebase` in `.github/workflows/deploy.yml`, `firebase-tools@14`) e GitHub Pages.
   PWA: `public/sw.js` (cambiando strategia alzare `CACHE`), icone da `npm run icone`.
 
-## Domande aperte (dettagli nel report, in ordine di priorità)
-- Alta: Collezione completa in 60-132 h (serve una seconda caccia?); zone nuove finiscono allo stage 200 (superato in
-  48-108 h); equip automatico ignora le regole degli unici (+20%?); i Lumi non attivi restano al Lv 1.
-- Media: Rinascita ogni 4-5 h a fine collaudo; Paragon automatico usa 4 bonus su 8; a fine gioco quasi tutti Neutri;
-  ritmo salito (frenare o no). Bassa: Dungeon mai persi; Raid offline scaduti 23%.
+## Domande aperte
+- Dungeon mai persi (anche al record − 1): lasciare (è un idle) o alzarli? Raid scaduti nel profilo offline del collaudo.
 
 ## Fatto (sintesi, dettagli in GDD "Fatto/Deciso")
 - Fasi 0-2: motore 10 tick/s, salvataggio versionato, combattimento, oggetti/affissi/trigger/unici/set/crafting.
@@ -66,10 +72,10 @@
 - Lotto 5: 30 unici, 8 set, 7 regole nuove (`src/data/uniques.ts`, costanti in fondo; logica in `combat.ts`/`stats.ts`).
 - Endgame: `src/data/endgame.ts`, `src/core/endgame.ts` (Paragon, Rinascita), Abisso in `src/core/modes.ts`/`enemies.ts`;
   UI: Abisso in scheda Mondo, Rinascita e Paragon in scheda Ascensione. Imprese Abissale/Paragone/Rinato.
-- Salvataggio: **v24** (v24 «Oltre», v23 `totals.ascensions`, v22 Veglia Eterna tolta, v21 skill fisse + rimborso rune, v20 `abyss`/`paragon`/`rebirth`), prima **v19** (v11 `vie`, v12 nemico + `keys`/`mode`/`tower`, v13 `ascension`, v14 campi opzionali rune, v15 `hero.sanctity`, v16 `codex`, v17 `collection`, v18 `achievements`, v19 `lumi`).
+- Salvataggio: **v25** (v25 `ascended`, v24 «Oltre», v23 `totals.ascensions`, v22 Veglia Eterna tolta, v21 skill fisse + rimborso rune, v20 `abyss`/`paragon`/`rebirth`), prima **v19** (v11 `vie`, v12 nemico + `keys`/`mode`/`tower`, v13 `ascension`, v14 campi opzionali rune, v15 `hero.sanctity`, v16 `codex`, v17 `collection`, v18 `achievements`, v19 `lumi`).
 
 ## Test
-- `npm test`: **248 verdi** (24 file), `npm run build` ok (anche dopo il restyling, verificato con screenshot 390/1100 px), collaudo 24 h di tutti i profili ok dopo la Spedizione (2026-10-27:
+- `npm test`: **260 verdi** (24 file), `npm run build` ok (anche dopo il restyling, verificato con screenshot 390/1100 px), collaudo 24 h di tutti i profili ok dopo la Spedizione (2026-10-27:
   Torre 71-80, Abisso 33-37, record 50-154, 2-4 Rinascite). Il test lento della Collezione ha timeout 20 s.
 - Collaudo: `npm run collaudo -- --ore 8 [--seed N] [--profilo id]` (`scripts/collaudo.ts`, un processo per profilo:
   5 Vie + uno con sessioni offline). 8 h: nessun NaN/crash/salvataggio rotto, ~30 s. Rilanciarlo dopo ogni sistema nuovo.
