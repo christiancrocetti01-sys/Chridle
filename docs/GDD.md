@@ -111,7 +111,7 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
 - **Deciso (utente, 2026-10-27):** niente compattazione, più contenuto. Punti extra: 1 ogni 10 piani di Torre, 1 ogni 3
   Ascensioni in tutto. Scelta automatica che guarda avanti verso notevoli/chiavi di volta. Regione **«Oltre»** (~60 stelle,
   una notevole ogni 3) con 15 notevoli: Catena di Luce (ogni 5° colpo fulmine 150% att.), Respiro della Battaglia
-  (uccisione → ricarica la skill più lontana), Scudo Ardente (scudo rotto esplode), Mietitore (uccisione +10% danni 5 s,
+  (uccisione di élite/boss → ricarica la skill più lontana), Scudo Ardente (scudo rotto esplode), Mietitore (uccisione +10% danni 5 s,
   max +30%), Sole Nascente (ogni 10 s colpo ×5), Gelo Profondo (gelo 10% congela 1 s), Fiamme Vive (bruciature passano al
   nemico dopo), Contrattacco (schivata → colpo subito), Vampiro di Luce (rubavita in eccesso → scudo), Ultima Preghiera
   (sotto 20% vita Preghiera da sola, ogni 20 s), Colpo Spezzante (critico −10% difesa nemica, max −50%), Eco delle Skill

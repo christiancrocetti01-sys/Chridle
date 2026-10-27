@@ -93,7 +93,8 @@ Manuali restano solo: scelta della Via, quando ascendere/rinascere, modalità (D
   - [x] Collaudo 24 h (2026-10-26)
   - [x] Stelle passo 1: punti da Torre e Ascensioni, scelta automatica verso le notevoli (2026-10-27)
   - [x] Stelle passo 2: regione «Oltre» con 15 notevoli e 3 chiavi di volta nuove (2026-10-27)
-  - [ ] Frenare Respiro della Battaglia, collaudo 24 h, pubblicare «Oltre»
+  - [x] Frenare Respiro della Battaglia (solo élite e boss), collaudo 24 h (2026-10-27)
+  - [ ] Pubblicare «Oltre» su `main`
   - [ ] Chiavi accumulate: Dungeon più veloci (proposta in STATO.md, attende scelta)
   - [ ] Più progressione e contenuti (proposte in STATO.md)
 - [ ] Revisione da telefono (rimandata a dopo la grafica)

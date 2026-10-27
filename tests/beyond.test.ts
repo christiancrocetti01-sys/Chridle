@@ -73,12 +73,19 @@ describe('regione «Oltre»', () => {
     expect(hits.at(-1)!).toBeGreaterThan(hits[0] * 1.3);
   });
 
-  it('Mietitore: +10% danni per uccisione; Respiro della Battaglia: ricarica la skill più lontana', () => {
+  it('Mietitore: +10% danni per uccisione; Respiro della Battaglia: élite e boss ricaricano la skill più lontana', () => {
     const s = game('reaper');
     const atk = stateStats(s).atk;
     killNow(s);
     expect(stateStats(s).atk).toBeCloseTo(atk * (1 + REAPER_STEP));
     const b = game('battleBreath', false, 20);
+    b.enemy!.boss = false;
+    b.enemy!.elite = null;
+    b.skills.cooldowns = { colpoSacro: 5, preghiera: 50, squarcio: 20 };
+    killNow(b);
+    expect(b.skills.cooldowns.preghiera).toBeGreaterThan(0); // nemico normale: niente
+    while (!b.enemy) step(b);
+    b.enemy.boss = true;
     b.skills.cooldowns = { colpoSacro: 5, preghiera: 50, squarcio: 20 };
     killNow(b);
     expect(b.skills.cooldowns.preghiera).toBe(0);

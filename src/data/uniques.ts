@@ -58,7 +58,7 @@ export const RULE_TEXT: Record<RuleId, string> = {
   thornsAura: 'Spine ×3, e feriscono anche quando schivi',
   luckyDrops: 'Il bottino ha il 15% di probabilità di salire di una rarità',
   chainBolt: "Ogni 5° colpo scarica un fulmine pari al 150% dell'attacco",
-  battleBreath: 'Ogni uccisione ricarica subito la skill più lontana dall’essere pronta',
+  battleBreath: 'Uccidere un’élite o un boss ricarica subito la skill più lontana dall’essere pronta',
   blazingShield: 'Quando lo scudo si rompe esplode: danno di fuoco pari al 30% della vita massima',
   reaper: 'Ogni uccisione dà +10% danni per 5 s (fino a +30%)',
   sunrise: 'Ogni 10 s il colpo successivo fa danno ×5',

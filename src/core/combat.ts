@@ -280,8 +280,8 @@ function onKill(state: GameState, events: CombatEvent[]) {
       b.ticks = REAPER_SECONDS * TICK_RATE;
     } else state.hero.buffs.push({ key: 'reaper', speedPct: 0, dmgPct: REAPER_STEP, ticks: REAPER_SECONDS * TICK_RATE });
   }
-  // Respiro della Battaglia: la skill più lontana dall'essere pronta si ricarica
-  if (hero.rules.has('battleBreath')) {
+  // Respiro della Battaglia: uccidendo élite e boss la skill più lontana dall'essere pronta si ricarica
+  if (hero.rules.has('battleBreath') && (boss || elite)) {
     const cd = state.skills.cooldowns;
     const id = state.skills.slots.filter((x): x is string => !!x && cd[x] > 0).sort((a, b) => cd[b] - cd[a])[0];
     if (id) cd[id] = 0;

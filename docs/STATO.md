@@ -3,10 +3,9 @@
 > File di passaggio di consegne tra sessioni. Aggiornato da Claude a fine di ogni modifica.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
-**Ultimo aggiornamento:** 2026-10-27 (Stelle «Oltre» fatte, ritmo da frenare: trovato il colpevole)
+**Ultimo aggiornamento:** 2026-10-27 (Respiro della Battaglia frenato, ritmo tornato a posto)
 **Fase corrente:** Fase 8 chiusa, grafica fatta. Ora **revisione dell'utente** (ROADMAP "Dopo la Fase 8").
-**Prossimo passo:** chiedere all'utente come frenare **Respiro della Battaglia** (`battleBreath`, sotto), collaudo 24 h,
-  poi pubblicare su `main`. Dopo: Chiavi (A/B/C) e contenuti.
+**Prossimo passo:** chiedere conferma e pubblicare «Oltre» su `main`. Dopo: Chiavi (A/B/C) e contenuti.
 **Online:** `main` = fino a Stelle passo 1. Sul branch in più: regione «Oltre» e freni (non pubblicati).
 
 ## Revisione utente 2026-10-26/27
@@ -15,13 +14,11 @@
   3 Ascensioni in tutto (`totals.ascensions`, v23); `autoStars` guarda avanti `STAR_LOOKAHEAD` = 6 verso le notevoli.
 - Solo sul branch: regione **«Oltre»** (`BEYOND` in `src/data/constellations.ts`, 51 stelle, 15 notevoli + 3 chiavi di
   volta, regole in `combat.ts`/`skills.ts`/`stats.ts`, costanti in fondo a `src/data/uniques.ts`, v24, `tests/beyond.test.ts`).
-  Freni già messi (l'utente ha chiesto di frenare): Mietitore max +30%, Sangue Freddo +20%, Martello +0,5%/colpo max +150%.
-- Ritmo (collaudo 24 h, profilo lama): prima di «Oltre» Torre ~62, Abisso ~28, 2 Rinascite; con «Oltre» Torre ~80-90,
-  Abisso ~38-45, 4 Rinascite. Prove a esclusione (cartelle in scratchpad, perse col container): il colpevole è
-  **Respiro della Battaglia** (ogni uccisione azzera la ricarica più lunga → Giudizio a ogni nemico). Senza di lei: Torre 70,
-  Abisso 33, 2 Rinascite. Le altre regole tolte una a una non cambiano quasi nulla; punti extra e lookahead da soli neanche.
-  Proposte di freno da chiedere: a) ogni uccisione toglie 3 s alla ricarica più lunga; b) azzera solo uccidendo élite e boss;
-  c) azzera la ricarica al massimo una volta ogni 10 s.
+  Freni (chiesti dall'utente): Mietitore max +30%, Sangue Freddo +20%, Martello +0,5%/colpo max +150%,
+  **Respiro della Battaglia** (`battleBreath`) ricarica la skill solo uccidendo élite e boss (scelta b dell'utente).
+- Ritmo (collaudo 24 h, profilo lama): prima di «Oltre» Torre ~62, Abisso ~28, 2 Rinascite; con «Oltre» non frenata
+  Torre ~80-90, Abisso ~38-45, 4 Rinascite (colpa di Respiro della Battaglia); **ora** Torre 70, Abisso 33, 2 Rinascite,
+  18 Ascensioni, livello ~49-98 (2026-10-27).
 - Collaudo 24 h pre-«Oltre» (2026-10-26): livello 89-95, record 112-125, ~20 Ascensioni, chiavi ~190/giorno, Essenza ferma 10-30k.
 - Proposte in attesa: **Chiavi** A) Spedizione (spendi 10/tutte, premi subito, al livello di un Dungeon già vinto; consigliata),
   B) Dungeon automatici, C) Dungeon a più chiavi. **Contenuti**: pozzo per l'Essenza, zone/boss oltre lo stage 100, unici/set
@@ -63,7 +60,7 @@
 - Salvataggio: **v24** (v24 «Oltre», v23 `totals.ascensions`, v22 Veglia Eterna tolta, v21 skill fisse + rimborso rune, v20 `abyss`/`paragon`/`rebirth`), prima **v19** (v11 `vie`, v12 nemico + `keys`/`mode`/`tower`, v13 `ascension`, v14 campi opzionali rune, v15 `hero.sanctity`, v16 `codex`, v17 `collection`, v18 `achievements`, v19 `lumi`).
 
 ## Test
-- `npm test`: **240 verdi** (24 file), `npm run build` ok, collaudo 24 h ok (2026-10-27). Il test lento della Collezione ha timeout 20 s.
+- `npm test`: **240 verdi** (24 file), `npm run build` ok, collaudo 24 h lama ok dopo il freno di Respiro (2026-10-27). Il test lento della Collezione ha timeout 20 s.
 - Collaudo: `npm run collaudo -- --ore 8 [--seed N] [--profilo id]` (`scripts/collaudo.ts`, un processo per profilo:
   5 Vie + uno con sessioni offline). 8 h: nessun NaN/crash/salvataggio rotto, ~30 s. Rilanciarlo dopo ogni sistema nuovo.
   Attenzione: nelle catene di comandi non fidarsi di `npm test | grep` (esce 0 anche se fallisce).
