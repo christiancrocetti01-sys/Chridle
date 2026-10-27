@@ -97,5 +97,6 @@ Manuali restano solo: scelta della Via, quando ascendere/rinascere, modalità (D
   - [x] Pubblicare «Oltre» su `main` (2026-10-27)
   - [x] Chiavi accumulate: Spedizione (A); Torre: Mitico ogni 25 piani; imprese Predone V, Scalatore V-VI (2026-10-27)
   - [x] Più progressione e contenuti: zone 11-20, lotto 6, bottino dei Raid, potenziamenti d'Ascensione, Lumi (2026-10-27)
-  - [ ] Revisione completa dei contenuti e report HTML (2026-10-27)
+  - [x] Revisione completa dei contenuti e report HTML (2026-10-27, `docs/report/`)
+  - [ ] Decisioni dell'utente sui 10 punti del report
 - [ ] Revisione da telefono (rimandata a dopo la grafica)

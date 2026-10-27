@@ -3,36 +3,34 @@
 > File di passaggio di consegne tra sessioni. Aggiornato da Claude a fine di ogni modifica.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
-**Ultimo aggiornamento:** 2026-10-27 (Spedizione e doni della Torre, su `main`)
+**Ultimo aggiornamento:** 2026-10-27 (5 contenuti + revisione completa, ramo `claude/epic-allen-10jgj5`)
 **Fase corrente:** Fase 8 chiusa, grafica fatta. Ora **revisione dell'utente** (ROADMAP "Dopo la Fase 8").
-**Prossimo passo:** altri contenuti (elenco sotto): proporne uno all'utente. Poi revisione da telefono.
+**Prossimo passo:** l'utente legge il report `docs/report/revisione-2026-10-27.html` e decide i 10 punti «Da decidere»;
+  poi revisione da telefono (la fa l'utente alla fine).
 **Online:** `main` = tutto, «Oltre» e Spedizione comprese (2026-10-27).
 
 ## Revisione utente 2026-10-26/27
-- Fatto e online (dettagli in GDD): offline 100% (v22), Torre riparte 5 piani sotto il record, punti stella da Torre e
-  Ascensioni (v23), `autoStars` guarda avanti `STAR_LOOKAHEAD` = 6.
-- Online: regione **«Oltre»** (`BEYOND` in `src/data/constellations.ts`, 51 stelle, 15 notevoli + 3 chiavi di
-  volta, regole in `combat.ts`/`skills.ts`/`stats.ts`, costanti in fondo a `src/data/uniques.ts`, v24, `tests/beyond.test.ts`).
-  Freni (chiesti dall'utente): Mietitore max +30%, Sangue Freddo +20%, Martello +0,5%/colpo max +150%,
-  **Respiro della Battaglia** (`battleBreath`) ricarica la skill solo uccidendo élite e boss (scelta b dell'utente).
-- Ritmo 24 h (lama): prima di «Oltre» Torre ~62, Abisso ~28; «Oltre» senza freno a Respiro Torre ~80-90; frenata Torre 70, Abisso 33.
-- Fatto (delega utente «scegli tu»): **Spedizione** (`expedition`/`canExpedition` in `src/core/modes.ts`, bottoni nella
-  sezione Dungeon di `src/ui/world.ts`, avviso in `main.ts`): chiavi → premi di un Dungeon senza modificatori, dopo il primo
-  Dungeon vinto; nel collaudo si usa con ≥ 13 chiavi. Torre: Mitico ogni 25 piani (`TOWER_GRAND_EVERY`). Imprese: Predone V,
-  Scalatore V-VI. Nessun cambio al salvataggio. Pozzo dell'Essenza scartato: skill e rune sono già pozzi infiniti.
+- Fatto e online prima di oggi: offline 100%, Torre −5 piani, punti stella, regione «Oltre» (freni chiesti dall'utente),
+  Spedizione, Mitico ogni 25 piani di Torre (dettagli in GDD).
 - Contenuti (2026-10-27, «finisci tutti i punti»): fatto **zone 11-20** (stage 101-200, 10 boss nuovi con carte in
   `BOSS_ART`; dopo lo stage 200 si ricomincia col numero romano), **lotto 6** (11 unici, set Gladiatore e Araldo
   dell'Alba), **bottino dei Raid** (un unico proprio per boss, 25%, `UniqueDef.raid`),
   **4 potenziamenti d'Ascensione** (Tempra, Giudizio, Prisma, Chiaviere), **4 Lumi** (Mezzaluna, Pallido, Stellina,
-  Solicello). Collaudo 24 h dopo: Torre 77-86, Abisso 37-43 (+~8%), record max 139-180. Da fare: revisione + report HTML.
+  Solicello). Collaudo 24 h dopo: Torre 77-86, Abisso 37-43 (+~8%), record max 139-180.
+- Revisione completa (2026-10-27): corretti i tag delle skill elementali (`skillTags` in `src/core/skills.ts`: le esplosioni
+  prendono il tag del loro elemento; prima 8 affissi + bonus di Inquisitore/Custode senza effetto), 6 nomi doppi di
+  affissi, notevole «Anima di Brace», guida. Report con collaudo 240 h e 10 decisioni: `docs/report/revisione-2026-10-27.html`
+  (pubblicato anche come artifact). Generatore nello scratchpad (non sopravvive: dati da `npm run collaudo -- --ore 240`).
 
 ## Pubblicazione
 - Firebase (`firebase.json`, job `firebase` in `.github/workflows/deploy.yml`, `firebase-tools@14`) e GitHub Pages.
   PWA: `public/sw.js` (cambiando strategia alzare `CACHE`), icone da `npm run icone`.
 
-## Domande aperte
-- Bonus fisso agli unici nel confronto dell'equip (+20%)?
-- Neutro (Corruzione ~0) senza bonus va bene? Abisso quasi fermo dalle ~180 h a 66-67: ammorbidire?
+## Domande aperte (dettagli nel report, in ordine di priorità)
+- Alta: Collezione completa in 60-132 h (serve una seconda caccia?); zone nuove finiscono allo stage 200 (superato in
+  48-108 h); equip automatico ignora le regole degli unici (+20%?); i Lumi non attivi restano al Lv 1.
+- Media: Rinascita ogni 4-5 h a fine collaudo; Paragon automatico usa 4 bonus su 8; a fine gioco quasi tutti Neutri;
+  ritmo salito (frenare o no). Bassa: Dungeon mai persi; Raid offline scaduti 23%.
 
 ## Fatto (sintesi, dettagli in GDD "Fatto/Deciso")
 - Fasi 0-2: motore 10 tick/s, salvataggio versionato, combattimento, oggetti/affissi/trigger/unici/set/crafting.
@@ -62,14 +60,15 @@
 - Salvataggio: **v24** (v24 «Oltre», v23 `totals.ascensions`, v22 Veglia Eterna tolta, v21 skill fisse + rimborso rune, v20 `abyss`/`paragon`/`rebirth`), prima **v19** (v11 `vie`, v12 nemico + `keys`/`mode`/`tower`, v13 `ascension`, v14 campi opzionali rune, v15 `hero.sanctity`, v16 `codex`, v17 `collection`, v18 `achievements`, v19 `lumi`).
 
 ## Test
-- `npm test`: **247 verdi** (24 file), `npm run build` ok, collaudo 24 h di tutti i profili ok dopo la Spedizione (2026-10-27:
+- `npm test`: **248 verdi** (24 file), `npm run build` ok, collaudo 24 h di tutti i profili ok dopo la Spedizione (2026-10-27:
   Torre 71-80, Abisso 33-37, record 50-154, 2-4 Rinascite). Il test lento della Collezione ha timeout 20 s.
 - Collaudo: `npm run collaudo -- --ore 8 [--seed N] [--profilo id]` (`scripts/collaudo.ts`, un processo per profilo:
   5 Vie + uno con sessioni offline). 8 h: nessun NaN/crash/salvataggio rotto, ~30 s. Rilanciarlo dopo ogni sistema nuovo.
   Attenzione: nelle catene di comandi non fidarsi di `npm test | grep` (esce 0 anche se fallisce).
-- Collaudo 10 giorni (`--ore 240`, ~19 min) dopo il ritocco `LATE_STAGE` (nemici più morbidi dallo stage 150): nessun
-  problema. Record massimo 212-228 (prima 169-191), Abisso 66-67 (prima 50; di nuovo quasi fermo dalle ~180 h),
-  Torre 120-124 (prima 95-97), livello 156-175, Paragon 221-240, Rinascite 21-28 (prima 24-38), imprese 59-62/69.
+- Collaudo 10 giorni del 2026-10-27 (~30-47 min, con tutti i contenuti, prima della correzione dei tag): nessun problema.
+  Record 271-370, Torre 158-183, Abisso 91-108 (non si ferma più), Paragon 242-313, Soli 64-124, Rinascite 32-54,
+  Collezione 45/45, imprese 62-66/72. Collaudo 24 h dopo la correzione dei tag: invariato (Torre 73-88, Abisso 35-43).
+- Collaudo 10 giorni precedente (25/10, prima di «Oltre»): record 212-228, Abisso 66-67 fermo dalle ~180 h, Torre 120-124.
 
 ## Note / problemi noti
 - Muro al boss di zona 50 (scudo + rigenerazione): con Via+Stelle ~4 h fermi (rigenerazione 1%/s): **voluto**, spinge ad ascendere.

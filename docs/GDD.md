@@ -248,7 +248,7 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
   offline e, alla migrazione v17, quelli già posseduti). Bonus a tema per unico (`src/data/collection.ts`, solo %)
   + premi di completamento al 25/50/100% (+5/+10/+15% attacco e vita, al 100% anche +10% ritrovamento magico).
   Elenco nella scheda Mondo, avviso alla scoperta. Collaudo: 7-10 unici su 18 in 8 h.
-  **Lotto 6 (2026-10-27):** 11 unici con le notevoli di «Oltre» (mai le chiavi di volta), set Gladiatore (Spezzascudi)
+  **Lotto 6 (2026-10-27):** 11 unici con le notevoli di «Oltre» (mai le chiavi di volta), set Gladiatore (Colpo Spezzante)
   e Araldo dell'Alba (Luce Incessante): 41 unici, 10 set. Collezionista VI a 40 unici. I premi al 25/50/100% si
   ricalcolano sul totale nuovo (chi aveva il 100% lo riprende trovando i nuovi).
 - **Imprese** (achievement) con ricompense.
