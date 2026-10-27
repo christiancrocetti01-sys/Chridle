@@ -96,5 +96,6 @@ Manuali restano solo: scelta della Via, quando ascendere/rinascere, modalità (D
   - [x] Frenare Respiro della Battaglia (solo élite e boss), collaudo 24 h (2026-10-27)
   - [x] Pubblicare «Oltre» su `main` (2026-10-27)
   - [x] Chiavi accumulate: Spedizione (A); Torre: Mitico ogni 25 piani; imprese Predone V, Scalatore V-VI (2026-10-27)
-  - [ ] Più progressione e contenuti (proposte in STATO.md)
+  - [x] Più progressione e contenuti: zone 11-20, lotto 6, bottino dei Raid, potenziamenti d'Ascensione, Lumi (2026-10-27)
+  - [ ] Revisione completa dei contenuti e report HTML (2026-10-27)
 - [ ] Revisione da telefono (rimandata a dopo la grafica)

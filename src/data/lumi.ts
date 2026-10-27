@@ -2,7 +2,8 @@
 import type { TrackId } from './achievements';
 import type { StatKey } from './items';
 
-export type LumoId = 'fiammella' | 'brina' | 'scintilla' | 'aureola' | 'ombretta' | 'lucciola';
+export type LumoId = 'fiammella' | 'brina' | 'scintilla' | 'aureola' | 'ombretta' | 'lucciola'
+  | 'mezzaluna' | 'pallido' | 'stellina' | 'solicello';
 
 type Mods = [StatKey, number][];
 
@@ -31,6 +32,15 @@ export const LUMI: LumoDef[] = [
     perLevel: [['critDmg', 0.03], ['shadowPct', 0.01]], special: [['dodge', 0.03]] },
   { id: 'lucciola', name: 'Lucciola', lore: 'Trova sempre qualcosa che luccica.', unlock: { track: 'collezione', n: 9, text: '9 unici in collezione' },
     perLevel: [['goldPct', 0.03], ['magicFind', 0.01]], special: [['xpPct', 0.1]] },
+  // 2026-10-27: i Lumi del fine gioco
+  { id: 'mezzaluna', name: 'Mezzaluna', lore: 'Il primo spicchio di luce dopo l’Eclissi.', unlock: { track: 'codex', n: 10, text: '10 gradi del Bestiario' },
+    perLevel: [['shadowPct', 0.02], ['critDmg', 0.02]], special: [['lifeSteal', 0.005]] },
+  { id: 'pallido', name: 'Pallido', lore: 'Ha visto il fondo dell’Abisso ed è tornato a galla.', unlock: { track: 'abisso', n: 5, text: "profondità 5 dell'Abisso" },
+    perLevel: [['defPct', 0.015], ['hpPct', 0.01]], special: [['dodge', 0.02]] },
+  { id: 'stellina', name: 'Stellina', lore: 'Caduta da una Costellazione, non vuole più tornarci.', unlock: { track: 'paragon', n: 50, text: 'Paragon 50' },
+    perLevel: [['atkPct', 0.015], ['elemPct', 0.01]], special: [['bossDmg', 0.15]] },
+  { id: 'solicello', name: 'Solicello', lore: 'Un Sole bambino, nato dalla prima Rinascita.', unlock: { track: 'rinascite', n: 1, text: 'prima Rinascita Solare' },
+    perLevel: [['holyPct', 0.015], ['hpPct', 0.015]], special: [['xpPct', 0.15], ['regenPct', 0.002]] },
 ];
 
 /** I Lumi non attivi danno questa frazione del loro bonus per livello. */

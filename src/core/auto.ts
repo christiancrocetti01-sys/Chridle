@@ -48,7 +48,7 @@ export function autoSocket(state: GameState) {
 }
 
 /** Lumo preferito di ogni Via. */
-export const VIA_LUMO: Record<ViaId, LumoId> = { paladino: 'aureola', lama: 'ombretta', inquisitore: 'fiammella', custode: 'scintilla', eclissiarca: 'ombretta' };
+export const VIA_LUMO: Record<ViaId, LumoId> = { paladino: 'aureola', lama: 'ombretta', inquisitore: 'fiammella', custode: 'scintilla', eclissiarca: 'mezzaluna' };
 
 /** Attiva il Lumo preferito della Via; se non c'è (o manca la Via), quello di livello più alto. */
 export function autoLumo(state: GameState) {

@@ -20,6 +20,19 @@ describe('Lumi', () => {
     expect(checkLumi(s)).toEqual([]);
   });
 
+  it('i Lumi del fine gioco: Abisso, Paragon, Rinascita; Mezzaluna è la preferita dell’Eclissiarca', () => {
+    const s = newGame(0, 1);
+    s.abyss.best = 5;
+    s.paragon.level = 50;
+    s.rebirth.count = 1;
+    expect(checkLumi(s)).toEqual(['pallido', 'stellina', 'solicello']);
+    expect(LUMI).toHaveLength(10);
+    s.vie.main = 'eclissiarca';
+    s.lumi.levels.mezzaluna = 1;
+    autoLumo(s);
+    expect(s.lumi.active).toBe('mezzaluna');
+  });
+
   it('il combattimento li sblocca con un evento', () => {
     const s = newGame(0, 2);
     s.stage.best = 15;
