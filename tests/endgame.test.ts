@@ -7,7 +7,7 @@ import { applyOffline } from '../src/core/offline';
 import { deserialize, serialize } from '../src/core/save';
 import { STATE_VERSION, newGame, type GameState } from '../src/core/state';
 import { stateStats } from '../src/core/stats';
-import { ABYSS_ASCENSIONS, ABYSS_HP, ABYSS_WAVES, PARAGON, REBIRTH_SCINTILLE, paragonCost, soliFor } from '../src/data/endgame';
+import { ABYSS_ASCENSIONS, ABYSS_HP, ABYSS_WAVES, PARAGON, REBIRTH_SCINTILLE, paragonCost, rebirthThreshold, soliFor } from '../src/data/endgame';
 
 const run = (s: GameState, ticks: number) => {
   const ev: CombatEvent[] = [];
@@ -113,6 +113,16 @@ describe('Rinascita Solare', () => {
     s.ascension.total = REBIRTH_SCINTILLE - 1;
     expect(canRebirth(s)).toBe(false);
     expect(soliFor(REBIRTH_SCINTILLE)).toBeGreaterThan(0);
+  });
+
+  it('ogni Rinascita alza la soglia della successiva', () => {
+    const s = ready();
+    s.rebirth.count = 10;
+    s.ascension.total = REBIRTH_SCINTILLE;
+    expect(canRebirth(s)).toBe(false);
+    expect(rebirthThreshold(10)).toBeGreaterThan(REBIRTH_SCINTILLE * 2);
+    s.ascension.total = rebirthThreshold(10);
+    expect(canRebirth(s)).toBe(true);
   });
 
   it('azzera Ascensioni e potenziamenti (tranne slot e Doppia Via), tiene Paragon e oggetti', () => {

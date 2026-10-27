@@ -2,7 +2,7 @@ import { newGear, rollItem } from '../src/core/items';
 import { describe, expect, it } from 'vitest';
 import { rewardStage, step, type CombatEvent } from '../src/core/combat';
 import { enemyAtk, makeElite, resMult, spawnEnemy, tickEnemy } from '../src/core/enemies';
-import { canExpedition, canRaid, dungeonLevel, enterDungeon, expedition, enterRaid, enterTower, leaveMode, towerBonus, towerStart } from '../src/core/modes';
+import { canExpedition, canRaid, dungeonLevel, enterDungeon, expedition, enterRaid, enterTower, leaveMode, raidLevel, towerBonus, towerStart } from '../src/core/modes';
 import { deserialize, serialize } from '../src/core/save';
 import { newGame, type GameState } from '../src/core/state';
 import { KILLS_PER_STAGE, LATE_STAGE, stageEnemy, stateStats } from '../src/core/stats';
@@ -198,6 +198,15 @@ describe('Dungeon, Torre e Raid', () => {
     expect(s.mode.kind).toBe('campaign');
     expect(s.totals.raids).toBe(1);
     expect(ev.some((e) => e.type === 'drop' && e.item.rarity >= 4)).toBe(true);
+  });
+
+  it('Raid: al record − 5, ma mai sopra lo stage attuale', () => {
+    const s = newGame(0, 1);
+    s.stage.best = 120;
+    s.stage.current = 120;
+    expect(raidLevel(s)).toBe(115);
+    s.stage.current = 100;
+    expect(raidLevel(s)).toBe(100);
   });
 
   it('Raid: ogni boss ha il suo unico, che cade solo lì', () => {

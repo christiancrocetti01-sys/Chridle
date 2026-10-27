@@ -1,6 +1,6 @@
 import { canAscend, perkCost, perkLevel, perkValue, scintilleGain } from '../core/ascension';
 import { canRebirth, cycleScintille, lootMult, paragonFree, powerMult, rebirthGain, sparkMult } from '../core/endgame';
-import { PARAGON, REBIRTH_SCINTILLE, paragonCost } from '../data/endgame';
+import { PARAGON, paragonCost, rebirthThreshold } from '../data/endgame';
 import { STAT_LABELS } from '../data/items';
 import { formatStat } from './gear';
 import { formatNum } from '../core/format';
@@ -59,7 +59,7 @@ export function createAscensionPanel(root: HTMLElement, actions: AscensionAction
       key = k;
       const ok = canAscend(state) && gain > 0;
       const cycle = Math.floor(cycleScintille(state));
-      const sunPct = Math.min(100, (cycle / REBIRTH_SCINTILLE) * 100);
+      const sunPct = Math.min(100, (cycle / rebirthThreshold(state.rebirth.count)) * 100);
       const paraPct = Math.min(100, (p.xp / paragonCost(p.level)) * 100);
       const free = paragonFree(p);
       // la Rinascita pronta si apre da sola: è lei la decisione del momento
@@ -80,7 +80,7 @@ export function createAscensionPanel(root: HTMLElement, actions: AscensionAction
         <section class="rite-rows">
           <div class="rite-row${sun ? ' ready' : ''}${sunOpen ? ' open' : ''}">
             <button class="rite-head" data-open="sun" aria-expanded="${sunOpen}">
-              <span class="row"><span>Rinascita${sun ? ' <span class="go">pronta</span>' : ''}</span><span class="muted small">${state.rebirth.soli ? `${state.rebirth.soli} Soli · ` : ''}${formatNum(cycle)} / ${REBIRTH_SCINTILLE} Scintille</span></span>
+              <span class="row"><span>Rinascita${sun ? ' <span class="go">pronta</span>' : ''}</span><span class="muted small">${state.rebirth.soli ? `${state.rebirth.soli} Soli · ` : ''}${formatNum(cycle)} / ${formatNum(rebirthThreshold(state.rebirth.count))} Scintille</span></span>
               <span class="bar"><span class="fill" style="width:${sunPct.toFixed(1)}%"></span></span>
             </button>
             ${sunOpen ? `<div class="rite-body">${rebirthBlock(state, confirmSun)}</div>` : ''}
@@ -116,7 +116,7 @@ function rebirthBlock(state: GameState, confirm: boolean): string {
         e si riparte da capo. Restano oggetti, rune, Torre, Abisso, Paragon, collezione e Lumi.</div>
       <div class="skill-info">${r.soli ? `Ora: attacco, vita e difesa <b>×${powerMult(r).toFixed(1)}</b> · oro, XP, Essenza e Paragon ×${lootMult(r).toFixed(1)} · Scintille ×${sparkMult(r).toFixed(2)}`
         : '<span class="muted">Ogni Sole: attacco, vita e difesa +100%, oro, XP ed Essenza +50%, Scintille +25%. Per sempre.</span>'}</div>
-      <div class="skill-info muted">Soli = √(Scintille del ciclo / 100), da ${REBIRTH_SCINTILLE} Scintille guadagnate (ora ${formatNum(Math.floor(cycleScintille(state)))}${r.soli ? ', senza il bonus dei Soli' : ''}).</div>
+      <div class="skill-info muted">Soli = √(Scintille del ciclo / 100), da ${formatNum(rebirthThreshold(r.count))} Scintille guadagnate (la soglia sale del 15% a ogni Rinascita; ora ${formatNum(Math.floor(cycleScintille(state)))}${r.soli ? ', senza il bonus dei Soli' : ''}).</div>
     </div>`;
 }
 

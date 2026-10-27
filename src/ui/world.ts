@@ -1,9 +1,9 @@
-import { abyssStage, abyssStart, canExpedition, dungeonLevel, dungeonReward, towerBonus, towerMilestones, towerStart } from '../core/modes';
+import { abyssStage, abyssStart, canExpedition, dungeonLevel, dungeonReward, raidLevel, towerBonus, towerMilestones, towerStart } from '../core/modes';
 import { abyssUnlocked } from '../core/endgame';
 import { ABYSS_ASCENSIONS, ABYSS_ATK, ABYSS_GUARDIAN_XP, ABYSS_HP, ABYSS_WAVES } from '../data/endgame';
 import type { GameState } from '../core/state';
 import { FAMILIES, MECHANIC_TEXT, ZONE_KEY_EVERY, ZONE_STAGES, zoneName, zoneOf, type DamageType, type Family } from '../data/enemies';
-import { DUNGEON_MODS, DUNGEON_WAVES, EXPEDITION_BATCH, RAID_KEYS, RAID_SECONDS, RAID_LEVEL_OFFSET, RAID_STAGE, TOWER_BACK, TOWER_GRAND_EVERY, TOWER_MILESTONE, TOWER_SECONDS } from '../data/modes';
+import { DUNGEON_MODS, DUNGEON_WAVES, EXPEDITION_BATCH, RAID_KEYS, RAID_SECONDS, RAID_STAGE, TOWER_BACK, TOWER_GRAND_EVERY, TOWER_MILESTONE, TOWER_SECONDS } from '../data/modes';
 import { TICK_RATE } from '../core/loop';
 import { RAID_UNIQUE_CHANCE, UNIQUES } from '../data/uniques';
 import { elem } from './icons';
@@ -123,7 +123,7 @@ export function createWorldPanel(root: HTMLElement, actions: WorldActions) {
             Gratis, Essenza a ogni piano. Si riparte ${TOWER_BACK} piani sotto il record (piano ${towerStart(state.tower.best)}).</p>`,
         },
         {
-          id: 'raid', name: 'Raid', tag: raidOpen ? `liv. ${state.stage.best - RAID_LEVEL_OFFSET}` : '', on: m.kind === 'raid', locked: !raidOpen,
+          id: 'raid', name: 'Raid', tag: raidOpen ? `liv. ${raidLevel(state)}` : '', on: m.kind === 'raid', locked: !raidOpen,
           line: raidOpen ? `boss leggendario in 3 fasi · ${RAID_KEYS} chiavi` : `si apre allo stage ${RAID_STAGE}`,
           action: raidOpen ? `<button class="btn" data-w="enterRaid"${state.keys >= RAID_KEYS && !inMode ? '' : ' disabled'}>Sfida</button>` : lock,
           info: `<p>${RAID_SECONDS} s per abbatterlo. Fase 2: evoca servitori e si scuda; fase 3: furia e rigenerazione.

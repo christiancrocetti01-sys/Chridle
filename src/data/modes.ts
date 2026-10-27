@@ -22,8 +22,8 @@ export const DUNGEON_MODS: DungeonMod[] = [
 /** Ricompense del boss del dungeon (prima dei modificatori): Frammenti e Essenza per livello del dungeon. */
 export const DUNGEON_FRAGMENTS = 8;
 export const DUNGEON_ESSENCE = 4;
-/** Il dungeon è al livello dello stage record meno questo scarto. */
-export const DUNGEON_LEVEL_OFFSET = 3;
+/** Il dungeon è al livello dello stage record meno questo scarto (1: i modificatori pesano davvero). */
+export const DUNGEON_LEVEL_OFFSET = 1;
 /**
  * Spedizione: spende le chiavi accumulate e dà subito le ricompense di un Dungeon senza modificatori (×1, giocato
  * vale in media ~×1,45) e il pezzo di set. Si sblocca dopo il primo Dungeon completato.
@@ -53,7 +53,7 @@ export const TOWER_ESSENCE = 2;
 export const RAID_STAGE = 50;
 export const RAID_KEYS = 3;
 export const RAID_SECONDS = 120;
-/** Il raid è al livello dello stage record meno questo scarto. */
+/** Il raid è al livello dello stage record meno questo scarto (e mai sopra lo stage attuale, `raidLevel`). */
 export const RAID_LEVEL_OFFSET = 5;
 export const RAID_HP = 40;
 export const RAID_ATK = 2;

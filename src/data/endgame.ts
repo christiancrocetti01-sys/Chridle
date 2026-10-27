@@ -43,10 +43,13 @@ export const PARAGON: ParagonDef[] = [
 export const paragonCost = (l: number) => Math.round(100 * Math.pow(l + 1, 1.5));
 
 // ── Rinascita Solare: meta-prestige, si azzerano le Ascensioni per i Soli ──
-/** Scintille guadagnate nel ciclo per poter rinascere. */
+/** Scintille guadagnate nel ciclo per poter rinascere (la prima volta). */
 export const REBIRTH_SCINTILLE = 400;
-/** Soli ottenuti con le Scintille del ciclo. */
-export const soliFor = (scintille: number) => (scintille < REBIRTH_SCINTILLE ? 0 : Math.floor(Math.sqrt(scintille / 100)));
+/** Ogni Rinascita fatta alza la soglia di questa frazione: la Rinascita resta un traguardo, non una routine. */
+export const REBIRTH_GROWTH = 0.15;
+export const rebirthThreshold = (count = 0) => Math.round(REBIRTH_SCINTILLE * (1 + REBIRTH_GROWTH * count));
+/** Soli ottenuti con le Scintille del ciclo (`count` = Rinascite già fatte). */
+export const soliFor = (scintille: number, count = 0) => (scintille < rebirthThreshold(count) ? 0 : Math.floor(Math.sqrt(scintille / 100)));
 /** Per ogni Sole: attacco, vita e difesa ×(1 + n × POWER); oro, XP ed Essenza ×(1 + n × LOOT); Scintille ×(1 + n × SPARK). */
 export const SOLE_POWER = 1;
 export const SOLE_LOOT = 0.5;

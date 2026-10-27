@@ -25,6 +25,8 @@ export type ModeEvent =
 type Events = { push(e: ModeEvent): void };
 
 export const dungeonLevel = (state: GameState) => Math.max(1, state.stage.best - DUNGEON_LEVEL_OFFSET);
+/** Raid al record − RAID_LEVEL_OFFSET, ma mai sopra lo stage dove si combatte ora (record fortunati, rientri dall'offline). */
+export const raidLevel = (state: GameState) => Math.max(1, Math.min(state.stage.best - RAID_LEVEL_OFFSET, state.stage.current));
 export const canRaid = (state: GameState) => state.stage.best >= RAID_STAGE && state.keys >= RAID_KEYS && state.mode.kind === 'campaign';
 export const towerMilestones = (best: number) => Math.floor(best / TOWER_MILESTONE);
 /** Bonus permanente della Torre (attacco e vita in %). */
@@ -99,7 +101,7 @@ export function enterRaid(state: GameState): boolean {
   if (!canRaid(state)) return false;
   state.keys -= RAID_KEYS;
   const name = RAID_BOSSES[Math.floor(nextRandom(state) * RAID_BOSSES.length)];
-  switchTo(state, { kind: 'raid', level: state.stage.best - RAID_LEVEL_OFFSET, ticksLeft: RAID_SECONDS * TICK_RATE, name });
+  switchTo(state, { kind: 'raid', level: raidLevel(state), ticksLeft: RAID_SECONDS * TICK_RATE, name });
   return true;
 }
 
