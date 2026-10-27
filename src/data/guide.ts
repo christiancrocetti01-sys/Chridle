@@ -1,4 +1,4 @@
-/** Guida del giocatore (pulsante «?» in alto): sezioni brevi, testo con poco HTML; {rarita} = elenco colorato. */
+/** Guida del giocatore (menu ≡ in alto): sezioni brevi, testo con poco HTML; {rarita} = elenco colorato. */
 export interface GuideSection { id: string; title: string; text: string[] }
 
 export const GUIDE_INTRO =
@@ -52,7 +52,7 @@ export const GUIDE: GuideSection[] = [
   },
   {
     id: 'vie', title: 'Vie', text: [
-      'Al <b>livello 10</b> scegli una Via (Build › Via): Paladino, Lama dell\'Alba, Inquisitore, Custode Stellare o Eclissiarca.',
+      'Al <b>livello 10</b> scegli una Via (Eroe › Via): Paladino, Lama dell\'Alba, Inquisitore, Custode Stellare o Eclissiarca.',
       'Ogni Via dà statistiche, una regola speciale e una regione delle Stelle. Cambiarla è gratis.',
       "Con il potenziamento d'Ascensione «Doppia Via» ne aggiungi una seconda.",
       '<b>Purezza e Corruzione</b>: alcuni oggetti e Vie spostano l\'ago. Corruzione = più danni, meno difesa e cure; Purezza = il contrario. Agli estremi si sbloccano effetti speciali.',
@@ -68,11 +68,11 @@ export const GUIDE: GuideSection[] = [
     ],
   },
   {
-    id: 'progressi', title: 'Progressi e Lumi', text: [
+    id: 'progressi', title: 'Codex e Lumi', text: [
       '<b>Bestiario</b>: uccidendo una famiglia sali di grado e fai +5% danni contro di lei, per sempre.',
       '<b>Collezione</b>: ogni leggendario unico trovato almeno una volta dà un bonus permanente, più premi al 25/50/100%.',
       '<b>Imprese</b>: traguardi a gradini (uccisioni, stage, livello…), ognuno con un piccolo bonus permanente.',
-      '<b>Lumi</b> (Build › Lumi): spiriti sbloccati dai traguardi. È attivo (bonus pieno + effetto) il preferito della tua Via, se l\'hai, altrimenti quello di livello più alto; gli altri danno il 25%. L\'Essenza fa salire da solo il Lumo attivo.',
+      '<b>Lumi</b> (Eroe › Lumi): spiriti sbloccati dai traguardi. È attivo (bonus pieno + effetto) il preferito della tua Via, se l\'hai, altrimenti quello di livello più alto; gli altri danno il 25%. L\'Essenza fa salire da solo il Lumo attivo.',
     ],
   },
   {
@@ -87,7 +87,7 @@ export const GUIDE: GuideSection[] = [
   {
     id: 'offline', title: 'Offline e consigli', text: [
       'A gioco chiuso il guerriero continua (come a gioco aperto): avanza di stage, se cade torna indietro e poi riprova. Al rientro il gioco lo calcola (dopo tanto tempo ci vuole un po\') e trovi il riepilogo.',
-      'Il gioco salva da solo nel browser. Il ♪ in alto accende i suoni.',
+      'Il gioco salva da solo nel browser. Il menu ≡ in alto accende i suoni.',
       'I pallini rossi sulle schede indicano qualcosa da fare (punti liberi, Ascensione pronta…).',
       'Bloccato? Prova, in ordine: punti nelle Stelle → Torre → Ascensione.',
     ],

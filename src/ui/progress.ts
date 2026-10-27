@@ -16,7 +16,7 @@ import { ZONES, ZONE_STAGES } from '../data/enemies';
 
 type Rows = ReturnType<typeof createExpander>;
 
-/** Scheda Progressi: Bestiario, Collezione leggendari e Imprese, ognuno nella sua sotto-scheda. */
+/** Scheda Codex: Bestiario, Collezione leggendari e Imprese, ognuno nella sua sotto-scheda. */
 export function createProgressPanel(root: HTMLElement) {
   const li = createExpander(root);
   let key = '';

@@ -29,15 +29,21 @@ export interface Hud {
 }
 
 type Sub = [id: string, name: string];
-interface TabDef { id: string; name: string; subs: Sub[] }
+interface TabDef { id: string; name: string; icon: string; subs: Sub[] }
 
-/** Schede principali (barra in basso) e sotto-schede: una cosa per schermata. */
+const NAV_ICON = (d: string) => `<svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="${d}"/></svg>`;
+
+/** Schede principali (barra in basso, a portata di pollice) e sotto-schede: una cosa per schermata. */
 const TABS: TabDef[] = [
-  { id: 'hero', name: 'Eroe', subs: [['oggetti', 'Oggetti'], ['potenziamenti', 'Potenziamenti'], ['statistiche', 'Statistiche']] },
-  { id: 'build', name: 'Build', subs: [['skill', 'Skill'], ['rune', 'Rune'], ['stelle', 'Stelle'], ['via', 'Via'], ['lumi', 'Lumi']] },
-  { id: 'world', name: 'Mondo', subs: [['zona', 'Zona'], ['modi', 'Modalità']] },
-  { id: 'progress', name: 'Progressi', subs: [['bestiario', 'Bestiario'], ['collezione', 'Collezione'], ['imprese', 'Imprese']] },
-  { id: 'ascension', name: 'Ascensione', subs: [['ascensione', 'Ascensione'], ['rinascita', 'Rinascita'], ['paragon', 'Paragon']] },
+  { id: 'battle', name: 'Battaglia', icon: 'M4 18 L17 5 M17 5 V9 M17 5 H13 M18 18 L5 5 M5 5 V9 M5 5 H9', subs: [] },
+  { id: 'hero', name: 'Eroe', icon: 'M5 19 V10 A6 6 0 0 1 17 10 V19 Z M5 12 H17 M11 12 V17', subs: [
+    ['oggetti', 'Oggetti'], ['skill', 'Skill'], ['rune', 'Rune'], ['stelle', 'Stelle'], ['via', 'Via'], ['lumi', 'Lumi'], ['statistiche', 'Statistiche'],
+  ] },
+  { id: 'world', name: 'Mondo', icon: 'M7 20 V6 L11 2 L15 6 V20 Z M9 9 H13 M9 13 H13 M3 20 H19', subs: [['zona', 'Zona'], ['modi', 'Modalità']] },
+  { id: 'ascension', name: 'Rituali', icon: 'M11 7 A4 4 0 1 0 11.01 7 Z M11 2 V5 M11 17 V20 M2 11 H5 M17 11 H20 M4.6 4.6 L6.7 6.7 M15.3 15.3 L17.4 17.4 M4.6 17.4 L6.7 15.3 M15.3 6.7 L17.4 4.6',
+    subs: [['ascensione', 'Ascensione'], ['rinascita', 'Rinascita'], ['paragon', 'Paragon']] },
+  { id: 'progress', name: 'Codex', icon: 'M11 5 C8 3 5 3 3 4 V18 C5 17 8 17 11 19 C14 17 17 17 19 18 V4 C17 3 14 3 11 5 Z M11 5 V19',
+    subs: [['bestiario', 'Bestiario'], ['collezione', 'Collezione'], ['imprese', 'Imprese']] },
 ];
 
 const UI_KEY = 'chridle.ui';
@@ -45,7 +51,7 @@ const UI_KEY = 'chridle.ui';
 interface UiPrefs { tab: string; subs: Record<string, string> }
 
 function loadPrefs(): UiPrefs {
-  const def: UiPrefs = { tab: 'hero', subs: Object.fromEntries(TABS.map((t) => [t.id, t.subs[0][0]])) };
+  const def: UiPrefs = { tab: 'battle', subs: Object.fromEntries(TABS.map((t) => [t.id, t.subs[0]?.[0] ?? ''])) };
   try {
     const p = JSON.parse(localStorage.getItem(UI_KEY) ?? 'null') as Partial<UiPrefs> | null;
     if (p && TABS.some((t) => t.id === p.tab)) def.tab = p.tab!;
@@ -62,43 +68,52 @@ function savePrefs(p: UiPrefs) {
 const SUB_CSS = `[data-view] [data-sub]{display:none}` +
   TABS.flatMap((t) => t.subs).map(([id]) => `[data-view="${id}"] [data-sub="${id}"]{display:block}`).join('');
 
+const COIN = (stroke: string, d: string) => `<svg class="coin" viewBox="0 0 12 12" aria-hidden="true"><path d="${d}" stroke="${stroke}"/></svg>`;
+
 export function createHud(root: HTMLElement, actions: HudActions): Hud {
   ensureArtDefs();
   const prefs = loadPrefs();
   root.innerHTML = `
     <style>${SUB_CSS}</style>
     <header class="top">
-      <div class="top-row">
-        <h1 class="title">Chridle <button class="sound" data-k="sound" title="Suoni">♪</button><button class="help" data-k="help" title="Guida">?</button></h1>
-        <div class="wallet">
-          <span class="gold"><span data-k="gold">0</span> <small>oro</small></span>
-          <span class="essence"><span data-k="essence">0</span> <small>Essenza</small></span>
-          <span class="essence"><span data-k="keys">0</span> <small>chiavi</small></span>
+      <div class="wallet">
+        <span title="Oro">${COIN('#D4AA4F', 'M6 1 A5 5 0 1 0 6.01 1 Z')}<b data-k="gold">0</b></span>
+        <span title="Essenza">${COIN('#A97BD8', 'M6 1 L10 6 L6 11 L2 6 Z')}<b data-k="essence">0</b></span>
+        <span title="Chiavi">${COIN('#ECE6D6', 'M4 3.5 A2.5 2.5 0 1 0 4.01 3.5 Z M6.5 6 H11.5 M9.5 6 V8.5')}<b data-k="keys">0</b></span>
+      </div>
+      <span class="top-stage" data-k="topstage"></span>
+      <div class="menu">
+        <button class="icon-btn" data-k="menu" aria-label="Menu: suoni e guida" aria-expanded="false">${NAV_ICON('M3 6 H17 M3 10 H17 M3 14 H17')}</button>
+        <div class="menu-pop" data-k="menupop" hidden>
+          <button class="menu-item" data-k="sound">Suoni</button>
+          <button class="menu-item" data-k="help">Guida</button>
         </div>
       </div>
-      <div class="meters">
-        <div>
-          <div class="row"><span>Livello <b data-k="level">1</b></span><span class="muted" data-k="xptext"></span></div>
-          <div class="bar"><div class="fill" data-k="xpbar"></div></div>
-        </div>
-        <div>
-          <div class="row"><span>Stage <b data-k="stage">1</b> <span class="muted" data-k="best"></span></span><span data-k="progress"></span></div>
-          <div class="bar"><div class="fill" data-k="stagebar"></div></div>
-        </div>
-      </div>
-      <div class="row zone-row"><span class="muted" data-k="zone"></span></div>
-      <div class="combat" data-k="combat"></div>
-      <div class="notice-row"><p class="notice" data-k="notice"></p><button class="btn sm" data-k="leave" hidden>Abbandona</button></div>
     </header>
-    <div class="navs">
-      <nav class="tabs">
-        ${TABS.map((t) => `<button class="tab" data-tab="${t.id}">${t.name}<span class="badge" data-badge="${t.id}"></span></button>`).join('')}
-      </nav>
-      <nav class="subtabs" data-k="subnav"></nav>
+    <div class="pane" data-pane="battle">
+      <div class="where">
+        <div class="row"><span class="label" data-k="zone"></span><span>Stage <b data-k="stage">1</b> <span class="muted" data-k="best"></span></span></div>
+        <div class="pips" data-k="pips">${'<i></i>'.repeat(KILLS_PER_STAGE)}</div>
+      </div>
+      <div class="combat" data-k="combat"></div>
+      <div class="xp-row muted"><span>Livello <b data-k="level">1</b></span><span data-k="xptext"></span></div>
+      <div class="bar xp"><div class="fill" data-k="xpbar"></div></div>
+      <div class="notice-row"><p class="notice" data-k="notice"></p><button class="btn sm" data-k="leave" hidden>Abbandona</button></div>
+      <button class="todo" data-k="todo" hidden></button>
     </div>
     <div class="pane" data-pane="hero">
-      <div data-sub="oggetti"><div data-k="gear"></div></div>
-      <div data-sub="potenziamenti">
+      <div class="page-head"><h1 class="page-title">Eroe</h1><span class="muted" data-k="herosub"></span></div>
+      <div data-sub="oggetti">
+        <div class="kpis" data-k="kpis"></div>
+        <div data-k="gear"></div>
+      </div>
+      <div data-k="skills"></div>
+      <div data-sub="stelle"><div data-k="stars"></div></div>
+      <div data-sub="via"><div data-k="vie"></div></div>
+      <div data-sub="lumi"><div data-k="lumi"></div></div>
+      <div data-sub="statistiche">
+        <h2 class="section">Statistiche</h2>
+        <dl class="stats" data-k="stats"></dl>
         <h2 class="section">Potenziamenti <span class="muted">· l'oro compra da solo il più economico</span></h2>
         <div class="upgrades">
           ${UPGRADES.map((u) => `
@@ -109,55 +124,71 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
             </div>`).join('')}
         </div>
       </div>
-      <div data-sub="statistiche">
-        <h2 class="section">Statistiche</h2>
-        <dl class="stats" data-k="stats"></dl>
-      </div>
     </div>
-    <div class="pane" data-pane="build">
-      <div data-k="skills"></div>
-      <div data-sub="stelle"><div data-k="stars"></div></div>
-      <div data-sub="via"><div data-k="vie"></div></div>
-      <div data-sub="lumi"><div data-k="lumi"></div></div>
-    </div>
-    <div class="pane" data-pane="world"><div data-k="world"></div></div>
-    <div class="pane" data-pane="progress"><div data-k="progress-panel"></div></div>
-    <div class="pane" data-pane="ascension"><div data-k="ascension"></div></div>
+    <div class="pane" data-pane="world"><div class="page-head"><h1 class="page-title">Mondo</h1></div><div data-k="world"></div></div>
+    <div class="pane" data-pane="ascension"><div class="page-head"><h1 class="page-title">Rituali</h1></div><div data-k="ascension"></div></div>
+    <div class="pane" data-pane="progress"><div class="page-head"><h1 class="page-title">Codex</h1></div><div data-k="progress-panel"></div></div>
+    <nav class="tabs">
+      ${TABS.map((t) => `<button class="tab" data-tab="${t.id}">${NAV_ICON(t.icon)}${t.name}<span class="badge" data-badge="${t.id}"></span></button>`).join('')}
+    </nav>
 `;
+  // le sotto-schede stanno sotto il titolo di ogni pane
+  root.querySelectorAll<HTMLElement>('.page-head').forEach((h) => h.insertAdjacentHTML('afterend', '<nav class="subtabs" role="tablist"></nav>'));
 
   const el = (k: string) => root.querySelector<HTMLElement>(`[data-k="${k}"]`)!;
   const refs = {
     gold: el('gold'), level: el('level'), xptext: el('xptext'), xpbar: el('xpbar'),
-    stage: el('stage'), best: el('best'), progress: el('progress'), stagebar: el('stagebar'),
-    notice: el('notice'), stats: el('stats'), essence: el('essence'), subnav: el('subnav'),
-    keys: el('keys'), zone: el('zone'), sound: el('sound'), leave: el('leave'),
+    stage: el('stage'), best: el('best'),
+    notice: el('notice'), stats: el('stats'), essence: el('essence'), pips: el('pips'),
+    keys: el('keys'), zone: el('zone'), sound: el('sound'), leave: el('leave'), todo: el('todo'),
+    topstage: el('topstage'), kpis: el('kpis'), herosub: el('herosub'), menu: el('menu'), menupop: el('menupop'),
   };
 
   const soundLabel = () => {
-    refs.sound.classList.toggle('on', soundOn());
+    refs.sound.textContent = `Suoni: ${soundOn() ? 'sì' : 'no'}`;
     refs.sound.setAttribute('aria-pressed', String(soundOn()));
   };
   soundLabel();
+  const menu = (open: boolean) => {
+    refs.menupop.hidden = !open;
+    refs.menu.setAttribute('aria-expanded', String(open));
+  };
+  refs.menu.addEventListener('click', (ev) => {
+    ev.stopPropagation();
+    menu(refs.menupop.hidden);
+  });
+  document.addEventListener('click', (ev) => {
+    if (!refs.menupop.hidden && !(ev.target as HTMLElement).closest('.menu-pop')) menu(false);
+  });
   refs.sound.addEventListener('click', () => {
     toggleSound();
     soundLabel();
   });
   refs.leave.addEventListener('click', () => actions.leaveMode());
-  el('help').addEventListener('click', openGuide);
+  el('help').addEventListener('click', () => {
+    menu(false);
+    openGuide();
+  });
+  refs.todo.addEventListener('click', () => {
+    show('ascension', refs.todo.dataset.go);
+    window.scrollTo({ top: 0 });
+  });
 
   /** Schede: mostra il pane scelto, ridisegna le sotto-schede e ricorda la scelta. */
   function show(tab: string, sub = prefs.subs[tab]) {
     prefs.tab = tab;
     prefs.subs[tab] = sub;
     savePrefs(prefs);
+    root.dataset.tabOn = tab;
     root.querySelectorAll<HTMLElement>('[data-tab]').forEach((t) => t.classList.toggle('on', t.dataset.tab === tab));
     root.querySelectorAll<HTMLElement>('[data-pane]').forEach((p) => {
       p.hidden = p.dataset.pane !== tab;
       p.dataset.view = prefs.subs[p.dataset.pane!];
     });
     const def = TABS.find((t) => t.id === tab)!;
-    refs.subnav.innerHTML = def.subs.map(([id, name]) =>
-      `<button class="subtab${id === sub ? ' on' : ''}" data-subtab="${id}">${name}<span class="badge" data-badge="${id}"></span></button>`).join('');
+    const nav = root.querySelector<HTMLElement>(`[data-pane="${tab}"] .subtabs`);
+    if (nav) nav.innerHTML = def.subs.map(([id, name]) =>
+      `<button class="subtab${id === sub ? ' on' : ''}" role="tab" aria-selected="${id === sub}" data-subtab="${id}">${name}<span class="badge" data-badge="${id}"></span></button>`).join('');
     badgeKey = '';
   }
   root.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach((b) =>
@@ -166,7 +197,7 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
       window.scrollTo({ top: 0 });
     }),
   );
-  refs.subnav.addEventListener('click', (ev) => {
+  root.addEventListener('click', (ev) => {
     const b = (ev.target as HTMLElement).closest<HTMLElement>('[data-subtab]');
     if (b) show(prefs.tab, b.dataset.subtab);
   });
@@ -183,6 +214,21 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
     if (k === badgeKey) return;
     badgeKey = k;
     root.querySelectorAll<HTMLElement>('[data-badge]').forEach((x) => (x.textContent = b[x.dataset.badge!] ?? ''));
+  }
+
+  /** L'unica cosa che chiede una decisione, in fondo alla Battaglia: Ascensione o Rinascita pronta. */
+  let todoKey = '';
+  function todo(state: GameState) {
+    const sun = canRebirth(state);
+    const gain = canAscend(state) ? scintilleGain(state) : 0;
+    const k = sun ? 'sun' : gain > 0 ? `asc${gain}` : '';
+    if (k === todoKey) return;
+    todoKey = k;
+    refs.todo.hidden = !k;
+    refs.todo.dataset.go = sun ? 'rinascita' : 'ascensione';
+    refs.todo.innerHTML = sun
+      ? '<span><b>Rinascita pronta</b><small>nuovo Sole: la Campagna ricomincia più forte</small></span><span class="go">RINASCI ›</span>'
+      : `<span><b>Ascensione pronta</b><small>+${formatNum(gain)} Scintille</small></span><span class="go">ASCENDI ›</span>`;
   }
 
   const gear = createGearPanel(el('gear'));
@@ -213,9 +259,13 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
       refs.stage.textContent = String(state.stage.current);
       refs.best.textContent = state.stage.best > state.stage.current ? `(record ${state.stage.best})` : '';
       const bossNow = state.enemy?.boss || state.stage.kills >= KILLS_PER_STAGE;
-      refs.progress.textContent = bossNow ? 'BOSS' : `${state.stage.kills} / ${KILLS_PER_STAGE}`;
-      refs.progress.classList.toggle('boss', !!bossNow);
-      refs.stagebar.style.width = `${Math.min(1, state.stage.kills / KILLS_PER_STAGE) * 100}%`;
+      const kills = Math.min(state.stage.kills, KILLS_PER_STAGE);
+      refs.topstage.textContent = `Stage ${state.stage.current} · ${bossNow ? 'boss' : `${kills}/${KILLS_PER_STAGE}`}`;
+      if (refs.pips.dataset.n !== String(kills)) {
+        refs.pips.dataset.n = String(kills);
+        refs.pips.querySelectorAll('i').forEach((p, i) => p.classList.toggle('on', i < kills));
+      }
+      refs.pips.classList.toggle('boss', !!bossNow);
       const m = state.mode;
       refs.notice.textContent = m.kind === 'dungeon' ? `Dungeon livello ${m.level}: nemico ${Math.min(m.wave + 1, DUNGEON_WAVES + 1)} di ${DUNGEON_WAVES + 1} (la Campagna è in pausa)`
         : m.kind === 'tower' ? `Torre dell'Alba: piano ${m.floor} · ${modeTimer(state)} (record ${state.tower.best})`
@@ -241,8 +291,12 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
       skills.update(state);
       stars.update(state);
       badges(state);
+      todo(state);
       combat.update(state);
       const s = stateStats(state);
+      refs.kpis.innerHTML = [['Attacco', s.atk], ['Vita', s.maxHp], ['Difesa', s.def]]
+        .map(([k, v]) => `<div><span class="label">${k}</span><b>${formatNum(v as number)}</b></div>`).join('');
+      refs.herosub.textContent = `Lv ${state.hero.level}`;
       refs.stats.innerHTML = [
         ['Vita', formatNum(s.maxHp)],
         ['Attacco', formatNum(s.atk)],

@@ -280,6 +280,15 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
 - **Fatto (2026-10-25):** `src/ui/art/` — `subjects.ts` (geometria a strati fill/shade/ink/line/gold/eye: 11 oggetti,
   5 famiglie, 10 boss di zona, eroe), `render.ts` (xilografia, linea di luce, carta, dorso), `index.ts` (carte di nemici,
   famiglie, boss, unici). Icone oggetti/avvisi in luce; ritratti in combattimento; gallerie in Bestiario e Collezione.
+- **Fatto (2026-10-27, restyling «Breviario di Luce», approvato dall'utente; sostituisce "UI divisa" e "testo puro"):**
+  palette inchiostro #0D0C0A / osso #ECE6D6 / cenere #A39B89 con **un solo accento oro #D4AA4F** (azione importante,
+  vita dell'eroe, scheda attiva); rosso #B5443A solo per il nemico; altro colore solo rarità ed elementi. Cinzel per titoli
+  ed etichette brevi, EB Garamond per il resto, cifre tabellari. Barra in alto: valute, stage, menu ≡ (suoni, guida).
+  **5 schede in basso**: Battaglia (carta del nemico grande, eroe in una riga, registro 3 righe, «Ascensione/Rinascita
+  pronta»), Eroe (Oggetti/Skill/Rune/Stelle/Via/Lumi/Statistiche+Potenziamenti, sotto-schede a controllo segmentato),
+  Mondo, Rituali (Ascensione/Rinascita/Paragon), Codex (Bestiario/Collezione/Imprese). Nomi degli oggetti color osso:
+  la rarità sta nella cornice dell'icona e nella riga «Slot · Rarità». Carte della Collezione con cornice d'oro.
+  Canvas della proposta: https://claude.ai/artifact/EssdGCbTmQDTGQm51MUJuL
 - **Deciso (2026-10-24, UI divisa):** "una cosa per schermata". Header compatto sempre visibile (valute, livello/stage,
   combattimento affiancato, log 3 righe, Abbandona); 5 schede fisse in basso con sotto-schede a pillola:
   Eroe (Oggetti/Potenziamenti/Statistiche), Build (Skill/Rune/Stelle/Via/Lumi), Mondo (Zona/Modalità),

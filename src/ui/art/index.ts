@@ -1,6 +1,6 @@
 import type { EnemyState } from '../../core/state';
 import { FAMILIES, ZONES, type Family } from '../../data/enemies';
-import { RARITIES, type ItemType } from '../../data/items';
+import type { ItemType } from '../../data/items';
 import type { UniqueDef } from '../../data/uniques';
 import { card, cardBack, lightIcon } from './render';
 import { BOSS_ART, FAMILY_ART, HERO_ART, ITEM_ART } from './subjects';
@@ -9,7 +9,6 @@ export { cardBack, ensureArtDefs } from './render';
 
 /** Cornici: bronzo i nemici comuni, oro campioni ed élite, rosso i boss di zona. */
 const FRAME = { normal: '#8a7a55', champion: '#d4a63c', zone: '#d9434b' };
-const LEGENDARY = 4;
 
 const FAMILY_ORDER = Object.keys(FAMILIES) as Family[];
 
@@ -37,6 +36,6 @@ export const zoneBossCard = (i: number, known: boolean) => {
   return known ? card({ subject: BOSS_ART[b.id] ?? FAMILY_ART[b.family], title: b.name, num: i + 1, frame: FRAME.zone }) : cardBack();
 };
 
-/** Carta di un leggendario unico della Collezione (cornice del colore Leggendario). */
+/** Carta di un leggendario unico della Collezione (cornice d'oro, come le altre carte del Codex). */
 export const uniqueCard = (u: UniqueDef, num: number, found = true) =>
-  found ? card({ subject: ITEM_ART[u.type], title: u.name, num, frame: RARITIES[LEGENDARY].color }) : cardBack();
+  found ? card({ subject: ITEM_ART[u.type], title: u.name, num, frame: FRAME.champion }) : cardBack();

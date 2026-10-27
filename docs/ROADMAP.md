@@ -99,4 +99,6 @@ Manuali restano solo: scelta della Via, quando ascendere/rinascere, modalità (D
   - [x] Più progressione e contenuti: zone 11-20, lotto 6, bottino dei Raid, potenziamenti d'Ascensione, Lumi (2026-10-27)
   - [x] Revisione completa dei contenuti e report HTML (2026-10-27, `docs/report/`)
   - [ ] Decisioni dell'utente sui 10 punti del report
+  - [x] Restyling UI «Breviario di Luce»: 5 schede in basso, Battaglia con carta grande, oro unico accento (2026-10-27)
+  - [ ] Mondo e Rituali compatti come nel canvas (una riga + pulsante, regole dietro una (i)) — da confermare
 - [ ] Revisione da telefono (rimandata a dopo la grafica)

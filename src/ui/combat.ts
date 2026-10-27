@@ -20,25 +20,24 @@ const LOG_SIZE = 3;
 /** Pannello di combattimento minimale: barre vita e registro degli eventi importanti. */
 export function createCombatPanel(root: HTMLElement) {
   root.innerHTML = `
+    <div class="foe">
+      <div class="foe-card" data-c="ecard"></div>
+      <h2 class="foe-name" data-c="enemy"></h2>
+      <div class="enemy-info muted" data-c="einfo"></div>
+      <div class="bar hp enemy"><div class="fill" data-c="enemybar"></div></div>
+      <div class="row small muted"><span data-c="efam"></span><span data-c="enemyhp"></span></div>
+    </div>
     <div class="fighter">
       <div class="portrait">${heroArt()}</div>
       <div class="fighter-bars">
-        <div class="row"><span>Guerriero</span><span class="muted" data-c="herohp"></span></div>
+        <div class="row small"><span>Guerriero</span><span class="muted" data-c="herohp"></span></div>
         <div class="bar hp"><div class="fill" data-c="herobar"></div></div>
-        <div class="bar light"><div class="fill" data-c="lightbar"></div></div>
+        <div class="bar light" title="Luce"><div class="fill" data-c="lightbar"></div></div>
       </div>
     </div>
-    <div class="fighter foe">
-      <div class="fighter-bars">
-        <div class="row"><span data-c="enemy"></span><span class="muted" data-c="enemyhp"></span></div>
-        <div class="bar hp enemy"><div class="fill" data-c="enemybar"></div></div>
-      </div>
-      <div class="portrait card-mini" data-c="ecard"></div>
-    </div>
-    <div class="enemy-info muted" data-c="einfo"></div>
     <ul class="log" data-c="log"></ul>`;
   const q = (k: string) => root.querySelector<HTMLElement>(`[data-c="${k}"]`)!;
-  const refs = { herohp: q('herohp'), herobar: q('herobar'), enemy: q('enemy'), enemyhp: q('enemyhp'), enemybar: q('enemybar'), einfo: q('einfo'), lightbar: q('lightbar'), log: q('log'), ecard: q('ecard') };
+  const refs = { herohp: q('herohp'), herobar: q('herobar'), enemy: q('enemy'), enemyhp: q('enemyhp'), enemybar: q('enemybar'), einfo: q('einfo'), efam: q('efam'), lightbar: q('lightbar'), log: q('log'), ecard: q('ecard') };
   let cardKey = '';
   const lines: HTMLLIElement[] = [];
 
@@ -80,7 +79,7 @@ export function createCombatPanel(root: HTMLElement) {
     }
     if (e.type === 'drop' && e.discovered) toast(`Collezione: <b>${e.item.name}</b><br><small>nuovo unico, bonus permanente</small>`, 'gold');
     else if (e.type === 'mode' && e.ok) toast(e.text, 'gold');
-    else if (e.type === 'lumo') toast(`Nuovo Lumo: <b>${lumoDef(e.id).name}</b><br><small>Build · Lumi</small>`, 'gold');
+    else if (e.type === 'lumo') toast(`Nuovo Lumo: <b>${lumoDef(e.id).name}</b><br><small>Eroe · Lumi</small>`, 'gold');
     else if (e.type === 'achievement') toast(`Impresa: <b>${achievementName(e.id)}</b>`, 'gold');
   }
 
@@ -118,11 +117,12 @@ export function createCombatPanel(root: HTMLElement) {
         cardKey = ck;
         refs.ecard.innerHTML = e ? enemyCard(e) : '';
       }
-      refs.enemy.textContent = e ? `${e.boss ? 'BOSS · ' : e.elite ? 'ÉLITE · ' : ''}${e.name}` : '…';
+      refs.enemy.innerHTML = e ? `${e.boss ? '<small>BOSS</small>' : e.elite ? '<small>ÉLITE</small>' : ''}${e.name}` : '…';
       refs.enemy.classList.toggle('boss', !!e?.boss || !!e?.elite);
       const timer = modeTimer(state);
       const mech = e?.mechanics.length ? ` · ${e.mechanics.map((x) => MECHANIC_SHORT[x]).join(', ')}` : '';
-      refs.einfo.innerHTML = e ? `${FAMILIES[e.family].name} · ${resText(e.family)}${mech}${timer ? ` · ⏳ ${timer}` : ''}` : '';
+      refs.einfo.innerHTML = e ? `${resText(e.family)}${mech}${timer ? ` · ${timer}` : ''}` : '';
+      refs.efam.textContent = e ? FAMILIES[e.family].name : '';
       refs.enemyhp.textContent = e ? `${formatNum(Math.max(0, e.hp))} / ${formatNum(e.maxHp)}` : '';
       refs.enemybar.style.width = e ? `${(Math.max(0, e.hp) / e.maxHp) * 100}%` : '0%';
     },

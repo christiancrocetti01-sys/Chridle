@@ -48,7 +48,7 @@ export function createAscensionPanel(root: HTMLElement, actions: AscensionAction
         <h2 class="section">Ascensione <span class="muted">· ${a.count} volte</span></h2>
         <div class="skill-row">
           <div class="skill-head"><span><b class="scint">${formatNum(a.scintille)}</b> Scintille <span class="muted">(${formatNum(a.total)} in tutto)</span></span>
-            <button class="btn sm${confirm ? ' danger' : ''}" data-a="ascend"${ok && gain > 0 ? '' : ' disabled'}>${confirm ? 'Conferma: riparti da capo' : `Ascendi · +${gain}`}</button></div>
+            <button class="btn sm${confirm ? ' danger' : ' primary'}" data-a="ascend"${ok && gain > 0 ? '' : ' disabled'}>${confirm ? 'Conferma: riparti da capo' : `Ascendi · +${gain}`}</button></div>
           <div class="skill-info">Il Sole si riaccende un poco, ma l’Eclissi ritorna. Si riparte da livello 1 e dallo stage iniziale
             perdendo oro, potenziamenti e Costellazioni (i punti tornano salendo). Restano oggetti, Frammenti, Essenza, rune, chiavi, Torre e Vie.</div>
           <div class="skill-info muted">${state.stage.best >= ASCEND_STAGE ? `Scintille = ((record − 30) / 10)²${sparkMult(state.rebirth) > 1 ? ` × ${sparkMult(state.rebirth).toFixed(2)} (Soli)` : ''}. Record attuale: stage ${state.stage.best}.` : `Si sblocca allo stage ${ASCEND_STAGE} (record attuale ${state.stage.best}).`}</div>
@@ -78,7 +78,7 @@ function rebirthBlock(state: GameState, confirm: boolean): string {
   return `<h2 class="section">Rinascita Solare <span class="muted">· ${r.count} volte</span></h2>
     <div class="skill-row">
       <div class="skill-head"><span><b class="scint">${r.soli}</b> Soli</span>
-        <button class="btn sm${confirm ? ' danger' : ''}" data-a="rebirth"${canRebirth(state) ? '' : ' disabled'}>${confirm ? 'Conferma: azzera le Ascensioni' : `Rinasci · +${gain} Soli`}</button></div>
+        <button class="btn sm${confirm ? ' danger' : ' primary'}" data-a="rebirth"${canRebirth(state) ? '' : ' disabled'}>${confirm ? 'Conferma: azzera le Ascensioni' : `Rinasci · +${gain} Soli`}</button></div>
       <div class="skill-info">Il Sole muore e rinasce. Si azzerano Ascensioni, Scintille e potenziamenti (restano gli slot delle skill e la Doppia Via)
         e si riparte da capo. Restano oggetti, rune, Torre, Abisso, Paragon, collezione e Lumi.</div>
       <div class="skill-info">${r.soli ? `Ora: attacco, vita e difesa <b>×${powerMult(r).toFixed(1)}</b> · oro, XP, Essenza e Paragon ×${lootMult(r).toFixed(1)} · Scintille ×${sparkMult(r).toFixed(2)}`

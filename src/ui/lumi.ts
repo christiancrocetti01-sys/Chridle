@@ -6,7 +6,7 @@ import { createExpander } from './list';
 
 const modsText = (mods: [StatKey, number][], mult = 1) => mods.map(([k, v]) => `+${formatStat(k, v * mult)} ${STAT_LABELS[k]}`).join(', ');
 
-/** Sezione Lumi della scheda Build (sola lettura): attivo il preferito della Via, gli altri al 25%; i livelli li compra l'Essenza. */
+/** Sezione Lumi della scheda Eroe (sola lettura): attivo il preferito della Via, gli altri al 25%; i livelli li compra l'Essenza. */
 export function createLumiPanel(root: HTMLElement) {
   const li = createExpander(root);
   let key = '';

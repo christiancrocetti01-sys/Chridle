@@ -16,12 +16,14 @@ export function formatStat(stat: StatKey, v: number): string {
   return v < 10 ? v.toFixed(1) : formatNum(v);
 }
 
-const UNIQUE_COLOR = '#e6b85c';
-const SET_COLOR = '#3ecf8e';
+/** Nome dell'oggetto color osso: la rarità si legge dalla cornice dell'icona e dalla riga sotto. */
+const itemLabel = (it: Item) => esc(it.name);
 
-function itemLabel(it: Item): string {
-  const color = it.special?.kind === 'unique' ? UNIQUE_COLOR : it.special?.kind === 'set' ? SET_COLOR : RARITIES[it.rarity].color;
-  return `<span class="rar-${it.rarity}" style="color:${color}">${esc(it.name)}</span>`;
+/** "Armatura · Leggendario", "Anello · Unico", "Elmo · Set del Bastione". */
+function itemKind(it: Item, slotName: string): string {
+  const sp = it.special;
+  const kind = sp?.kind === 'unique' ? 'Unico' : sp?.kind === 'set' ? `Set ${SETS.find((x) => x.id === sp.id)?.name ?? ''}` : RARITIES[it.rarity].name;
+  return `${slotName} · ${kind}`;
 }
 
 /** Effetto fisso di un unico, oppure bonus del set con i pezzi indossati (attivi evidenziati). */
@@ -100,14 +102,12 @@ function craftNote(it: Item): string {
 
 export function createGearPanel(root: HTMLElement) {
   root.innerHTML = `
-    <h2 class="section">Equipaggiamento</h2>
-    <p class="muted">Ogni oggetto che cade si indossa da solo se aumenta la potenza; gli altri diventano Frammenti, che alzano da soli il tier degli affissi indossati.</p>
     <div class="slots" data-g="slots"></div>
-    <div class="detail" data-g="detail"></div>
-    <div class="salvage-row"><span><b data-g="frag">0</b> <span class="muted">Frammenti</span></span></div>`;
+    <div class="salvage-row"><span><b data-g="frag">0</b> <span class="muted">Frammenti</span></span></div>
+    <p class="hint">Si cambia da solo: ogni oggetto migliore si indossa, gli altri diventano Frammenti, che alzano da soli il tier degli affissi.</p>`;
 
   const q = (k: string) => root.querySelector<HTMLElement>(`[data-g="${k}"]`)!;
-  const refs = { slots: q('slots'), detail: q('detail'), frag: q('frag') };
+  const refs = { slots: q('slots'), frag: q('frag') };
   let selected: Selection = null;
   let lastKey = '';
   let current: GameState | null = null;
@@ -116,7 +116,8 @@ export function createGearPanel(root: HTMLElement) {
     const t = (ev.target as HTMLElement).closest<HTMLElement>('[data-act]');
     if (!t) return;
     const { act, slot } = t.dataset;
-    if (act === 'pick-slot') selected = current?.gear.equipped[slot as SlotId] ? { kind: 'slot', slot: slot as SlotId } : null;
+    // secondo tocco sulla stessa riga: si richiude
+    if (act === 'pick-slot') selected = current?.gear.equipped[slot as SlotId] && !(selected?.slot === slot) ? { kind: 'slot', slot: slot as SlotId } : null;
     lastKey = '';
   });
 
@@ -127,7 +128,7 @@ export function createGearPanel(root: HTMLElement) {
       return `${itemDetail(it, Object.values(gear.equipped) as Item[])}
         ${craftNote(it)}`;
     }
-    return '<p class="muted">Tocca un oggetto per vederne i dettagli.</p>';
+    return 'Tocca un oggetto per gli affissi.';
   }
 
   return {
@@ -146,16 +147,17 @@ export function createGearPanel(root: HTMLElement) {
       if (key === lastKey) return;
       lastKey = key;
 
-      // slot come righe di testo: "Arma ······ Mazza dei Santi 10"
+      // una riga per slot: icona nella cornice della rarità, nome, tipo · rarità, livello oggetto
       refs.slots.innerHTML = SLOTS.map(({ id, name }) => {
         const it = gear.equipped[id];
         const sel = selected?.kind === 'slot' && selected.slot === id ? ' sel' : '';
-        return `<button class="slot-row${sel}${it ? '' : ' empty'}" data-act="pick-slot" data-slot="${id}">
-          <span class="slot-name">${name}</span><span class="dots"></span>${it
-            ? `<span class="slot-item" style="color:${RARITIES[it.rarity].color}">${itemIcon(it.type, it.rarity)}${itemLabel(it)}</span><span class="slot-lv">${it.ilvl}</span>`
-            : '<span class="muted">—</span>'}</button>`;
-      }).join('');
-      refs.detail.innerHTML = renderDetail(gear);
+        return `<button class="slot-row${sel}${it ? '' : ' empty'}" data-act="pick-slot" data-slot="${id}">${it
+          ? `<span class="slot-icon r${it.rarity}" style="color:${RARITIES[it.rarity].color}">${itemIcon(it.type, it.rarity)}</span>
+            <span class="slot-text"><span class="slot-item">${itemLabel(it)}</span><span class="slot-sub">${itemKind(it, name)}</span></span>
+            <span class="slot-lv">${it.ilvl}</span>`
+          : `<span class="slot-icon"></span><span class="slot-text"><span class="slot-item muted">—</span><span class="slot-sub">${name}</span></span>`}</button>${
+          sel ? `<div class="detail">${renderDetail(gear)}</div>` : ''}`;
+      }).join('') + (selected ? '' : `<p class="hint">${renderDetail(gear)}</p>`);
     },
   };
 }

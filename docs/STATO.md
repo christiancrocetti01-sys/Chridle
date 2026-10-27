@@ -3,12 +3,12 @@
 > File di passaggio di consegne tra sessioni. Aggiornato da Claude a fine di ogni modifica.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
-**Ultimo aggiornamento:** 2026-10-27 (5 contenuti + revisione completa, ramo `claude/epic-allen-10jgj5`)
+**Ultimo aggiornamento:** 2026-10-27 (restyling UI «Breviario di Luce», ramo `claude/epic-allen-10jgj5`)
 **Fase corrente:** Fase 8 chiusa, grafica fatta. Ora **revisione dell'utente** (ROADMAP "Dopo la Fase 8").
-**Prossimo passo:** l'utente valuta la **proposta di restyling UI** «Breviario di Luce» (canvas
-  https://claude.ai/artifact/EssdGCbTmQDTGQm51MUJuL: 5 schermate nuove + oggi + sistema visivo) e risponde alle domande
-  (navigazione a 5 voci in basso, Build dentro Eroe, oro unico accento, nomi oggetti color osso). Nessun codice ancora.
-  In sospeso anche i 10 punti «Da decidere» del report `docs/report/revisione-2026-10-27.html`.
+**Prossimo passo:** l'utente prova il **restyling «Breviario di Luce»** (fatto, sul ramo; canvas
+  https://claude.ai/artifact/EssdGCbTmQDTGQm51MUJuL). Possibile passo 2 (da confermare): Mondo e Rituali compatti come nel
+  canvas (una riga + pulsante per modalità, regole dietro una (i); Ascensione «grande e sola»). In sospeso anche i 10 punti
+  «Da decidere» del report `docs/report/revisione-2026-10-27.html`. Il ramo non è ancora su `main`.
 **Online:** `main` = tutto, «Oltre» e Spedizione comprese (2026-10-27).
 
 ## Revisione utente 2026-10-26/27
@@ -23,6 +23,13 @@
   prendono il tag del loro elemento; prima 8 affissi + bonus di Inquisitore/Custode senza effetto), 6 nomi doppi di
   affissi, notevole «Anima di Brace», guida. Report con collaudo 240 h e 10 decisioni: `docs/report/revisione-2026-10-27.html`
   (pubblicato anche come artifact). Generatore nello scratchpad (non sopravvive: dati da `npm run collaudo -- --ore 240`).
+
+## Restyling UI (2026-10-27)
+- `src/ui/hud.ts`: barra in alto (valute, stage, menu ≡ con suoni e guida), 5 schede fisse in basso (Battaglia, Eroe,
+  Mondo, Rituali, Codex; id interni `battle/hero/world/ascension/progress`), titolo + sotto-schede segmentate per pane,
+  riquadro «Ascensione/Rinascita pronta» (`todo`, attributo `data-go`: **mai `data-sub` fuori dai pane**, lo nasconde il CSS).
+- `src/ui/combat.ts`: carta del nemico grande al centro, eroe in una riga. `src/ui/gear.ts`: slot in righe con cornice della
+  rarità, dettaglio sotto la riga toccata. Palette e componenti in fondo a `src/style.css` (blocco «Breviario di Luce»).
 
 ## Pubblicazione
 - Firebase (`firebase.json`, job `firebase` in `.github/workflows/deploy.yml`, `firebase-tools@14`) e GitHub Pages.
@@ -62,7 +69,7 @@
 - Salvataggio: **v24** (v24 «Oltre», v23 `totals.ascensions`, v22 Veglia Eterna tolta, v21 skill fisse + rimborso rune, v20 `abyss`/`paragon`/`rebirth`), prima **v19** (v11 `vie`, v12 nemico + `keys`/`mode`/`tower`, v13 `ascension`, v14 campi opzionali rune, v15 `hero.sanctity`, v16 `codex`, v17 `collection`, v18 `achievements`, v19 `lumi`).
 
 ## Test
-- `npm test`: **248 verdi** (24 file), `npm run build` ok, collaudo 24 h di tutti i profili ok dopo la Spedizione (2026-10-27:
+- `npm test`: **248 verdi** (24 file), `npm run build` ok (anche dopo il restyling, verificato con screenshot 390/1100 px), collaudo 24 h di tutti i profili ok dopo la Spedizione (2026-10-27:
   Torre 71-80, Abisso 33-37, record 50-154, 2-4 Rinascite). Il test lento della Collezione ha timeout 20 s.
 - Collaudo: `npm run collaudo -- --ore 8 [--seed N] [--profilo id]` (`scripts/collaudo.ts`, un processo per profilo:
   5 Vie + uno con sessioni offline). 8 h: nessun NaN/crash/salvataggio rotto, ~30 s. Rilanciarlo dopo ogni sistema nuovo.
