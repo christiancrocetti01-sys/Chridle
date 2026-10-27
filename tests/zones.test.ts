@@ -7,7 +7,7 @@ import { deserialize, serialize } from '../src/core/save';
 import { newGame, type GameState } from '../src/core/state';
 import { KILLS_PER_STAGE, LATE_STAGE, stageEnemy, stateStats } from '../src/core/stats';
 import { BOSS_ART } from '../src/ui/art/subjects';
-import { ENEMIES, FAMILIES, FURY_AFTER_S, ZONES, ZONE_KEY_EVERY, ZONE_STAGES, zoneName, zoneOf } from '../src/data/enemies';
+import { ENEMIES, FAMILIES, FURY_AFTER_S, ZONES, ZONE_KEY_EVERY, ZONE_STAGES, SIGNS_MAX, bossMechanics, signReward, zoneName, zoneOf, zoneSigns } from '../src/data/enemies';
 import { DUNGEON_ESSENCE, DUNGEON_FRAGMENTS, DUNGEON_WAVES, RAID_BOSSES, RAID_KEYS, TOWER_GRAND_EVERY, RAID_STAGE, TOWER_KEY_EVERY, TOWER_MILESTONE } from '../src/data/modes';
 import { UNIQUES } from '../src/data/uniques';
 
@@ -198,6 +198,31 @@ describe('Dungeon, Torre e Raid', () => {
     expect(s.mode.kind).toBe('campaign');
     expect(s.totals.raids).toBe(1);
     expect(ev.some((e) => e.type === 'drop' && e.item.rarity >= 4)).toBe(true);
+  });
+
+  it('Segni: dal ciclo II ogni zona ha modificatori fissi, premi più alti e un boss con una meccanica in più', () => {
+    for (let st = 1; st <= ZONES.length * ZONE_STAGES; st++) expect(zoneSigns(st)).toEqual([]);
+    const c2 = ZONES.length * ZONE_STAGES + 5;
+    expect(zoneSigns(c2)).toHaveLength(1);
+    expect(zoneSigns(c2)).toEqual(zoneSigns(c2 + 4)); // stessa zona, stessi segni
+    expect(zoneSigns(ZONES.length * ZONE_STAGES * 2 + 5)).toHaveLength(2);
+    const far = zoneSigns(ZONES.length * ZONE_STAGES * 9 + 5);
+    expect(far).toHaveLength(SIGNS_MAX);
+    expect(new Set(far).size).toBe(SIGNS_MAX);
+    expect(signReward(zoneSigns(c2))).toBeGreaterThan(1.4);
+    const boss = ZONES.length * ZONE_STAGES + ZONE_STAGES;
+    expect(bossMechanics(boss).length).toBe(Math.min(4, ZONES[0].mechanics.length + 1));
+    expect(bossMechanics(ZONE_STAGES)).toEqual(ZONES[0].mechanics);
+  });
+
+  it('Segni: «Orda» dà ai nemici della zona il 50% di vita in più', () => {
+    let stage = ZONES.length * ZONE_STAGES + 1;
+    while (!zoneSigns(stage).includes('orda') || zoneSigns(stage).includes('elite')) stage += ZONE_STAGES;
+    const s = newGame(0, 1);
+    s.stage.current = s.stage.best = stage;
+    const e = spawnEnemy(s);
+    const plain = stageEnemy(stage).hp * ENEMIES.find((x) => x.id === e.templateId)!.hp;
+    expect(e.maxHp).toBeCloseTo(plain * 1.5 * (e.elite ? 2 : 1), -2);
   });
 
   it('Raid: al record − 5, ma mai sopra lo stage attuale', () => {

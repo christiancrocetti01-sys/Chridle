@@ -1,10 +1,10 @@
 import {
   BOSS_REGEN, BOSS_SHIELD, CHAMPIONS, ELITES, ELITE_CHANCE, ELITE_FROM_STAGE, ELITE_HP, ENEMIES, ENRAGE_EVERY_S, ENRAGE_STEP,
   FURY_AFTER_S, FURY_MAX_DOUBLINGS,
-  FAMILIES, SUMMON_ATK, SUMMON_EVERY_S, ZONES, ZONE_BOSS_HP, zoneOf, type DamageType, type EliteId, type EnemyTemplate, type Family,
+  FAMILIES, SIGN_ELITE_CHANCE, SUMMON_ATK, SUMMON_EVERY_S, ZONES, ZONE_BOSS_HP, bossMechanics, zoneOf, zoneSigns, type DamageType, type EliteId, type EnemyTemplate, type Family,
 } from '../data/enemies';
 import {
-  DUNGEON_WAVES, RAID_ATK, RAID_HP, RAID_PHASES, TOWER_ATK, TOWER_BASE, TOWER_HP, TOWER_STEP,
+  type DungeonModId, DUNGEON_WAVES, RAID_ATK, RAID_HP, RAID_PHASES, TOWER_ATK, TOWER_BASE, TOWER_HP, TOWER_STEP,
 } from '../data/modes';
 import { ABYSS_ATK, ABYSS_BASE, ABYSS_ELITE, ABYSS_HP, ABYSS_STEP, ABYSS_WAVES } from '../data/endgame';
 import { TICK_RATE } from './loop';
@@ -73,11 +73,20 @@ function zoneEnemy(state: GameState, stage: number, eliteRoll: boolean): EnemySt
 function stageBoss(stage: number, forceZoneBoss = false): EnemyState {
   const z = zoneOf(stage);
   if (z.zoneBoss || forceZoneBoss) {
-    const e = build(z.zone.boss, stage, { boss: true, zoneBoss: true, mechanics: [...z.zone.mechanics] });
+    const e = build(z.zone.boss, stage, { boss: true, zoneBoss: true, mechanics: bossMechanics(stage) });
     e.maxHp = e.hp = e.maxHp * ZONE_BOSS_HP;
     return e;
   }
   return build(CHAMPIONS[z.zone.family], stage, { boss: true });
+}
+
+/** Modificatori dei Dungeon (e Segni dei cicli) sul nemico; «Prescelti» rende élite i nemici normali con questa probabilità. */
+function applyMods(state: GameState, e: EnemyState, mods: DungeonModId[], eliteChance: number) {
+  if (!e.boss && !e.elite && mods.includes('elite') && (eliteChance >= 1 || nextRandom(state) < eliteChance)) makeElite(e, pickOf(state, ELITES).id);
+  if (mods.includes('orda')) e.hp = e.maxHp *= 1.5;
+  if (mods.includes('furia')) e.atk *= 1.4;
+  if (mods.includes('rapidi')) e.attackSpeed *= 1.3;
+  if (mods.includes('corazzati')) e.def *= 2;
 }
 
 /** Prossimo nemico secondo la modalità in corso. */
@@ -85,11 +94,7 @@ export function spawnEnemy(state: GameState): EnemyState {
   const m = state.mode;
   if (m.kind === 'dungeon') {
     const e = m.wave >= DUNGEON_WAVES ? stageBoss(m.level, true) : zoneEnemy(state, m.level, false);
-    if (m.wave < DUNGEON_WAVES && m.mods.includes('elite')) makeElite(e, pickOf(state, ELITES).id);
-    if (m.mods.includes('orda')) e.hp = e.maxHp *= 1.5;
-    if (m.mods.includes('furia')) e.atk *= 1.4;
-    if (m.mods.includes('rapidi')) e.attackSpeed *= 1.3;
-    if (m.mods.includes('corazzati')) e.def *= 2;
+    applyMods(state, e, m.mods, 1);
     return e;
   }
   if (m.kind === 'tower') {
@@ -117,7 +122,10 @@ export function spawnEnemy(state: GameState): EnemyState {
     return e;
   }
   const boss = state.stage.kills >= KILLS_PER_STAGE;
-  return boss ? stageBoss(state.stage.current) : zoneEnemy(state, state.stage.current, true);
+  const e = boss ? stageBoss(state.stage.current) : zoneEnemy(state, state.stage.current, true);
+  const signs = zoneSigns(state.stage.current);
+  if (signs.length) applyMods(state, e, signs, SIGN_ELITE_CHANCE);
+  return e;
 }
 
 export type MechanicEvent = { type: 'mechanic'; text: string };

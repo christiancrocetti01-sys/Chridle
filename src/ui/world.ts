@@ -2,7 +2,7 @@ import { abyssStage, abyssStart, canExpedition, dungeonLevel, dungeonReward, rai
 import { abyssUnlocked } from '../core/endgame';
 import { ABYSS_ASCENSIONS, ABYSS_ATK, ABYSS_GUARDIAN_XP, ABYSS_HP, ABYSS_WAVES } from '../data/endgame';
 import type { GameState } from '../core/state';
-import { FAMILIES, MECHANIC_TEXT, ZONE_KEY_EVERY, ZONE_STAGES, zoneName, zoneOf, type DamageType, type Family } from '../data/enemies';
+import { FAMILIES, MECHANIC_TEXT, ZONE_KEY_EVERY, ZONE_STAGES, bossMechanics, signReward, zoneName, zoneOf, zoneSigns, type DamageType, type Family } from '../data/enemies';
 import { DUNGEON_MODS, DUNGEON_WAVES, EXPEDITION_BATCH, RAID_KEYS, RAID_SECONDS, RAID_STAGE, TOWER_BACK, TOWER_GRAND_EVERY, TOWER_MILESTONE, TOWER_SECONDS } from '../data/modes';
 import { TICK_RATE } from '../core/loop';
 import { RAID_UNIQUE_CHANCE, UNIQUES } from '../data/uniques';
@@ -90,6 +90,8 @@ export function createWorldPanel(root: HTMLElement, actions: WorldActions) {
       const z = zoneOf(state.stage.current);
       const inMode = m.kind !== 'campaign';
       const zStart = z.index * ZONE_STAGES + 1;
+      const signs = zoneSigns(state.stage.current);
+      const signText = signs.length ? `<p>Segni del ciclo: ${signs.map((id) => { const d = DUNGEON_MODS.find((x) => x.id === id)!; return `<b>${d.name}</b> (${d.text})`; }).join(', ')} · oro, XP ed Essenza ×${signReward(signs).toFixed(2)}.</p>` : '';
       const lvl = dungeonLevel(state);
       const dz = zoneOf(lvl);
       const raidOpen = state.stage.best >= RAID_STAGE;
@@ -99,8 +101,8 @@ export function createWorldPanel(root: HTMLElement, actions: WorldActions) {
         {
           id: 'campaign', name: 'Campagna', line: `${zoneName(state.stage.current)} · record ${state.stage.best}`, action: '', on: !inMode,
           info: `<p><b>${zoneName(state.stage.current)}</b> · ${FAMILIES[z.zone.family].name} · stage ${zStart}-${zStart + ZONE_STAGES - 1}</p>
-            <p class="muted">${z.zone.lore}</p><p>${resText(z.zone.family)}</p>
-            <p>Boss di zona (stage ${zStart + ZONE_STAGES - 1}): <b>${z.zone.boss.name}</b> — ${z.zone.mechanics.map((x) => MECHANIC_TEXT[x]).join('; ')}.${(zStart + ZONE_STAGES - 1) % ZONE_KEY_EVERY === 0 ? ' Al record dà una chiave.' : ''}</p>`,
+            <p class="muted">${z.zone.lore}</p><p>${resText(z.zone.family)}</p>${signText}
+            <p>Boss di zona (stage ${zStart + ZONE_STAGES - 1}): <b>${z.zone.boss.name}</b> — ${bossMechanics(zStart).map((x) => MECHANIC_TEXT[x]).join('; ')}.${(zStart + ZONE_STAGES - 1) % ZONE_KEY_EVERY === 0 ? ' Al record dà una chiave.' : ''}</p>`,
         },
         {
           id: 'dungeon', name: 'Dungeon', tag: `liv. ${lvl}`, line: `${DUNGEON_WAVES} nemici + boss · pezzo di set garantito`, on: m.kind === 'dungeon',

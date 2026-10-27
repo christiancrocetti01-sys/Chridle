@@ -1,4 +1,4 @@
-import { ELITE_DROP, ELITE_KEY_CHANCE, ELITE_REWARD, VAMPIRIC_SHARE, ZONE_KEY_EVERY } from '../data/enemies';
+import { ELITE_DROP, ELITE_KEY_CHANCE, ELITE_REWARD, VAMPIRIC_SHARE, ZONE_KEY_EVERY, signReward, zoneSigns } from '../data/enemies';
 import { UPGRADES, type UpgradeId } from '../data/upgrades';
 import { discover } from './collection';
 import { checkAchievements } from './achievements';
@@ -69,7 +69,8 @@ export function step(state: GameState, events: CombatEvent[] = []): CombatEvent[
   }
   const hero = stateStats(state);
   const m = state.mode;
-  if (!(m.kind === 'dungeon' && m.mods.includes('tenebra'))) heal(state, hero, hero.regen / TICK_RATE);
+  const dark = m.kind === 'dungeon' ? m.mods.includes('tenebra') : m.kind === 'campaign' && zoneSigns(state.stage.current).includes('tenebra');
+  if (!dark) heal(state, hero, hero.regen / TICK_RATE);
   tickBuffs(state);
   if (state.hero.sanctity > 0) state.hero.sanctity--;
   if (state.hero.prayer > 0) state.hero.prayer--;
@@ -256,10 +257,12 @@ function onKill(state: GameState, events: CombatEvent[]) {
   const base = stageEnemy(stage);
   const hero = stateStats(state);
   const raid = state.mode.kind === 'raid';
-  const mult = raid ? 20 : zoneBoss ? 10 : boss ? 5 : elite ? ELITE_REWARD : 1;
+  // Segni dei cicli: premi più alti nelle zone ripetute
+  const sign = state.mode.kind === 'campaign' ? signReward(zoneSigns(stage)) : 1;
+  const mult = (raid ? 20 : zoneBoss ? 10 : boss ? 5 : elite ? ELITE_REWARD : 1) * sign;
   const gold = base.gold * mult * hero.goldMult;
   const xp = base.xp * mult * hero.xpMult;
-  const essence = essenceFor(stage, boss) * (elite ? ELITE_REWARD : 1) * (1 + perkValue(state.ascension, 'essenza')) * lootMult(state.rebirth);
+  const essence = essenceFor(stage, boss) * (elite ? ELITE_REWARD : 1) * sign * (1 + perkValue(state.ascension, 'essenza')) * lootMult(state.rebirth);
   state.gold += gold;
   state.essence += essence;
   state.totals.gold += gold;

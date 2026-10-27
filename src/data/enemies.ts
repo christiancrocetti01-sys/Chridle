@@ -1,4 +1,5 @@
 import type { Element } from './items';
+import { DUNGEON_MODS, type DungeonModId } from './modes';
 
 export type Family = 'nonmorti' | 'demoni' | 'bestie' | 'culto' | 'vuoto';
 /** Tipi di danno a cui un nemico resiste: il fisico più gli elementi. */
@@ -138,10 +139,44 @@ export const ZONES: ZoneDef[] = [
     lore: 'Il Sole è libero, ma la sua ombra è rimasta. E ha imparato a odiarlo.' },
 ];
 
-/** Zona dello stage (dopo l'ultima, lo stage 200, si ricomincia: "Cimitero dei Caduti II", "III"…). */
+/** Zona dello stage (dopo l'ultima, lo stage 200, si ricomincia: "Cimitero dei Caduti II", "III"…, con i Segni). */
 export function zoneOf(stage: number): { zone: ZoneDef; index: number; cycle: number; zoneBoss: boolean } {
   const i = Math.floor((stage - 1) / ZONE_STAGES);
   return { zone: ZONES[i % ZONES.length], index: i, cycle: Math.floor(i / ZONES.length) + 1, zoneBoss: stage % ZONE_STAGES === 0 };
+}
+
+/**
+ * Segni dei cicli (dal II, cioè dallo stage 201): ogni zona ripetuta ha modificatori fissi presi da quelli dei Dungeon
+ * (1 nel ciclo II, 2 nel III, 3 dal IV) e premi più alti; il boss di zona prende una meccanica in più.
+ * Deterministici: dipendono solo da zona e ciclo.
+ */
+export const SIGN_IDS: DungeonModId[] = ['orda', 'furia', 'rapidi', 'corazzati', 'elite', 'tenebra'];
+export const SIGNS_MAX = 3;
+/** Con il segno «Prescelti» la probabilità che un nemico normale sia un'élite. */
+export const SIGN_ELITE_CHANCE = 0.3;
+/** Oro, XP ed Essenza in più per ogni segno, oltre al premio del modificatore. */
+export const SIGN_REWARD = 0.25;
+
+export function zoneSigns(stage: number): DungeonModId[] {
+  const z = zoneOf(stage);
+  if (z.cycle < 2) return [];
+  const start = (z.index * 5 + z.cycle * 3) % SIGN_IDS.length;
+  return Array.from({ length: Math.min(SIGNS_MAX, z.cycle - 1) }, (_, k) => SIGN_IDS[(start + k * 2) % SIGN_IDS.length]);
+}
+
+/** Moltiplicatore di oro, XP ed Essenza dello stage dovuto ai segni. */
+export const signReward = (signs: DungeonModId[]) =>
+  1 + signs.reduce((sum, id) => sum + SIGN_REWARD + DUNGEON_MODS.find((m) => m.id === id)!.reward, 0);
+
+/** Meccaniche del boss di zona: dal ciclo II una in più, tra quelle che non ha. */
+export function bossMechanics(stage: number): Mechanic[] {
+  const z = zoneOf(stage);
+  const own = [...z.zone.mechanics];
+  if (z.cycle < 2) return own;
+  const all: Mechanic[] = ['enrage', 'shield', 'summon', 'regen'];
+  const free = all.filter((m) => !own.includes(m));
+  if (free.length) own.push(free[(z.index + z.cycle) % free.length]);
+  return own;
 }
 
 export const zoneName = (stage: number) => {
