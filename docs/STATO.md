@@ -3,30 +3,29 @@
 > File di passaggio di consegne tra sessioni. Aggiornato da Claude a fine di ogni modifica.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
-**Ultimo aggiornamento:** 2026-10-27 (Stelle passo 2: regione «Oltre» con 15 notevoli e 3 chiavi di volta)
+**Ultimo aggiornamento:** 2026-10-27 (Stelle «Oltre» fatte, ritmo da frenare: trovato il colpevole)
 **Fase corrente:** Fase 8 chiusa, grafica fatta. Ora **revisione dell'utente** (ROADMAP "Dopo la Fase 8").
-**Prossimo passo:** l'utente decide se il ritmo dopo «Oltre» va bene (o va frenato) e se pubblicare; poi Chiavi (A/B/C) e contenuti.
-**Online:** `main` è indietro di Stelle passo 2 (solo sul branch).
+**Prossimo passo:** chiedere all'utente come frenare **Respiro della Battaglia** (`battleBreath`, sotto), collaudo 24 h,
+  poi pubblicare su `main`. Dopo: Chiavi (A/B/C) e contenuti.
+**Online:** `main` = fino a Stelle passo 1. Sul branch in più: regione «Oltre» e freni (non pubblicati).
 
-## Sessione 2026-10-26 (revisione utente)
-- Offline **100%** (`OFFLINE_EFFICIENCY`), tolta Veglia Eterna; migrazione **v22** rimborsa le Scintille (`VEGLIA_REFUND`).
-- Torre: si riparte `TOWER_BACK` = 5 piani sotto il record (`towerStart` in `src/core/modes.ts`).
-- Scintille (`autoPerks`): sempre il potenziamento più economico, nessuna priorità (l'utente non vuole Doppia Via/Quinto Sole prima).
-- Collaudo 24 h (6 profili): nessun problema. Livello 89-95, record 112-125 (fermo ~100-120 dalle 9 h), 19-23 Ascensioni
-  (~1/h), 2 Rinascite (~12 h e ~21 h), Torre 62-65, Abisso 28-29, Paragon ~25, collezione 17-24/30, imprese 42-46/69.
-  Chiavi 7,5-8,4/h (~190/giorno). Essenza ferma a 10-30k: dopo le 8 rune non c'è niente che valga la spesa.
-- Stelle: l'utente **non** vuole compattarle ma più contenuto. Passo 1 fatto: punti extra 1 ogni 10 piani di Torre
-  (`STAR_POINTS_TOWER_EVERY`) e 1 ogni 3 Ascensioni in tutto (`STAR_POINTS_ASC_EVERY`, `totals.ascensions`, salvataggio **v23**);
-  `autoStars` valuta percorsi fino a `STAR_LOOKAHEAD` = 6 verso notevoli/chiavi di volta (regola = +6% potenza).
-  Passo 2 fatto: regione «Oltre» (`BEYOND`, 51 stelle, 18 regole nuove, dettagli GDD §7), salvataggio **v24**, test in
-  `tests/beyond.test.ts`. Collaudo 8 h: a 8 h Torre 56-62 (prima 46-51), Abisso 25-29 (prima 16-19), livello 77-86 (prima 58-73);
-  tutti i profili prendono le notevoli di Crociato e Arcano. Collaudo 24 h: Torre 83-94 (prima 62-71), Abisso 39-49
-  (prima 28-33), Paragon 33-37 (prima 25-31), Rinascite 3-4 (prima 2-3), Soli 6-8 (prima 4-6). Nessun problema.
-- Proposte in attesa di conferma:
-  - **Chiavi**: A) Spedizione (spendi 10/tutte le chiavi, ricompense subito, solo al livello di un Dungeon già vinto);
-    B) Dungeon automatici (anche offline); C) Dungeon a più chiavi (×N premi, nemici più forti). Consigliata A.
-  - **Contenuti**: pozzo per l'Essenza (rune oltre il livello, rune nuove), zone/boss oltre lo stage 100, unici/set lotto 6,
-    traguardi della Torre ogni 25 piani, boss e bottino propri dei Raid, nuovi potenziamenti d'Ascensione, più imprese e Lumi.
+## Revisione utente 2026-10-26/27
+- Fatto e online: offline **100%** (Veglia Eterna tolta, Scintille rimborsate, v22); Torre riparte `TOWER_BACK` = 5 piani
+  sotto il record; Scintille sempre nel potenziamento più economico; punti stella extra: 1 ogni 10 piani di Torre e 1 ogni
+  3 Ascensioni in tutto (`totals.ascensions`, v23); `autoStars` guarda avanti `STAR_LOOKAHEAD` = 6 verso le notevoli.
+- Solo sul branch: regione **«Oltre»** (`BEYOND` in `src/data/constellations.ts`, 51 stelle, 15 notevoli + 3 chiavi di
+  volta, regole in `combat.ts`/`skills.ts`/`stats.ts`, costanti in fondo a `src/data/uniques.ts`, v24, `tests/beyond.test.ts`).
+  Freni già messi (l'utente ha chiesto di frenare): Mietitore max +30%, Sangue Freddo +20%, Martello +0,5%/colpo max +150%.
+- Ritmo (collaudo 24 h, profilo lama): prima di «Oltre» Torre ~62, Abisso ~28, 2 Rinascite; con «Oltre» Torre ~80-90,
+  Abisso ~38-45, 4 Rinascite. Prove a esclusione (cartelle in scratchpad, perse col container): il colpevole è
+  **Respiro della Battaglia** (ogni uccisione azzera la ricarica più lunga → Giudizio a ogni nemico). Senza di lei: Torre 70,
+  Abisso 33, 2 Rinascite. Le altre regole tolte una a una non cambiano quasi nulla; punti extra e lookahead da soli neanche.
+  Proposte di freno da chiedere: a) ogni uccisione toglie 3 s alla ricarica più lunga; b) azzera solo uccidendo élite e boss;
+  c) azzera la ricarica al massimo una volta ogni 10 s.
+- Collaudo 24 h pre-«Oltre» (2026-10-26): livello 89-95, record 112-125, ~20 Ascensioni, chiavi ~190/giorno, Essenza ferma 10-30k.
+- Proposte in attesa: **Chiavi** A) Spedizione (spendi 10/tutte, premi subito, al livello di un Dungeon già vinto; consigliata),
+  B) Dungeon automatici, C) Dungeon a più chiavi. **Contenuti**: pozzo per l'Essenza, zone/boss oltre lo stage 100, unici/set
+  lotto 6, traguardi Torre ogni 25 piani, bottino proprio dei Raid, nuovi potenziamenti d'Ascensione, più imprese e Lumi.
 
 ## Pubblicazione
 - Firebase (`firebase.json`, job `firebase` in `.github/workflows/deploy.yml`, `firebase-tools@14`) e GitHub Pages.
@@ -64,7 +63,7 @@
 - Salvataggio: **v24** (v24 «Oltre», v23 `totals.ascensions`, v22 Veglia Eterna tolta, v21 skill fisse + rimborso rune, v20 `abyss`/`paragon`/`rebirth`), prima **v19** (v11 `vie`, v12 nemico + `keys`/`mode`/`tower`, v13 `ascension`, v14 campi opzionali rune, v15 `hero.sanctity`, v16 `codex`, v17 `collection`, v18 `achievements`, v19 `lumi`).
 
 ## Test
-- `npm test`: **240 verdi** (24 file), `npm run build` ok, collaudo 8 h ok (2026-10-27). Il test lento della Collezione ha timeout 20 s.
+- `npm test`: **240 verdi** (24 file), `npm run build` ok, collaudo 24 h ok (2026-10-27). Il test lento della Collezione ha timeout 20 s.
 - Collaudo: `npm run collaudo -- --ore 8 [--seed N] [--profilo id]` (`scripts/collaudo.ts`, un processo per profilo:
   5 Vie + uno con sessioni offline). 8 h: nessun NaN/crash/salvataggio rotto, ~30 s. Rilanciarlo dopo ogni sistema nuovo.
   Attenzione: nelle catene di comandi non fidarsi di `npm test | grep` (esce 0 anche se fallisce).
