@@ -6,7 +6,7 @@
 **Ultimo aggiornamento:** 2026-10-26 (revisione utente: offline 100%, Torre, Scintille, collaudo 24 h)
 **Fase corrente:** Fase 8 chiusa, grafica fatta. Ora **revisione dell'utente** (ROADMAP "Dopo la Fase 8").
 **Prossimo passo:** l'utente deve scegliere su Stelle e Chiavi (proposte sotto), poi un passo alla volta.
-**Online:** `main` è indietro: gli ultimi commit sono solo sul branch (offline 100% ecc. non ancora pubblicati).
+**Online:** `main` = branch (offline 100%, Torre, Scintille pubblicati 2026-10-27).
 
 ## Sessione 2026-10-26 (revisione utente)
 - Offline **100%** (`OFFLINE_EFFICIENCY`), tolta Veglia Eterna; migrazione **v22** rimborsa le Scintille (`VEGLIA_REFUND`).
