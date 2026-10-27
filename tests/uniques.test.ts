@@ -203,8 +203,8 @@ describe('regole del lotto 5', () => {
   };
 
   it('ogni unico e ogni set ha una regola con il suo testo; 6 pezzi di tipi diversi per set', () => {
-    expect(UNIQUES.length).toBe(30);
-    expect(SETS.length).toBe(8);
+    expect(UNIQUES.length).toBe(41);
+    expect(SETS.length).toBe(10);
     expect(new Set(UNIQUES.map((u) => u.id)).size).toBe(UNIQUES.length);
     for (const set of SETS) expect(new Set(set.pieces.map((p) => p.type)).size).toBe(6);
   });
@@ -272,5 +272,23 @@ describe('salvataggio v6', () => {
     expect(m.version).toBe(STATE_VERSION);
     expect(m.hero.nextCrit).toBe(false);
     expect(nextCrit).toBe(false);
+  });
+});
+
+describe('lotto 6', () => {
+  it('le notevoli di «Oltre» arrivano anche dagli unici, mai le chiavi di volta', () => {
+    const lot6 = ['setteSaette', 'mattino', 'cuoreGhiaccio', 'duellante', 'calVermiglio', 'rogo', 'spezzascudi', 'messe', 'sangueFreddo', 'fiammeVive', 'ecoArcano'];
+    lot6.forEach((id, i) => {
+      const u = UNIQUES.find((x) => x.id === id)!;
+      expect(stateStats(game([unique(900 + i, id)])).rules.has(u.rule), id).toBe(true);
+    });
+    const keystones: RuleId[] = ['supernova', 'livingFortress', 'timeStop', 'battleBreath', 'judgeHammer'];
+    for (const u of UNIQUES) expect(keystones).not.toContain(u.rule);
+  });
+
+  it('Gladiatore completo: regola Spezzascudi', () => {
+    const set = SETS.find((x) => x.id === 'gladiatore')!;
+    const s = game(set.pieces.map((p, i) => piece(950 + i, 'gladiatore', p.type)));
+    expect(stateStats(s).rules.has('armorBreak')).toBe(true);
   });
 });

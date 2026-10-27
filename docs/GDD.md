@@ -158,6 +158,9 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
   scudo a metà vita, evocazioni, rigenerazione) all'ultimo stage della zona. Resistenze per famiglia (fisico ed
   elementi). Élite dallo stage 5 (8%): 5 affissi, ×3 ricompense, 50% di bottino, 5% di chiave.
 - **Deciso (2026-10-24):** il muro al boss di zona 50 resta (spinge ad ascendere). Nomi approvati.
+- **Fatto (zone 11-20, delega dell'utente, 2026-10-27):** stage 101-200 con 10 zone e boss nuovi (Necropoli Sommersa →
+  Il Sole Spento), stesso ordine delle famiglie e stesso numero di meccaniche della zona 100 stage prima, combinazioni
+  diverse; carte in `BOSS_ART`. Dallo stage 201 si ricomincia col numero romano.
 
 ## 10. Modalità di gioco
 | Modalità | Descrizione | Ricompensa principale |
@@ -239,6 +242,9 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
   offline e, alla migrazione v17, quelli già posseduti). Bonus a tema per unico (`src/data/collection.ts`, solo %)
   + premi di completamento al 25/50/100% (+5/+10/+15% attacco e vita, al 100% anche +10% ritrovamento magico).
   Elenco nella scheda Mondo, avviso alla scoperta. Collaudo: 7-10 unici su 18 in 8 h.
+  **Lotto 6 (2026-10-27):** 11 unici con le notevoli di «Oltre» (mai le chiavi di volta), set Gladiatore (Spezzascudi)
+  e Araldo dell'Alba (Luce Incessante): 41 unici, 10 set. Collezionista VI a 40 unici. I premi al 25/50/100% si
+  ricalcolano sul totale nuovo (chi aveva il 100% lo riprende trovando i nuovi).
 - **Imprese** (achievement) con ricompense.
   **Fatto (2026-10-24):** 11 tracce a gradini, 54 imprese (`src/data/achievements.ts`): uccisioni, stage, livello,
   Ascensioni, Dungeon, Raid, Torre, gradi del Bestiario, collezione, rune, oro. Ricompensa (decisione utente): solo

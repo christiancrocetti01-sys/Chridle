@@ -21,7 +21,8 @@
   Dungeon vinto; nel collaudo si usa con ≥ 13 chiavi. Torre: Mitico ogni 25 piani (`TOWER_GRAND_EVERY`). Imprese: Predone V,
   Scalatore V-VI. Nessun cambio al salvataggio. Pozzo dell'Essenza scartato: skill e rune sono già pozzi infiniti.
 - Contenuti (2026-10-27, «finisci tutti i punti»): fatto **zone 11-20** (stage 101-200, 10 boss nuovi con carte in
-  `BOSS_ART`; dopo lo stage 200 si ricomincia col numero romano). Da fare: unici/set lotto 6, bottino dei Raid,
+  `BOSS_ART`; dopo lo stage 200 si ricomincia col numero romano), **lotto 6** (11 unici, set Gladiatore e Araldo
+  dell'Alba). Da fare: bottino dei Raid,
   potenziamenti d'Ascensione, più Lumi; poi revisione completa + report HTML.
 
 ## Pubblicazione
@@ -60,7 +61,7 @@
 - Salvataggio: **v24** (v24 «Oltre», v23 `totals.ascensions`, v22 Veglia Eterna tolta, v21 skill fisse + rimborso rune, v20 `abyss`/`paragon`/`rebirth`), prima **v19** (v11 `vie`, v12 nemico + `keys`/`mode`/`tower`, v13 `ascension`, v14 campi opzionali rune, v15 `hero.sanctity`, v16 `codex`, v17 `collection`, v18 `achievements`, v19 `lumi`).
 
 ## Test
-- `npm test`: **242 verdi** (24 file), `npm run build` ok, collaudo 24 h di tutti i profili ok dopo la Spedizione (2026-10-27:
+- `npm test`: **244 verdi** (24 file), `npm run build` ok, collaudo 24 h di tutti i profili ok dopo la Spedizione (2026-10-27:
   Torre 71-80, Abisso 33-37, record 50-154, 2-4 Rinascite). Il test lento della Collezione ha timeout 20 s.
 - Collaudo: `npm run collaudo -- --ore 8 [--seed N] [--profilo id]` (`scripts/collaudo.ts`, un processo per profilo:
   5 Vie + uno con sessioni offline). 8 h: nessun NaN/crash/salvataggio rotto, ~30 s. Rilanciarlo dopo ogni sistema nuovo.

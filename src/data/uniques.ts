@@ -128,6 +128,18 @@ export const UNIQUES: UniqueDef[] = [
   { id: 'lampo', name: 'Stivali del Lampo', type: 'stivali', tags: ['fulmine', 'velocita'], mods: [['lightningPct', 0.15], ['speedPct', 0.06]], rule: 'echoLightning' },
   { id: 'occhioAbisso', name: "Occhio dell'Abisso", type: 'amuleto', tags: ['ombra', 'veleno'], mods: [['poison', 2], ['shadowPct', 0.1]], rule: 'dotDouble' },
   { id: 'aurora', name: "Reliquia dell'Aurora", type: 'reliquia', tags: ['sacro', 'vita'], mods: [['holy', 2], ['regenPct', 0.004]], rule: 'overhealHoly' },
+  // lotto 6: le notevoli della regione «Oltre» su un oggetto (le chiavi di volta restano solo nelle Costellazioni)
+  { id: 'setteSaette', name: 'Scettro delle Sette Saette', type: 'arma', tags: ['fulmine'], mods: [['lightning', 3], ['lightningPct', 0.15]], rule: 'chainBolt' },
+  { id: 'mattino', name: 'Elmo del Primo Mattino', type: 'elmo', tags: ['sacro', 'critico'], mods: [['holyPct', 0.15], ['critDmg', 0.2]], rule: 'sunrise' },
+  { id: 'cuoreGhiaccio', name: 'Cuore di Ghiaccio', type: 'amuleto', tags: ['gelo'], mods: [['cold', 2.5], ['coldPct', 0.15]], rule: 'deepFreeze' },
+  { id: 'duellante', name: 'Guanti del Duellante', type: 'guanti', tags: ['velocita', 'difesa'], mods: [['dodge', 0.04], ['speedPct', 0.05]], rule: 'riposte' },
+  { id: 'calVermiglio', name: 'Calice Vermiglio', type: 'reliquia', tags: ['rubavita', 'vita'], mods: [['lifeSteal', 0.012], ['hpPct', 0.06]], rule: 'lightVampire' },
+  { id: 'rogo', name: 'Corazza del Rogo', type: 'armatura', tags: ['fuoco', 'difesa'], mods: [['firePct', 0.15], ['defPct', 0.1]], rule: 'blazingShield' },
+  { id: 'spezzascudi', name: 'Spezzascudi', type: 'secondaria', tags: ['fisico', 'critico'], mods: [['atkPct', 0.08], ['crit', 0.03]], rule: 'armorBreak' },
+  { id: 'messe', name: 'Sandali della Messe', type: 'stivali', tags: ['ombra', 'velocita'], mods: [['shadowPct', 0.12], ['speedPct', 0.04]], rule: 'reaper' },
+  { id: 'sangueFreddo', name: 'Cintura del Sangue Freddo', type: 'cintura', tags: ['gelo', 'vita'], mods: [['coldPct', 0.1], ['hpPct', 0.1]], rule: 'coldBlood' },
+  { id: 'fiammeVive', name: 'Mantello delle Fiamme Vive', type: 'mantello', tags: ['fuoco', 'veleno'], mods: [['fire', 1.5], ['poison', 1.5]], rule: 'livingFlames' },
+  { id: 'ecoArcano', name: "Anello dell'Eco Arcano", type: 'anello', tags: ['fuoco', 'gelo', 'fulmine', 'sacro', 'ombra'], mods: [['elemPct', 0.06], ['crit', 0.02]], rule: 'skillEcho' },
 ];
 
 export interface SetDef {
@@ -234,6 +246,29 @@ export const SETS: SetDef[] = [
     bonus2: [['magicFind', 0.2], ['goldPct', 0.25]],
     bonus4: { on: 'kill', effect: { kind: 'haste', value: 0.2, seconds: 5 } },
     bonus6: { rule: 'luckyDrops', mods: [['xpPct', 0.3]] },
+  },
+  // lotto 6
+  {
+    id: 'gladiatore', name: 'Gladiatore', tags: ['fisico', 'critico'],
+    pieces: [
+      { type: 'arma', name: 'Gladio del Gladiatore' }, { type: 'elmo', name: 'Elmo del Gladiatore' },
+      { type: 'armatura', name: 'Pettorale del Gladiatore' }, { type: 'guanti', name: 'Cesti del Gladiatore' },
+      { type: 'stivali', name: 'Schinieri del Gladiatore' }, { type: 'cintura', name: 'Cinturone del Gladiatore' },
+    ],
+    bonus2: [['atkPct', 0.2], ['crit', 0.03]],
+    bonus4: { on: 'crit', effect: { kind: 'bleed', value: 0.8 } },
+    bonus6: { rule: 'armorBreak', mods: [['critDmg', 0.5]] },
+  },
+  {
+    id: 'araldoAlba', name: "Araldo dell'Alba", tags: ['sacro', 'vita'],
+    pieces: [
+      { type: 'secondaria', name: "Vessillo dell'Araldo" }, { type: 'elmo', name: "Diadema dell'Araldo" },
+      { type: 'armatura', name: "Cotta dell'Araldo" }, { type: 'mantello', name: "Manto dell'Araldo" },
+      { type: 'amuleto', name: "Sole dell'Araldo" }, { type: 'reliquia', name: "Lanterna dell'Araldo" },
+    ],
+    bonus2: [['holyPct', 0.25], ['hpPct', 0.1]],
+    bonus4: { on: 'kill', effect: { kind: 'shield', value: 0.06 } },
+    bonus6: { rule: 'ceaselessLight', mods: [['holyPct', 0.25], ['regenPct', 0.004]] },
   },
 ];
 

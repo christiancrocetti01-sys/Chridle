@@ -26,7 +26,7 @@ export const TRACKS: TrackDef[] = [
   { id: 'raid', name: 'Ammazzaboss', text: '{n} Raid vinti', steps: [1, 5, 25, 100], bonus: [['bossDmg', 0.03]] },
   { id: 'torre', name: 'Scalatore', text: "piano {n} della Torre dell'Alba", steps: [10, 25, 50, 100, 150, 200], bonus: [['defPct', 0.02]] },
   { id: 'codex', name: 'Studioso', text: '{n} gradi del Bestiario', steps: [5, 10, 15, 20, 25], bonus: [['elemPct', 0.02]] },
-  { id: 'collezione', name: 'Collezionista', text: '{n} unici in collezione', steps: [1, 5, 10, 20, 30], bonus: [['critDmg', 0.04]] },
+  { id: 'collezione', name: 'Collezionista', text: '{n} unici in collezione', steps: [1, 5, 10, 20, 30, 40], bonus: [['critDmg', 0.04]] },
   { id: 'rune', name: 'Runologo', text: '{n} rune sbloccate', steps: [1, 2, 4, 6, 8], bonus: [['goldPct', 0.03]] },
   { id: 'oro', name: 'Tesoriere', text: '{n} oro guadagnato', steps: [1e4, 1e6, 1e9, 1e12, 1e15], bonus: [['goldPct', 0.03]] },
   { id: 'abisso', name: 'Abissale', text: "profondità {n} dell'Abisso", steps: [5, 10, 25, 50, 100], bonus: [['hpPct', 0.02], ['defPct', 0.02]] },

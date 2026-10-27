@@ -35,6 +35,17 @@ export const COLLECTION_BONUS: Record<string, Mods> = {
   lampo: [['speedPct', 0.02]],
   occhioAbisso: [['shadowPct', 0.03]],
   aurora: [['regenPct', 0.001]],
+  setteSaette: [['lightningPct', 0.03]],
+  mattino: [['holyPct', 0.03]],
+  cuoreGhiaccio: [['coldPct', 0.03]],
+  duellante: [['dodge', 0.01]],
+  calVermiglio: [['lifeSteal', 0.002]],
+  rogo: [['firePct', 0.03]],
+  spezzascudi: [['critDmg', 0.04]],
+  messe: [['shadowPct', 0.03]],
+  sangueFreddo: [['hpPct', 0.03]],
+  fiammeVive: [['bleed', 0.01]],
+  ecoArcano: [['elemPct', 0.02]],
 };
 
 /** Premi di completamento (si sommano): frazione della collezione → bonus. */
