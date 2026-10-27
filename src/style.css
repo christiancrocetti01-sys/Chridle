@@ -446,3 +446,56 @@ select { font: inherit; }
 .btn.primary:not(:disabled):hover { background: #E8C670; border-color: #E8C670; }
 .btn.danger { color: #E8958D; border-color: var(--foe); }
 .todo[hidden] { display: none; }
+
+/* Mondo: una carta per modalità, regole dietro la (i) */
+.modes { display: grid; gap: 10px; margin-top: 14px; }
+.mode { padding: 10px 6px 10px 14px; border: 1px solid var(--line); border-radius: 6px; }
+.mode.on { border-color: var(--accent); background: var(--surface); }
+.mode.locked { border-style: dashed; color: var(--faint); }
+.mode-head { display: flex; align-items: center; gap: 4px; min-height: 44px; }
+.mode-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.mode-name { font-size: 17px; font-weight: 600; }
+.mode-name .muted { font-weight: 400; font-size: 15px; }
+.mode.locked .mode-name { font-weight: 400; }
+.mode-line { font-size: 14px; color: var(--muted); }
+.mode.locked .mode-line { color: var(--faint); }
+.mode-on { margin: 0 8px; font: 500 12px 'Cinzel', Georgia, serif; letter-spacing: 0.1em; color: var(--accent); white-space: nowrap; }
+.mode-lock { width: 44px; display: grid; place-items: center; }
+.mode-lock svg, .icon-btn.info svg { fill: none; stroke: currentColor; stroke-width: 1.4; }
+.icon-btn.info { flex: none; color: var(--faint); }
+.icon-btn.info[aria-expanded="true"] { color: var(--accent); }
+.mode-head .btn { flex: none; height: 44px; margin-right: 8px; padding: 0 14px; }
+.btn.fill:not(:disabled) { background: var(--text); border-color: var(--text); color: var(--bg); font-weight: 600; }
+.btn.fill:not(:disabled):hover { background: #fff; }
+.mode-sub { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 8px 8px 0 0; padding-top: 8px; border-top: 1px solid var(--surface-2); font-size: 14px; color: var(--muted); }
+p.mode-sub { display: block; margin-bottom: 0; }
+.mode-btns { display: flex; gap: 4px; flex: none; }
+.mode-btns .btn { height: 36px; }
+.mode-info { margin: 8px 8px 0 0; padding-top: 8px; border-top: 1px solid var(--surface-2); font-size: 0.88em; color: var(--text); }
+.mode-info p { margin: 0 0 6px; }
+
+/* Rituali: l'Ascensione grande e sola */
+.rite { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: 16px; padding: 20px 16px; text-align: center; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+.rite-num { font-size: 44px; font-weight: 600; line-height: 1.1; color: var(--accent); }
+.rite-num.off { color: var(--faint); }
+.btn.big { width: 100%; height: 48px; margin-top: 8px; font: 700 14px 'Cinzel', Georgia, serif; letter-spacing: 0.1em; }
+.btn.big.danger { font: 600 15px 'EB Garamond', Georgia, serif; letter-spacing: 0; }
+.rite p { margin: 0; }
+.rite-cols { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; padding-top: 12px; border-top: 1px solid var(--line); text-align: left; font-size: 14px; }
+.rite-cols > div { display: flex; flex-direction: column; gap: 2px; }
+.rite-rows { margin-top: 10px; }
+.rite-row { border-bottom: 1px solid var(--line); }
+.rite-head { display: block; width: 100%; padding: 12px 0; background: none; border: 0; color: var(--text); font: inherit; text-align: left; cursor: pointer; }
+.rite-head .row { margin-top: 0; align-items: baseline; gap: 8px; }
+.rite-head .bar { display: block; height: 3px; margin-top: 8px; }
+.rite-head .fill { display: block; }
+.rite-row.ready .fill { background: var(--accent); }
+.rite-row:not(.ready) .fill { background: var(--muted); }
+.rite .go, .rite-head .go { color: var(--accent); }
+.rite-body { padding-bottom: 10px; }
+.rite-body .skill-row:first-child { padding-top: 0; }
+.perks { display: grid; }
+.perk { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--surface-2); font-size: 15px; }
+.perk > span:last-child { text-align: right; font-size: 14px; }
+.perk.dim > span:first-child { color: var(--muted); }
+.link { margin-top: 8px; padding: 8px 0; background: none; border: 0; color: var(--accent); font: inherit; cursor: pointer; }

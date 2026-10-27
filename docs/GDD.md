@@ -286,7 +286,9 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
   ed etichette brevi, EB Garamond per il resto, cifre tabellari. Barra in alto: valute, stage, menu ≡ (suoni, guida).
   **5 schede in basso**: Battaglia (carta del nemico grande, eroe in una riga, registro 3 righe, «Ascensione/Rinascita
   pronta»), Eroe (Oggetti/Skill/Rune/Stelle/Via/Lumi/Statistiche+Potenziamenti, sotto-schede a controllo segmentato),
-  Mondo, Rituali (Ascensione/Rinascita/Paragon), Codex (Bestiario/Collezione/Imprese). Nomi degli oggetti color osso:
+  Mondo (una carta per modalità: nome, una riga, pulsante; regole dietro la (i); in corso = cornice d'oro, chiusa =
+  tratteggiata), Rituali (Ascensione grande e sola; Rinascita e Paragon in una riga con barra, si aprono al tocco, la
+  Rinascita pronta si apre da sola; Permanenti compatti, 3 + «Tutti»), Codex (Bestiario/Collezione/Imprese). Nomi degli oggetti color osso:
   la rarità sta nella cornice dell'icona e nella riga «Slot · Rarità». Carte della Collezione con cornice d'oro.
   Canvas della proposta: https://claude.ai/artifact/EssdGCbTmQDTGQm51MUJuL
 - **Deciso (2026-10-24, UI divisa):** "una cosa per schermata". Header compatto sempre visibile (valute, livello/stage,

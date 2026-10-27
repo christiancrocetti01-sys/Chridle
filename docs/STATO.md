@@ -5,11 +5,9 @@
 
 **Ultimo aggiornamento:** 2026-10-27 (restyling UI «Breviario di Luce», ramo `claude/epic-allen-10jgj5`)
 **Fase corrente:** Fase 8 chiusa, grafica fatta. Ora **revisione dell'utente** (ROADMAP "Dopo la Fase 8").
-**Prossimo passo:** l'utente prova il **restyling «Breviario di Luce»** (fatto, sul ramo; canvas
-  https://claude.ai/artifact/EssdGCbTmQDTGQm51MUJuL). Possibile passo 2 (da confermare): Mondo e Rituali compatti come nel
-  canvas (una riga + pulsante per modalità, regole dietro una (i); Ascensione «grande e sola»). In sospeso anche i 10 punti
-  «Da decidere» del report `docs/report/revisione-2026-10-27.html`. Il ramo non è ancora su `main`.
-**Online:** `main` = tutto, «Oltre» e Spedizione comprese (2026-10-27).
+**Prossimo passo:** l'utente prova online il restyling «Breviario di Luce» completo (passo 2 fatto: Mondo e Rituali
+  compatti). Restano i 10 punti «Da decidere» del report `docs/report/revisione-2026-10-27.html`.
+**Online:** `main` = tutto, restyling compreso (passi 1 e 2, 2026-10-27).
 
 ## Revisione utente 2026-10-26/27
 - Fatto e online prima di oggi: offline 100%, Torre −5 piani, punti stella, regione «Oltre» (freni chiesti dall'utente),
@@ -30,6 +28,8 @@
   riquadro «Ascensione/Rinascita pronta» (`todo`, attributo `data-go`: **mai `data-sub` fuori dai pane**, lo nasconde il CSS).
 - `src/ui/combat.ts`: carta del nemico grande al centro, eroe in una riga. `src/ui/gear.ts`: slot in righe con cornice della
   rarità, dettaglio sotto la riga toccata. Palette e componenti in fondo a `src/style.css` (blocco «Breviario di Luce»).
+- Passo 2: `src/ui/world.ts` carte `ModeCard` (regole dietro `data-info`), `src/ui/ascension.ts` blocco `.rite` + righe
+  Rinascita/Paragon (`data-open`). Mondo e Rituali non hanno più sotto-schede (`subs: []`).
 
 ## Pubblicazione
 - Firebase (`firebase.json`, job `firebase` in `.github/workflows/deploy.yml`, `firebase-tools@14`) e GitHub Pages.

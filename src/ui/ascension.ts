@@ -16,12 +16,26 @@ export interface AscensionActions {
 const perkText = (d: PerkDef, total: number) =>
   d.text.replace('{v}', d.id === 'balzo' || d.id === 'slot' || d.id === 'chiavi' ? String(total) : String(Math.round(total * 100)));
 
-/** Scheda Ascensione: Scintille, pulsante per ascendere e potenziamenti permanenti. */
+/** Perk mostrati prima di «Tutti e N». */
+const PERKS_SHOWN = 3;
+
+/** Scheda Rituali: l'Ascensione grande e sola, Rinascita e Paragon in una riga (si aprono al tocco), permanenti compatti. */
 export function createAscensionPanel(root: HTMLElement, actions: AscensionActions) {
   let key = '';
   let confirm = false;
   let confirmSun = false;
+  let allPerks = false;
+  const open = new Set<string>();
   root.addEventListener('click', (ev) => {
+    const row = (ev.target as HTMLElement).closest<HTMLElement>('[data-open]');
+    if (row) {
+      const id = row.dataset.open!;
+      if (id === 'perks') allPerks = !allPerks;
+      else if (open.has(id)) open.delete(id);
+      else open.add(id);
+      key = '';
+      return;
+    }
     const t = (ev.target as HTMLElement).closest<HTMLElement>('[data-a]');
     if (!t) return;
     if (t.dataset.a === 'ascend') {
@@ -39,34 +53,54 @@ export function createAscensionPanel(root: HTMLElement, actions: AscensionAction
       const a = state.ascension;
       const gain = scintilleGain(state);
       const p = state.paragon;
-      const k = JSON.stringify([a, gain, confirm, confirmSun, canAscend(state), p.level, p.points, Math.floor((p.xp / paragonCost(p.level)) * 100), state.rebirth]);
+      const sun = canRebirth(state);
+      const k = JSON.stringify([a, gain, confirm, confirmSun, canAscend(state), p.level, p.points, Math.floor((p.xp / paragonCost(p.level)) * 100), state.rebirth, allPerks, [...open], sun]);
       if (k === key) return;
       key = k;
-      const ok = canAscend(state);
+      const ok = canAscend(state) && gain > 0;
+      const cycle = Math.floor(cycleScintille(state));
+      const sunPct = Math.min(100, (cycle / REBIRTH_SCINTILLE) * 100);
+      const paraPct = Math.min(100, (p.xp / paragonCost(p.level)) * 100);
+      const free = paragonFree(p);
+      // la Rinascita pronta si apre da sola: è lei la decisione del momento
+      const sunOpen = open.has('sun') !== sun;
+      const perks = allPerks ? PERKS : PERKS.slice(0, PERKS_SHOWN);
       root.innerHTML = `
-        <div data-sub="ascensione">
-        <h2 class="section">Ascensione <span class="muted">· ${a.count} volte</span></h2>
-        <div class="skill-row">
-          <div class="skill-head"><span><b class="scint">${formatNum(a.scintille)}</b> Scintille <span class="muted">(${formatNum(a.total)} in tutto)</span></span>
-            <button class="btn sm${confirm ? ' danger' : ' primary'}" data-a="ascend"${ok && gain > 0 ? '' : ' disabled'}>${confirm ? 'Conferma: riparti da capo' : `Ascendi · +${gain}`}</button></div>
-          <div class="skill-info">Il Sole si riaccende un poco, ma l’Eclissi ritorna. Si riparte da livello 1 e dallo stage iniziale
-            perdendo oro, potenziamenti e Costellazioni (i punti tornano salendo). Restano oggetti, Frammenti, Essenza, rune, chiavi, Torre e Vie.</div>
-          <div class="skill-info muted">${state.stage.best >= ASCEND_STAGE ? `Scintille = ((record − 30) / 10)²${sparkMult(state.rebirth) > 1 ? ` × ${sparkMult(state.rebirth).toFixed(2)} (Soli)` : ''}. Record attuale: stage ${state.stage.best}.` : `Si sblocca allo stage ${ASCEND_STAGE} (record attuale ${state.stage.best}).`}</div>
-        </div>
-        <h2 class="section">Potenziamenti permanenti <span class="muted">· le Scintille si spendono da sole, sempre nel più economico</span></h2>
-        <div class="skill-list">${PERKS.map((d) => {
+        <section class="rite">
+          <span class="label">Ascensione · n° ${a.count + 1}</span>
+          <span class="rite-num${ok ? '' : ' off'}">+${formatNum(gain)}</span>
+          <span>Scintille <span class="muted">(ora ${formatNum(a.scintille)}, ${formatNum(a.total)} in tutto)</span></span>
+          <button class="btn primary big${confirm ? ' danger' : ''}" data-a="ascend"${ok ? '' : ' disabled'}>${confirm ? 'Conferma: riparti da capo' : 'Ascendi'}</button>
+          <p class="muted small">${state.stage.best >= ASCEND_STAGE ? `Scintille = ((record − 30) / 10)²${sparkMult(state.rebirth) > 1 ? ` × ${sparkMult(state.rebirth).toFixed(2)} (Soli)` : ''} · record stage ${state.stage.best}` : `Si apre allo stage ${ASCEND_STAGE} (record ${state.stage.best})`}</p>
+          <div class="rite-cols">
+            <div><span class="label">Restano</span><span>oggetti, Frammenti, Essenza, rune, chiavi, Torre, Vie</span></div>
+            <div><span class="label">Si perdono</span><span class="muted">livello, stage, oro, potenziamenti, Stelle (i punti tornano salendo)</span></div>
+          </div>
+        </section>
+        <section class="rite-rows">
+          <div class="rite-row${sun ? ' ready' : ''}${sunOpen ? ' open' : ''}">
+            <button class="rite-head" data-open="sun" aria-expanded="${sunOpen}">
+              <span class="row"><span>Rinascita${sun ? ' <span class="go">pronta</span>' : ''}</span><span class="muted small">${state.rebirth.soli ? `${state.rebirth.soli} Soli · ` : ''}${formatNum(cycle)} / ${REBIRTH_SCINTILLE} Scintille</span></span>
+              <span class="bar"><span class="fill" style="width:${sunPct.toFixed(1)}%"></span></span>
+            </button>
+            ${sunOpen ? `<div class="rite-body">${rebirthBlock(state, confirmSun)}</div>` : ''}
+          </div>
+          <div class="rite-row${open.has('para') ? ' open' : ''}">
+            <button class="rite-head" data-open="para" aria-expanded="${open.has('para')}">
+              <span class="row"><span>Paragon${p.level ? ` <span class="muted">liv. ${p.level}</span>` : ''}</span><span class="muted small">${p.level || p.xp ? `${Math.floor(paraPct)}%${free ? ` · ${free} punti` : ''}` : "si guadagna nell'Abisso"}</span></span>
+              <span class="bar"><span class="fill" style="width:${paraPct.toFixed(1)}%"></span></span>
+            </button>
+            ${open.has('para') ? `<div class="rite-body">${paragonBlock(state)}</div>` : ''}
+          </div>
+        </section>
+        <h2 class="section">Permanenti <span class="muted">· le Scintille si spendono da sole, nel più economico</span></h2>
+        <div class="perks">${perks.map((d) => {
           const lv = perkLevel(a, d.id);
           const maxed = d.max !== undefined && lv >= d.max;
-          const cost = perkCost(a, d.id);
-          return `<div class="skill-row">
-            <div class="skill-head"><span><b>${d.name}</b> <span class="muted">Lv ${lv}${d.max ? `/${d.max}` : ''}</span></span>
-              <span class="muted">${maxed ? 'Massimo' : `prossimo · ${formatNum(cost)}`}</span></div>
-            <div class="skill-info">${lv ? perkText(d, perkValue(a, d.id)) : `<span class="muted">${perkText(d, d.value)} al primo livello</span>`}</div>
-          </div>`;
+          return `<div class="perk${lv ? '' : ' dim'}"><span>${d.name} <span class="muted">${lv}${d.max ? `/${d.max}` : ''}</span></span>
+            <span class="muted">${lv ? perkText(d, perkValue(a, d.id)) : `${perkText(d, d.value)} al Lv 1`}${maxed ? ' · max' : ` · prossimo ${formatNum(perkCost(a, d.id))}`}</span></div>`;
         }).join('')}</div>
-        </div>
-        <div data-sub="rinascita">${rebirthBlock(state, confirmSun)}</div>
-        <div data-sub="paragon">${paragonBlock(state)}</div>`;
+        ${PERKS.length > PERKS_SHOWN ? `<button class="link" data-open="perks">${allPerks ? 'Meno ‹' : `Tutti e ${PERKS.length} ›`}</button>` : ''}`;
     },
   };
 }
@@ -75,9 +109,8 @@ export function createAscensionPanel(root: HTMLElement, actions: AscensionAction
 function rebirthBlock(state: GameState, confirm: boolean): string {
   const r = state.rebirth;
   const gain = rebirthGain(state);
-  return `<h2 class="section">Rinascita Solare <span class="muted">· ${r.count} volte</span></h2>
-    <div class="skill-row">
-      <div class="skill-head"><span><b class="scint">${r.soli}</b> Soli</span>
+  return `<div class="skill-row">
+      <div class="skill-head"><span><b class="scint">${r.soli}</b> Soli <span class="muted">· ${r.count} Rinascite</span></span>
         <button class="btn sm${confirm ? ' danger' : ' primary'}" data-a="rebirth"${canRebirth(state) ? '' : ' disabled'}>${confirm ? 'Conferma: azzera le Ascensioni' : `Rinasci · +${gain} Soli`}</button></div>
       <div class="skill-info">Il Sole muore e rinasce. Si azzerano Ascensioni, Scintille e potenziamenti (restano gli slot delle skill e la Doppia Via)
         e si riparte da capo. Restano oggetti, rune, Torre, Abisso, Paragon, collezione e Lumi.</div>
@@ -91,11 +124,8 @@ function rebirthBlock(state: GameState, confirm: boolean): string {
 function paragonBlock(state: GameState): string {
   const p = state.paragon;
   const free = paragonFree(p);
-  const pct = Math.min(100, (p.xp / paragonCost(p.level)) * 100);
-  return `<h2 class="section">Paragon <span class="muted">· livello ${p.level}${free ? ` · <b>${free}</b> punti` : ''}</span></h2>
-    <div class="skill-row">
-      <div class="bar"><div class="fill" style="width:${pct.toFixed(1)}%"></div></div>
-      <div class="skill-info muted">${formatNum(p.xp)} / ${formatNum(paragonCost(p.level))} esperienza Paragon: si guadagna solo nell'Abisso.
+  return `<div class="skill-row">
+      <div class="skill-info muted">Livello ${p.level}${free ? ` · <b>${free}</b> punti da spendere` : ''} · ${formatNum(p.xp)} / ${formatNum(paragonCost(p.level))} esperienza Paragon: si guadagna solo nell'Abisso.
         I punti si spendono da soli, a giro: Forza, Vigore, Forza, Precisione, Vigore, Tempra.</div>
     </div>
     <div class="skill-list">${PARAGON.map((d) => {

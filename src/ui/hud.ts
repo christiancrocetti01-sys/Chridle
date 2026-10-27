@@ -39,9 +39,9 @@ const TABS: TabDef[] = [
   { id: 'hero', name: 'Eroe', icon: 'M5 19 V10 A6 6 0 0 1 17 10 V19 Z M5 12 H17 M11 12 V17', subs: [
     ['oggetti', 'Oggetti'], ['skill', 'Skill'], ['rune', 'Rune'], ['stelle', 'Stelle'], ['via', 'Via'], ['lumi', 'Lumi'], ['statistiche', 'Statistiche'],
   ] },
-  { id: 'world', name: 'Mondo', icon: 'M7 20 V6 L11 2 L15 6 V20 Z M9 9 H13 M9 13 H13 M3 20 H19', subs: [['zona', 'Zona'], ['modi', 'Modalità']] },
+  { id: 'world', name: 'Mondo', icon: 'M7 20 V6 L11 2 L15 6 V20 Z M9 9 H13 M9 13 H13 M3 20 H19', subs: [] },
   { id: 'ascension', name: 'Rituali', icon: 'M11 7 A4 4 0 1 0 11.01 7 Z M11 2 V5 M11 17 V20 M2 11 H5 M17 11 H20 M4.6 4.6 L6.7 6.7 M15.3 15.3 L17.4 17.4 M4.6 17.4 L6.7 15.3 M15.3 6.7 L17.4 4.6',
-    subs: [['ascensione', 'Ascensione'], ['rinascita', 'Rinascita'], ['paragon', 'Paragon']] },
+    subs: [] },
   { id: 'progress', name: 'Codex', icon: 'M11 5 C8 3 5 3 3 4 V18 C5 17 8 17 11 19 C14 17 17 17 19 18 V4 C17 3 14 3 11 5 Z M11 5 V19',
     subs: [['bestiario', 'Bestiario'], ['collezione', 'Collezione'], ['imprese', 'Imprese']] },
 ];
@@ -170,7 +170,7 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
     openGuide();
   });
   refs.todo.addEventListener('click', () => {
-    show('ascension', refs.todo.dataset.go);
+    show('ascension');
     window.scrollTo({ top: 0 });
   });
 
@@ -208,7 +208,7 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
     const asc = canAscend(state) && scintilleGain(state) > 0;
     const sun = canRebirth(state);
     const b: Record<string, string> = {
-      ascension: asc || sun ? '•' : '', ascensione: asc ? '•' : '', rinascita: sun ? '•' : '',
+      ascension: asc || sun ? '•' : '',
     };
     const k = JSON.stringify(b);
     if (k === badgeKey) return;
@@ -225,7 +225,6 @@ export function createHud(root: HTMLElement, actions: HudActions): Hud {
     if (k === todoKey) return;
     todoKey = k;
     refs.todo.hidden = !k;
-    refs.todo.dataset.go = sun ? 'rinascita' : 'ascensione';
     refs.todo.innerHTML = sun
       ? '<span><b>Rinascita pronta</b><small>nuovo Sole: la Campagna ricomincia più forte</small></span><span class="go">RINASCI ›</span>'
       : `<span><b>Ascensione pronta</b><small>+${formatNum(gain)} Scintille</small></span><span class="go">ASCENDI ›</span>`;
