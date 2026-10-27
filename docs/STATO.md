@@ -3,16 +3,16 @@
 > File di passaggio di consegne tra sessioni. Aggiornato da Claude a fine di ogni modifica.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
-**Ultimo aggiornamento:** 2026-10-27 (Respiro della Battaglia frenato, ritmo tornato a posto)
+**Ultimo aggiornamento:** 2026-10-27 («Oltre» pubblicata su `main`)
 **Fase corrente:** Fase 8 chiusa, grafica fatta. Ora **revisione dell'utente** (ROADMAP "Dopo la Fase 8").
-**Prossimo passo:** chiedere conferma e pubblicare «Oltre» su `main`. Dopo: Chiavi (A/B/C) e contenuti.
-**Online:** `main` = fino a Stelle passo 1. Sul branch in più: regione «Oltre» e freni (non pubblicati).
+**Prossimo passo:** chiedere all'utente cosa fare tra Chiavi (A/B/C, sotto) e contenuti.
+**Online:** `main` = tutto, regione «Oltre» compresa (2026-10-27).
 
 ## Revisione utente 2026-10-26/27
 - Fatto e online: offline **100%** (Veglia Eterna tolta, Scintille rimborsate, v22); Torre riparte `TOWER_BACK` = 5 piani
   sotto il record; Scintille sempre nel potenziamento più economico; punti stella extra: 1 ogni 10 piani di Torre e 1 ogni
   3 Ascensioni in tutto (`totals.ascensions`, v23); `autoStars` guarda avanti `STAR_LOOKAHEAD` = 6 verso le notevoli.
-- Solo sul branch: regione **«Oltre»** (`BEYOND` in `src/data/constellations.ts`, 51 stelle, 15 notevoli + 3 chiavi di
+- Online: regione **«Oltre»** (`BEYOND` in `src/data/constellations.ts`, 51 stelle, 15 notevoli + 3 chiavi di
   volta, regole in `combat.ts`/`skills.ts`/`stats.ts`, costanti in fondo a `src/data/uniques.ts`, v24, `tests/beyond.test.ts`).
   Freni (chiesti dall'utente): Mietitore max +30%, Sangue Freddo +20%, Martello +0,5%/colpo max +150%,
   **Respiro della Battaglia** (`battleBreath`) ricarica la skill solo uccidendo élite e boss (scelta b dell'utente).
