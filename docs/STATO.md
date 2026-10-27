@@ -5,7 +5,7 @@
 
 **Ultimo aggiornamento:** 2026-10-27 (Stelle passo 2: regione «Oltre» con 15 notevoli e 3 chiavi di volta)
 **Fase corrente:** Fase 8 chiusa, grafica fatta. Ora **revisione dell'utente** (ROADMAP "Dopo la Fase 8").
-**Prossimo passo:** esito collaudo 24 h dopo «Oltre» (in corso) e ok dell'utente per pubblicare; poi Chiavi (A/B/C) e contenuti.
+**Prossimo passo:** l'utente decide se il ritmo dopo «Oltre» va bene (o va frenato) e se pubblicare; poi Chiavi (A/B/C) e contenuti.
 **Online:** `main` è indietro di Stelle passo 2 (solo sul branch).
 
 ## Sessione 2026-10-26 (revisione utente)
@@ -20,7 +20,8 @@
   `autoStars` valuta percorsi fino a `STAR_LOOKAHEAD` = 6 verso notevoli/chiavi di volta (regola = +6% potenza).
   Passo 2 fatto: regione «Oltre» (`BEYOND`, 51 stelle, 18 regole nuove, dettagli GDD §7), salvataggio **v24**, test in
   `tests/beyond.test.ts`. Collaudo 8 h: a 8 h Torre 56-62 (prima 46-51), Abisso 25-29 (prima 16-19), livello 77-86 (prima 58-73);
-  tutti i profili prendono le notevoli di Crociato e Arcano.
+  tutti i profili prendono le notevoli di Crociato e Arcano. Collaudo 24 h: Torre 83-94 (prima 62-71), Abisso 39-49
+  (prima 28-33), Paragon 33-37 (prima 25-31), Rinascite 3-4 (prima 2-3), Soli 6-8 (prima 4-6). Nessun problema.
 - Proposte in attesa di conferma:
   - **Chiavi**: A) Spedizione (spendi 10/tutte le chiavi, ricompense subito, solo al livello di un Dungeon già vinto);
     B) Dungeon automatici (anche offline); C) Dungeon a più chiavi (×N premi, nemici più forti). Consigliata A.
