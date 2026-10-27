@@ -24,6 +24,11 @@ export const DUNGEON_FRAGMENTS = 8;
 export const DUNGEON_ESSENCE = 4;
 /** Il dungeon è al livello dello stage record meno questo scarto. */
 export const DUNGEON_LEVEL_OFFSET = 3;
+/**
+ * Spedizione: spende le chiavi accumulate e dà subito le ricompense di un Dungeon senza modificatori (×1, giocato
+ * vale in media ~×1,45) e il pezzo di set. Si sblocca dopo il primo Dungeon completato.
+ */
+export const EXPEDITION_BATCH = 10;
 
 // ── Torre dell'Alba: piani infiniti, record personale, bonus permanenti ai traguardi ──
 export const TOWER_SECONDS = 30;
@@ -39,6 +44,8 @@ export const TOWER_BONUS = 0.03;
 export const TOWER_KEY_EVERY = 10;
 /** Si riparte questi piani sotto il record (non da capo: niente esperienza facile ai piani bassi). */
 export const TOWER_BACK = 5;
+/** Ogni TOWER_GRAND_EVERY piani di record: un oggetto Mitico garantito. */
+export const TOWER_GRAND_EVERY = 25;
 /** Essenza per piano superato (× numero del piano). */
 export const TOWER_ESSENCE = 2;
 

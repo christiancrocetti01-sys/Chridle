@@ -177,6 +177,11 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
 - **Deciso (collaudo, 2026-10-24):** boss di zona: chiave solo ogni 20 stage (`ZONE_KEY_EVERY`): ~5-6 chiavi/h invece
   di 8-10. Raid al livello record − 5 (`RAID_LEVEL_OFFSET`): vinti ~60% invece di ~45%. Corruzione invariata
   (un profilo che cerca le soglie arriva a +70 / −90).
+- **Fatto (chiavi accumulate e Torre, scelte di Claude su delega dell'utente, 2026-10-27):** **Spedizione** (bottoni
+  «10 chiavi» / «Tutte» nella sezione Dungeon, dopo il primo Dungeon completato): ogni chiave dà subito Frammenti ed
+  Essenza di un Dungeon senza modificatori (×1, giocato ~×1,45) al livello record − 3 e un pezzo di set; conta come
+  Dungeon completato. Torre: ogni 25 piani di record (`TOWER_GRAND_EVERY`) un oggetto **Mitico**. Imprese: Predone V
+  (1000 Dungeon), Scalatore V-VI (piani 150 e 200).
 - **Fatto (Abisso, scelte di Claude su delega dell'utente):** si sblocca dopo 3 Ascensioni (o con una Rinascita). Profondità
   infinite: 10 nemici (25% élite) + un Guardiano (boss di zona), poi la profondità successiva finché non si cade.
   Profondità d = stage 40 + 3d, vita ×2, attacco ×1,5. Si riparte da record − 3. Ricompense: bottino normale + esperienza

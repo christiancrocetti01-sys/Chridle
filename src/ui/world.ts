@@ -1,9 +1,9 @@
-import { abyssStage, abyssStart, dungeonLevel, dungeonReward, towerBonus, towerMilestones, towerStart } from '../core/modes';
+import { abyssStage, abyssStart, canExpedition, dungeonLevel, dungeonReward, towerBonus, towerMilestones, towerStart } from '../core/modes';
 import { abyssUnlocked } from '../core/endgame';
 import { ABYSS_ASCENSIONS, ABYSS_ATK, ABYSS_GUARDIAN_XP, ABYSS_HP, ABYSS_WAVES } from '../data/endgame';
 import type { GameState } from '../core/state';
 import { FAMILIES, MECHANIC_TEXT, ZONE_KEY_EVERY, ZONE_STAGES, zoneName, zoneOf, type DamageType, type Family } from '../data/enemies';
-import { DUNGEON_MODS, DUNGEON_WAVES, RAID_KEYS, RAID_SECONDS, RAID_LEVEL_OFFSET, RAID_STAGE, TOWER_BACK, TOWER_MILESTONE, TOWER_SECONDS } from '../data/modes';
+import { DUNGEON_MODS, DUNGEON_WAVES, EXPEDITION_BATCH, RAID_KEYS, RAID_SECONDS, RAID_LEVEL_OFFSET, RAID_STAGE, TOWER_BACK, TOWER_GRAND_EVERY, TOWER_MILESTONE, TOWER_SECONDS } from '../data/modes';
 import { TICK_RATE } from '../core/loop';
 import { elem } from './icons';
 
@@ -12,6 +12,8 @@ export interface WorldActions {
   enterTower(): void;
   enterRaid(): void;
   enterAbyss(): void;
+  expeditionBatch(): void;
+  expeditionAll(): void;
   leaveMode(): void;
 }
 
@@ -40,7 +42,7 @@ export function createWorldPanel(root: HTMLElement, actions: WorldActions) {
   return {
     update(state: GameState) {
       const m = state.mode;
-      const k = JSON.stringify([state.stage.current, state.stage.best, state.keys, m.kind, m.kind === 'dungeon' ? m.mods : 0, state.tower.best, state.abyss.best, state.ascension.count, state.rebirth.count]);
+      const k = JSON.stringify([state.stage.current, state.stage.best, state.keys, state.totals.dungeons > 0, m.kind, m.kind === 'dungeon' ? m.mods : 0, state.tower.best, state.abyss.best, state.ascension.count, state.rebirth.count]);
       if (k === key) return;
       key = k;
       const z = zoneOf(state.stage.current);
@@ -69,6 +71,11 @@ export function createWorldPanel(root: HTMLElement, actions: WorldActions) {
             const d = DUNGEON_MODS.find((x) => x.id === id)!;
             return `${d.name} (${d.text})`;
           }).join(', ')} · ricompense ×${dungeonReward(m.mods).toFixed(2)} · nemico ${Math.min(m.wave + 1, DUNGEON_WAVES + 1)}/${DUNGEON_WAVES + 1}</div>` : ''}
+          <div class="skill-head"><span>Spedizione</span><span>
+            <button class="btn sm" data-w="expeditionBatch"${canExpedition(state) && state.keys >= EXPEDITION_BATCH ? '' : ' disabled'}>${EXPEDITION_BATCH} chiavi</button>
+            <button class="btn sm" data-w="expeditionAll"${canExpedition(state) ? '' : ' disabled'}>Tutte</button></span></div>
+          <div class="skill-info">Senza combattere: ogni chiave dà subito Frammenti, Essenza e un pezzo di set, come un Dungeon
+            senza modificatori (meno ricco che giocarlo).${state.totals.dungeons > 0 ? '' : ' <span class="muted">Si sblocca dopo il primo Dungeon completato.</span>'}</div>
           <div class="skill-info muted">Chiavi: dai boss di zona ogni ${ZONE_KEY_EVERY} stage (al record), dalla Torre e, a volte, dalle élite.</div>
         </div>
         <h2 class="section">Torre dell'Alba <span class="muted">· record piano ${state.tower.best}</span></h2>
@@ -76,7 +83,7 @@ export function createWorldPanel(root: HTMLElement, actions: WorldActions) {
           <div class="skill-head"><span>Bonus permanente: <b>+${Math.round(towerBonus(state.tower.best) * 100)}%</b> attacco e vita</span>
             <button class="btn sm" data-w="enterTower"${inMode ? ' disabled' : ''}>Sali</button></div>
           <div class="skill-info">Un nemico per piano, ${TOWER_SECONDS} s per batterlo. Ogni ${TOWER_MILESTONE} piani di record: +3% attacco e vita per sempre
-            (prossimo traguardo: piano ${(towerMilestones(state.tower.best) + 1) * TOWER_MILESTONE}). Gratis, Essenza a ogni piano.
+            (prossimo traguardo: piano ${(towerMilestones(state.tower.best) + 1) * TOWER_MILESTONE}); ogni ${TOWER_GRAND_EVERY} un oggetto <b>Mitico</b>. Gratis, Essenza a ogni piano.
             Si riparte ${TOWER_BACK} piani sotto il record (piano ${towerStart(state.tower.best)}).</div>
         </div>
         <h2 class="section">Raid</h2>

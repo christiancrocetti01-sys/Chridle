@@ -14,14 +14,14 @@ import { elementalDamage, stateStats, type Stats } from '../src/core/stats';
 import { chooseSecondVia, chooseVia } from '../src/core/vie';
 import { unlockCost } from '../src/core/runes';
 import { activeVie } from '../src/core/vie';
-import { canRaid, enterAbyss, enterDungeon, enterRaid, enterTower } from '../src/core/modes';
+import { canExpedition, canRaid, enterAbyss, enterDungeon, enterRaid, enterTower, expedition } from '../src/core/modes';
 import { abyssUnlocked, canRebirth, rebirth } from '../src/core/endgame';
 import { ascend, canAscend } from '../src/core/ascension';
 import { applyOffline } from '../src/core/offline';
 import { deserialize, serialize } from '../src/core/save';
 import { TICK_RATE } from '../src/core/loop';
 import { VIA_LEVEL, type ViaId } from '../src/data/vie';
-import { RAID_KEYS, RAID_STAGE } from '../src/data/modes';
+import { EXPEDITION_BATCH, RAID_KEYS, RAID_STAGE } from '../src/data/modes';
 import { UNIQUES } from '../src/data/uniques';
 
 interface Profile {
@@ -70,7 +70,7 @@ function power(state: GameState, p: Profile): number {
 // ---------------------------------------------------------------- controlli
 
 interface Counters {
-  kills: number; deaths: number; keysGained: number; keysOffline: number;
+  kills: number; deaths: number; expeditionKeys: number; keysGained: number; keysOffline: number;
   /** Chiavi per fonte: boss di zona, élite in Campagna, Dungeon (élite), Torre. */
   keySrc: Record<string, number>;
   /** Esiti dei Raid persi (morte o tempo) e Corruzione massima raggiunta. */
@@ -111,7 +111,7 @@ interface Checkpoint {
 function simulate(p: Profile) {
   const state = newGame(0, SEED * 1000 + PROFILES.indexOf(p) + 1);
   const c: Counters = {
-    kills: 0, deaths: 0, keysGained: 0, keysOffline: 0, keySrc: {}, raidLoss: {}, maxCorr: 0, minCorr: 0, dungeons: [0, 0], towers: [0, 0], raids: [0, 0], abyss: 0,
+    kills: 0, deaths: 0, expeditionKeys: 0, keysGained: 0, keysOffline: 0, keySrc: {}, raidLoss: {}, maxCorr: 0, minCorr: 0, dungeons: [0, 0], towers: [0, 0], raids: [0, 0], abyss: 0,
     ascensions: 0, rebirths: 0, rebirthAt: [], crafts: 0, essenceGained: 0, offlineHours: 0, saveChecks: 0,
   };
   const checkpoints: Checkpoint[] = [];
@@ -161,6 +161,8 @@ function simulate(p: Profile) {
       if (state.mode.kind === 'campaign') {
         // Ascensione quando si è fermi da 15 minuti; prima si spendono le chiavi
         const stuck = t - lastBestTick > 15 * 60 * TICK_RATE;
+        // chiavi accumulate (offline): Spedizione, tenendo quelle del Raid
+        if (canExpedition(state) && state.keys >= EXPEDITION_BATCH + RAID_KEYS) c.expeditionKeys += expedition(state, state.keys - RAID_KEYS)!.keys;
         if (state.stage.best >= RAID_STAGE && canRaid(state)) enterRaid(state);
         else if (state.keys >= 1 && (state.stage.best < RAID_STAGE || state.keys > RAID_KEYS)) enterDungeon(state);
         else if (t - lastTower > 20 * 60 * TICK_RATE) { enterTower(state); lastTower = t; }
@@ -243,7 +245,7 @@ function report(results: Result[]) {
     }
     const online = r.hours;
     console.log(`  chiavi: ${c.keysGained} in gioco (${fmt(c.keysGained / online)}/h) + ${c.keysOffline} offline (${c.offlineHours} h)  ·  fonti ${JSON.stringify(c.keySrc)}`);
-    console.log(`  dungeon ${c.dungeons[0]}✓/${c.dungeons[1]}✗  torre ${c.towers[0]}✓/${c.towers[1]}✗  raid ${c.raids[0]}✓/${c.raids[1]}✗ ${JSON.stringify(c.raidLoss)}  ·  corruzione ${c.minCorr}…${c.maxCorr}`);
+    console.log(`  dungeon ${c.dungeons[0]}✓/${c.dungeons[1]}✗  torre ${c.towers[0]}✓/${c.towers[1]}✗  raid ${c.raids[0]}✓/${c.raids[1]}✗ ${JSON.stringify(c.raidLoss)}  ·  spedizioni ${c.expeditionKeys} chiavi  ·  corruzione ${c.minCorr}…${c.maxCorr}`);
     console.log(`  rinascite ${c.rebirths} a ${c.rebirthAt.join(', ') || '—'} h  ·  discese nell'Abisso ${c.abyss}`);
     console.log(`  ascensioni ${c.ascensions} a ${r.ascendAt.length > 20 ? `${r.ascendAt.slice(0, 10).join(', ')} … ${r.ascendAt.slice(-3).join(', ')}` : r.ascendAt.join(', ') || '—'} h  ·  affissi alzati ${c.crafts}  rune ${JSON.stringify(r.end.runes.levels)}`);
     console.log(`  fine: Vie ${r.end.vie.join('+')}, stelle ${r.end.stars}, corruzione ${r.end.corruption}, regole ${r.end.rules.join(' ') || '—'}`);

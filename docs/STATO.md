@@ -3,26 +3,25 @@
 > File di passaggio di consegne tra sessioni. Aggiornato da Claude a fine di ogni modifica.
 > Massimo ~60 righe: solo ciò che serve per ripartire.
 
-**Ultimo aggiornamento:** 2026-10-27 («Oltre» pubblicata su `main`)
+**Ultimo aggiornamento:** 2026-10-27 (Spedizione e doni della Torre, su `main`)
 **Fase corrente:** Fase 8 chiusa, grafica fatta. Ora **revisione dell'utente** (ROADMAP "Dopo la Fase 8").
-**Prossimo passo:** chiedere all'utente cosa fare tra Chiavi (A/B/C, sotto) e contenuti.
-**Online:** `main` = tutto, regione «Oltre» compresa (2026-10-27).
+**Prossimo passo:** altri contenuti (elenco sotto): proporne uno all'utente. Poi revisione da telefono.
+**Online:** `main` = tutto, «Oltre» e Spedizione comprese (2026-10-27).
 
 ## Revisione utente 2026-10-26/27
-- Fatto e online: offline **100%** (Veglia Eterna tolta, Scintille rimborsate, v22); Torre riparte `TOWER_BACK` = 5 piani
-  sotto il record; Scintille sempre nel potenziamento più economico; punti stella extra: 1 ogni 10 piani di Torre e 1 ogni
-  3 Ascensioni in tutto (`totals.ascensions`, v23); `autoStars` guarda avanti `STAR_LOOKAHEAD` = 6 verso le notevoli.
+- Fatto e online (dettagli in GDD): offline 100% (v22), Torre riparte 5 piani sotto il record, punti stella da Torre e
+  Ascensioni (v23), `autoStars` guarda avanti `STAR_LOOKAHEAD` = 6.
 - Online: regione **«Oltre»** (`BEYOND` in `src/data/constellations.ts`, 51 stelle, 15 notevoli + 3 chiavi di
   volta, regole in `combat.ts`/`skills.ts`/`stats.ts`, costanti in fondo a `src/data/uniques.ts`, v24, `tests/beyond.test.ts`).
   Freni (chiesti dall'utente): Mietitore max +30%, Sangue Freddo +20%, Martello +0,5%/colpo max +150%,
   **Respiro della Battaglia** (`battleBreath`) ricarica la skill solo uccidendo élite e boss (scelta b dell'utente).
-- Ritmo (collaudo 24 h, profilo lama): prima di «Oltre» Torre ~62, Abisso ~28, 2 Rinascite; con «Oltre» non frenata
-  Torre ~80-90, Abisso ~38-45, 4 Rinascite (colpa di Respiro della Battaglia); **ora** Torre 70, Abisso 33, 2 Rinascite,
-  18 Ascensioni, livello ~49-98 (2026-10-27).
-- Collaudo 24 h pre-«Oltre» (2026-10-26): livello 89-95, record 112-125, ~20 Ascensioni, chiavi ~190/giorno, Essenza ferma 10-30k.
-- Proposte in attesa: **Chiavi** A) Spedizione (spendi 10/tutte, premi subito, al livello di un Dungeon già vinto; consigliata),
-  B) Dungeon automatici, C) Dungeon a più chiavi. **Contenuti**: pozzo per l'Essenza, zone/boss oltre lo stage 100, unici/set
-  lotto 6, traguardi Torre ogni 25 piani, bottino proprio dei Raid, nuovi potenziamenti d'Ascensione, più imprese e Lumi.
+- Ritmo 24 h (lama): prima di «Oltre» Torre ~62, Abisso ~28; «Oltre» senza freno a Respiro Torre ~80-90; frenata Torre 70, Abisso 33.
+- Fatto (delega utente «scegli tu»): **Spedizione** (`expedition`/`canExpedition` in `src/core/modes.ts`, bottoni nella
+  sezione Dungeon di `src/ui/world.ts`, avviso in `main.ts`): chiavi → premi di un Dungeon senza modificatori, dopo il primo
+  Dungeon vinto; nel collaudo si usa con ≥ 13 chiavi. Torre: Mitico ogni 25 piani (`TOWER_GRAND_EVERY`). Imprese: Predone V,
+  Scalatore V-VI. Nessun cambio al salvataggio. Pozzo dell'Essenza scartato: skill e rune sono già pozzi infiniti.
+- Contenuti ancora proposti: zone/boss oltre lo stage 100 (ora ciclano con numeri romani; servono carte nuove),
+  unici/set lotto 6, bottino proprio dei Raid, nuovi potenziamenti d'Ascensione, più Lumi.
 
 ## Pubblicazione
 - Firebase (`firebase.json`, job `firebase` in `.github/workflows/deploy.yml`, `firebase-tools@14`) e GitHub Pages.
@@ -60,7 +59,8 @@
 - Salvataggio: **v24** (v24 «Oltre», v23 `totals.ascensions`, v22 Veglia Eterna tolta, v21 skill fisse + rimborso rune, v20 `abyss`/`paragon`/`rebirth`), prima **v19** (v11 `vie`, v12 nemico + `keys`/`mode`/`tower`, v13 `ascension`, v14 campi opzionali rune, v15 `hero.sanctity`, v16 `codex`, v17 `collection`, v18 `achievements`, v19 `lumi`).
 
 ## Test
-- `npm test`: **240 verdi** (24 file), `npm run build` ok, collaudo 24 h lama ok dopo il freno di Respiro (2026-10-27). Il test lento della Collezione ha timeout 20 s.
+- `npm test`: **242 verdi** (24 file), `npm run build` ok, collaudo 24 h di tutti i profili ok dopo la Spedizione (2026-10-27:
+  Torre 71-80, Abisso 33-37, record 50-154, 2-4 Rinascite). Il test lento della Collezione ha timeout 20 s.
 - Collaudo: `npm run collaudo -- --ore 8 [--seed N] [--profilo id]` (`scripts/collaudo.ts`, un processo per profilo:
   5 Vie + uno con sessioni offline). 8 h: nessun NaN/crash/salvataggio rotto, ~30 s. Rilanciarlo dopo ogni sistema nuovo.
   Attenzione: nelle catene di comandi non fidarsi di `npm test | grep` (esce 0 anche se fallisce).

@@ -2,12 +2,12 @@ import { newGear } from '../src/core/items';
 import { describe, expect, it } from 'vitest';
 import { rewardStage, step, type CombatEvent } from '../src/core/combat';
 import { enemyAtk, makeElite, resMult, spawnEnemy, tickEnemy } from '../src/core/enemies';
-import { canRaid, dungeonLevel, enterDungeon, enterRaid, enterTower, leaveMode, towerBonus, towerStart } from '../src/core/modes';
+import { canExpedition, canRaid, dungeonLevel, enterDungeon, expedition, enterRaid, enterTower, leaveMode, towerBonus, towerStart } from '../src/core/modes';
 import { deserialize, serialize } from '../src/core/save';
 import { newGame, type GameState } from '../src/core/state';
 import { KILLS_PER_STAGE, LATE_STAGE, stageEnemy, stateStats } from '../src/core/stats';
 import { ENEMIES, FAMILIES, FURY_AFTER_S, ZONES, ZONE_KEY_EVERY, ZONE_STAGES, zoneName, zoneOf } from '../src/data/enemies';
-import { DUNGEON_WAVES, RAID_KEYS, RAID_STAGE, TOWER_KEY_EVERY, TOWER_MILESTONE } from '../src/data/modes';
+import { DUNGEON_ESSENCE, DUNGEON_FRAGMENTS, DUNGEON_WAVES, RAID_KEYS, TOWER_GRAND_EVERY, RAID_STAGE, TOWER_KEY_EVERY, TOWER_MILESTONE } from '../src/data/modes';
 
 const run = (s: GameState, ticks: number) => {
   const ev: CombatEvent[] = [];
@@ -143,6 +143,37 @@ describe('Dungeon, Torre e Raid', () => {
     expect(w.mode.kind === 'tower' && w.mode.floor).toBe(towerStart(23));
     expect(towerStart(23)).toBe(19);
     expect(towerStart(2)).toBe(1);
+  });
+
+  it('Spedizione: dopo il primo Dungeon spende le chiavi e dà subito le ricompense', () => {
+    const s = god(newGame(0, 4));
+    s.stage.best = 40;
+    s.keys = 25;
+    expect(canExpedition(s)).toBe(false);
+    expect(expedition(s, 10)).toBeNull();
+    s.totals.dungeons = 1;
+    const f0 = s.fragments, e0 = s.essence;
+    const r = expedition(s, 10)!;
+    expect(r.keys).toBe(10);
+    expect(s.keys).toBe(15);
+    expect(r.items).toBe(10);
+    expect(s.fragments - f0).toBeGreaterThanOrEqual(DUNGEON_FRAGMENTS * dungeonLevel(s) * 10); // più i pezzi scartati
+    expect(s.essence - e0).toBe(DUNGEON_ESSENCE * dungeonLevel(s) * 10);
+    expect(s.totals.dungeons).toBe(11);
+    expect(expedition(s, 100)!.keys).toBe(15);
+    expect(s.keys).toBe(0);
+    expect(canExpedition(s)).toBe(false);
+  });
+
+  it(`Torre: ogni ${TOWER_GRAND_EVERY} piani di record un oggetto Mitico`, () => {
+    const s = god(newGame(0, 4));
+    s.tower.best = TOWER_GRAND_EVERY - 1;
+    enterTower(s);
+    s.mode.kind === 'tower' && (s.mode.floor = TOWER_GRAND_EVERY);
+    const ev = run(s, 100);
+    expect(s.tower.best).toBeGreaterThanOrEqual(TOWER_GRAND_EVERY);
+    expect(ev.some((e) => e.type === 'drop' && e.item.rarity === 5)).toBe(true);
+    expect(ev.some((e) => e.type === 'mode' && e.text.startsWith('Vetta'))).toBe(true);
   });
 
   it('Raid: serve lo stage richiesto e 3 chiavi, poi bottino Leggendario o meglio', () => {

@@ -95,6 +95,6 @@ Manuali restano solo: scelta della Via, quando ascendere/rinascere, modalità (D
   - [x] Stelle passo 2: regione «Oltre» con 15 notevoli e 3 chiavi di volta nuove (2026-10-27)
   - [x] Frenare Respiro della Battaglia (solo élite e boss), collaudo 24 h (2026-10-27)
   - [x] Pubblicare «Oltre» su `main` (2026-10-27)
-  - [ ] Chiavi accumulate: Dungeon più veloci (proposta in STATO.md, attende scelta)
+  - [x] Chiavi accumulate: Spedizione (A); Torre: Mitico ogni 25 piani; imprese Predone V, Scalatore V-VI (2026-10-27)
   - [ ] Più progressione e contenuti (proposte in STATO.md)
 - [ ] Revisione da telefono (rimandata a dopo la grafica)

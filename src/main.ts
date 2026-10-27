@@ -3,7 +3,10 @@ import { MAX_TICKS_PER_FRAME, TICK_MS, stepAccumulator } from './core/loop';
 import { loadGame, saveGame, type StorageLike } from './core/save';
 import { changeGear, step, type CombatEvent } from './core/combat';
 import { chooseSecondVia, chooseVia } from './core/vie';
-import { enterAbyss, enterDungeon, enterRaid, enterTower, leaveMode } from './core/modes';
+import { enterAbyss, enterDungeon, enterRaid, enterTower, expedition, leaveMode, type ExpeditionResult } from './core/modes';
+import { EXPEDITION_BATCH } from './data/modes';
+import { formatNum as fmt } from './core/format';
+import { toast } from './ui/fx';
 import { rebirth } from './core/endgame';
 import { ascend } from './core/ascension';
 import { runOffline, startOffline } from './core/offline';
@@ -28,6 +31,13 @@ function getStorage(): StorageLike {
   }
 }
 
+function expeditionToast(r: ExpeditionResult | null) {
+  if (!r) return;
+  const extra = [r.equipped ? `${r.equipped} indossat${r.equipped > 1 ? 'i' : 'o'}` : '', r.discovered ? `${r.discovered} unic${r.discovered > 1 ? 'i' : 'o'} nuov${r.discovered > 1 ? 'i' : 'o'}` : '']
+    .filter(Boolean).join(', ');
+  toast(`Spedizione: ${r.keys} chiav${r.keys > 1 ? 'i' : 'e'} → +${fmt(r.fragments)} Frammenti, +${fmt(r.essence)} Essenza, ${r.items} pezzi di set${extra ? ` (${extra})` : ''}`, 'good');
+}
+
 function main() {
   const storage = getStorage();
   const state = loadGame(storage) ?? newGame(Date.now());
@@ -37,6 +47,8 @@ function main() {
     enterTower: () => enterTower(state),
     enterRaid: () => enterRaid(state),
     enterAbyss: () => enterAbyss(state),
+    expeditionBatch: () => expeditionToast(expedition(state, EXPEDITION_BATCH)),
+    expeditionAll: () => expeditionToast(expedition(state, state.keys)),
     rebirth: () => rebirth(state),
     leaveMode: () => leaveMode(state, []),
     ascend: () => ascend(state),

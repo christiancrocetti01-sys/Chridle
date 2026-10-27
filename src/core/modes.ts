@@ -2,7 +2,8 @@ import { RARITIES, type SlotId } from '../data/items';
 import { takeItem } from './autoequip';
 import {
   DUNGEON_ESSENCE, DUNGEON_FRAGMENTS, DUNGEON_WAVES, DUNGEON_LEVEL_OFFSET, DUNGEON_MODS, DUNGEON_MODS_COUNT, RAID_BOSSES, RAID_DIVINE,
-  RAID_KEYS, RAID_LEVEL_OFFSET, RAID_MIN_RARITY, RAID_MYTHIC, RAID_SECONDS, RAID_STAGE, TOWER_BACK, TOWER_BONUS, TOWER_ESSENCE, TOWER_KEY_EVERY, TOWER_MILESTONE, TOWER_SECONDS,
+  RAID_KEYS, RAID_LEVEL_OFFSET, RAID_MIN_RARITY, RAID_MYTHIC, RAID_SECONDS, RAID_STAGE, TOWER_BACK, TOWER_BASE, TOWER_BONUS, TOWER_ESSENCE, TOWER_GRAND_EVERY,
+  TOWER_KEY_EVERY, TOWER_MILESTONE, TOWER_SECONDS, TOWER_STEP,
   type DungeonModId,
 } from '../data/modes';
 import { discover } from './collection';
@@ -48,6 +49,40 @@ export function enterDungeon(state: GameState): boolean {
   while (mods.length < DUNGEON_MODS_COUNT) mods.push(pool.splice(Math.floor(nextRandom(state) * pool.length), 1)[0]);
   switchTo(state, { kind: 'dungeon', level: dungeonLevel(state), wave: 0, mods });
   return true;
+}
+
+export interface ExpeditionResult {
+  keys: number;
+  fragments: number;
+  essence: number;
+  /** Pezzi di set: quanti indossati e quanti unici nuovi in collezione. */
+  items: number;
+  equipped: number;
+  discovered: number;
+}
+
+export const canExpedition = (state: GameState) => state.totals.dungeons > 0 && state.keys >= 1;
+
+/** Spedizione: spende fino a `n` chiavi e dà subito le ricompense di altrettanti Dungeon senza modificatori. */
+export function expedition(state: GameState, n: number): ExpeditionResult | null {
+  if (!canExpedition(state)) return null;
+  const keys = Math.min(Math.floor(n), state.keys);
+  const level = dungeonLevel(state);
+  const r: ExpeditionResult = { keys, fragments: 0, essence: 0, items: 0, equipped: 0, discovered: 0 };
+  state.keys -= keys;
+  for (let i = 0; i < keys; i++) {
+    const rarity = Math.max(3, rollRarity(state, true, stateStats(state).magicFind));
+    const item = rollItem(state, state.gear.nextId++, level, rarity, undefined, true);
+    if (discover(state, item)) r.discovered++;
+    if (takeItem(state, item)) r.equipped++;
+    r.items++;
+  }
+  r.fragments = DUNGEON_FRAGMENTS * level * keys;
+  r.essence = DUNGEON_ESSENCE * level * keys;
+  state.fragments += r.fragments;
+  state.essence += r.essence;
+  state.totals.dungeons += keys;
+  return r;
 }
 
 /** Piano da cui si riparte entrando nella Torre. */
@@ -120,6 +155,10 @@ export function onModeKill(state: GameState, events: Events): boolean {
       if (m.floor % TOWER_KEY_EVERY === 0) {
         state.keys++;
         events.push({ type: 'key', keys: state.keys });
+      }
+      if (m.floor % TOWER_GRAND_EVERY === 0) {
+        giveItem(state, rollItem(state, state.gear.nextId++, TOWER_BASE + m.floor * TOWER_STEP, 5), events);
+        events.push({ type: 'mode', text: `Vetta della Torre: piano ${m.floor}, un oggetto Mitico in dono`, ok: true });
       }
       if (towerMilestones(m.floor) > before) events.push({ type: 'mode', text: `Traguardo della Torre: piano ${m.floor}, bonus permanente +${Math.round(towerBonus(m.floor) * 100)}%`, ok: true });
     }
