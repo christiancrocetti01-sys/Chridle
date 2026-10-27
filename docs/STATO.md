@@ -5,8 +5,10 @@
 
 **Ultimo aggiornamento:** 2026-10-27 (5 contenuti + revisione completa, ramo `claude/epic-allen-10jgj5`)
 **Fase corrente:** Fase 8 chiusa, grafica fatta. Ora **revisione dell'utente** (ROADMAP "Dopo la Fase 8").
-**Prossimo passo:** l'utente legge il report `docs/report/revisione-2026-10-27.html` e decide i 10 punti «Da decidere»;
-  poi revisione da telefono (la fa l'utente alla fine).
+**Prossimo passo:** l'utente valuta la **proposta di restyling UI** «Breviario di Luce» (canvas
+  https://claude.ai/artifact/EssdGCbTmQDTGQm51MUJuL: 5 schermate nuove + oggi + sistema visivo) e risponde alle domande
+  (navigazione a 5 voci in basso, Build dentro Eroe, oro unico accento, nomi oggetti color osso). Nessun codice ancora.
+  In sospeso anche i 10 punti «Da decidere» del report `docs/report/revisione-2026-10-27.html`.
 **Online:** `main` = tutto, «Oltre» e Spedizione comprese (2026-10-27).
 
 ## Revisione utente 2026-10-26/27
