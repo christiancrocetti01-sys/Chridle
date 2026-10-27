@@ -203,7 +203,7 @@ describe('regole del lotto 5', () => {
   };
 
   it('ogni unico e ogni set ha una regola con il suo testo; 6 pezzi di tipi diversi per set', () => {
-    expect(UNIQUES.length).toBe(41);
+    expect(UNIQUES.length).toBe(45);
     expect(SETS.length).toBe(10);
     expect(new Set(UNIQUES.map((u) => u.id)).size).toBe(UNIQUES.length);
     for (const set of SETS) expect(new Set(set.pieces.map((p) => p.type)).size).toBe(6);
@@ -276,14 +276,14 @@ describe('salvataggio v6', () => {
 });
 
 describe('lotto 6', () => {
-  it('le notevoli di «Oltre» arrivano anche dagli unici, mai le chiavi di volta', () => {
+  it('le notevoli di «Oltre» arrivano anche dagli unici, mai le chiavi di volta (solo i Raid)', () => {
     const lot6 = ['setteSaette', 'mattino', 'cuoreGhiaccio', 'duellante', 'calVermiglio', 'rogo', 'spezzascudi', 'messe', 'sangueFreddo', 'fiammeVive', 'ecoArcano'];
     lot6.forEach((id, i) => {
       const u = UNIQUES.find((x) => x.id === id)!;
       expect(stateStats(game([unique(900 + i, id)])).rules.has(u.rule), id).toBe(true);
     });
     const keystones: RuleId[] = ['supernova', 'livingFortress', 'timeStop', 'battleBreath', 'judgeHammer'];
-    for (const u of UNIQUES) expect(keystones).not.toContain(u.rule);
+    for (const u of UNIQUES.filter((x) => !x.raid)) expect(keystones).not.toContain(u.rule);
   });
 
   it('Gladiatore completo: regola Spezzascudi', () => {

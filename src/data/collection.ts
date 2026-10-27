@@ -46,6 +46,10 @@ export const COLLECTION_BONUS: Record<string, Mods> = {
   sangueFreddo: [['hpPct', 0.03]],
   fiammeVive: [['bleed', 0.01]],
   ecoArcano: [['elemPct', 0.02]],
+  maglioColosso: [['bossDmg', 0.05]],
+  scagliaDrago: [['defPct', 0.04]],
+  grembo: [['shadowPct', 0.04]],
+  cateneTitano: [['atkPct', 0.03]],
 };
 
 /** Premi di completamento (si sommano): frazione della collezione → bonus. */

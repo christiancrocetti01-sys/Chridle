@@ -1,4 +1,4 @@
-import { newGear } from '../src/core/items';
+import { newGear, rollItem } from '../src/core/items';
 import { describe, expect, it } from 'vitest';
 import { rewardStage, step, type CombatEvent } from '../src/core/combat';
 import { enemyAtk, makeElite, resMult, spawnEnemy, tickEnemy } from '../src/core/enemies';
@@ -8,7 +8,8 @@ import { newGame, type GameState } from '../src/core/state';
 import { KILLS_PER_STAGE, LATE_STAGE, stageEnemy, stateStats } from '../src/core/stats';
 import { BOSS_ART } from '../src/ui/art/subjects';
 import { ENEMIES, FAMILIES, FURY_AFTER_S, ZONES, ZONE_KEY_EVERY, ZONE_STAGES, zoneName, zoneOf } from '../src/data/enemies';
-import { DUNGEON_ESSENCE, DUNGEON_FRAGMENTS, DUNGEON_WAVES, RAID_KEYS, TOWER_GRAND_EVERY, RAID_STAGE, TOWER_KEY_EVERY, TOWER_MILESTONE } from '../src/data/modes';
+import { DUNGEON_ESSENCE, DUNGEON_FRAGMENTS, DUNGEON_WAVES, RAID_BOSSES, RAID_KEYS, TOWER_GRAND_EVERY, RAID_STAGE, TOWER_KEY_EVERY, TOWER_MILESTONE } from '../src/data/modes';
+import { UNIQUES } from '../src/data/uniques';
 
 const run = (s: GameState, ticks: number) => {
   const ev: CombatEvent[] = [];
@@ -198,6 +199,30 @@ describe('Dungeon, Torre e Raid', () => {
     expect(s.totals.raids).toBe(1);
     expect(ev.some((e) => e.type === 'drop' && e.item.rarity >= 4)).toBe(true);
   });
+
+  it('Raid: ogni boss ha il suo unico, che cade solo lì', () => {
+    const own = UNIQUES.filter((u) => u.raid);
+    expect(own.map((u) => u.raid).sort()).toEqual([...RAID_BOSSES].sort());
+    for (let i = 0; i < 3000; i++) {
+      const it = rollItem({ rng: i + 1 }, i, 10, 5);
+      expect(own.map((u) => u.id)).not.toContain(it.special?.id);
+    }
+    let found = 0;
+    for (let seed = 1; seed <= 16; seed++) {
+      const s = god(newGame(0, seed));
+      s.keys = RAID_KEYS;
+      s.stage.best = RAID_STAGE;
+      enterRaid(s);
+      while (!s.enemy) step(s);
+      const boss = (s.mode as { name: string }).name;
+      Object.assign(s.enemy, { hp: 1, phase: 3, mechanics: [] });
+      const drops = run(s, 300).filter((e) => e.type === 'drop');
+      const sp = drops.map((e) => (e as { item: { special?: { id: string } } }).item.special?.id).find((id) => own.some((u) => u.id === id));
+      if (sp) { found++; expect(own.find((u) => u.id === sp)!.raid).toBe(boss); }
+    }
+    expect(found).toBeGreaterThan(0);
+    expect(found).toBeLessThan(12);
+  }, 30000);
 
   it('si può abbandonare; il salvataggio conserva modalità e chiavi', () => {
     const s = newGame(0, 4);

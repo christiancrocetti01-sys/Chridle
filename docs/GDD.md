@@ -189,6 +189,10 @@ morte → stage precedente e "allenamento" finché non si sale di livello; danno
   infinite: 10 nemici (25% élite) + un Guardiano (boss di zona), poi la profondità successiva finché non si cade.
   Profondità d = stage 40 + 3d, vita ×2, attacco ×1,5. Si riparte da record − 3. Ricompense: bottino normale + esperienza
   Paragon = profondità per uccisione (Guardiano ×10). Valori in `src/data/endgame.ts`.
+- **Fatto (bottino dei Raid, 2026-10-27):** ogni boss di Raid ha un unico proprio (`UniqueDef.raid`), che cade solo
+  vincendo quel Raid (`RAID_UNIQUE_CHANCE` = 25%) e mai altrove: Maglio del Colosso (Martello del Giudizio), Scaglia
+  d'Ossidiana (Fortezza Vivente), Grembo del Vuoto (Tempo Fermo), Catene del Titano (Respiro della Battaglia): le chiavi
+  di volta su un oggetto. Contano nella Collezione (45 unici).
 
 ## 11. Valute ed economia
 - **Oro**: base, per potenziamenti e acquisti.

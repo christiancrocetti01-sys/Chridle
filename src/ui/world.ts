@@ -5,6 +5,7 @@ import type { GameState } from '../core/state';
 import { FAMILIES, MECHANIC_TEXT, ZONE_KEY_EVERY, ZONE_STAGES, zoneName, zoneOf, type DamageType, type Family } from '../data/enemies';
 import { DUNGEON_MODS, DUNGEON_WAVES, EXPEDITION_BATCH, RAID_KEYS, RAID_SECONDS, RAID_LEVEL_OFFSET, RAID_STAGE, TOWER_BACK, TOWER_GRAND_EVERY, TOWER_MILESTONE, TOWER_SECONDS } from '../data/modes';
 import { TICK_RATE } from '../core/loop';
+import { RAID_UNIQUE_CHANCE, UNIQUES } from '../data/uniques';
 import { elem } from './icons';
 
 export interface WorldActions {
@@ -42,7 +43,7 @@ export function createWorldPanel(root: HTMLElement, actions: WorldActions) {
   return {
     update(state: GameState) {
       const m = state.mode;
-      const k = JSON.stringify([state.stage.current, state.stage.best, state.keys, state.totals.dungeons > 0, m.kind, m.kind === 'dungeon' ? m.mods : 0, state.tower.best, state.abyss.best, state.ascension.count, state.rebirth.count]);
+      const k = JSON.stringify([state.stage.current, state.stage.best, state.keys, state.totals.dungeons > 0, m.kind, m.kind === 'dungeon' ? m.mods : 0, state.tower.best, state.abyss.best, state.ascension.count, state.rebirth.count, state.collection.length]);
       if (k === key) return;
       key = k;
       const z = zoneOf(state.stage.current);
@@ -91,7 +92,8 @@ export function createWorldPanel(root: HTMLElement, actions: WorldActions) {
           <div class="skill-head"><span>${state.stage.best >= RAID_STAGE ? `Boss enorme in 3 fasi, livello ${state.stage.best - RAID_LEVEL_OFFSET}` : `Si sblocca allo stage ${RAID_STAGE}`}</span>
             <button class="btn sm" data-w="enterRaid"${state.stage.best >= RAID_STAGE && state.keys >= RAID_KEYS && !inMode ? '' : ' disabled'}>Entra · ${RAID_KEYS} chiavi</button></div>
           <div class="skill-info">${RAID_SECONDS} s per abbatterlo. Fase 2: evoca servitori e si scuda; fase 3: furia e rigenerazione.
-            In premio un oggetto <b>Leggendario</b> garantito (a volte Mitico o Divino).</div>
+            In premio un oggetto <b>Leggendario</b> garantito (a volte Mitico o Divino); ${Math.round(RAID_UNIQUE_CHANCE * 100)}% di probabilità che sia l'unico proprio del boss:
+            ${UNIQUES.filter((u) => u.raid).map((u) => `${u.raid} → <b>${u.name}</b>${state.collection.includes(u.id) ? ' ✓' : ''}`).join(' · ')}.</div>
         </div>
         <h2 class="section">Abisso <span class="muted">· record profondità ${state.abyss.best}</span></h2>
         <div class="skill-row${abyssUnlocked(state) ? '' : ' locked'}">

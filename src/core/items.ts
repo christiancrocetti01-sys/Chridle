@@ -85,10 +85,10 @@ export function rollRarity(rng: Rng, boss = false, magicFind = 0): number {
 }
 
 /** Genera un oggetto casuale. Deterministico: dipende solo dallo stato dell'RNG. */
-export function rollItem(rng: Rng, uid: number, ilvl: number, rarity: number, type?: ItemType, forceSet = false): Item {
+export function rollItem(rng: Rng, uid: number, ilvl: number, rarity: number, type?: ItemType, forceSet = false, uniqueId?: string): Item {
   const r = RARITIES[rarity];
   const growth = itemGrowth(ilvl);
-  const special = rollSpecial(rng, rarity, growth, type, forceSet);
+  const special = rollSpecial(rng, rarity, growth, type, forceSet, uniqueId);
   const def = ITEM_TYPES.find((t) => t.id === (special?.type ?? type)) ?? pick(rng, ITEM_TYPES);
   // piccola variazione (±10%) anche sulla statistica di base
   const base = { stat: def.base, value: def.baseValue * growth * r.power * (0.9 + 0.2 * nextRandom(rng)) };
@@ -116,10 +116,11 @@ export function rollItem(rng: Rng, uid: number, ilvl: number, rarity: number, ty
 /** Statistiche fisse degli unici: le piatte valgono come un affisso T3 e crescono con il livello oggetto. */
 const UNIQUE_FLAT_MULT = 2;
 
-/** Decide se l'oggetto è un unico o un pezzo di set (con `type` fissato, solo tra quelli di quel tipo). */
-function rollSpecial(rng: Rng, rarity: number, growth: number, type?: ItemType, forceSet = false) {
-  if (!forceSet && rarity >= UNIQUE_MIN_RARITY && nextRandom(rng) < UNIQUE_CHANCE) {
-    const pool = UNIQUES.filter((u) => !type || u.type === type);
+/** Decide se l'oggetto è un unico o un pezzo di set (con `type` fissato, solo tra quelli di quel tipo; `uniqueId` lo impone). */
+function rollSpecial(rng: Rng, rarity: number, growth: number, type?: ItemType, forceSet = false, uniqueId?: string) {
+  if (uniqueId || (!forceSet && rarity >= UNIQUE_MIN_RARITY && nextRandom(rng) < UNIQUE_CHANCE)) {
+    // gli unici dei Raid cadono solo dal loro boss
+    const pool = uniqueId ? UNIQUES.filter((u) => u.id === uniqueId) : UNIQUES.filter((u) => !u.raid && (!type || u.type === type));
     if (pool.length) {
       const u = pick(rng, pool);
       const mods = u.mods.map(([stat, value]) => ({ stat, value: FLAT_STATS.has(stat) ? value * UNIQUE_FLAT_MULT * growth : value }));

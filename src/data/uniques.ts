@@ -92,6 +92,8 @@ export interface UniqueDef {
   /** Statistiche fisse (le piatte crescono con il livello oggetto, come gli affissi). */
   mods: Mods;
   rule: RuleId;
+  /** Bottino proprio di un Raid: cade solo vincendo il Raid di questo boss (`RAID_BOSSES`), mai altrove. */
+  raid?: string;
 }
 
 /** Leggendari unici: nome ed effetto fissi, più gli affissi casuali della loro rarità. */
@@ -140,6 +142,11 @@ export const UNIQUES: UniqueDef[] = [
   { id: 'sangueFreddo', name: 'Cintura del Sangue Freddo', type: 'cintura', tags: ['gelo', 'vita'], mods: [['coldPct', 0.1], ['hpPct', 0.1]], rule: 'coldBlood' },
   { id: 'fiammeVive', name: 'Mantello delle Fiamme Vive', type: 'mantello', tags: ['fuoco', 'veleno'], mods: [['fire', 1.5], ['poison', 1.5]], rule: 'livingFlames' },
   { id: 'ecoArcano', name: "Anello dell'Eco Arcano", type: 'anello', tags: ['fuoco', 'gelo', 'fulmine', 'sacro', 'ombra'], mods: [['elemPct', 0.06], ['crit', 0.02]], rule: 'skillEcho' },
+  // bottino dei Raid: le chiavi di volta più forti, solo dal loro boss
+  { id: 'maglioColosso', name: 'Maglio del Colosso', type: 'arma', tags: ['fisico'], mods: [['atkPct', 0.2], ['bossDmg', 0.15]], rule: 'judgeHammer', raid: 'Colosso dell’Eclissi' },
+  { id: 'scagliaDrago', name: "Scaglia d'Ossidiana", type: 'armatura', tags: ['fuoco', 'difesa'], mods: [['defPct', 0.2], ['firePct', 0.15]], rule: 'livingFortress', raid: 'Drago d’Ossidiana' },
+  { id: 'grembo', name: 'Grembo del Vuoto', type: 'amuleto', tags: ['ombra'], mods: [['shadow', 3], ['shadowPct', 0.2]], rule: 'timeStop', raid: 'Madre del Vuoto' },
+  { id: 'cateneTitano', name: 'Catene del Titano', type: 'guanti', tags: ['fisico', 'vita'], mods: [['atkPct', 0.1], ['hpPct', 0.12]], rule: 'battleBreath', raid: 'Titano Incatenato' },
 ];
 
 export interface SetDef {
@@ -277,6 +284,8 @@ export const UNIQUE_CHANCE = 0.25;
 export const UNIQUE_MIN_RARITY = 4;
 export const SET_CHANCE = 0.08;
 export const SET_MIN_RARITY = 3;
+/** Probabilità che il bottino di un Raid vinto sia l'unico proprio di quel boss. */
+export const RAID_UNIQUE_CHANCE = 0.25;
 
 // ── regole del lotto 5 ──
 /** Gelo che intorpidisce: velocità d'attacco del nemico. */

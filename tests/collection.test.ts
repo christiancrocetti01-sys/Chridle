@@ -46,7 +46,8 @@ describe('Collezione leggendari', () => {
     expect(reachedMilestones(ids)).toHaveLength(COLLECTION_MILESTONES.length);
     const m = emptyMods();
     addCollectionMods(ids, m);
-    const atk = COLLECTION_MILESTONES.reduce((sum, x) => sum + (x.mods.find(([k]) => k === 'atkPct')?.[1] ?? 0), 0);
+    const atkOf = (mods: [string, number][]) => mods.find(([k]) => k === 'atkPct')?.[1] ?? 0;
+    const atk = COLLECTION_MILESTONES.reduce((sum, x) => sum + atkOf(x.mods), 0) + ids.reduce((sum, id) => sum + atkOf(COLLECTION_BONUS[id]), 0);
     expect(m.atkPct).toBeCloseTo(atk);
   });
 

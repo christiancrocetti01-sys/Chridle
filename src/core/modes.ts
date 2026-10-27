@@ -10,6 +10,7 @@ import { discover } from './collection';
 import { rollItem, rollRarity, type Item } from './items';
 import { TICK_RATE } from './loop';
 import { nextRandom } from './rng';
+import { RAID_UNIQUE_CHANCE, UNIQUES } from '../data/uniques';
 import type { GameState } from './state';
 import { stateStats } from './stats';
 import { ABYSS_BACK, ABYSS_BASE, ABYSS_GUARDIAN_XP, ABYSS_STEP, ABYSS_WAVES } from '../data/endgame';
@@ -185,7 +186,9 @@ export function onModeKill(state: GameState, events: Events): boolean {
   if (m.kind === 'raid') {
     const r = nextRandom(state);
     const rarity = r < RAID_DIVINE ? 6 : r < RAID_DIVINE + RAID_MYTHIC ? 5 : RAID_MIN_RARITY;
-    giveItem(state, rollItem(state, state.gear.nextId++, m.level, rarity), events);
+    const own = UNIQUES.find((u) => u.raid === m.name);
+    const uid = state.gear.nextId++;
+    giveItem(state, own && nextRandom(state) < RAID_UNIQUE_CHANCE ? rollItem(state, uid, m.level, rarity, undefined, false, own.id) : rollItem(state, uid, m.level, rarity), events);
     state.totals.raids++;
     leaveMode(state, events, `Raid vinto! Bottino ${RARITIES[rarity].name}`, true);
     return false;
